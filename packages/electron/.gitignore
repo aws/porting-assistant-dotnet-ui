@@ -1,0 +1,8 @@
+src-python
+react_build
+netcore_build
+config
+
+src/*.js
+src/*.js.map
+test_store

@@ -1,0 +1,38 @@
+@import "~@awsui/design-tokens";
+
+.nav {
+  width: 100%;
+  background-color: #000000;
+  height: 41px;
+  display: flex;
+  text-indent: -9999em;
+  padding-left: 5px;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1500;
+}
+
+.navLinkContainer {
+  display: flex;
+}
+
+.navLink,
+.navLinkDisabled {
+  display: flex;
+  align-items: center;
+}
+
+.navLink > span > svg {
+  color: $color-text-interactive-disabled;
+}
+
+.navLinkHover > span > svg {
+  color: $color-text-home-header-default;
+}
+
+.navLinkDisabled > span > svg {
+  color: $color-text-interactive-default;
+}

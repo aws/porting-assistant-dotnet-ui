@@ -1,0 +1,23 @@
+.filtering {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.input {
+  flex-grow: 6 !important;
+  width: auto !important;
+}
+
+.select {
+  margin-left: 1rem !important;
+  max-width: 180px !important;
+  flex-grow: 2 !important;
+  flex-shrink: 1 !important;
+  flex-basis: 130px !important;
+}
+
+.results {
+  margin-left: 1rem !important;
+}

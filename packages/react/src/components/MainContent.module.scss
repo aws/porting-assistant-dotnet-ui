@@ -1,0 +1,56 @@
+@import "~@awsui/design-tokens";
+
+.customHomeHeader {
+  background-color: $color-background-home-header;
+  padding-bottom: 30px;
+  padding-top: 40px;
+}
+
+.customHomeHeaderTitle {
+  color: $color-text-home-header-default;
+}
+
+.customHomeCategory,
+.customHomeHeaderSubTitle {
+  color: $color-text-home-header-secondary;
+}
+
+@media (min-width: 992px) {
+  .customHomeSidebar {
+    margin-top: -64px;
+  }
+}
+
+.customHomeHeaderTitle > * {
+  max-width: 700px;
+}
+
+.customHomeImagePlaceholder {
+  img {
+    width: 100%;
+    max-width: 1181px;
+  }
+}
+
+ul.customListSeparator {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    border-top: 50px solid $color-border-divider-default;
+    padding: 0.8rem 0;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    &:first-child {
+      padding-top: 0;
+      border-top: none;
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+}

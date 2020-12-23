@@ -1,0 +1,34 @@
+{
+  "name": "@porting-assistant/integration-test",
+  "version": "1.3.0",
+  "productName": "Porting Assistant for .NET",
+  "description": "Porting Assistant for .NET",
+  "author": {
+    "name": "Amazon Web Services",
+    "email": "aws@amazon.com",
+    "url": "http://aws.amazon.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:aws/porting-assistant-dotnet-ui.git"
+  },
+  "license": "https://github.com/aws/porting-assistant-dotnet-ui/blob/github/LICENSE",
+  "scripts": {
+    "build:download": "npx run-script-os",
+    "build:download:win32": "tsc && build-scripts\\build.bat",
+    "build:download:default": "build-scripts/build.sh",
+    "test": "npx jest --runInBand",
+    "license-checker": "npx license-checker --production --exclude MIT,Apache-2.0,Unlicense,BSD-2-Clause,BSD-3-Clause",
+    "generate-attribution": "npx generate-attribution"
+  },
+  "dependencies": {
+    "@types/jest": "^25.1.2",
+    "aws-sdk": "^2.570.0",
+    "electron": "10.1.5",
+    "jest": "^25.1.0",
+    "run-script-os": "^1.1.1",
+    "spectron": "^12.0.0",
+    "ts-jest": "^25.3.0",
+    "typescript": "^3.8.3"
+  }
+}

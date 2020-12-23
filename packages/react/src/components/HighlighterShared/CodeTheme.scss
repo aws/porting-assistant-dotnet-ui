@@ -1,0 +1,118 @@
+@import "~@awsui/design-tokens";
+
+$portingAssistant-monospace: Monaco, Menlo, Consolas, "Courier Prime", Courier, "Courier New", monospace;
+$portingAssistant-ember-light: Helvetica, Arial, sans-serif;
+
+.portingAssistant-theme {
+  font-family: $portingAssistant-monospace;
+  color: $color-text-body-default;
+
+  .ace_gutter {
+    color: $color-text-input-disabled;
+    background: $color-text-notification-default;
+  }
+
+  .ace_gutter-active-line {
+    background: $color-background-input-disabled;
+  }
+
+  .ace_active-line {
+    background: none;
+  }
+
+  .ace_cursor {
+    color: $color-text-body-default;
+  }
+
+  .ace_selection {
+    background: $color-text-home-header-secondary;
+    border-radius: 0;
+  }
+
+  .ace_selected-word {
+    background: $color-background-input-disabled;
+  }
+
+  .ace_comment {
+    color: $color-text-input-disabled;
+  }
+
+  .ace_keyword {
+    color: $color-text-accent;
+  }
+
+  .ace_operator {
+    color: $color-text-body-default;
+  }
+
+  .ace_storage,
+  .ace_type {
+    color: $color-text-link-default;
+  }
+
+  .ace_bracket,
+  .ace_paren,
+  .ace_tag-open,
+  .ace_end-tag-open,
+  .ace_tag-close {
+    color: $color-text-input-disabled;
+  }
+
+  .ace_string,
+  .ace_numeric,
+  .ace_regex {
+    color: $color-text-status-success;
+  }
+
+  .ace_tag-name {
+    color: $color-text-accent;
+  }
+
+  .ace_attribute-equals {
+    color: $color-text-input-disabled;
+  }
+
+  .ace_strong {
+    color: inherit;
+    font-weight: 700;
+  }
+
+  .ace_emphasis {
+    color: inherit;
+    font-style: italic;
+  }
+
+  .ace_heading.ace_markup,
+  .ace_list.ace_markup {
+    color: $color-text-accent;
+  }
+
+  .ace_success {
+    color: $color-text-status-success;
+  }
+
+  .ace_error,
+  .ace_failure {
+    color: $color-text-status-error;
+  }
+
+  .ace_running_command {
+    color: $color-text-link-default;
+  }
+
+  .ace_link {
+    text-decoration: underline;
+  }
+
+  .ace_conflict,
+  .ace_conflict_separator {
+    color: $color-text-status-error;
+    font-weight: 700;
+  }
+
+  .ace_conflict_indicator {
+    color: $color-text-home-header-default;
+    background: $color-text-status-error;
+    font-weight: 700;
+  }
+}

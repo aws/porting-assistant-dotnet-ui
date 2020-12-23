@@ -1,0 +1,23 @@
+.file {
+  display: flex;
+  flex-direction: row;
+}
+
+.icon {
+  margin-right: 0.8rem;
+  margin-top: 0.2rem;
+}
+
+.metadata {
+  align-self: flex-start;
+}
+
+.filename {
+  font-size: 1.3rem;
+}
+
+.description {
+  color: var(--awsui-color-text-form-secondary, #687078);
+  font-size: 1.2rem;
+  line-height: 1.5rem;
+}

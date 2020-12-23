@@ -1,0 +1,5 @@
+{
+  "testTimeout": 3600000,
+  "preset": "ts-jest",
+  "maxConcurrency": 1
+}

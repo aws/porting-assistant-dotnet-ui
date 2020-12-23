@@ -1,0 +1,37 @@
+{
+  "eslint.workingDirectories": [
+    "./packages/react",
+    "./packages/electron",
+    "./packages/integration-test"
+  ],
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "orta.vscode-jest",
+    "syler.sass-indented",
+    "visualstudioexptteam.vscodeintellicode",
+    "christian-kohler.path-intellisense",
+    "dbaeumer.vscode-eslint"
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "emmet.showAbbreviationSuggestions": false,
+  "emmet.showExpandedAbbreviation": "never",
+  "eslint.codeAction.showDocumentation": {},
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  "jest.runAllTestsFirst": false,
+  "jest.autoEnable": false,
+  "search.exclude": {
+    "**/build": true,
+    "**/dist": true
+  }
+}

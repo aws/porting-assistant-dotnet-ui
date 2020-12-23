@@ -1,0 +1,353 @@
+import csvStringify from "csv-stringify";
+import { buffers, eventChannel } from "redux-saga";
+import { all, call, put, SagaReturnType, select, take, takeEvery } from "redux-saga/effects";
+import { getType } from "typesafe-actions";
+import { v4 as uuid } from "uuid";
+
+import { externalUrls } from "../../constants/externalUrls";
+import { NugetPackage, PackageAnalysisResult, ProjectApiAnalysisResult, SolutionProject } from "../../models/project";
+import { Response } from "../../models/response";
+import { getPortingPath } from "../../utils/getPortingPath";
+import { getPortingSolutionPath } from "../../utils/getPortingSolutionPath";
+import { getTargetFramework } from "../../utils/getTargetFramework";
+import { isFailed, isLoaded } from "../../utils/Loadable";
+import { nugetPackageKey } from "../../utils/NugetPackageKey";
+import { analyzeSolution, exportSolution, getApiAnalysis, init, ping, removeSolution } from "../actions/backend";
+import { pushCurrentMessageUpdate, setCurrentMessageUpdate } from "../actions/error";
+import { getFileContents } from "../actions/file";
+import { getNugetPackageWithData } from "../actions/nugetPackage";
+import { portProjects } from "../actions/porting";
+import {
+  selectApiAnalysis,
+  selectNugetPackages,
+  selectSolutionToSolutionDetails
+} from "../selectors/solutionSelectors";
+import {
+  selectApiTableData,
+  selectFileTableData,
+  selectNugetTableData,
+  selectProjectTableData
+} from "../selectors/tableSelectors";
+
+function nugetPackageUpdateEventEmitter() {
+  return eventChannel<Response<PackageAnalysisResult, NugetPackage>>(emitter => {
+    window.backend.listenNugetPackageUpdate(nugetPackage => {
+      emitter(nugetPackage);
+    });
+    // No unsubscribe for now.
+    return () => {};
+  }, buffers.expanding());
+}
+
+function apiAnalysisUpdateEventEmitter() {
+  return eventChannel<Response<ProjectApiAnalysisResult, SolutionProject>>(emitter => {
+    window.backend.listenApiAnalysisUpdate(apiAnalysis => {
+      emitter(apiAnalysis);
+    });
+    // No unsubscribe for now.
+    return () => {};
+  }, buffers.expanding());
+}
+
+export function* watchNugetPackageUpdate() {
+  const channel: SagaReturnType<typeof nugetPackageUpdateEventEmitter> = yield call(nugetPackageUpdateEventEmitter);
+  while (true) {
+    const nugetPackage: Response<PackageAnalysisResult, NugetPackage> = yield take(channel);
+    if (nugetPackage.status.status === "Success") {
+      yield put(getNugetPackageWithData.success(nugetPackage.value));
+    } else {
+      yield put(
+        getNugetPackageWithData.failure({
+          nugetPackage: nugetPackage.errorValue,
+          error: nugetPackage.status.error
+        })
+      );
+    }
+  }
+}
+
+export function* watchApiAnalysisUpdate() {
+  const channel: SagaReturnType<typeof apiAnalysisUpdateEventEmitter> = yield call(apiAnalysisUpdateEventEmitter);
+  while (true) {
+    let projectApiAnalysis: Response<ProjectApiAnalysisResult, SolutionProject> = yield take(channel);
+    if (projectApiAnalysis.status.status === "Success") {
+      yield put(getApiAnalysis.success(projectApiAnalysis.value));
+    } else {
+      yield put(
+        getApiAnalysis.failure({
+          projectFile: projectApiAnalysis.errorValue.projectPath,
+          solutionFile: projectApiAnalysis.errorValue.solutionPath,
+          error: projectApiAnalysis.status.error
+        })
+      );
+    }
+  }
+}
+
+function* handleInit(action: ReturnType<typeof init>) {
+  yield put(ping());
+  const storedSolutions = window.electron.getState("solutions", {});
+  const targetFramework = getTargetFramework();
+  for (const solution of Object.keys(storedSolutions)) {
+    yield put(
+      analyzeSolution.request({
+        solutionPath: solution,
+        settings: { ignoredProjects: [], targetFramework: targetFramework },
+        force: action.payload
+      })
+    );
+  }
+}
+
+function* handlePing() {
+  try {
+    const response = yield window.backend.ping();
+    if (response === "pong") {
+      return true;
+    }
+  } catch (err) {}
+  yield put(
+    setCurrentMessageUpdate([
+      {
+        messageId: uuid(),
+        groupId: "pingFailed",
+        type: "error",
+        header: "An unexpected error occured",
+        content: "Ensure that you have all prerequisites installed. Restart Porting Assistant for .NET afterwards.",
+        buttonText: "View prerequisites",
+        onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
+      }
+    ])
+  );
+}
+
+function* handleAnalyzeSolution(action: ReturnType<typeof analyzeSolution.request>) {
+  yield put(ping());
+  try {
+    const currentSolutionPath = action.payload.solutionPath;
+    const solutionToSolutionDetails: ReturnType<typeof selectSolutionToSolutionDetails> = yield select(
+      selectSolutionToSolutionDetails
+    );
+    const solution = solutionToSolutionDetails[currentSolutionPath];
+    const solutionToApiAnalysis: ReturnType<typeof selectApiAnalysis> = yield select(selectApiAnalysis);
+    const apiAnalysis = solutionToApiAnalysis[currentSolutionPath];
+    const nugetPackages: ReturnType<typeof selectNugetPackages> = yield select(selectNugetPackages);
+
+    const isNugetPackageLoaded = (n: NugetPackage) => {
+      const key = nugetPackageKey(n.packageId, n.version);
+      return isLoaded(nugetPackages[key]) || isFailed(nugetPackages[key]);
+    };
+
+    if (
+      isLoaded(solution) &&
+      apiAnalysis != null &&
+      Object.values(apiAnalysis).every(a => isLoaded(a) || isFailed(a)) &&
+      solution.data.projects.reduce(
+        (agg, p) => agg && p.packageReferences?.every(n => isNugetPackageLoaded(n)) === true,
+        true
+      ) &&
+      action.payload.force !== true
+    ) {
+      return;
+    }
+    const solutionDetails: SagaReturnType<typeof window.backend.analyzeSolution> = yield call(
+      [window.backend, window.backend.analyzeSolution],
+      currentSolutionPath,
+      action.payload.settings
+    );
+
+    if (solutionDetails.status.status === "Success") {
+      const solutions = window.electron.getState("solutions");
+      if (!Object.keys(solutions).includes(solutionDetails.value.solutionFilePath)) {
+        return;
+      }
+      solutions[solutionDetails.value.solutionFilePath].lastAssessedDate = new Date().toUTCString();
+      window.electron.saveState("solutions", solutions);
+      yield put(analyzeSolution.success({ solutionDetails: solutionDetails.value }));
+    } else {
+      yield put(
+        analyzeSolution.failure({
+          error: solutionDetails.status.error,
+          solutionPath: action.payload.solutionPath
+        })
+      );
+    }
+  } catch (e) {
+    yield put(analyzeSolution.failure({ solutionPath: action.payload.solutionPath, error: e }));
+  }
+}
+
+function* handleGetFileContents(action: ReturnType<typeof getFileContents.request>) {
+  try {
+    const sourceFilePath = action.payload;
+    const fileContents: SagaReturnType<typeof window.backend.getFileContents> = yield call(
+      [window.backend, window.backend.getFileContents],
+      sourceFilePath
+    );
+    yield put(getFileContents.success({ sourceFilePath: action.payload, fileContents }));
+  } catch (e) {
+    yield put(getFileContents.failure({ sourceFilePath: action.payload, error: e }));
+  }
+}
+
+function* handlePortProjects(action: ReturnType<typeof portProjects.request>) {
+  yield put(ping());
+  try {
+    const storedSolutions = window.electron.getState("solutions", {});
+    const portingLocation = storedSolutions[action.payload.solution.solutionFilePath].porting?.portingLocation;
+    if (portingLocation == null) {
+      return put(
+        portProjects.failure(
+          new Error("Unable to port projects because port settings have not been set for solution yet.")
+        )
+      );
+    }
+    yield call(
+      [window.porting, window.porting.applyPortingProjectFileChanges],
+      action.payload.projects.map(p => getPortingPath(action.payload.solution, p, portingLocation)),
+      getPortingSolutionPath(action.payload.solution, portingLocation),
+      action.payload.targetFramework,
+      action.payload.nugetPackageUpgrades
+    );
+    yield put(portProjects.success());
+  } catch (e) {
+    yield put(portProjects.failure(e));
+  }
+}
+
+function handleRemoveSolution(action: ReturnType<typeof removeSolution>) {
+  const paths = window.electron.getState("solutions", {});
+  delete paths[action.payload];
+  window.electron.saveState("solutions", paths);
+}
+
+function* handleExportSolution(action: ReturnType<typeof exportSolution>) {
+  const filename: SagaReturnType<typeof window.electron.dialog.showSaveDialog> = yield call(
+    [window.electron.dialog, window.electron.dialog.showSaveDialog],
+    {
+      title: "Export assessment report",
+      buttonLabel: "Export",
+      showsTagField: false,
+      filters: [{ name: "*.zip", extensions: ["zip"] }]
+    }
+  );
+  if (filename.canceled || filename.filePath == null) {
+    return;
+  }
+  const filePath = filename.filePath;
+  const solutionUrl = `/solutions/${encodeURIComponent(action.payload.solutionPath)}`;
+  const projectData: SagaReturnType<typeof selectProjectTableData> = yield select(state =>
+    selectProjectTableData(state, solutionUrl)
+  );
+  const nugetData: SagaReturnType<typeof selectNugetTableData> = yield select(state =>
+    selectNugetTableData(state, solutionUrl)
+  );
+  const fileData: SagaReturnType<typeof selectFileTableData> = yield select(state =>
+    selectFileTableData(state, solutionUrl)
+  );
+  const apiData: SagaReturnType<typeof selectApiTableData> = yield select(state =>
+    selectApiTableData(state, solutionUrl)
+  );
+  const exportCsv = async (data: any[]) => {
+    return new Promise<string>((resolve, reject) =>
+      csvStringify([Object.keys(data[0]), ...data.map(d => Object.values(d))], (err, output) => {
+        if (err || output == null) {
+          reject(err);
+        }
+        resolve(output);
+      })
+    );
+  };
+
+  const apiWithinFiles = apiData?.reduce((agg, cur) => {
+    cur.locations.forEach(source => {
+      agg.push({
+        apiName: cur.apiName,
+        packageName: cur.packageName,
+        packageVersion: cur.packageVersion,
+        sourceFiles: source.sourcefilePath,
+        startLine: source.location,
+        replacement: cur.replacement,
+        isCompatible: cur.isCompatible,
+        deprecated: cur.deprecated
+      });
+    });
+    return agg;
+  }, Array<any>());
+
+  try {
+    const { project, nuget, file, api } = yield all({
+      project: exportCsv(projectData),
+      nuget: exportCsv(nugetData),
+      file: exportCsv(fileData || []),
+      api: exportCsv(apiWithinFiles || [])
+    });
+
+    yield call([window.electron, window.electron.writeZipFile], filePath, [
+      { filename: "projects.csv", contents: project },
+      { filename: "nugetPackages.csv", contents: nuget },
+      { filename: "sourceFiles.csv", contents: file },
+      { filename: "apis.csv", contents: api }
+    ]);
+
+    yield put(
+      pushCurrentMessageUpdate({
+        messageId: uuid(),
+        type: "success",
+        dismissible: true,
+        content: `Successfully exported ${filePath}`
+      })
+    );
+  } catch (err) {
+    yield put(
+      pushCurrentMessageUpdate({
+        messageId: uuid(),
+        type: "error",
+        dismissible: true,
+        content: `Failed to export ${filePath}`
+      })
+    );
+  }
+}
+
+function* watchInit() {
+  yield takeEvery(getType(init), handleInit);
+}
+
+function* watchPing() {
+  yield takeEvery(getType(ping), handlePing);
+}
+
+function* watchAnalyzeSolution() {
+  yield takeEvery(getType(analyzeSolution.request), handleAnalyzeSolution);
+}
+
+function* watchGetFileContents() {
+  yield takeEvery(getType(getFileContents.request), handleGetFileContents);
+}
+
+function* watchPortProjects() {
+  yield takeEvery(getType(portProjects.request), handlePortProjects);
+}
+
+function* watchExportSolution() {
+  yield takeEvery(getType(exportSolution), handleExportSolution);
+}
+
+function* watchRemoveSolution() {
+  yield takeEvery(getType(removeSolution), handleRemoveSolution);
+}
+
+export default function* backendSaga() {
+  yield all([
+    watchInit(),
+    watchAnalyzeSolution(),
+    watchApiAnalysisUpdate(),
+    watchNugetPackageUpdate(),
+    watchGetFileContents(),
+    watchPortProjects(),
+    watchExportSolution(),
+    watchRemoveSolution(),
+    watchPing()
+  ]);
+}

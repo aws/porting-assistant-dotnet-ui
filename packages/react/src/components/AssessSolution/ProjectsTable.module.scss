@@ -1,0 +1,9 @@
+@import "@awsui/design-tokens";
+
+.portSuccess {
+  color: $color-text-status-success;
+}
+
+.notPorted {
+  color: $color-text-empty;
+}

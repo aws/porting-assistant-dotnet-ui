@@ -1,0 +1,29 @@
+{
+  "productName": "Porting Assistant for .NET",
+  "distPath": "./dist",
+  "latestYml": "latest.yml",
+  "buildConfig": {
+    "electronDist": "./electron-dist",
+    "extraMetadata": {
+      "name": "Porting Assistant for .NET"
+    },
+    "extraResources": ["upgrade", "config", "netcore_build", "public"],
+    "appId": "com.amazon.aws.portingassistant",
+    "files": ["ts-dist", "react_build", "schema", "build/**/*"],
+    "win": {
+      "publisherName": ["Amazon Web Services, Inc."],
+      "verifyUpdateCodeSignature": false,
+      "target": "NSIS",
+      "sign": "./build-scripts/customSign.ts",
+      "icon": "./build/icon.ico"
+    },
+    "nsis": {
+      "artifactName": "Porting-Assistant-DotNet-${version}.${ext}",
+      "deleteAppDataOnUninstall": true,
+      "license": "license.txt",
+      "menuCategory": "Porting Assistant for .NET",
+      "installerIcon": "./build/installerIcon.ico",
+      "uninstallerIcon": "./build/uninstallerIcon.ico"
+    }
+  }
+}

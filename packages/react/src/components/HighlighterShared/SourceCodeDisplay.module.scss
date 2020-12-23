@@ -1,0 +1,90 @@
+@import "@awsui/design-tokens";
+@import "./CodeTheme.scss";
+
+.loading {
+  width: 100%;
+  text-align: center;
+}
+
+.errorMarker {
+  position: absolute;
+}
+
+.highlighter {
+  width: 100%;
+  height: 0.1rem;
+  contain: layout;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 1.3rem;
+  line-height: 1.7rem;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.theme {
+  font-family: $portingAssistant-monospace;
+  color: $color-text-body-default;
+}
+
+.line {
+  > td {
+    position: static;
+    border-spacing: 0;
+    padding: 0;
+    vertical-align: top;
+    height: 100%;
+  }
+
+  > :global(.ace_line) {
+    width: 100%;
+    padding-left: 0.4rem;
+  }
+}
+
+.handle {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: 0;
+  border: none;
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+  padding-left: 1.9rem;
+  margin-right: 0.4rem;
+  padding-right: 0.6rem;
+  text-align: right;
+  white-space: pre;
+}
+
+.lineComment {
+  font-family: $portingAssistant-ember-light;
+
+  > td {
+    padding: 0;
+    border-top: 0.1rem solid $color-background-input-disabled;
+    border-bottom: 0.1rem solid $color-background-input-disabled;
+    vertical-align: top;
+  }
+}
+
+.commentSection {
+  padding: 2rem;
+}
+
+.incompatibleGutter {
+  background-color: $color-background-status-error !important;
+}
+
+.incompatible {
+  background-color: $color-background-status-error !important;
+}
+
+.centerContent {
+  text-align: center;
+}

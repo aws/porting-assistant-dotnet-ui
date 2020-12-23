@@ -1,0 +1,115 @@
+{
+  "name": "@porting-assistant/react",
+  "version": "1.3.0",
+  "productName": "Porting Assistant for .NET",
+  "description": "Porting Assistant for .NET",
+  "author": {
+    "name": "Amazon Web Services",
+    "email": "aws@amazon.com",
+    "url": "http://aws.amazon.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:aws/porting-assistant-dotnet-ui.git"
+  },
+  "license": "https://github.com/aws/porting-assistant-dotnet-ui/blob/github/LICENSE",
+  "homepage": "./",
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "jest",
+    "test:staged": "jest --watchAll=false --findRelatedTests",
+    "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache",
+    "license-checker": "npx license-checker --production --exclude MIT,Apache-2.0,Unlicense,BSD-2-Clause,BSD-3-Clause",
+    "generate-attribution": "npx generate-attribution",
+    "precommit": "lint-staged"
+  },
+  "devDependencies": {
+    "@types/classnames": "^2.2.10",
+    "@types/jest": "^25.2.3",
+    "@types/node": "^13.9.0",
+    "@types/react": "^16.9.53",
+    "@types/react-dom": "^16.9.8",
+    "@types/react-redux": "^7.1.9",
+    "@types/react-router-dom": "^5.1.6",
+    "@types/redux-logger": "^3.0.8",
+    "@types/redux-mock-store": "^1.0.2",
+    "@types/semver": "^7.2.0",
+    "@types/uuid": "^8.0.0",
+    "@types/xmldom": "^0.1.29",
+    "cross-env": "^7.0.2",
+    "eslint-config-prettier": "^6.5.0",
+    "eslint-plugin-flowtype": "^3.13.0",
+    "eslint-plugin-simple-import-sort": "^5.0.3",
+    "lint-staged": "^10.5.0",
+    "node-sass": "^4.14.1",
+    "prettier": "^1.19.1",
+    "react-scripts": "4.0.0",
+    "ts-jest": "^23.0.0",
+    "typescript": "^3.9.7",
+    "vis-data": "^6.5.1"
+  },
+  "dependencies": {
+    "@awsui/collection-hooks": "^1.0.0",
+    "@awsui/components-react": "^3.0",
+    "@awsui/design-tokens": "^3.0",
+    "@awsui/global-styles": "^1.0.0",
+    "ace-builds": "^1.4.9",
+    "axios": "^0.18.0",
+    "axios-retry": "^3.1.2",
+    "classnames": "^2.2.6",
+    "compare-versions": "^3.6.0",
+    "csv-stringify": "^5.5.0",
+    "electron": "^10.1.5",
+    "immer": "^6.0.1",
+    "re-reselect": "^3.4.0",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "react-error-boundary": "^2.3.2",
+    "react-hook-form": "^5.7.2",
+    "react-redux": "^7.2.1",
+    "react-router-dom": "^5.2.0",
+    "redux": "^4.0.5",
+    "redux-logger": "^3.0.6",
+    "redux-saga": "^1.1.3",
+    "reselect": "^4.0.0",
+    "typesafe-actions": "^5.1.0",
+    "uuid": "^8.2.0",
+    "vis-network": "^7.5.2",
+    "xmldom": "^0.3.0"
+  },
+  "prettier": {
+    "printWidth": 120
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "prettier"
+    ],
+    "plugins": [
+      "simple-import-sort"
+    ],
+    "rules": {
+      "simple-import-sort/sort": "error",
+      "sort-imports": "off",
+      "import/order": "off"
+    }
+  },
+  "browserslist": {
+    "production": [
+      "Chrome 78"
+    ],
+    "development": [
+      "Chrome 78"
+    ]
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,json,css,scss,md}": [
+      "npm run test:staged",
+      "prettier --write"
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "porting-assistant-dotnet-ui",
+  "version": "1.3.0",
+  "productName": "Porting Assistant for .NET",
+  "description": "Porting Assistant for .NET",
+  "author": {
+    "name": "Amazon Web Services",
+    "email": "aws@amazon.com",
+    "url": "http://aws.amazon.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:aws/porting-assistant-dotnet-ui.git"
+  },
+  "license": "https://github.com/aws/porting-assistant-dotnet-ui/blob/github/LICENSE",
+  "scripts": {
+    "start": "npx lerna run start --scope @porting-assistant/react --scope @porting-assistant/electron --stream --parallel",
+    "test": "npx lerna run test --stream",
+    "build": "npx lerna run build --stream",
+    "create:exe:dev": "npx lerna run create-dev-exe --scope @porting-assistant/electron",
+    "build:exe:dev": "npx lerna run build-dev-exe --scope @porting-assistant/electron",
+    "publish:beta": "npx lerna run publish-beta --scope @porting-assistant/electron --",
+    "publish:preprod": "npx lerna run publish-preprod --scope @porting-assistant/electron --",
+    "integration-test": "npx lerna run test --scope @porting-assistant/integration-test --stream",
+    "postinstall": "npx lerna bootstrap",
+    "version": "npx lerna version --no-push --no-git-tag-version --yes",
+    "license-checker": "npx license-checker --production --exclude MIT,Apache-2.0,Unlicense,BSD-2-Clause,BSD-3-Clause && npx lerna run license-checker --stream",
+    "generate-attribution": "npx generate-attribution && npx lerna run generate-attribution --stream"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lerna run --concurrency 1 --stream precommit --since HEAD --exclude-dependents"
+    }
+  },
+  "devDependencies": {
+    "husky": "^4.2.5",
+    "lerna": "^3.20.2"
+  }
+}

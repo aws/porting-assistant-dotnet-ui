@@ -1,0 +1,14 @@
+.upgradeTable {
+  width: 100%;
+
+  td {
+    // padding-right: 2.5 * $awsui-base-size;
+    padding-right: 2.5 * 1rem;
+  }
+}
+
+.modal {
+  > div > div > div > :nth-child(2) {
+    padding: 0 !important;
+  }
+}

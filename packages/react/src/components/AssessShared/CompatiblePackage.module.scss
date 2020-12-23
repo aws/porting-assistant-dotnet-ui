@@ -1,0 +1,61 @@
+@import "@awsui/design-tokens";
+
+.bar {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.barSection {
+  text-align: center;
+}
+
+.barColor {
+  height: 20px;
+  margin-bottom: 10px;
+
+  &.gray {
+    border: 1px solid $color-text-input-disabled;
+    background-color: $color-text-input-disabled;
+  }
+
+  &.white {
+    border: 1px solid $color-text-input-disabled;
+    background-color: $color-text-home-header-default;
+  }
+}
+
+.barNumber {
+  white-space: nowrap;
+}
+
+.legend {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.legendSection {
+  width: 300px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.legendColor {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 5px;
+
+  &.gray {
+    border: 1px solid $color-text-input-disabled;
+    background-color: $color-text-input-disabled;
+  }
+
+  &.white {
+    border: 1px solid $color-text-input-disabled;
+    background-color: $color-text-home-header-default;
+  }
+}
