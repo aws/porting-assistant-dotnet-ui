@@ -41,7 +41,7 @@ const createLocalStore = () =>
       profile: "",
       targetFramework: { label: ".NET Core 3.1.0", id: "netcoreapp3.1" },
       share: false,
-      lastConfirmVersion: ""
+      lastConfirmVersion: "",
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -76,8 +76,8 @@ const createLocalStore = () =>
         type: "boolean",
       },
       lastConfirmVersion: {
-        type: "string"
-      }
+        type: "string",
+      },
     },
     watch: true,
     cwd:
@@ -107,7 +107,7 @@ const createReducerCacheStore = () =>
         "solution-reducer"
       )),
     },
-    name: "reducer-cache-1.3.0",
+    name: "reducer-cache-1.4.0",
     clearInvalidConfig: true,
     cwd:
       process.env["NODE_ENV"] === "test"
