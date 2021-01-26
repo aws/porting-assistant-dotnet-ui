@@ -239,7 +239,9 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
                 <div>
                   <Link
                     href="#/"
-                    onFollow={() => {
+                    onFollow={event => {
+                      event.preventDefault();
+                      event.stopPropagation();
                       setModalTitle(`${nugetPackage.data.packageVersionPair.packageId} deprecated API calls`);
                       setModalItems(selectedApi.deprecatedApis);
                       setShowModal(true);

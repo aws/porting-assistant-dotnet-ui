@@ -157,11 +157,25 @@ const SettingsDashboardInternal: React.FC = () => {
               <Box variant="p">
                 The Porting Assistant for .NET tool is licensed as "AWS Content" under the terms and conditions of the
                 AWS Customer Agreement located at{" "}
-                <LinkComponent href="#/" onFollow={() => window.electron.openExternalUrl(externalUrls.agreement)}>
+                <LinkComponent
+                  href="#/"
+                  onFollow={event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    window.electron.openExternalUrl(externalUrls.agreement);
+                  }}
+                >
                   Agreement
                 </LinkComponent>{" "}
                 and the Service Terms located at{" "}
-                <LinkComponent href="#/" onFollow={() => window.electron.openExternalUrl(externalUrls.serviceTerms)}>
+                <LinkComponent
+                  href="#/"
+                  onFollow={event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    window.electron.openExternalUrl(externalUrls.serviceTerms);
+                  }}
+                >
                   Service-Terms
                 </LinkComponent>
                 . By installing, using or accessing The Porting Assistant for .NET tool, you agree to such terms and

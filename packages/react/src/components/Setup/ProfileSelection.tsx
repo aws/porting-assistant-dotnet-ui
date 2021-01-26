@@ -192,11 +192,13 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                     href="#/"
                     external
                     fontSize="body-s"
-                    onFollow={() =>
+                    onFollow={event => {
+                      event.preventDefault();
+                      event.stopPropagation();
                       window.electron.openExternalUrl(
                         "https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html"
-                      )
-                    }
+                      );
+                    }}
                   >
                     Learn more
                   </Link>
@@ -207,11 +209,15 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                     errorText={errors.profileSelection?.message}
                     constraintText={
                       <Link
-                        href="/#"
+                        href="#/"
                         fontSize="body-s"
                         id="add-named-profile"
                         variant="primary"
-                        onFollow={() => setShowModal(true)}
+                        onFollow={event => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setShowModal(true);
+                        }}
                       >
                         Add a named profile
                       </Link>
@@ -229,7 +235,14 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                       empty={
                         <Box variant="small">
                           You have no profiles.{" "}
-                          <Link href="#/" onFollow={() => setShowModal(true)}>
+                          <Link
+                            href="#/"
+                            onFollow={event => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              setShowModal(true);
+                            }}
+                          >
                             Add a profile
                           </Link>
                         </Box>
@@ -250,7 +263,11 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                     external
                     href="#/"
                     fontSize="body-s"
-                    onFollow={() => window.electron.openExternalUrl(externalUrls.howItWorks)}
+                    onFollow={event => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      window.electron.openExternalUrl(externalUrls.howItWorks);
+                    }}
                   >
                     Learn more
                   </Link>

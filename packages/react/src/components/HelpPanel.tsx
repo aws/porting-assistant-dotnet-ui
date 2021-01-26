@@ -19,7 +19,14 @@ export const HelpPanel: React.FC = React.memo(() => {
               {data.info.learnMoreLinks.map(link => {
                 return (
                   <li key={link.text}>
-                    <Link href="#/" onFollow={() => window.electron.openExternalUrl(link.externalUrl)}>
+                    <Link
+                      href="#/"
+                      onFollow={event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        window.electron.openExternalUrl(link.externalUrl);
+                      }}
+                    >
                       {link.text}
                     </Link>
                   </li>
@@ -33,7 +40,11 @@ export const HelpPanel: React.FC = React.memo(() => {
             <Link
               href="#/"
               external
-              onFollow={() => window.electron.openExternalUrl(data.info.learnMoreLinks[0].externalUrl)}
+              onFollow={event => {
+                event.preventDefault();
+                event.stopPropagation();
+                window.electron.openExternalUrl(data.info.learnMoreLinks[0].externalUrl);
+              }}
             >
               {data.info.learnMoreLinks[0].text}
             </Link>
