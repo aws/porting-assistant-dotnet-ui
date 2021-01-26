@@ -10,7 +10,16 @@ export const copyDirectory = (
     ncp(
       solutionDirectory,
       destinationPath,
-      { clobber: false, stopOnErr: true },
+      {
+        filter: (source) => {
+          if (path.basename(source).match("^[.git]")) {
+            return false;
+          }
+          return true;
+        },
+        clobber: false,
+        stopOnErr: true,
+      },
       (error) => {
         if (error) {
           reject(error);
