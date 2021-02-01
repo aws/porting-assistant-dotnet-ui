@@ -181,7 +181,11 @@ const MainContentInternal: React.FC = () => {
                     <li>
                       <LinkComponent
                         href="#/"
-                        onFollow={() => window.electron.openExternalUrl(externalUrls.defaultDocumentation)}
+                        onFollow={event => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          window.electron.openExternalUrl(externalUrls.defaultDocumentation);
+                        }}
                       >
                         Documentation
                       </LinkComponent>

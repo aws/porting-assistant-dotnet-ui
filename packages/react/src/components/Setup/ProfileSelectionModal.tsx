@@ -64,11 +64,13 @@ const ProfileSelectionModalInternal: React.FC<Props> = ({ onAddProfile, onSetMod
               external
               fontSize="body-m"
               href="#/"
-              onFollow={() =>
+              onFollow={event => {
+                event.preventDefault();
+                event.stopPropagation();
                 window.electron.openExternalUrl(
                   "https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration"
-                )
-              }
+                );
+              }}
             >
               Learn more
             </Link>

@@ -17,7 +17,9 @@ export const InfoLink: React.FC<Props> = React.memo(({ heading, mainContent, lea
     <Link
       variant="info"
       href="#/"
-      onFollow={() =>
+      onFollow={event => {
+        event.preventDefault();
+        event.stopPropagation();
         dispatch(
           openTools({
             isOpen: true,
@@ -27,8 +29,8 @@ export const InfoLink: React.FC<Props> = React.memo(({ heading, mainContent, lea
               learnMoreLinks
             }
           })
-        )
-      }
+        );
+      }}
     >
       Info
     </Link>
