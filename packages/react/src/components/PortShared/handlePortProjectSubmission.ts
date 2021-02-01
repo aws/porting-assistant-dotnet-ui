@@ -44,7 +44,7 @@ export const handlePortProjectSubmission = async (
     portingSolutionPath,
     targetFramework,
     Object.entries(data.upgrades).reduce((agg, [key, value]) => {
-      agg[key] = (value as SelectProps.Option).value as string;
+      agg[key] = (value as SelectProps.Option).label as string;
       return agg;
     }, {} as { [packageId: string]: string })
   );
