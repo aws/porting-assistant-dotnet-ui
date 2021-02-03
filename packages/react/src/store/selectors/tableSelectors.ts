@@ -114,6 +114,27 @@ export const getErrorCounts = (
   }, 0);
 };
 
+export const getActionCounts = (
+  projectToApiAnalysis: ProjectToApiAnalysis,
+  projectPath?: string | null,
+  sourceFile?: string | null
+) => {
+  if (projectToApiAnalysis == null) {
+    return 0;
+  }
+
+  const selectedInvocations = getSelectedInvocations(projectToApiAnalysis, projectPath, sourceFile);
+  return Object.values(selectedInvocations).reduce((agg, cur) => {
+    if (!isLoaded(cur)) {
+      return agg;
+    }
+    const actions = cur.data.sourceFileAnalysisResults.reduce((agg, cur) => {
+      return agg + cur.recommendedActions.length;
+    }, 0);
+    return agg + actions;
+  }, 0);
+};
+
 export const selectDashboardTableData = createSelector(
   selectNugetPackages,
   selectApiAnalysis,
@@ -145,6 +166,7 @@ export const selectDashboardTableData = createSelector(
         );
         const apiCompatibility = getApiCounts(solutionPath, solutionToApiAnalysis, solutionDetails, targetFramework);
         const buildErrors = getErrorCounts(solutionToApiAnalysis[solutionPath]);
+        const portingActions = getActionCounts(solutionToApiAnalysis[solutionPath]);
         return {
           name: solutionDetails.data.solutionName || "-",
           path: solutionDetails.data.solutionFilePath || "-",
@@ -161,7 +183,8 @@ export const selectDashboardTableData = createSelector(
               ? undefined
               : apiCompatibility[1] - apiCompatibility[0],
           totalApis: nugetCompatibility == null || apiCompatibility == null ? undefined : apiCompatibility[1],
-          buildErrors: buildErrors
+          buildErrors: buildErrors,
+          portingActions: portingActions
         } as DashboardTableData;
       })
       .filter((r): r is DashboardTableData => r != null);
@@ -199,6 +222,7 @@ export const selectProjectTableData = createCachedSelector(
         incompatibleApis: apis.isApisLoading ? null : apis.values[1] - apis.values[0],
         totalApis: apis.values[1],
         buildErrors: getErrorCounts(projectToApiAnalysis, project.projectFilePath, null),
+        portingActions: getActionCounts(projectToApiAnalysis, project.projectFilePath, null),
         ported: isPortingCompleted(solutionFilePath, project, portingProjects),
         buildFailed:
           project.projectFilePath != null &&

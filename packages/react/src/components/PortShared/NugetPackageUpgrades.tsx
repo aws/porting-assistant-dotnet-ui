@@ -106,7 +106,8 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
                 n.version === api.codeEntityDetails.package?.version
             ) &&
             api.codeEntityDetails != null &&
-            api.codeEntityDetails.package?.packageId != null
+            api.codeEntityDetails.package?.packageId != null &&
+            api.codeEntityDetails.package.packageSourceType === "NUGET"
           ) {
             nugetPackagesInProjects.push({
               packageId: api.codeEntityDetails.package?.packageId,
@@ -179,30 +180,30 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
           }
           const compatibleVersion =
             nugetPackage.data.compatibilityResults[target?.id || targetFramework]?.compatibleVersions;
-          const options = [
-            { id: nugetPackageInProject.version, label: "Don't upgrade package" },
-            ...(compatibleVersion == null
-              ? []
-              : Object.values(compatibleVersion)
-                  .filter(
-                    compatibleVersion => compareSemver(compatibleVersion, nugetPackageInProject.version || "") > 0
-                  )
-                  .map(version => {
-                    const apis =
-                      deprecatedApiByPackageVersion[nugetPackageInProject.packageId!] != null &&
-                      deprecatedApiByPackageVersion[nugetPackageInProject.packageId!][version] != null
-                        ? deprecatedApiByPackageVersion[nugetPackageInProject.packageId!][version]
-                        : { deprecatedApis: [], totalApis: 0 };
-                    return {
-                      id: version,
-                      label: version,
-                      description: `Deprecated API calls: ${apis.deprecatedApis.length} of ${apis.totalApis}`
-                    };
-                  })
-                  .reverse())
-          ];
-          if (options.length === 1) {
-            return null;
+          const options = Object.values(compatibleVersion)
+            .filter(
+              compatibleVersion =>
+                compareSemver(compatibleVersion, nugetPackageInProject.version || "") > 0 &&
+                !compatibleVersion.includes("-")
+            )
+            .map(version => {
+              const apis =
+                deprecatedApiByPackageVersion[nugetPackageInProject.packageId!] != null &&
+                deprecatedApiByPackageVersion[nugetPackageInProject.packageId!][version] != null
+                  ? deprecatedApiByPackageVersion[nugetPackageInProject.packageId!][version]
+                  : { deprecatedApis: [], totalApis: 0 };
+              return {
+                id: nugetPackage.data.packageVersionPair.packageId,
+                label: version,
+                description: `Deprecated API calls: ${apis.deprecatedApis.length} of ${apis.totalApis}`
+              };
+            });
+          if (options.length === 0) {
+            options.push({
+              id: nugetPackage.data.packageVersionPair.packageId || "",
+              label: nugetPackage.data.packageVersionPair.version || "",
+              description: `Deprecated API calls: 0 of 0`
+            });
           }
 
           const selectedApi = getDeprecatedApis(
@@ -341,7 +342,7 @@ const getDeprecatedApis = (
   if (selectedNugetPackageVersion[nugetPackage.packageId!] === undefined) {
     return { totalApis: 0, deprecatedApis: [] };
   }
-  if (selectedNugetPackageVersion[nugetPackage.packageId!].value === nugetPackage.version) {
+  if (selectedNugetPackageVersion[nugetPackage.packageId!].label !== nugetPackage.version) {
     return { totalApis: 0, deprecatedApis: [] };
   }
   if (deprecatedApiByPackageVersion[nugetPackage.packageId!] === undefined) {
@@ -349,13 +350,13 @@ const getDeprecatedApis = (
   }
   if (
     deprecatedApiByPackageVersion[nugetPackage.packageId!][
-      selectedNugetPackageVersion[nugetPackage.packageId!].value as string
+      selectedNugetPackageVersion[nugetPackage.packageId!].label as string
     ] === undefined
   ) {
     return { totalApis: 0, deprecatedApis: [] };
   }
   return deprecatedApiByPackageVersion[nugetPackage.packageId!][
-    selectedNugetPackageVersion[nugetPackage.packageId!].value as string
+    selectedNugetPackageVersion[nugetPackage.packageId!].label as string
   ];
 };
 

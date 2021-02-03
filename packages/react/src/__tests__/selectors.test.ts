@@ -666,6 +666,7 @@ describe("selectDashboardTableData", () => {
         totalPackages: 1,
         incompatibleApis: 1,
         totalApis: 2,
+        portingActions: 2,
         buildErrors: 1
       }
     ];
@@ -719,6 +720,7 @@ describe("selectDashboardTableData", () => {
         incompatiblePackages: 0,
         totalPackages: 1,
         totalApis: 2,
+        portingActions: 2,
         buildErrors: 1,
         ported: true,
         buildFailed: false
@@ -734,6 +736,7 @@ describe("selectDashboardTableData", () => {
         totalPackages: 1,
         totalApis: 0,
         buildErrors: 0,
+        portingActions: 0,
         ported: true,
         buildFailed: false
       }

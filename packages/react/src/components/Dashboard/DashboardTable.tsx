@@ -42,6 +42,7 @@ export interface DashboardTableData {
   incompatibleApis?: number;
   totalApis?: number;
   buildErrors?: number;
+  portingActions?: number;
 }
 
 const DashboardTableInternal: React.FC = () => {
@@ -125,11 +126,28 @@ const DashboardTableInternal: React.FC = () => {
                   (selectedItems[0].portedProjects == null ||
                     selectedItems[0].incompatiblePackages == null ||
                     selectedItems[0].incompatibleApis == null ||
+                    selectedItems[0].portingActions == null ||
                     selectedItems[0].buildErrors == null))
               }
               onClick={() => history.push(`/solutions/${encodeURIComponent(selectedItems[0].path)}`)}
             >
               View details
+            </Button>
+            <Button
+              id="port-solution-button"
+              key="port-solution"
+              disabled={
+                selectedItems.length !== 1 ||
+                (selectedItems.length === 1 &&
+                  (selectedItems[0].portedProjects == null ||
+                    selectedItems[0].incompatiblePackages == null ||
+                    selectedItems[0].incompatibleApis == null ||
+                    selectedItems[0].portingActions == null ||
+                    selectedItems[0].buildErrors == null))
+              }
+              onClick={() => history.push(`/solutions/${encodeURIComponent(selectedItems[0].path)}`)}
+            >
+              Port solution
             </Button>
             <ButtonDropdown
               id="actions-dropdown"
@@ -280,6 +298,7 @@ const columnDefinitions: TableProps.ColumnDefinition<DashboardTableData>[] = [
       item.portedProjects == null ||
       item.incompatiblePackages == null ||
       item.incompatibleApis == null ||
+      item.portingActions == null ||
       item.buildErrors == null ? (
         <div id={`solution-link-${escapeNonAlphaNumeric(item.path)}`} className={styles.inProgress}>
           {item.name}
@@ -334,6 +353,16 @@ const columnDefinitions: TableProps.ColumnDefinition<DashboardTableData>[] = [
       </div>
     ),
     sortingField: "buildErrors"
+  },
+  {
+    id: "porting-action",
+    header: "Porting actions",
+    cell: item => (
+      <div id={`porting-action-${escapeNonAlphaNumeric(item.path)}`} className="porting-action">
+        {item.portingActions == null ? inProgress() : item.portingActions}
+      </div>
+    ),
+    sortingField: "portingActions"
   }
 ];
 
