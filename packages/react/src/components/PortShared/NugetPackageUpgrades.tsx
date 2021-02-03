@@ -199,11 +199,7 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
               };
             });
           if (options.length === 0) {
-            options.push({
-              id: nugetPackage.data.packageVersionPair.packageId || "",
-              label: nugetPackage.data.packageVersionPair.version || "",
-              description: `Deprecated API calls: 0 of 0`
-            });
+            return null;
           }
 
           const selectedApi = getDeprecatedApis(

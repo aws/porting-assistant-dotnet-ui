@@ -310,8 +310,7 @@ const shareCheckbox = (
 
 const targetFrameworkOptions: SelectProps.Option[] = [
   { label: ".NET 5.0.0", value: "net5.0" },
-  { label: ".NET Core 3.1.0", value: "netcoreapp3.1" },
-  { label: ".NET Standard 2.1.0", value: "netstandard2.1" }
+  { label: ".NET Core 3.1.0", value: "netcoreapp3.1" }
 ];
 
 export const ProfileSelecion = React.memo(ProfileSelecionInternal);

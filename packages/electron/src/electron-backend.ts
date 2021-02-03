@@ -120,6 +120,7 @@ export const initConnection = (logger: any = console) => {
         const RecommendedActions = Object.keys(upgradeVersions).map((key) => {
           return {
             PackageId: key,
+            Version: upgradeVersions[key],
             TargetVersions: [upgradeVersions[key]],
             recommendedActionType: "UpgradePackage",
             description: null,

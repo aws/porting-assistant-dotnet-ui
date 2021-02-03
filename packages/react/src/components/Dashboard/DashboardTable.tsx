@@ -133,22 +133,6 @@ const DashboardTableInternal: React.FC = () => {
             >
               View details
             </Button>
-            <Button
-              id="port-solution-button"
-              key="port-solution"
-              disabled={
-                selectedItems.length !== 1 ||
-                (selectedItems.length === 1 &&
-                  (selectedItems[0].portedProjects == null ||
-                    selectedItems[0].incompatiblePackages == null ||
-                    selectedItems[0].incompatibleApis == null ||
-                    selectedItems[0].portingActions == null ||
-                    selectedItems[0].buildErrors == null))
-              }
-              onClick={() => history.push(`/solutions/${encodeURIComponent(selectedItems[0].path)}`)}
-            >
-              Port solution
-            </Button>
             <ButtonDropdown
               id="actions-dropdown"
               key="actions-dropdown"

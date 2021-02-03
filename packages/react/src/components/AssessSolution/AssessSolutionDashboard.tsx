@@ -1,15 +1,17 @@
 import { Box, Button, Header, NonCancelableCustomEvent, SpaceBetween, Tabs, TabsProps } from "@awsui/components-react";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Redirect, useHistory, useLocation } from "react-router";
 
 import { paths } from "../../constants/paths";
+import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
 import { Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution, exportSolution } from "../../store/actions/backend";
+import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { getTargetFramework } from "../../utils/getTargetFramework";
-import { Loadable } from "../../utils/Loadable";
+import { isLoaded, Loadable } from "../../utils/Loadable";
 import { ApiTable } from "../AssessShared/ApiTable";
 import { FileTable } from "../AssessShared/FileTable";
 import { NugetPackageTable } from "../AssessShared/NugetPackageTable";
@@ -17,6 +19,7 @@ import { ProjectReferences } from "../AssessShared/ProjectReferences";
 import { useApiAnalysisFlashbarMessage } from "../AssessShared/useApiAnalysisFlashbarMessage";
 import { useNugetFlashbarMessages } from "../AssessShared/useNugetFlashbarMessages";
 import { InfoLink } from "../InfoLink";
+import { PortConfigurationModal } from "../PortConfigurationModal/PortConfigurationModal";
 import { ProjectsTable } from "./ProjectsTable";
 import { SolutionSummary } from "./SolutionSummary";
 
@@ -29,6 +32,8 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
   const dispatch = useDispatch();
   const history = useHistory();
   const location = useLocation<HistoryState>();
+  const portingLocation = usePortingAssistantSelector(state => selectPortingLocation(state, location.pathname));
+  const [showPortingModal, setShowPortingModal] = useState(false);
   const targetFramework = getTargetFramework();
   useNugetFlashbarMessages(projects);
   useApiAnalysisFlashbarMessage(solution);
@@ -129,6 +134,40 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             >
               Reassess solution
             </Button>
+            <Button
+              id="port-solution-button"
+              key="port-solution"
+              disabled={!isLoaded(projects)}
+              onClick={() => {
+                if (portingLocation == null) {
+                  setShowPortingModal(true);
+                } else {
+                  if (isLoaded(projects)) {
+                    history.push({
+                      pathname: `/port-solution/${encodeURIComponent(solution.solutionFilePath)}`,
+                      state: {
+                        projects: projects.data
+                      }
+                    });
+                  }
+                }
+              }}
+            >
+              Port solution
+            </Button>
+            <PortConfigurationModal
+              solution={solution}
+              visible={showPortingModal}
+              onDismiss={() => setShowPortingModal(false)}
+              onSubmit={() => {
+                history.push({
+                  pathname: `/port-solution/${encodeURIComponent(solution.solutionFilePath)}`,
+                  state: {
+                    projects: isLoaded(projects) ? projects.data : []
+                  }
+                });
+              }}
+            />
           </SpaceBetween>
         }
       >
