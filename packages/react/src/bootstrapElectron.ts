@@ -2,7 +2,13 @@ import { Dialog } from "electron";
 
 import { LocalStoreSchema } from "./models/localStoreSchema";
 import { PortingProjectFileResult } from "./models/porting";
-import { NugetPackage, PackageAnalysisResult, ProjectApiAnalysisResult, SolutionProject } from "./models/project";
+import {
+  NugetPackage,
+  PackageAnalysisResult,
+  ProjectApiAnalysisResult,
+  SolutionProject,
+  VersionPair
+} from "./models/project";
 import { Response } from "./models/response";
 import { Credentials } from "./models/setup";
 import { Profiles } from "./models/setup";
@@ -57,7 +63,7 @@ export interface Porting {
     projectPaths: string[],
     solutionPath: string,
     targetFramework: string,
-    upgradeVersions: { [packageId: string]: string }
+    upgradeVersions: { [packageId: string]: VersionPair }
   ) => Promise<Response<PortingProjectFileResult[], PortingProjectFileResult[]>>;
 }
 

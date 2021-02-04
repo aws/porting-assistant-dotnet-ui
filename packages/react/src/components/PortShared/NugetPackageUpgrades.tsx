@@ -183,7 +183,7 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
           const options = Object.values(compatibleVersion)
             .filter(
               compatibleVersion =>
-                compareSemver(compatibleVersion, nugetPackageInProject.version || "") > 0 &&
+                compareSemver(compatibleVersion, nugetPackageInProject.version || "") >= 0 &&
                 !compatibleVersion.includes("-")
             )
             .map(version => {
@@ -193,10 +193,10 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
                   ? deprecatedApiByPackageVersion[nugetPackageInProject.packageId!][version]
                   : { deprecatedApis: [], totalApis: 0 };
               return {
-                id: nugetPackage.data.packageVersionPair.packageId,
+                value: nugetPackageInProject.version,
                 label: version,
                 description: `Deprecated API calls: ${apis.deprecatedApis.length} of ${apis.totalApis}`
-              };
+              } as SelectProps.Option;
             });
           if (options.length === 0) {
             return null;
@@ -211,7 +211,7 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
             <tr key={nugetPackage.data.packageVersionPair.packageId}>
               <td>
                 <div>{nugetPackage.data.packageVersionPair.packageId}</div>
-                <Box variant="small">Version: {nugetPackageInProject.version}</Box>
+                <Box variant="small">Current version: {nugetPackageInProject.version}</Box>
               </td>
               <td>
                 <Select

@@ -100,6 +100,8 @@ const DashboardTableInternal: React.FC = () => {
                 </p>
                 <h4>Build errors</h4>
                 <p>The total number of build errors for solutions.</p>
+                <h4>Porting actions</h4>
+                <p>The total number of porting actions for solutions.</p>
               </>
             }
             learnMoreLinks={[

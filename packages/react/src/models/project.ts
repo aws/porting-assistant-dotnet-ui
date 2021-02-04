@@ -98,6 +98,11 @@ export interface TextSpan {
   endLinePosition?: number;
 }
 
+export interface VersionPair {
+  originalVersion: string;
+  upgradeVersion: string;
+}
+
 export type CompatibleTargets = string;
 export type Compatibility = "UNKNOWN" | "COMPATIBLE" | "INCOMPATIBLE" | "DEPRACATED";
 export type RecommendedActionType =

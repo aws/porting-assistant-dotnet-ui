@@ -137,6 +137,7 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             <Button
               id="port-solution-button"
               key="port-solution"
+              variant="primary"
               disabled={!isLoaded(projects)}
               onClick={() => {
                 if (portingLocation == null) {
