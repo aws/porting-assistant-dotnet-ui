@@ -36,7 +36,6 @@ const PortSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) 
   return (
     <form
       onSubmit={handleSubmit(async data => {
-        debugger;
         if (targetFramework.id == null) {
           setError("targetFramework", { type: "required", message: "Target Framework is required." });
           return;
