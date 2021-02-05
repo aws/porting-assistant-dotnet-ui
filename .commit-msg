@@ -1,6 +1,7 @@
-# Title: Summary, imperative, start with prefix fix|feat|test|docs|refactor, don't end with a period
-# No more than 50 chars. #### 50 chars is here: #
-fix|feat|test|docs|refactor: 
+# Title: Summary, imperative, start with prefix build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test, don't end with a period, 
+# refer https://github.com/aws/porting-assistant-dotnet-ui/blob/develop/CONTRIBUTING.md for more details
+# No more than 50 chars. #### 50 chars is here:
+fix|feat|test|docs|refactor|build|chore|perf|revert|style:
 
 # Remember blank line between title and body.
 # Body: Explain *what* and *why* (not *how*). Include github issue id #.
