@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { v4 as uuid } from "uuid";
 
 import { PortingLocation } from "../../models/porting";
-import { Project } from "../../models/project";
+import { Project, VersionPair } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution } from "../../store/actions/backend";
 import {
@@ -44,9 +44,12 @@ export const handlePortProjectSubmission = async (
     portingSolutionPath,
     targetFramework,
     Object.entries(data.upgrades).reduce((agg, [key, value]) => {
-      agg[key] = (value as SelectProps.Option).label as string;
+      agg[key] = {
+        originalVersion: (value as SelectProps.Option).value,
+        upgradeVersion: (value as SelectProps.Option).label
+      } as VersionPair;
       return agg;
-    }, {} as { [packageId: string]: string })
+    }, {} as { [packageId: string]: VersionPair })
   );
 
   if (response.status.status === "Success") {

@@ -13,12 +13,12 @@ import {
   TableProps,
   TextFilter
 } from "@awsui/components-react";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FormContextValues } from "react-hook-form";
 import { useLocation } from "react-router";
 
 import { usePortingAssistantSelector } from "../../createReduxStore";
-import { ApiAnalysisResult, NugetPackage, Project } from "../../models/project";
+import { ApiAnalysisResult, NugetPackage, PackageToPackageAnalysisResult, Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { selectCurrentSolutionApiAnalysis, selectNugetPackages } from "../../store/selectors/solutionSelectors";
 import { compareSemver } from "../../utils/compareSemver";
@@ -106,7 +106,8 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
                 n.version === api.codeEntityDetails.package?.version
             ) &&
             api.codeEntityDetails != null &&
-            api.codeEntityDetails.package?.packageId != null
+            api.codeEntityDetails.package?.packageId != null &&
+            api.codeEntityDetails.package.packageSourceType === "NUGET"
           ) {
             nugetPackagesInProjects.push({
               packageId: api.codeEntityDetails.package?.packageId,
@@ -168,6 +169,23 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
     return result;
   }, [nugetPackages, nugetPackagesInProjects, projects, solutionApiAnalysis, targetFramework]);
 
+  useEffect(() => {
+    const defaultupgradetable = nugetPackagesInProjects.reduce(
+      (agg, cur) => {
+        const options = getUpgradeOptions(cur, nugetPackages, target, targetFramework, deprecatedApiByPackageVersion);
+        if (options != null) {
+          agg[cur.packageId] = options[0];
+        }
+        return agg;
+      },
+      {} as {
+        [packageId: string]: SelectProps.Option;
+      }
+    );
+    setSelectedNugetPackageVersion(defaultupgradetable);
+    onChange(defaultupgradetable);
+  }, []);
+
   const upgradeTable = useMemo(
     () =>
       nugetPackagesInProjects
@@ -177,31 +195,14 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
           if (!isLoaded(nugetPackage)) {
             return null;
           }
-          const compatibleVersion =
-            nugetPackage.data.compatibilityResults[target?.id || targetFramework]?.compatibleVersions;
-          const options = [
-            { id: nugetPackageInProject.version, label: "Don't upgrade package" },
-            ...(compatibleVersion == null
-              ? []
-              : Object.values(compatibleVersion)
-                  .filter(
-                    compatibleVersion => compareSemver(compatibleVersion, nugetPackageInProject.version || "") > 0
-                  )
-                  .map(version => {
-                    const apis =
-                      deprecatedApiByPackageVersion[nugetPackageInProject.packageId!] != null &&
-                      deprecatedApiByPackageVersion[nugetPackageInProject.packageId!][version] != null
-                        ? deprecatedApiByPackageVersion[nugetPackageInProject.packageId!][version]
-                        : { deprecatedApis: [], totalApis: 0 };
-                    return {
-                      id: version,
-                      label: version,
-                      description: `Deprecated API calls: ${apis.deprecatedApis.length} of ${apis.totalApis}`
-                    };
-                  })
-                  .reverse())
-          ];
-          if (options.length === 1) {
+          const options = getUpgradeOptions(
+            nugetPackageInProject,
+            nugetPackages,
+            target,
+            targetFramework,
+            deprecatedApiByPackageVersion
+          );
+          if (options == null) {
             return null;
           }
 
@@ -214,16 +215,14 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
             <tr key={nugetPackage.data.packageVersionPair.packageId}>
               <td>
                 <div>{nugetPackage.data.packageVersionPair.packageId}</div>
-                <Box variant="small">Version: {nugetPackageInProject.version}</Box>
+                <Box variant="small">Current version: {nugetPackageInProject.version}</Box>
               </td>
               <td>
                 <Select
                   id={`select-version-${escapeNonAlphaNumeric(nugetPackage.data.packageVersionPair.packageId || "")}`}
                   disabled={isSubmitting}
                   className={styles.upgradeSelectField}
-                  selectedOption={
-                    selectedNugetPackageVersion[nugetPackage.data.packageVersionPair.packageId] || options[0]
-                  }
+                  selectedOption={selectedNugetPackageVersion[nugetPackage.data.packageVersionPair.packageId]}
                   options={options}
                   onChange={event => {
                     const result = {
@@ -341,7 +340,7 @@ const getDeprecatedApis = (
   if (selectedNugetPackageVersion[nugetPackage.packageId!] === undefined) {
     return { totalApis: 0, deprecatedApis: [] };
   }
-  if (selectedNugetPackageVersion[nugetPackage.packageId!].value === nugetPackage.version) {
+  if (selectedNugetPackageVersion[nugetPackage.packageId!].label !== nugetPackage.version) {
     return { totalApis: 0, deprecatedApis: [] };
   }
   if (deprecatedApiByPackageVersion[nugetPackage.packageId!] === undefined) {
@@ -349,14 +348,53 @@ const getDeprecatedApis = (
   }
   if (
     deprecatedApiByPackageVersion[nugetPackage.packageId!][
-      selectedNugetPackageVersion[nugetPackage.packageId!].value as string
+      selectedNugetPackageVersion[nugetPackage.packageId!].label as string
     ] === undefined
   ) {
     return { totalApis: 0, deprecatedApis: [] };
   }
   return deprecatedApiByPackageVersion[nugetPackage.packageId!][
-    selectedNugetPackageVersion[nugetPackage.packageId!].value as string
+    selectedNugetPackageVersion[nugetPackage.packageId!].label as string
   ];
+};
+
+export const getUpgradeOptions = (
+  nugetPackageInProject: NugetPackage,
+  nugetPackages: PackageToPackageAnalysisResult,
+  target: any,
+  targetFramework: string,
+  deprecatedApiByPackageVersion: {
+    [packageId: string]: { [version: string]: { totalApis: number; deprecatedApis: DeprecatedApi[] } };
+  }
+) => {
+  const nugetPackage = nugetPackages[nugetPackageKey(nugetPackageInProject?.packageId, nugetPackageInProject?.version)];
+  if (!isLoaded(nugetPackage)) {
+    return null;
+  }
+  const compatibleVersion = nugetPackage.data.compatibilityResults[target?.id || targetFramework]?.compatibleVersions;
+  const options = Object.values(compatibleVersion)
+    .filter(
+      compatibleVersion =>
+        compareSemver(compatibleVersion, nugetPackageInProject.version || "") >= 0 && !compatibleVersion.includes("-")
+    )
+    .map(version => {
+      const apis =
+        deprecatedApiByPackageVersion[nugetPackageInProject.packageId!] != null &&
+        deprecatedApiByPackageVersion[nugetPackageInProject.packageId!][version] != null
+          ? deprecatedApiByPackageVersion[nugetPackageInProject.packageId!][version]
+          : { deprecatedApis: [], totalApis: 0 };
+      return {
+        value: nugetPackageInProject.version,
+        label: version,
+        description: `Deprecated API calls: ${apis.deprecatedApis.length} of ${apis.totalApis}`
+      } as SelectProps.Option;
+    });
+
+  if (options.length === 0) {
+    return null;
+  }
+
+  return options;
 };
 
 const modalColumns: TableProps.ColumnDefinition<DeprecatedApi>[] = [

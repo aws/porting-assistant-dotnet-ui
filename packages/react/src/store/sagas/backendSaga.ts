@@ -7,8 +7,6 @@ import { v4 as uuid } from "uuid";
 import { externalUrls } from "../../constants/externalUrls";
 import { NugetPackage, PackageAnalysisResult, ProjectApiAnalysisResult, SolutionProject } from "../../models/project";
 import { Response } from "../../models/response";
-import { getPortingPath } from "../../utils/getPortingPath";
-import { getPortingSolutionPath } from "../../utils/getPortingSolutionPath";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isFailed, isLoaded } from "../../utils/Loadable";
 import { nugetPackageKey } from "../../utils/NugetPackageKey";
@@ -16,7 +14,6 @@ import { analyzeSolution, exportSolution, getApiAnalysis, init, ping, removeSolu
 import { pushCurrentMessageUpdate, setCurrentMessageUpdate } from "../actions/error";
 import { getFileContents } from "../actions/file";
 import { getNugetPackageWithData } from "../actions/nugetPackage";
-import { portProjects } from "../actions/porting";
 import {
   selectApiAnalysis,
   selectNugetPackages,
@@ -190,31 +187,6 @@ function* handleGetFileContents(action: ReturnType<typeof getFileContents.reques
   }
 }
 
-function* handlePortProjects(action: ReturnType<typeof portProjects.request>) {
-  yield put(ping());
-  try {
-    const storedSolutions = window.electron.getState("solutions", {});
-    const portingLocation = storedSolutions[action.payload.solution.solutionFilePath].porting?.portingLocation;
-    if (portingLocation == null) {
-      return put(
-        portProjects.failure(
-          new Error("Unable to port projects because port settings have not been set for solution yet.")
-        )
-      );
-    }
-    yield call(
-      [window.porting, window.porting.applyPortingProjectFileChanges],
-      action.payload.projects.map(p => getPortingPath(action.payload.solution, p, portingLocation)),
-      getPortingSolutionPath(action.payload.solution, portingLocation),
-      action.payload.targetFramework,
-      action.payload.nugetPackageUpgrades
-    );
-    yield put(portProjects.success());
-  } catch (e) {
-    yield put(portProjects.failure(e));
-  }
-}
-
 function handleRemoveSolution(action: ReturnType<typeof removeSolution>) {
   const paths = window.electron.getState("solutions", {});
   delete paths[action.payload];
@@ -326,10 +298,6 @@ function* watchGetFileContents() {
   yield takeEvery(getType(getFileContents.request), handleGetFileContents);
 }
 
-function* watchPortProjects() {
-  yield takeEvery(getType(portProjects.request), handlePortProjects);
-}
-
 function* watchExportSolution() {
   yield takeEvery(getType(exportSolution), handleExportSolution);
 }
@@ -345,7 +313,6 @@ export default function* backendSaga() {
     watchApiAnalysisUpdate(),
     watchNugetPackageUpdate(),
     watchGetFileContents(),
-    watchPortProjects(),
     watchExportSolution(),
     watchRemoveSolution(),
     watchPing()

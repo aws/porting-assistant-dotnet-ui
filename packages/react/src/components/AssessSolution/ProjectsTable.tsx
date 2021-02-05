@@ -32,6 +32,7 @@ export interface TableData {
   incompatibleApis: number | null;
   totalApis: number | null;
   buildErrors: number | null;
+  portingActions: number | null;
   ported: boolean;
   buildFailed: boolean;
 }
@@ -116,6 +117,9 @@ const ProjectsTableInternal: React.FC<Props> = ({ solution }) => {
                   </Box>
                   <Box variant="p">
                     <Box variant="strong">Build errors</Box> - The number of build errors in the project.
+                  </Box>
+                  <Box variant="p">
+                    <Box variant="strong">Porting actions</Box> - The number of porting actions in the project.
                   </Box>
                   <Box variant="p">
                     <Box variant="strong">Port status</Box> - Port status of the project.
@@ -280,6 +284,17 @@ const columnDefinitions: TableProps.ColumnDefinition<TableData>[] = [
       );
     },
     sortingField: "buildErrors"
+  },
+  {
+    id: "porting-actions",
+    header: "Porting actions",
+    cell: item => {
+      if (item.portingActions == null) {
+        return <Spinner />;
+      }
+      return <div id={`build-errors-${escapeNonAlphaNumeric(item.projectPath)}`}>{item.portingActions}</div>;
+    },
+    sortingField: "portingActions"
   },
   {
     id: "ported",

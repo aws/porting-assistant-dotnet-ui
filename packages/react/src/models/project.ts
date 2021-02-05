@@ -24,6 +24,7 @@ export interface ProjectReference {
 export interface NugetPackage {
   packageId: string;
   version?: string;
+  packageSourceType?: PackageSourceType;
 }
 
 export interface PackageAnalysisResult {
@@ -97,6 +98,11 @@ export interface TextSpan {
   endLinePosition?: number;
 }
 
+export interface VersionPair {
+  originalVersion: string;
+  upgradeVersion: string;
+}
+
 export type CompatibleTargets = string;
 export type Compatibility = "UNKNOWN" | "COMPATIBLE" | "INCOMPATIBLE" | "DEPRACATED";
 export type RecommendedActionType =
@@ -106,6 +112,7 @@ export type RecommendedActionType =
   | "ReplacePackage"
   | "NoRecommendation";
 export type CodeEntityType = "Namespace" | "Class" | "Method" | "InstanceAttribute" | "ClassAttribute";
+export type PackageSourceType = "SDK" | "NUGET" | "PORTABILITY_ANALYZER" | "RECOMMENDATION" | "PRIVATE";
 export type SolutionToSolutionDetails = { [solutionPath: string]: Loadable<SolutionDetails> };
 export type ProjectToApiAnalysis = { [project: string]: Loadable<ProjectApiAnalysisResult> };
 export type SolutionToApiAnalysis = { [solutionPath: string]: ProjectToApiAnalysis };

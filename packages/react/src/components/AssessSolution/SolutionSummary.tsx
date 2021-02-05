@@ -13,7 +13,7 @@ import {
   selectCurrentSolutionDetails,
   selectNugetPackages
 } from "../../store/selectors/solutionSelectors";
-import { getErrorCounts } from "../../store/selectors/tableSelectors";
+import { getActionCounts, getErrorCounts } from "../../store/selectors/tableSelectors";
 import { API_LOADING_AGGREGATE, getCompatibleApi } from "../../utils/getCompatibleApi";
 import { getCompatibleNugetsAgg, LOADING_AGGREGATES } from "../../utils/getCompatibleNugets";
 import { getTargetFramework } from "../../utils/getTargetFramework";
@@ -66,6 +66,16 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
       return 0;
     }
     return getErrorCounts(apiAnalysis);
+  }, [apiAnalysis, projects]);
+
+  const portingActions = useMemo(() => {
+    if (!isLoaded(projects)) {
+      return 0;
+    }
+    if (projects.data.length === 0) {
+      return 0;
+    }
+    return getActionCounts(apiAnalysis);
   }, [apiAnalysis, projects]);
 
   const [shownLoadingMessage, setShownLoadingMessage] = useState(false);
@@ -171,17 +181,34 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
         </div>
         <div>
           <SpaceBetween size="l">
-            <SummaryItem
-              label="Build errors"
-              infoLink={
-                <InfoLink
-                  heading="Build errors"
-                  mainContent={<Box variant="p">The number of build errors in the assessed solution.</Box>}
-                  learnMoreLinks={[]}
+            <ColumnLayout columns={2} variant="text-grid">
+              <div>
+                <SummaryItem
+                  label="Build errors"
+                  infoLink={
+                    <InfoLink
+                      heading="Build errors"
+                      mainContent={<Box variant="p">The number of build errors in the assessed solution.</Box>}
+                      learnMoreLinks={[]}
+                    />
+                  }
+                  content={apiCompatibilities.isApisLoading ? <Spinner /> : buildErrors}
                 />
-              }
-              content={apiCompatibilities.isApisLoading ? <Spinner /> : buildErrors}
-            />
+              </div>
+              <div>
+                <SummaryItem
+                  label="Porting actions"
+                  infoLink={
+                    <InfoLink
+                      heading="Porting actions"
+                      mainContent={<Box variant="p">The number of porting actions in the assessed solution.</Box>}
+                      learnMoreLinks={[]}
+                    />
+                  }
+                  content={apiCompatibilities.isApisLoading ? <Spinner /> : portingActions}
+                />
+              </div>
+            </ColumnLayout>
             <SummaryItem label="Filepath" content={solution.solutionFilePath} />
           </SpaceBetween>
         </div>
