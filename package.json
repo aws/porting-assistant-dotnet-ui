@@ -30,10 +30,13 @@
   "husky": {
     "hooks": {
       "pre-commit": "lerna run --concurrency 1 --stream precommit --since HEAD --exclude-dependents",
-      "prepare-commit-msg": "git-commit-template .commit-msg"
+      "prepare-commit-msg": "git-commit-template .commit-msg",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
   "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
     "git-commit-template": "^1.0.5",
     "husky": "^4.2.5",
     "lerna": "^3.20.2"
