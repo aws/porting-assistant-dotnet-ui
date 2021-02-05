@@ -1,0 +1,9 @@
+# Title: Summary, imperative, start upper case, don't end with a period
+# No more than 50 chars. #### 50 chars is here: #
+feature: 
+ 
+# Remember blank line between title and body.
+# Body: Explain *what* and *why* (not *how*). Include github issue id #.
+#fix: 
+# Explain the how you change your code
+#change:
