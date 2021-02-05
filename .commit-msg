@@ -1,9 +1,7 @@
-# Title: Summary, imperative, start upper case, don't end with a period
+# Title: Summary, imperative, start with prefix fix|feat|test|docs|refactor, don't end with a period
 # No more than 50 chars. #### 50 chars is here: #
-feature: 
- 
+fix|feat|test|docs|refactor: 
+
 # Remember blank line between title and body.
 # Body: Explain *what* and *why* (not *how*). Include github issue id #.
-#fix: 
 # Explain the how you change your code
-#change:
