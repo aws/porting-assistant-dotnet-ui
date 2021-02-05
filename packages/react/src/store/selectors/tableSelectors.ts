@@ -467,7 +467,7 @@ export const selectNugetTableData = createCachedSelector(
                 apis: fileApiFrequency[key]?.api || 0,
                 sourceFiles: fileApiFrequency[key]?.file || 0,
                 replacement: replacement,
-                compatible: compatibility === "COMPATIBLE",
+                compatible: compatibility,
                 failed: isFailed(packageAnalysisResult),
                 deprecated: compatibility === "DEPRACATED"
               };
@@ -478,7 +478,7 @@ export const selectNugetTableData = createCachedSelector(
                 apis: fileApiFrequency[key]?.api || 0,
                 sourceFiles: fileApiFrequency[key]?.file || 0,
                 replacement: replacement,
-                compatible: undefined,
+                compatible: "UNKNOWN",
                 failed: isFailed(packageAnalysisResult),
                 deprecated: false
               };

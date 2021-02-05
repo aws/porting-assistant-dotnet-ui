@@ -8,7 +8,7 @@ import { matchPath, useLocation } from "react-router";
 import { pathValues } from "../../constants/paths";
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
-import { NugetPackage } from "../../models/project";
+import { Compatibility, NugetPackage } from "../../models/project";
 import { selectNugetPackages, selectProjects } from "../../store/selectors/solutionSelectors";
 import { selectNugetTableData } from "../../store/selectors/tableSelectors";
 import { filteringCountText } from "../../utils/FilteringCountText";
@@ -22,7 +22,7 @@ export type NugetPackageTableFields = NugetPackage & {
   sourceFiles: number;
   apis: number;
   replacement: string;
-  compatible: boolean | undefined;
+  compatible: Compatibility;
   failed: boolean;
   deprecated: boolean;
 };
@@ -138,6 +138,12 @@ const NugetPackageTableInternal: React.FC = () => {
                   <Box variant="p">
                     <Box variant="strong">Suggested replacements</Box> - Suggested replacements for compatiblity.
                   </Box>
+                  <Box variant="p">
+                    <Box variant="strong">Notes:</Box> Porting Assistant does not support assessing the compatibility of
+                    private NuGet packages. Private NuGet packages will have the compatibility result of unknown. To
+                    assess the compatibility of private NuGet packages, add the solution of the package as a separate
+                    assessment.
+                  </Box>
                 </>
               }
               learnMoreLinks={[
@@ -193,8 +199,10 @@ const columnDefinitions: TableProps.ColumnDefinition<NugetPackageTableFields>[] 
       <div id={`compatibility-${escapeNonAlphaNumeric(item.packageId || "")}`}>
         {item.failed ? (
           <StatusIndicator type="warning">Failed</StatusIndicator>
-        ) : item.compatible ? (
+        ) : item.compatible === "COMPATIBLE" ? (
           <StatusIndicator type="success">Compatible</StatusIndicator>
+        ) : item.compatible === "UNKNOWN" ? (
+          <StatusIndicator type="info">Unknown</StatusIndicator>
         ) : item.deprecated ? (
           <StatusIndicator type="info">Deprecated</StatusIndicator>
         ) : (

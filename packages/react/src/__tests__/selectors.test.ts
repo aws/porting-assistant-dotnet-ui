@@ -938,7 +938,7 @@ describe("selectDashboardTableData", () => {
         failed: false,
         sourceFiles: 1,
         replacement: "test upgrade",
-        compatible: true,
+        compatible: "COMPATIBLE",
         deprecated: false
       }
     ];
