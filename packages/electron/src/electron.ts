@@ -109,11 +109,7 @@ const isDev =
 const isTest = process.env["NODE_ENV"] === "test";
 
 function createWindow() {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-
   mainWindow = new BrowserWindow({
-    width: width,
-    height: height,
     webPreferences: {
       contextIsolation: true,
       preload: path.join(__dirname, "preload.js"),
@@ -123,6 +119,7 @@ function createWindow() {
     icon: path.join(__dirname, "..", "build", "icon.ico"),
   });
 
+  mainWindow.maximize();
   if (isDev) {
     mainWindow.loadURL("http://localhost:3000");
     mainWindow.webContents.openDevTools();
