@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aws4RequestSigner" Version="1.0.1" />
+    <PackageReference Include="AWSSDK.APIGateway" Version="3.5.2.39" />
+    <PackageReference Include="AWSSDK.Core" Version="3.5.3.3" />
+    <PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="PortingAssistant.Client.Client" Version="1.5.10-alpha-g0bce462880" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PortingAssistant.Api\PortingAssistant.Api.csproj" />
+    <ProjectReference Include="..\PortingAssistant.Common\PortingAssistant.Common.csproj" />
+  </ItemGroup>
+
+</Project>

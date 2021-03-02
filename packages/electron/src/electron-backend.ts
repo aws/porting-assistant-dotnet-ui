@@ -20,6 +20,82 @@ ipcMain.handle("getConfigPath", (_event) => {
   return app.getPath("userData");
 });
 
+export const initTelemetryConnection = (logger: any = console) => {
+  let instance: Connection | undefined = undefined;
+
+  const createConnection = (browserWindow: Electron.BrowserWindow) => {
+    const connection = new ConnectionBuilder()
+      .connectTo(
+        "dotnet",
+        isDev
+          ? path.join(
+              __dirname,
+              "..",
+              "netcore_build",
+              "PortingAssistant.Telemetry.dll"
+            )
+          : path.join(
+              path.dirname(app.getPath("exe")),
+              "resources",
+              "netcore_build",
+              "PortingAssistant.Telemetry.dll"
+            ),
+        isDev
+          ? path.join(
+              __dirname,
+              "..",
+              "build-scripts",
+              "telemetry-config.dev.json"
+            )
+          : path.join(
+              path.dirname(app.getPath("exe")),
+              "resources",
+              "config",
+              "telemetry-config.json"
+            ),
+        localStore.get("profile"),
+        app.getPath("userData")
+      )
+      .build();
+
+    console.log("Telemetry Connection Start.");
+
+    connection.onDisconnect = () => {
+      // Recreate connection on disconnect
+      logger.log("disconnected");
+      instance = undefined;
+    };
+
+    return connection;
+  };
+
+  return {
+    getConnectionInstance: () => instance,
+    closeConnection: () => {
+      if (instance != null) {
+        instance.close();
+      }
+    },
+    registerListeners: (browserWindow: Electron.BrowserWindow) => {
+      if (!localStore.get("profile")) {
+        console.log("Did not find profile, setting onDidChange");
+        localStore.onDidChange("profile", () => {
+          console.log("Profile changed, recreating connection");
+          if (instance != null) {
+            instance.close();
+            instance = undefined;
+          }
+          instance = createConnection(browserWindow);
+        });
+      } else {
+        console.log("profileFound: " + localStore.get("profile"));
+        instance = createConnection(browserWindow);
+      }
+    },
+  };
+};
+
+
 export const initConnection = (logger: any = console) => {
   ipcMain.handle("ping", async (_event) => {
     if (instance === undefined) {
