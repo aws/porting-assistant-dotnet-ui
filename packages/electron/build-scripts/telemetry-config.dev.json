@@ -1,0 +1,8 @@
+{
+    "InvokeUrl": "https://localhost",
+    "Region": "us-east-1",
+    "ServiceName": "service_name",
+    "LogsPath": "telemetry-logs",
+    "Description": "Porting Assistant for .NET Log"
+  }
+  

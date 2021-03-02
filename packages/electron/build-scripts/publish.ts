@@ -151,6 +151,24 @@ if (config.config !== undefined) {
   );
 }
 
+if (config.telemetryConfig !== undefined) {
+  fs.writeFileSync(
+    path.join("config", "telemetry-config.json"),
+    fs.readFileSync(config.telemetryConfig).toString()
+  );
+} else {
+  fs.writeFileSync(
+    path.join("config", "telemety-config.json"),
+    JSON.stringify({
+      InvokeUrl: process.env["INVOKE_URL"],
+      Region: process.env["S3_REGION"],
+      ServiceName: process.env["SERVICE_NAME"],
+      LogsPath: "telemetry-logs",
+      Description: "Porting Assistant for .NET Log",
+    })
+  );
+}
+
 const buildConfig = config.buildConfig;
 if (args.sign) {
   buildConfig.win["sign"] = process.env["SIGNER_PATH"];

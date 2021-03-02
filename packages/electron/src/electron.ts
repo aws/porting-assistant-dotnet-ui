@@ -15,7 +15,7 @@ import path from "path";
 import log from "electron-log";
 import url from "url";
 import electronIsDev from "electron-is-dev";
-import { initConnection } from "./electron-backend";
+import { initConnection, initTelemetryConnection } from "./electron-backend";
 import { localStore } from "./preload-localStore";
 
 const upgradeConfig = require(electronIsDev
@@ -101,6 +101,7 @@ autoUpdater.allowDowngrade = true;
 autoUpdater.autoInstallOnAppQuit = false;
 
 const connection = initConnection(log.functions);
+const telemetryConnection = initTelemetryConnection(log.functions);
 
 const isDev =
   electronIsDev &&
@@ -138,6 +139,7 @@ function createWindow() {
   });
 
   connection.registerListeners(mainWindow);
+  telemetryConnection.registerListeners(mainWindow);
 
   // Create updater yml
   // @ts-ignore
@@ -167,6 +169,7 @@ function createWindow() {
       .then((resp) => {
         if (resp.response === 0) {
           connection.closeConnection();
+          telemetryConnection.closeConnection();
           autoUpdater.quitAndInstall();
         }
       });
@@ -184,6 +187,7 @@ app.on("ready", () => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin" || isTest) {
     connection.closeConnection();
+    telemetryConnection.closeConnection();
     app.quit();
   }
 });
