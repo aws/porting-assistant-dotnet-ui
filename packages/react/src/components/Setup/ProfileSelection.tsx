@@ -44,10 +44,13 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
   const dispatch = useDispatch();
   const currentProfile = window.electron.getState("profile");
   const cachedTargetFramework = window.electron.getState("targetFramework");
-  const currentTargetFramework = {
-    label: cachedTargetFramework.label,
-    value: cachedTargetFramework.id
-  };
+  const currentTargetFramework =
+    cachedTargetFramework.id === "netstandard2.1"
+      ? {}
+      : {
+          label: cachedTargetFramework.label,
+          value: cachedTargetFramework.id
+        };
 
   const [targetFramework, setTargetFramework] = useState(currentTargetFramework);
   const [profiles, setProfiles] = useState({ label: currentProfile, id: "" } as SelectProps.Option);

@@ -87,11 +87,17 @@ const getStateFromCache = (): Partial<RS> => {
   const profile = window.electron.getState("profile");
   const share = window.electron.getState("share");
   const lastConfirmVersion = window.electron.getState("lastConfirmVersion");
+  const targetFramework = window.electron.getState("targetFramework");
   return {
     solution: {
       apiAnalysis: Object.assign({} as SolutionToApiAnalysis, apiAnalysis),
       solutionToSolutionDetails: Object.assign({} as SolutionToSolutionDetails, filteredSolutionToSolutionDetails),
-      profileSet: profile != null && profile.length > 0 && share === true && lastConfirmVersion === "1.3.0"
+      profileSet:
+        profile != null &&
+        profile.length > 0 &&
+        share === true &&
+        lastConfirmVersion === "1.3.0" &&
+        targetFramework.id !== "netstandard2.1"
     },
     nugetPackage: Object.assign(
       {
