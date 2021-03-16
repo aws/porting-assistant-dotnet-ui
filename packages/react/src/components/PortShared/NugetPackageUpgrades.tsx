@@ -261,7 +261,7 @@ const NugetPackageUpgradesInternal: React.FC<Props> = ({ projects, onChange, wat
       nugetPackagesInProjects,
       onChange,
       selectedNugetPackageVersion,
-      target?.id,
+      target,
       targetFramework
     ]
   );

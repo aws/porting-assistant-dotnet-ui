@@ -298,7 +298,7 @@ const columnDefinitions: TableProps.ColumnDefinition<DashboardTableData>[] = [
           {item.name}
         </LinkComponent>
       ),
-    sortingField: "solutionName"
+    sortingField: "name"
   },
   {
     id: "ported-projects",

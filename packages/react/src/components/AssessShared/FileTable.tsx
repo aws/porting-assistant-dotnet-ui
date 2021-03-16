@@ -29,12 +29,7 @@ const FileTableInternal: React.FC = () => {
   const [filterText, setFilterText] = useState("");
   const [sortDetail, setSortDetail] = useState<TableProps.SortingState<SourceFile>>({
     sortingColumn: {
-      sortingField: "source-file",
-      sortingComparator: (a: any, b: any) => {
-        const aPath = a.isProjectPage ? a.projectPath : a.solutionPath;
-        const bPath = b.isProjectPage ? b.projectPath : b.solutionPath;
-        return aPath.localeCompare(bPath);
-      }
+      sortingField: "sourceFilePath"
     },
     isDescending: false
   });
@@ -200,10 +195,10 @@ const columnDefinitions: TableProps.ColumnDefinition<SourceFile>[] = [
         )}
       </LinkComponent>
     ),
-    sortingField: "source-file",
-    sortingComparator: (a: any, b: any) => {
-      const aPath = a.isProjectPage ? a.projectPath : a.solutionPath;
-      const bPath = b.isProjectPage ? b.projectPath : b.solutionPath;
+    sortingField: "sourceFilePath",
+    sortingComparator: (a: SourceFile, b: SourceFile) => {
+      const aPath = window.electron.getRelativePath(a.isProjectPage ? a.projectPath : a.solutionPath, a.sourceFilePath);
+      const bPath = window.electron.getRelativePath(b.isProjectPage ? b.projectPath : b.solutionPath, b.sourceFilePath);
       return aPath.localeCompare(bPath);
     }
   },
@@ -211,7 +206,8 @@ const columnDefinitions: TableProps.ColumnDefinition<SourceFile>[] = [
     id: "incompatible-api-calls",
     header: "Incompatible API calls",
     cell: item => `${item.incompatibleApis} of ${item.totalApis}`,
-    sortingField: "incompatibleApi"
+    sortingField: "incompatibleApis",
+    sortingComparator: (a: SourceFile, b: SourceFile) => a.incompatibleApis - b.incompatibleApis
   }
 ];
 
