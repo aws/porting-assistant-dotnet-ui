@@ -224,6 +224,7 @@ export const sourceFileAnalysisResult2: SourceFileAnalysisResult = {
 export const projectAnalysisResult: ProjectApiAnalysisResult = {
   solutionFile: "/test/solution",
   projectFile: "/test/testproject",
+  projectGuid: "00000000",
   errors: [""],
   sourceFileAnalysisResults: [sourceFileAnalysisResult1, sourceFileAnalysisResult2]
 };

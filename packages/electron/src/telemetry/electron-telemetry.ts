@@ -232,7 +232,8 @@ export const logApiMetrics = (response: any) => {
 
     if (
       projectAnalysis.sourceFileAnalysisResults != null &&
-      projectAnalysis.projectFile != null
+      projectAnalysis.projectFile != null &&
+      projectAnalysis.projectGuid != null
     ) {
       //Metrics with ListMetrics and MetaData
       const apis = projectAnalysis.sourceFileAnalysisResults.flatMap(
@@ -244,6 +245,8 @@ export const logApiMetrics = (response: any) => {
               originalDefinition: invocation.codeEntityDetails?.signature,
               compatibility:
                 invocation.compatibilityResults[targetFramework]?.compatibility,
+              packageId: invocation.codeEntityDetails.package?.packageId,
+              packageVersion: invocation.codeEntityDetails.package?.version,
             };
           })
       );
@@ -260,6 +263,13 @@ export const logApiMetrics = (response: any) => {
               .update(projectAnalysis.projectFile)
               .digest("hex"),
           },
+          {
+            Name: "projectGuid",
+            Value: crypto
+              .createHash("sha256")
+              .update(projectAnalysis.projectGuid)
+              .digest("hex"),
+          },
           { Name: "portingAssistantVersion", Value: app.getVersion() },
           {
             Name: "targetFramework",
@@ -274,6 +284,7 @@ export const logApiMetrics = (response: any) => {
           },
         ],
       };
+      log.info(JSON.stringify(metrics));
       metricsBuffer.push(JSON.stringify(metrics));
     }
   } catch (err) {}
