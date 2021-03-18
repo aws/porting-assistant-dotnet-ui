@@ -32,10 +32,6 @@ const NugetPackageTableInternal: React.FC = () => {
   const nugetPackages = useSelector(selectNugetPackages);
   const nugetPackagesWithFields = usePortingAssistantSelector(state => selectNugetTableData(state, location.pathname));
   const projects = usePortingAssistantSelector(state => selectProjects(state, location.pathname));
-  const [sortingDetail, setSortingDetail] = useState<TableProps.SortingState<NugetPackageTableFields>>({
-    sortingColumn: { sortingField: "status" },
-    isDescending: true
-  });
 
   const isSingleProject = useMemo(() => {
     const match = matchPath<{ solution: string; project: string }>(location.pathname, {
@@ -89,9 +85,6 @@ const NugetPackageTableInternal: React.FC = () => {
       columnDefinitions={columnDefinitionWithProject}
       loading={isTableLoading}
       items={items}
-      sortingColumn={sortingDetail.sortingColumn}
-      sortingDescending={sortingDetail.isDescending}
-      onSortingChange={event => setSortingDetail(event.detail)}
       filter={
         <TextFilter
           {...filterProps}
