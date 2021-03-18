@@ -5,6 +5,7 @@ import { PortingProjectFileResult } from "./models/porting";
 import {
   NugetPackage,
   PackageAnalysisResult,
+  Project,
   ProjectApiAnalysisResult,
   SolutionProject,
   VersionPair
@@ -60,7 +61,7 @@ export interface Porting {
   getConfig: () => SolutionToPortingProjects;
   setConfig: (data: SolutionToPortingProjects) => void;
   applyPortingProjectFileChanges: (
-    projectPaths: string[],
+    projectPaths: Project[],
     solutionPath: string,
     targetFramework: string,
     upgradeVersions: { [packageId: string]: VersionPair }

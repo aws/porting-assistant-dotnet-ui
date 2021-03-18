@@ -112,7 +112,7 @@ export const initConnection = (logger: any = console) => {
       "applyPortingProjectFileChanges",
       async (
         _event,
-        projectPaths,
+        projects,
         solutionPath,
         targetFramework,
         upgradeVersions
@@ -127,7 +127,7 @@ export const initConnection = (logger: any = console) => {
           };
         });
         const request = {
-          projectPaths,
+          projects,
           solutionPath,
           targetFramework,
           RecommendedActions,
