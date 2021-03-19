@@ -40,6 +40,7 @@ export interface PackageAnalysisResultWithDate extends PackageAnalysisResult {
 export interface ProjectApiAnalysisResult {
   solutionFile: string;
   projectFile: string;
+  projectGuid?: string;
   errors: string[];
   sourceFileAnalysisResults: SourceFileAnalysisResult[];
 }

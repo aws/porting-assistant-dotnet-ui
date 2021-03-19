@@ -91,6 +91,7 @@ namespace PortingAssistant.Common.Services
                                     Errors = projectAnalysResult.Errors,
                                     SolutionFile = request.solutionFilePath,
                                     ProjectFile = projectAnalysResult.ProjectFilePath,
+                                    ProjectGuid = projectAnalysResult.ProjectGuid,
                                     SourceFileAnalysisResults = projectAnalysResult.SourceFileAnalysisResults
                                 },
                                 Status = Response<ProjectApiAnalysisResult, SolutionProject>.Success()
