@@ -284,7 +284,6 @@ export const logApiMetrics = (response: any) => {
           },
         ],
       };
-      log.info(JSON.stringify(metrics));
       metricsBuffer.push(JSON.stringify(metrics));
     }
   } catch (err) {}
