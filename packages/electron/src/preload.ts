@@ -13,12 +13,18 @@ import {
   portingStore,
   reducerCacheStore,
 } from "./preload-localStore";
+import {
+  Project,
+  VersionPair,
+} from "@porting-assistant/react/src/models/project";
 
 contextBridge.exposeInMainWorld("electron", {
   openExternalUrl: (url: string) => shell.openExternal(url),
   openPath: (path: string) => shell.openPath(path),
-  saveState: (key: "solutions" | "profile" | "share" | "lastConfirmVersion", value: any) =>
-    localStore.set(key, value),
+  saveState: (
+    key: "solutions" | "profile" | "share" | "lastConfirmVersion",
+    value: any
+  ) => localStore.set(key, value),
   getState: (
     key: "solutions" | "profile" | "targetFramework" | "share",
     defaultValue: any
@@ -106,14 +112,14 @@ contextBridge.exposeInMainWorld("porting", {
   getConfig: () => portingStore.get("solutions"),
   setConfig: (data: any) => portingStore.set("solutions", data),
   applyPortingProjectFileChanges: (
-    projectPaths: string[],
+    projects: Project[],
     solutionPath: string,
     targetFramework: string,
-    upgradeVersions: { [packageId: string]: string }
+    upgradeVersions: { [packageId: string]: VersionPair }
   ) =>
     invokeBackend(
       "applyPortingProjectFileChanges",
-      projectPaths,
+      projects,
       solutionPath,
       targetFramework,
       upgradeVersions

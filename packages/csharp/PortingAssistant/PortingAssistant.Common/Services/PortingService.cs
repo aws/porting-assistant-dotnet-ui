@@ -27,7 +27,7 @@ namespace PortingAssistant.Common.Services
             {
                 var portingRequst = new PortingRequest
                 {
-                    ProjectPaths = request.ProjectPaths,
+                    Projects = request.Projects,
                     SolutionPath = request.SolutionPath,
                     RecommendedActions = request.RecommendedActions.Select(r => (RecommendedAction)r).ToList(),
                     TargetFramework = request.TargetFramework

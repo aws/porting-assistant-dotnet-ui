@@ -40,7 +40,11 @@ export const handlePortProjectSubmission = async (
     await window.porting.copyDirectory(solution.solutionFilePath, portingLocation.workingDirectory);
   }
   const response = await window.porting.applyPortingProjectFileChanges(
-    projects.map(p => getPortingPath(solution, p, portingLocation)),
+    projects.map(p => {
+      let portingProjects = Object.assign({}, p);
+      portingProjects.projectFilePath = getPortingPath(solution, p, portingLocation);
+      return portingProjects;
+    }),
     portingSolutionPath,
     targetFramework,
     Object.entries(data.upgrades).reduce((agg, [key, value]) => {
