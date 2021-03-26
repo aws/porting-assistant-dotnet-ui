@@ -12,7 +12,7 @@ export const copyDirectory = (
       destinationPath,
       {
         filter: (source) => {
-          if (path.basename(source).match("^[.git]")) {
+          if (path.basename(source).match("^(.git)")) {
             return false;
           }
           return true;
