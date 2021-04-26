@@ -1,4 +1,4 @@
-import { Box } from "@awsui/components-react";
+import { Alert, Box, Link } from "@awsui/components-react";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router";
@@ -12,6 +12,7 @@ import { setInfo } from "../store/actions/tools";
 const DashboardInternal: React.FC = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const [visible, setVisible] = React.useState(true);
   useEffect(() => {
     dispatch(
       setInfo({
@@ -41,7 +42,40 @@ const DashboardInternal: React.FC = () => {
   return (
     <PortingAssistantAppLayout
       contentType="table"
-      content={<DashboardTable />}
+      content={
+        <>
+          <>
+            <Alert
+              type="info"
+              header="Porting Assistant is now available as an extension for Microsoft Visual Studio"
+              dismissible={true}
+              visible={visible}
+              onDismiss={() => setVisible(false)}
+              buttonText={
+                <>
+                  Get the Visual Studio Extension
+                  <Link
+                    external
+                    externalIconAriaLabel="Opens in a new tab"
+                    href="#/"
+                    onFollow={event => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      window.electron.openExternalUrl(externalUrls.visualstudioExtension);
+                    }}
+                  ></Link>
+                </>
+              }
+              onButtonClick={() => {
+                window.electron.openExternalUrl(externalUrls.visualstudioExtension);
+              }}
+            >
+              Assess your soluton for .Net Core compatibility and start porting them in Visual Studio.
+            </Alert>
+          </>
+          <DashboardTable />
+        </>
+      }
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumb} />}
     />
   );

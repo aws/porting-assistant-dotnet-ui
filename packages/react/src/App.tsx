@@ -81,33 +81,6 @@ const AppInternal: React.FC<{}> = () => {
 
   useEffect(() => {
     const hasProfile = window.electron.getState("profile");
-    dispatch(
-      pushCurrentMessageUpdate({
-        messageId: uuid(),
-        groupId: "vsExternsion",
-        type: "info",
-        header: "Porting Assistant is now available as an extension for Microsoft Visual Studio ",
-        content: "Assess your soluton for .Net Core compatibility and start porting them in Visual Studio",
-        dismissible: true,
-        buttonText: (
-          <>
-            Get the Visual Studio Externsion
-            <Link
-              external
-              externalIconAriaLabel="Opens in a new tab"
-              href="#/"
-              onFollow={event => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-            ></Link>
-          </>
-        ),
-        onButtonClick: () => {
-          window.electron.openExternalUrl(externalUrls.visualstudioExtension);
-        }
-      })
-    );
     if (hasProfile) {
       dispatch(init(false));
     }

@@ -212,7 +212,7 @@ function* handleOpenSolutionInIDE(action: ReturnType<typeof openSolutionInIDE>) 
       pushCurrentMessageUpdate({
         messageId: uuid(),
         groupId: "OpenInVS",
-        content: `Successfully Open ${solutionFilePath} in Visual Studio.`,
+        content: `Successfully opened ${window.electron.getFilename(solutionFilePath)} in Visual Studio.`,
         type: "success",
         dismissible: true
       })
@@ -222,7 +222,7 @@ function* handleOpenSolutionInIDE(action: ReturnType<typeof openSolutionInIDE>) 
       pushCurrentMessageUpdate({
         messageId: uuid(),
         groupId: "OpenInVS",
-        content: `Failed to Open ${solutionFilePath} in Visual Studio with.`,
+        content: `Failed to Open ${window.electron.getFilename(solutionFilePath)} in Visual Studio.`,
         type: "error",
         dismissible: true
       })
