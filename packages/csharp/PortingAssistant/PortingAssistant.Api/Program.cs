@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Client;
 using PortingAssistant.Client.Model;
 using Serilog;
+using PortingAssistant.VisualStudio;
 
 namespace PortingAssistant.Api
 {
@@ -77,6 +78,7 @@ namespace PortingAssistant.Api
                 .AddSerilog(logger: Log.Logger, dispose: true));
             serviceCollection.AddTransient<IAssessmentService, AssessmentService>();
             serviceCollection.AddTransient<IPortingService, PortingService>();
+            serviceCollection.AddSingleton<IVisualStudioFinder, VisualStudioFinder>();
             serviceCollection.AddAssessment(config);
             serviceCollection.AddOptions();
         }

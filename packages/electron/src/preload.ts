@@ -97,6 +97,8 @@ contextBridge.exposeInMainWorld("backend", {
       targetFramework: string;
     }
   ) => invokeBackend("analyzeSolution", solutionFilePath, settings),
+  openSolutionInIDE: (solutionFilePath: string) =>
+    invokeBackend("openSolutionInIDE", solutionFilePath),
   getFileContents: (sourceFilePath: string) =>
     invokeBackend("getFileContents", sourceFilePath),
   listenNugetPackageUpdate: (callback: (message: string) => void) =>

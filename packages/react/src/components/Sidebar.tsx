@@ -33,6 +33,18 @@ const items: SideNavigationProps.Item[] = [
   { type: "divider" },
   {
     type: "link",
+    text: "Contribute on Github",
+    href: externalUrls.github,
+    external: true
+  },
+  {
+    type: "link",
+    text: "Visual Studio Extension",
+    href: externalUrls.visualstudioExtension,
+    external: true
+  },
+  {
+    type: "link",
     text: "Documentation",
     href: externalUrls.defaultDocumentation,
     external: true

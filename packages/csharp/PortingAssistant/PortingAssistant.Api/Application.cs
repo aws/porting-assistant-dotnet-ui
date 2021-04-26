@@ -6,6 +6,9 @@ using PortingAssistant.Common.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
+using System.Diagnostics;
+using PortingAssistant.VisualStudio;
+using PortingAssistant.Common.Utils;
 
 namespace PortingAssistant.Api
 {
@@ -71,6 +74,30 @@ namespace PortingAssistant.Api
                 var portingService = _services.GetRequiredService<IPortingService>();
 
                 return portingService.ApplyPortingChanges(request);
+            });
+
+            _connection.On<string, Response<bool, string>>("openSolutionInIDE", request =>
+            {
+                try
+                {
+                    var portingService = _services.GetRequiredService<IPortingService>();
+                    var vsfinder = _services.GetRequiredService<IVisualStudioFinder>();
+                    var vsPath = vsfinder.GetLatestVisualStudioPath();
+                    var vsexe = PortingAssistantUtils.FindFiles(vsPath, "devenv.exe");
+                    Process.Start(vsexe, request);
+                    return new Response<bool, string>
+                    {
+                        Status = Response<bool, string>.Success()
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new Response<bool, string>
+                    {
+                        Status = Response<bool, string>.Failed(ex),
+                        ErrorValue = ex.Message
+                    };
+                }
             });
         }
 
