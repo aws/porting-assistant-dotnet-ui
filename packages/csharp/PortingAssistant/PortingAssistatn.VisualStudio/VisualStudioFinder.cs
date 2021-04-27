@@ -8,6 +8,13 @@ using Microsoft.VisualStudio.Setup.Configuration;
 
 namespace PortingAssistant.VisualStudio
 {
+    /// <summary>
+    ///     Wrap the Microsoft.VisualStudio.Setup.Configuration.Interop API to query
+    ///     Visual Studio setup for instances installed on the machine.
+    ///     Code derived from sample: 
+    ///     https://code.msdn.microsoft.com/Visual-Studio-Setup-0cedd331.
+    ///     https://github.com/dotnet/upgrade-assistant
+    /// </summary>
     public class VisualStudioFinder : IVisualStudioFinder
     {
         private const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
