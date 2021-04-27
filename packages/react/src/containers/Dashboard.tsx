@@ -1,4 +1,4 @@
-import { Alert, Box, Link } from "@awsui/components-react";
+import { Alert, Box, Link, SpaceBetween } from "@awsui/components-react";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router";
@@ -44,7 +44,7 @@ const DashboardInternal: React.FC = () => {
       contentType="table"
       content={
         <>
-          <>
+          <SpaceBetween direction="vertical" size="xs">
             <Alert
               type="info"
               header="Porting Assistant is now available as an extension for Microsoft Visual Studio"
@@ -72,8 +72,8 @@ const DashboardInternal: React.FC = () => {
             >
               Assess your soluton for .Net Core compatibility and start porting them in Visual Studio.
             </Alert>
-          </>
-          <DashboardTable />
+            <DashboardTable />
+          </SpaceBetween>
         </>
       }
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumb} />}

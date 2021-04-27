@@ -1,4 +1,3 @@
-import Link from "@awsui/components-react/link";
 import React, { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useDispatch } from "react-redux";
@@ -23,7 +22,7 @@ import { Settings } from "./containers/Settings";
 import { Setup } from "./containers/Setup";
 import { usePortingAssistantSelector } from "./createReduxStore";
 import { init } from "./store/actions/backend";
-import { pushCurrentMessageUpdate, setCurrentMessageUpdate, setErrorUpdate } from "./store/actions/error";
+import { setCurrentMessageUpdate, setErrorUpdate } from "./store/actions/error";
 
 interface RouteWithErrorProps extends RouteProps {
   requireProfile: boolean;
