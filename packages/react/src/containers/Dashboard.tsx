@@ -1,4 +1,4 @@
-import { Alert, Box, Link, SpaceBetween } from "@awsui/components-react";
+import { Alert, Box, Icon, SpaceBetween } from "@awsui/components-react";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router";
@@ -47,30 +47,21 @@ const DashboardInternal: React.FC = () => {
           <SpaceBetween direction="vertical" size="xs">
             <Alert
               type="info"
-              header="Porting Assistant is now available as an extension for Microsoft Visual Studio"
+              header="Porting Assistant for .NET is now available as an extension for Microsoft Visual Studio"
               dismissible={true}
               visible={visible}
               onDismiss={() => setVisible(false)}
               buttonText={
-                <>
-                  Get the Visual Studio Extension
-                  <Link
-                    external
-                    externalIconAriaLabel="Opens in a new tab"
-                    href="#/"
-                    onFollow={event => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      window.electron.openExternalUrl(externalUrls.visualstudioExtension);
-                    }}
-                  ></Link>
-                </>
+                <SpaceBetween direction="horizontal" size="xxs">
+                  <>Get the Visual Studio extension</>
+                  <Icon name="external" size="normal" variant="normal" />
+                </SpaceBetween>
               }
               onButtonClick={() => {
                 window.electron.openExternalUrl(externalUrls.visualstudioExtension);
               }}
             >
-              Assess your soluton for .Net Core compatibility and start porting them in Visual Studio.
+              Assess your soluton for .NET Core compatibility and start porting them in Visual Studio.
             </Alert>
             <DashboardTable />
           </SpaceBetween>

@@ -118,7 +118,11 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             >
               Export assessment report
             </Button>
-            <Button iconName="external" onClick={() => dispatch(openSolutionInIDE(solution.solutionFilePath))}>
+            <Button
+              iconName="external"
+              iconAlign="right"
+              onClick={() => dispatch(openSolutionInIDE(solution.solutionFilePath))}
+            >
               View in Visual Studio
             </Button>
             <Button
