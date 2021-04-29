@@ -5,6 +5,7 @@ import { getType } from "typesafe-actions";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
+import { Message } from "../../models/error";
 import { NugetPackage, PackageAnalysisResult, ProjectApiAnalysisResult, SolutionProject } from "../../models/project";
 import { Response } from "../../models/response";
 import { getTargetFramework } from "../../utils/getTargetFramework";
@@ -218,15 +219,17 @@ function* handleOpenSolutionInIDE(action: ReturnType<typeof openSolutionInIDE>) 
       })
     );
   } else {
-    yield put(
-      pushCurrentMessageUpdate({
-        messageId: uuid(),
-        groupId: "OpenInVS",
-        content: `Failed to Open ${window.electron.getFilename(solutionFilePath)} in Visual Studio.`,
-        type: "error",
-        dismissible: true
-      })
-    );
+    let message: Message = {
+      messageId: uuid(),
+      groupId: "OpenInVS",
+      content: `Failed to Open ${window.electron.getFilename(solutionFilePath)} in Visual Studio.`,
+      type: "error",
+      dismissible: true
+    };
+    if (response.errorValue === "A valid installation of Visual Studio was not found") {
+      message.content = response.errorValue;
+    }
+    yield put(pushCurrentMessageUpdate(message));
   }
 }
 

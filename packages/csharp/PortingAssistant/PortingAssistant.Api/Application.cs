@@ -84,6 +84,16 @@ namespace PortingAssistant.Api
                     var vsfinder = _services.GetRequiredService<IVisualStudioFinder>();
                     var vsPath = vsfinder.GetLatestVisualStudioPath();
                     var vsexe = PortingAssistantUtils.FindFiles(vsPath, "devenv.exe");
+
+                    if (vsexe == null)
+                    {
+                        return new Response<bool, string>
+                        {
+                            Status = Response<bool, string>.Failed(new Exception("No Visual Studio")),
+                            ErrorValue = "A valid installation of Visual Studio was not found"
+                        };
+                    }
+
                     Process.Start(vsexe, request);
                     return new Response<bool, string>
                     {

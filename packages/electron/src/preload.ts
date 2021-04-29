@@ -22,7 +22,12 @@ contextBridge.exposeInMainWorld("electron", {
   openExternalUrl: (url: string) => shell.openExternal(url),
   openPath: (path: string) => shell.openPath(path),
   saveState: (
-    key: "solutions" | "profile" | "share" | "lastConfirmVersion",
+    key:
+      | "solutions"
+      | "profile"
+      | "share"
+      | "lastConfirmVersion"
+      | "notification",
     value: any
   ) => localStore.set(key, value),
   getState: (

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 
 namespace PortingAssistant.Common.Utils
 {
@@ -19,7 +16,10 @@ namespace PortingAssistant.Common.Utils
             // Find in SubDirectories
             string[] subdirectoryEntries = Directory.GetDirectories(targetDirectory);
             foreach (string subdirectory in subdirectoryEntries)
-                return FindFiles(subdirectory, fileName);
+            {
+                var file = FindFiles(subdirectory, fileName);
+                if (file != null) return file;
+            }
 
             return null;
         }

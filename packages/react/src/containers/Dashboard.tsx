@@ -12,7 +12,8 @@ import { setInfo } from "../store/actions/tools";
 const DashboardInternal: React.FC = () => {
   const dispatch = useDispatch();
   const location = useLocation();
-  const [visible, setVisible] = React.useState(true);
+  const notification = window.electron.getState("notification");
+  const [visible, setVisible] = React.useState(notification);
   useEffect(() => {
     dispatch(
       setInfo({
@@ -50,11 +51,16 @@ const DashboardInternal: React.FC = () => {
               header="Porting Assistant for .NET is now available as an extension for Microsoft Visual Studio"
               dismissible={true}
               visible={visible}
-              onDismiss={() => setVisible(false)}
+              onDismiss={() => {
+                setVisible(false);
+                window.electron.saveState("notification", false);
+              }}
               buttonText={
                 <SpaceBetween direction="horizontal" size="xxs">
-                  <>Get the Visual Studio extension</>
-                  <Icon name="external" size="normal" variant="normal" />
+                  <div>Get the Visual Studio extension</div>
+                  <div>
+                    <Icon name="external" size="normal" variant="normal" />
+                  </div>
                 </SpaceBetween>
               }
               onButtonClick={() => {
