@@ -6,7 +6,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortingAssistant.Api", "Por
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortingAssistant.Common", "PortingAssistant.Common\PortingAssistant.Common.csproj", "{1F00D537-92AF-477D-B473-ED6C070E0A2C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortingAssistant.VisualStudio", "PortingAssistatn.VisualStudio\PortingAssistant.VisualStudio.csproj", "{1BAF959D-83A3-4E02-B47D-710ACD856791}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortingAssistant.VisualStudio", "PortingAssistant.VisualStudio\PortingAssistant.VisualStudio.csproj", "{1BAF959D-83A3-4E02-B47D-710ACD856791}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

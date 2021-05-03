@@ -13,6 +13,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PortingAssistant.Common\PortingAssistant.Common.csproj" />
-    <ProjectReference Include="..\PortingAssistatn.VisualStudio\PortingAssistant.VisualStudio.csproj" />
+    <ProjectReference Include="..\PortingAssistant.VisualStudio\PortingAssistant.VisualStudio.csproj" />
   </ItemGroup>
 </Project>
