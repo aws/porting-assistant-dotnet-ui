@@ -261,6 +261,7 @@ function* handleExportSolution(action: ReturnType<typeof exportSolution>) {
     selectApiTableData(state, solutionUrl)
   );
   const exportCsv = async (data: any[]) => {
+    if (data.length === 0 || data == null) return Promise.resolve("");
     return new Promise<string>((resolve, reject) =>
       csvStringify([Object.keys(data[0]), ...data.map(d => Object.values(d))], (err, output) => {
         if (err || output == null) {
