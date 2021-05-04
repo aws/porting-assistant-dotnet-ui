@@ -3,7 +3,6 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
-		<DockerComposeProjectPath>../docker-compose.dcproj</DockerComposeProjectPath>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -14,6 +13,5 @@
 	<ItemGroup>
 		<ProjectReference Include="..\PortingAssistant.Common\PortingAssistant.Common.csproj" />
 		<ProjectReference Include="..\PortingAssistant.VisualStudio\PortingAssistant.VisualStudio.csproj" />
-		<ProjectReference Include="..\test\PortingAssistant.VisualStudio.csproj" />
 	</ItemGroup>
 </Project>
