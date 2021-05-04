@@ -22,7 +22,12 @@ contextBridge.exposeInMainWorld("electron", {
   openExternalUrl: (url: string) => shell.openExternal(url),
   openPath: (path: string) => shell.openPath(path),
   saveState: (
-    key: "solutions" | "profile" | "share" | "lastConfirmVersion",
+    key:
+      | "solutions"
+      | "profile"
+      | "share"
+      | "lastConfirmVersion"
+      | "notification",
     value: any
   ) => localStore.set(key, value),
   getState: (
@@ -97,6 +102,8 @@ contextBridge.exposeInMainWorld("backend", {
       targetFramework: string;
     }
   ) => invokeBackend("analyzeSolution", solutionFilePath, settings),
+  openSolutionInIDE: (solutionFilePath: string) =>
+    invokeBackend("openSolutionInIDE", solutionFilePath),
   getFileContents: (sourceFilePath: string) =>
     invokeBackend("getFileContents", sourceFilePath),
   listenNugetPackageUpdate: (callback: (message: string) => void) =>

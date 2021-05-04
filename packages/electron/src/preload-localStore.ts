@@ -42,6 +42,7 @@ const createLocalStore = () =>
       targetFramework: { label: ".NET Core 3.1.0", id: "netcoreapp3.1" },
       share: false,
       lastConfirmVersion: "",
+      notification: true,
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -77,6 +78,9 @@ const createLocalStore = () =>
       },
       lastConfirmVersion: {
         type: "string",
+      },
+      notification: {
+        type: "boolean",
       },
     },
     watch: true,

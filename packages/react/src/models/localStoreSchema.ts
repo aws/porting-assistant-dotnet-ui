@@ -7,6 +7,7 @@ export interface LocalStoreSchema {
   targetFramework: TargetFramework;
   share: boolean;
   lastConfirmVersion: string;
+  notification: boolean;
 }
 
 export interface SolutionLocalStoreSchema {

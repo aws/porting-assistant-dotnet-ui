@@ -42,6 +42,7 @@ export interface exportSolutionPayload {
   solutionPath: string;
 }
 export const exportSolution = createAction("exportSolution")<exportSolutionPayload>();
+export const openSolutionInIDE = createAction("openSolutionInIDE")<string>();
 
 export const setProfileSet = createAction("setProfileSet")<boolean>();
 

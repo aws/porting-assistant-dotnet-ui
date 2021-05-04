@@ -5,12 +5,21 @@ import { getType } from "typesafe-actions";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
+import { Message } from "../../models/error";
 import { NugetPackage, PackageAnalysisResult, ProjectApiAnalysisResult, SolutionProject } from "../../models/project";
 import { Response } from "../../models/response";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isFailed, isLoaded } from "../../utils/Loadable";
 import { nugetPackageKey } from "../../utils/NugetPackageKey";
-import { analyzeSolution, exportSolution, getApiAnalysis, init, ping, removeSolution } from "../actions/backend";
+import {
+  analyzeSolution,
+  exportSolution,
+  getApiAnalysis,
+  init,
+  openSolutionInIDE,
+  ping,
+  removeSolution
+} from "../actions/backend";
 import { pushCurrentMessageUpdate, setCurrentMessageUpdate } from "../actions/error";
 import { getFileContents } from "../actions/file";
 import { getNugetPackageWithData } from "../actions/nugetPackage";
@@ -193,6 +202,37 @@ function handleRemoveSolution(action: ReturnType<typeof removeSolution>) {
   window.electron.saveState("solutions", paths);
 }
 
+function* handleOpenSolutionInIDE(action: ReturnType<typeof openSolutionInIDE>) {
+  const solutionFilePath = action.payload;
+  const response: SagaReturnType<typeof window.backend.openSolutionInIDE> = yield call(
+    [window.backend, window.backend.openSolutionInIDE],
+    solutionFilePath
+  );
+  if (response.status.status === "Success") {
+    yield put(
+      pushCurrentMessageUpdate({
+        messageId: uuid(),
+        groupId: "OpenInVS",
+        content: `Successfully opened ${window.electron.getFilename(solutionFilePath)} in Visual Studio.`,
+        type: "success",
+        dismissible: true
+      })
+    );
+  } else {
+    let message: Message = {
+      messageId: uuid(),
+      groupId: "OpenInVS",
+      content: `Failed to Open ${window.electron.getFilename(solutionFilePath)} in Visual Studio.`,
+      type: "error",
+      dismissible: true
+    };
+    if (response.errorValue === "A valid installation of Visual Studio was not found") {
+      message.content = response.errorValue;
+    }
+    yield put(pushCurrentMessageUpdate(message));
+  }
+}
+
 function* handleExportSolution(action: ReturnType<typeof exportSolution>) {
   const filename: SagaReturnType<typeof window.electron.dialog.showSaveDialog> = yield call(
     [window.electron.dialog, window.electron.dialog.showSaveDialog],
@@ -221,6 +261,7 @@ function* handleExportSolution(action: ReturnType<typeof exportSolution>) {
     selectApiTableData(state, solutionUrl)
   );
   const exportCsv = async (data: any[]) => {
+    if (data.length === 0 || data == null) return Promise.resolve("");
     return new Promise<string>((resolve, reject) =>
       csvStringify([Object.keys(data[0]), ...data.map(d => Object.values(d))], (err, output) => {
         if (err || output == null) {
@@ -306,6 +347,10 @@ function* watchRemoveSolution() {
   yield takeEvery(getType(removeSolution), handleRemoveSolution);
 }
 
+function* watchOpenInIDE() {
+  yield takeEvery(getType(openSolutionInIDE), handleOpenSolutionInIDE);
+}
+
 export default function* backendSaga() {
   yield all([
     watchInit(),
@@ -315,6 +360,7 @@ export default function* backendSaga() {
     watchGetFileContents(),
     watchExportSolution(),
     watchRemoveSolution(),
+    watchOpenInIDE(),
     watchPing()
   ]);
 }

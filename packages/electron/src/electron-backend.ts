@@ -148,6 +148,14 @@ export const initConnection = (logger: any = console) => {
       }
     );
 
+    ipcMain.handle("openSolutionInIDE", async (_event, solutionFilePath) => {
+      const response = await connection.send(
+        "openSolutionInIDE",
+        solutionFilePath
+      );
+      return response;
+    });
+
     connection.on("onNugetPackageUpdate", (response) => {
       browserWindow.webContents.send("onNugetPackageUpdate", response);
     });

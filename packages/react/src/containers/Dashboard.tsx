@@ -1,4 +1,4 @@
-import { Box } from "@awsui/components-react";
+import { Alert, Box, Icon, SpaceBetween } from "@awsui/components-react";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router";
@@ -12,6 +12,8 @@ import { setInfo } from "../store/actions/tools";
 const DashboardInternal: React.FC = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const notification = window.electron.getState("notification");
+  const [visible, setVisible] = React.useState(notification);
   useEffect(() => {
     dispatch(
       setInfo({
@@ -41,7 +43,36 @@ const DashboardInternal: React.FC = () => {
   return (
     <PortingAssistantAppLayout
       contentType="table"
-      content={<DashboardTable />}
+      content={
+        <>
+          <SpaceBetween direction="vertical" size="xs">
+            <Alert
+              type="info"
+              header="Porting Assistant for .NET is now available as an extension for Microsoft Visual Studio"
+              dismissible={true}
+              visible={visible}
+              onDismiss={() => {
+                setVisible(false);
+                window.electron.saveState("notification", false);
+              }}
+              buttonText={
+                <SpaceBetween direction="horizontal" size="xxs">
+                  <div>Get the Visual Studio extension</div>
+                  <div>
+                    <Icon name="external" size="normal" variant="normal" />
+                  </div>
+                </SpaceBetween>
+              }
+              onButtonClick={() => {
+                window.electron.openExternalUrl(externalUrls.visualstudioExtension);
+              }}
+            >
+              Assess your soluton for .NET Core compatibility and start porting them in Visual Studio.
+            </Alert>
+            <DashboardTable />
+          </SpaceBetween>
+        </>
+      }
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumb} />}
     />
   );

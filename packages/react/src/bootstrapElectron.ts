@@ -48,6 +48,7 @@ export interface Backend {
     solutionPath: string,
     settings: { ignoredProjects: string[]; targetFramework: string }
   ) => Promise<Response<SolutionDetails, string>>;
+  openSolutionInIDE: (solutionFilePath: string) => Promise<Response<boolean, string>>;
   getFileContents: (sourceFilePath: string) => Promise<string>;
   getNugetPackages: (packageVersions: NugetPackage[], solutionPath: string) => Promise<Response<string, string>>;
   listenNugetPackageUpdate: (callback: (nugetPackage: Response<PackageAnalysisResult, NugetPackage>) => void) => void;

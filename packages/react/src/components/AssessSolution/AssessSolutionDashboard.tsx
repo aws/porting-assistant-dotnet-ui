@@ -8,7 +8,7 @@ import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
 import { Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
-import { analyzeSolution, exportSolution } from "../../store/actions/backend";
+import { analyzeSolution, exportSolution, openSolutionInIDE } from "../../store/actions/backend";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isLoaded, Loadable } from "../../utils/Loadable";
@@ -117,6 +117,13 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               onClick={() => dispatch(exportSolution({ solutionPath: solution.solutionFilePath }))}
             >
               Export assessment report
+            </Button>
+            <Button
+              iconName="external"
+              iconAlign="right"
+              onClick={() => dispatch(openSolutionInIDE(solution.solutionFilePath))}
+            >
+              View in Visual Studio
             </Button>
             <Button
               iconName="refresh"

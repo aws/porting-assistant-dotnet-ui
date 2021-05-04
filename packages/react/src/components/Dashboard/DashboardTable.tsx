@@ -17,7 +17,7 @@ import { useHistory } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
-import { analyzeSolution, exportSolution, removeSolution } from "../../store/actions/backend";
+import { analyzeSolution, exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import { removePortedSolution } from "../../store/actions/porting";
 import { selectSolutionToSolutionDetails } from "../../store/selectors/solutionSelectors";
@@ -140,6 +140,7 @@ const DashboardTableInternal: React.FC = () => {
               key="actions-dropdown"
               items={[
                 { text: "Export assessment report", id: "download" },
+                { text: "View in Visual Studio", id: "view" },
                 { text: "Remove", id: "delete" }
               ]}
               disabled={selectedItems.length === 0}
@@ -151,6 +152,8 @@ const DashboardTableInternal: React.FC = () => {
                   case "delete":
                     setShowDeleteModal(true);
                     break;
+                  case "view":
+                    dispatch(openSolutionInIDE(selectedItems[0].path));
                 }
               }}
             >
