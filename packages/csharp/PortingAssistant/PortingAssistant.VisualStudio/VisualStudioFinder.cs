@@ -26,13 +26,16 @@ namespace PortingAssistant.VisualStudio
             _logger = logger;
         }
 
+        public VisualStudioFinder()
+        {
+        }
+
         public string GetLatestVisualStudioPath()
         {
             var latest = GetLatestPath();
 
             if (latest is null)
             {
-                _logger.LogWarning("Did not find a Visual Studio instance");
                 return null;
             }
 
@@ -41,13 +44,11 @@ namespace PortingAssistant.VisualStudio
 
             if (Directory.Exists(installation))
             {
-                _logger.LogDebug("Found Visual Studio {VsVersion} at {VsPath}", version, installation);
 
                 return installation;
             }
             else
             {
-                _logger.LogInformation("Found Visual Studio {VsVersion}, but directory '{VsPath}' does not exist.", version, installation);
 
                 return null;
             }

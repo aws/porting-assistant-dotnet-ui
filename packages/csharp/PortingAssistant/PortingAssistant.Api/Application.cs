@@ -7,8 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
 using System.Diagnostics;
-using PortingAssistant.VisualStudio;
 using PortingAssistant.Common.Utils;
+using PortingAssistant.VisualStudio;
 
 namespace PortingAssistant.Api
 {
