@@ -30,7 +30,8 @@ namespace PortingAssistant.Common.Services
                     Projects = request.Projects,
                     SolutionPath = request.SolutionPath,
                     RecommendedActions = request.RecommendedActions.Select(r => (RecommendedAction)r).ToList(),
-                    TargetFramework = request.TargetFramework
+                    TargetFramework = request.TargetFramework,
+                    IncludeCodeFix = true
                 };
 
                 var results = _client.ApplyPortingChanges(portingRequst);

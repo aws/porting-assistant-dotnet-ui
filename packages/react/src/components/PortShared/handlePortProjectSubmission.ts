@@ -125,7 +125,13 @@ export const handlePortProjectSubmission = async (
     dispatch(
       analyzeSolution.request({
         solutionPath: portingSolutionPath,
-        settings: { ignoredProjects: [], targetFramework: targetFramework },
+        settings: {
+          ignoredProjects: [],
+          targetFramework: targetFramework,
+          continiousEnabled: false,
+          actionsOnly: false,
+          compatibleOnly: false
+        },
         force: true
       })
     );
