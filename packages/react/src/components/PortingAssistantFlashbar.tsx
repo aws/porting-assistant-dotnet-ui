@@ -27,7 +27,7 @@ const PortingAssistantFlashbarInternal: React.FC<Props> = () => {
   const messages = useMemo(
     () =>
       currentMessageUpdates.map(message => ({
-        dismiss: () => {
+        onDismiss: () => {
           dispatch(removeCurrentMessageUpdate({ messageId: message.messageId }));
         },
         ...message
