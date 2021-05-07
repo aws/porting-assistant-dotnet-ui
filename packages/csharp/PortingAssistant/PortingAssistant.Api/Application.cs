@@ -52,6 +52,13 @@ namespace PortingAssistant.Api
 
         public void SetupConnection(bool console = false)
         {
+            /*
+            var service = _services.GetRequiredService<IAssessmentService>();
+            var result = service.AnalyzeSolution(new AnalyzeSolutionRequest
+            {
+                solutionFilePath = @"C:\Users\lwwnz\Desktop\port\SampleWebApi.sln",
+                settings = new AnalyzerSettings()
+            });*/
             _connection.On<AnalyzeSolutionRequest, Response<SolutionDetails, string>>("analyzeSolution", request =>
             {
                 var assessmentService = _services.GetRequiredService<IAssessmentService>();

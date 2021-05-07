@@ -58,29 +58,20 @@ export const useApiAnalysisFlashbarMessage = (solution?: SolutionDetails, projec
     });
 
     if (invalidProjects.size > 0) {
-      if (solution != null) {
-        dispatch(
-          pushCurrentMessageUpdate({
-            messageId: uuid(),
-            groupId: "ApiFailed",
-            content: `Failed to build ${invalidProjects.size} projects in ${solution.solutionName}.`,
-            type: "info",
-            buttonText: "View failed projects",
-            onButtonClick: () => history.push(location.pathname, { activeTabId: "projects" }),
-            dismissible: true
-          })
-        );
-      } else {
-        dispatch(
-          pushCurrentMessageUpdate({
-            messageId: uuid(),
-            groupId: "ApiFailed",
-            content: `Failed to build ${invalidProjects.size} projects.`,
-            type: "info",
-            dismissible: true
-          })
-        );
-      }
+      dispatch(
+        pushCurrentMessageUpdate({
+          messageId: uuid(),
+          groupId: "ApiFailed",
+          content: `Failed to build ${invalidProjects.size} projects${
+            solution == null ? "" : " in " + solution.solutionName
+          }. 
+            You must be able to build your project in Visual Studio. 
+            If this error persists after installing the .NET Developer Pack for this Framework version, 
+            Contact Support in the Porting Assistant help menu..`,
+          type: "error",
+          dismissible: true
+        })
+      );
     }
   }, [apiAnalysis, dispatch, history, location.pathname, project, solution, solutionToSolutionDetails]);
 };
