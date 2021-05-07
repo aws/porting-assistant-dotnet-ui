@@ -5,7 +5,13 @@ import { SolutionDetails } from "../../models/solution";
 
 export interface analyzeSolutionRequestPayload {
   solutionPath: string;
-  settings: { ignoredProjects: string[]; targetFramework: string };
+  settings: {
+    ignoredProjects: string[];
+    targetFramework: string;
+    continiousEnabled: boolean;
+    compatibleOnly: boolean;
+    actionsOnly: boolean;
+  };
   force?: boolean;
 }
 export interface analyzeSolutionSuccessPayload {

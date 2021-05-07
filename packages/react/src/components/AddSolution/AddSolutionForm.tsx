@@ -26,7 +26,13 @@ const ImportSolutionInternal: React.FC = () => {
         dispatch(
           analyzeSolution.request({
             solutionPath: data.solutionFilename,
-            settings: { ignoredProjects: [], targetFramework: targetFramework },
+            settings: {
+              ignoredProjects: [],
+              targetFramework: targetFramework,
+              continiousEnabled: false,
+              actionsOnly: false,
+              compatibleOnly: false
+            },
             force: true
           })
         );

@@ -46,7 +46,13 @@ export interface Backend {
   ping: () => Promise<string>;
   analyzeSolution: (
     solutionPath: string,
-    settings: { ignoredProjects: string[]; targetFramework: string }
+    settings: {
+      ignoredProjects: string[];
+      targetFramework: string;
+      continiousEnabled: boolean;
+      actionsOnly: boolean;
+      compatibleOnly: boolean;
+    }
   ) => Promise<Response<SolutionDetails, string>>;
   openSolutionInIDE: (solutionFilePath: string) => Promise<Response<boolean, string>>;
   getFileContents: (sourceFilePath: string) => Promise<string>;

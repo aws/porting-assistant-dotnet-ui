@@ -98,7 +98,13 @@ function* handleInit(action: ReturnType<typeof init>) {
     yield put(
       analyzeSolution.request({
         solutionPath: solution,
-        settings: { ignoredProjects: [], targetFramework: targetFramework },
+        settings: {
+          ignoredProjects: [],
+          targetFramework: targetFramework,
+          continiousEnabled: false,
+          actionsOnly: false,
+          compatibleOnly: false
+        },
         force: action.payload
       })
     );

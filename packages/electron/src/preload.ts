@@ -98,8 +98,11 @@ contextBridge.exposeInMainWorld("backend", {
   analyzeSolution: (
     solutionFilePath: string,
     settings: {
-      IgnoreProjects: string[];
+      ignoreProjects: string[];
       targetFramework: string;
+      continiousEnabled: boolean;
+      actionsOnly: boolean;
+      compatibleOnly: boolean;
     }
   ) => invokeBackend("analyzeSolution", solutionFilePath, settings),
   openSolutionInIDE: (solutionFilePath: string) =>

@@ -76,7 +76,13 @@ const DashboardTableInternal: React.FC = () => {
       dispatch(
         analyzeSolution.request({
           solutionPath: solutionPath,
-          settings: { ignoredProjects: [], targetFramework: targetFramework },
+          settings: {
+            ignoredProjects: [],
+            targetFramework: targetFramework,
+            continiousEnabled: false,
+            actionsOnly: false,
+            compatibleOnly: false
+          },
           force: true
         })
       );

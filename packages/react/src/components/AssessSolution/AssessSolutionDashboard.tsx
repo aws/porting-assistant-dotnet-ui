@@ -132,7 +132,13 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
                 dispatch(
                   analyzeSolution.request({
                     solutionPath: solution.solutionFilePath,
-                    settings: { ignoredProjects: [], targetFramework: targetFramework },
+                    settings: {
+                      ignoredProjects: [],
+                      targetFramework: targetFramework,
+                      continiousEnabled: false,
+                      actionsOnly: false,
+                      compatibleOnly: false
+                    },
                     force: true
                   })
                 );
