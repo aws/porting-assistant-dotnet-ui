@@ -667,7 +667,8 @@ describe("selectDashboardTableData", () => {
         incompatibleApis: 1,
         totalApis: 2,
         portingActions: 2,
-        buildErrors: 1
+        buildErrors: 1,
+        failed: false
       }
     ];
     expect(result).toEqual(expectResult);
