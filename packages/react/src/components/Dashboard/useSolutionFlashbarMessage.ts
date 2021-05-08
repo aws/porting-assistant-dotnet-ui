@@ -44,7 +44,9 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
         })
       );
     }
-    const completed = prevLoadingSolutions.current.filter(s => !loadingSolutions.some(ls => ls.path === s.path));
+    const completed = prevLoadingSolutions.current.filter(
+      s => !loadingSolutions.some(ls => ls.path === s.path) && !failedSolutions.some(ls => ls.path === s.path)
+    );
     if (completed.length === 1) {
       dispatch(
         pushCurrentMessageUpdate({
@@ -68,7 +70,8 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
       );
     }
 
-    if (failedSolutions.length === 1) {
+    const failed = prevLoadingSolutions.current.filter(s => failedSolutions.some(ls => ls.path === s.path));
+    if (failed.length === 1) {
       dispatch(
         pushCurrentMessageUpdate({
           messageId: uuid(),
@@ -80,7 +83,7 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
       );
     }
 
-    if (failedSolutions.length > 1) {
+    if (failed.length > 1) {
       dispatch(
         pushCurrentMessageUpdate({
           messageId: uuid(),
@@ -95,6 +98,7 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
     if (loadingSolutions.length === 0) {
       dispatch(removeCurrentMessageUpdate({ groupId: "assess" }));
     }
+
     if (loadingSolutions !== prevLoadingSolutions.current) {
       prevLoadingSolutions.current = loadingSolutions;
     }
