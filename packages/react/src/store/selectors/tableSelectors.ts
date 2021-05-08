@@ -154,6 +154,21 @@ export const selectDashboardTableData = createSelector(
           return null;
         }
         if (!isLoaded(solutionDetails) && !isReloading(solutionDetails)) {
+          if (isFailed(solutionDetails)) {
+            return {
+              name: path.basename(solutionPath),
+              path: solutionPath,
+              portedProjects: 0,
+              totalProjects: 0,
+              incompatiblePackages: 0,
+              totalPackages: 0,
+              incompatibleApis: 0,
+              totalApis: 0,
+              buildErrors: 0,
+              portingActions: 0,
+              failed: true
+            } as DashboardTableData;
+          }
           return {
             name: path.basename(solutionPath),
             path: solutionPath
@@ -184,7 +199,8 @@ export const selectDashboardTableData = createSelector(
               : apiCompatibility[1] - apiCompatibility[0],
           totalApis: nugetCompatibility == null || apiCompatibility == null ? undefined : apiCompatibility[1],
           buildErrors: buildErrors,
-          portingActions: portingActions
+          portingActions: portingActions,
+          failed: false
         } as DashboardTableData;
       })
       .filter((r): r is DashboardTableData => r != null);

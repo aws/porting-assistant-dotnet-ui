@@ -11,9 +11,13 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
 
   useEffect(() => {
     const loadingSolutions: DashboardTableData[] = [];
+    const failedSolutions: DashboardTableData[] = [];
     tableData.forEach(data => {
       if (data.incompatibleApis == null || data.incompatiblePackages == null) {
         loadingSolutions.push(data);
+      }
+      if (data.failed === true) {
+        failedSolutions.push(data);
       }
     });
     if (loadingSolutions.length === 1) {
@@ -63,6 +67,31 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
         })
       );
     }
+
+    if (failedSolutions.length === 1) {
+      dispatch(
+        pushCurrentMessageUpdate({
+          messageId: uuid(),
+          groupId: "assessFailed",
+          type: "error",
+          content: `Failed to assess ${failedSolutions[0].name}. You must be able to build your project in Visual Studio. If this error persists, contact support in the Porting Assistant help menu.`,
+          dismissible: true
+        })
+      );
+    }
+
+    if (failedSolutions.length > 1) {
+      dispatch(
+        pushCurrentMessageUpdate({
+          messageId: uuid(),
+          groupId: "assessFailed",
+          type: "error",
+          content: `Failed to assess ${failedSolutions.length} solutions. You must be able to build your project in Visual Studio. If this error persists, contact support in the Porting Assistant help menu.`,
+          dismissible: true
+        })
+      );
+    }
+
     if (loadingSolutions.length === 0) {
       dispatch(removeCurrentMessageUpdate({ groupId: "assess" }));
     }

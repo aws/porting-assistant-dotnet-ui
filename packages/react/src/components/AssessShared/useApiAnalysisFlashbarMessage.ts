@@ -67,7 +67,7 @@ export const useApiAnalysisFlashbarMessage = (solution?: SolutionDetails, projec
           }. 
             You must be able to build your project in Visual Studio. 
             If this error persists after installing the .NET Developer Pack for this Framework version, 
-            Contact Support in the Porting Assistant help menu..`,
+            contact support in the Porting Assistant help menu.`,
           type: "error",
           dismissible: true
         })

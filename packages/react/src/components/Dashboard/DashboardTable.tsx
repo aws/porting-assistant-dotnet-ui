@@ -43,6 +43,7 @@ export interface DashboardTableData {
   totalApis?: number;
   buildErrors?: number;
   portingActions?: number;
+  failed?: boolean;
 }
 
 const DashboardTableInternal: React.FC = () => {
@@ -344,7 +345,13 @@ const columnDefinitions: TableProps.ColumnDefinition<DashboardTableData>[] = [
     header: "Build errors",
     cell: item => (
       <div id={`build-error-${escapeNonAlphaNumeric(item.path)}`} className="build-error">
-        {item.buildErrors == null ? inProgress() : item.buildErrors}
+        {item.failed === true ? (
+          <StatusIndicator type="error">Build failed</StatusIndicator>
+        ) : item.buildErrors == null ? (
+          inProgress()
+        ) : (
+          item.buildErrors
+        )}
       </div>
     ),
     sortingField: "buildErrors"

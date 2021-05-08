@@ -32,7 +32,13 @@ const logger = createLogger({
   level: "info"
 });
 
-const cacheActions = [analyzeSolution.success, getApiAnalysis.success, removeSolution];
+const cacheActions = [
+  analyzeSolution.success,
+  analyzeSolution.failure,
+  getApiAnalysis.success,
+  getApiAnalysis.failure,
+  removeSolution
+];
 const nugetCacheActions = [getNugetPackageWithData.success];
 const portCacheActions = [removePortedSolution];
 
