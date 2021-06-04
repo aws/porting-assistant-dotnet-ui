@@ -193,9 +193,6 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const targetFramework = await (
       await app.client.$(`#target-framework-${projectFilePath}`)
     ).getText();
-
-    console.log(firstProjectId);
-    console.log(targetFramework);
     expect(targetFramework).toBe("netcoreapp3.1");
   };
 
