@@ -8,6 +8,7 @@ import {
   clearSolutions,
 } from "./hooks";
 import path from "path";
+import fs from "fs/promises";
 
 describe("stability check, assess a solution, reassess the solution, check all solution tabs make sure loaded, check all projects for all solution, make sure loaded, check porting for all projects", () => {
   let app: Application;
@@ -36,10 +37,14 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await assessSolutionCheck(solutionNameTagId);
     console.log(`assess solution ${solutionNameTagId} success`);
     console.log(`reassessing solution ${solutionNameTagId}....`);
-    await reassessSolutionCheck(solutionNameTagId);
+    const assessmentResults = await reassessSolutionCheck(
+      solutionNameTagId,
+      solutionPath
+    );
     console.log(`reassess solution ${solutionNameTagId} success`);
     console.log(`checking tabs in solution ${solutionNameTagId}`);
-    await solutionTabCheck();
+    const numSourceFiles = await solutionTabCheck();
+    assessmentResults.push(numSourceFiles);
     const projectName = await app.client.$(".project-name");
     if (!projectName.isExisting()) {
       return;
@@ -57,35 +62,56 @@ describe("stability check, assess a solution, reassess the solution, check all s
         await portingProjectsCheck("other");
       }
       await app.client.pause(2000);
-      await (await app.client.$("awsui-spinner")).waitForExist({
-        reverse: true,
-        timeout: 600000,
+      await (await app.client.$("._circle_oh9fc_75")).waitForExist({ 
+        reverse: true, timeout: 600000 
       });
       await (await app.client.$(solutionNameTagId)).click();
     }
+    await checkPortingProjectResults(solutionNameTagId, projects[0]);
+    return assessmentResults;
+  };
+
+  const checkAssessmentResults = async (solutionPath: string) => {
+    const escapedSolutionPath = escapeNonAlphaNumeric(solutionPath);
+    return await Promise.all([
+      await(
+        await app.client.$(`#ported-projects-${escapedSolutionPath}`)
+      ).getText(),
+      await(
+        await app.client.$(`#incompatible-packages-${escapedSolutionPath}`)
+      ).getText(),
+      await(
+        await app.client.$(`#incompatible-apis-${escapedSolutionPath}`)
+      ).getText(),
+      await(
+        await app.client.$(`#build-error-${escapedSolutionPath}`)
+      ).getText(),
+    ]);
   };
 
   const assessSolutionCheck = async (solutionNameTagId: string) => {
-    await (
-      await app.client.$(".DashboardTable_inProgress__36V-K")
-    ).waitForExist({
-      reverse: true,
-      timeout: 600000,
+    await (await app.client.$("._circle_oh9fc_75")).waitForExist({ 
+      reverse: true, timeout: 600000 
     });
     await (await app.client.$(solutionNameTagId)).click();
   };
 
-  const reassessSolutionCheck = async (solutionNameTagId: string) => {
+  const reassessSolutionCheck = async (
+    solutionNameTagId: string,
+    solutionPath: string
+  ) => {
     const reassessSolution = await app.client.$("#reassess-solution");
     await reassessSolution.waitForEnabled({ timeout: 600000 });
     await reassessSolution.click();
     await (
-      await app.client.$(".DashboardTable_inProgress__36V-K")
+      await app.client.$("._circle_oh9fc_75")
     ).waitForExist({
       reverse: true,
       timeout: 600000,
     });
+    const results = await checkAssessmentResults(solutionPath);
     await (await app.client.$(solutionNameTagId)).click();
+    return results;
   };
 
   const solutionTabCheck = async () => {
@@ -95,7 +121,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await projectReferenceTab.waitForExist({ timeout: 100000 });
     await projectReferenceTab.click();
     await (await app.client.$("#project-dependencies")).waitForExist({
-      timeout: 400000,
+      timeout: 600000,
     });
     await (await app.client.$(`a[data-testid="nuget-packages"]`)).click();
     await (await app.client.$("=NuGet packages")).waitForDisplayed();
@@ -103,8 +129,12 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await (await app.client.$("=APIs")).waitForDisplayed();
     await (await app.client.$(`a[data-testid="source-files"]`)).click();
     await (await app.client.$("=Source files")).waitForDisplayed();
+    const numSourceFiles = await(
+      await app.client.$("._counter_14rjr_108")
+    ).getText();
     await (await app.client.$(`a[data-testid="projects"]`)).click();
     await (await app.client.$("=Projects")).waitForDisplayed();
+    return numSourceFiles;
   };
 
   const projectTabCheck = async () => {
@@ -144,6 +174,44 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await (await app.client.$("#port-button")).click();
   };
 
+  const checkPortingProjectResults = async (
+    solutionNameTagId: string,
+    firstProjectId: string
+  ) => {
+    // porting action is inconsistent in where it drops you off. ensuring we 
+    // are clicked into the solution page in order to assess porting results.
+    const solutionLink = await app.client.$(solutionNameTagId);
+    if (await solutionLink.isExisting()) {
+      await(await app.client.$("._circle_oh9fc_75")).waitForExist({
+        reverse: true,
+        timeout: 800000,
+      });
+      await solutionLink.click();
+    }
+    // should be 'project-name-[projectfilepath]'
+    const projectFilePath = firstProjectId.split("-")[2];
+    const targetFramework = await (
+      await app.client.$(`#target-framework-${projectFilePath}`)
+    ).getText();
+
+    console.log(firstProjectId);
+    console.log(targetFramework);
+    expect(targetFramework).toBe("netcoreapp3.1");
+  };
+
+  const validateHighLevelResults = async (
+    results: string[] | undefined,
+    expectedValues: string[]
+  ) => {
+    // [portedProjects, incompatiblePackages, incompatibleApis, buildErrors, numSourceFiles]
+    expect(results).toBeTruthy();
+    expect(results ? results[0] : "").toBe(expectedValues[0]);
+    expect(results ? results[1] : "").toBe(expectedValues[1]);
+    expect(results ? results[2] : "").toBe(expectedValues[2]);
+    expect(results ? results[3] : "").toBe(expectedValues[3]);
+    expect(results ? results[4] : "").toBe(expectedValues[4]);
+  };
+
   beforeAll(async () => {
     app = await startApp();
     await selectProfile();
@@ -166,29 +234,76 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await stopApp(app);
   });
 
-  test("run through NopCommerce 4.3.0", async () => {
-    const solutionPath: string = path.join(
-      testSolutionPath(),
-      "nopCommerce-release-4.30",
-      "src",
-      "NopCommerce.sln"
-    );
-    await addSolution(app, solutionPath);
-    await app.client.refresh();
-    return await runThroughSolution(solutionPath, "inplace");
-  });
+  // test("run through NopCommerce 3.1.0", async () => {
+  //   const solutionFolderPath: string = path.join(
+  //     testSolutionPath(),
+  //     "nopCommerce-release-3.10",
+  //     "src"
+  //   );
+  //   const solutionPath: string = path.join(
+  //     solutionFolderPath,
+  //     "NopCommerce.sln"
+  //   );
+  //   await addSolution(app, solutionPath);
+  //   await app.client.refresh();
+  //   const results =  await runThroughSolution(solutionPath, "inplace");
+  //   await validateHighLevelResults(
+  //     results, 
+  //     ["0 of 40", "37 of 38", "328 of 898", "0", "(1565)"]
+  //   );
+
+  //   const getCatalogController = fs.readFile(
+  //     path.join(
+  //       solutionFolderPath,
+  //       "Libraries",
+  //       "Nop.Core",
+  //       "Nop.Core.csproj"
+  //     ),
+  //     "utf8"
+  //   );
+
+  //   expect(
+  //     (await getCatalogController).indexOf('Include="Autofac" Version="4.0.0"')
+  //   ).not.toBe(-1);
+  // });
 
   test("run through mvcmusicstore", async () => {
-    const solutionPath: string = path.join(
+    const solutionFolderPath: string = path.join(
       testSolutionPath(),
       "mvcmusicstore",
       "sourceCode",
-      "mvcmusicstore",
+      "mvcmusicstore"
+    );
+    const solutionPath: string = path.join(
+      solutionFolderPath,
       "MvcMusicStore.sln"
     );
     await addSolution(app, solutionPath);
     await app.client.refresh();
-    return await runThroughSolution(solutionPath, "inplace");
+    const results = await runThroughSolution(solutionPath, "inplace");
+    await validateHighLevelResults(
+      results, 
+      ["0 of 1", "2 of 6", "34 of 52", "0", "(21)"]
+    );
+    const controllerFolderPath: string = path.join(
+      solutionFolderPath,
+      "MvcMusicStore",
+      "Controllers"
+    );
+    const getAccountController = fs.readFile(
+      path.join(controllerFolderPath, "AccountController.cs"),
+      "utf8"
+    );
+    const getStoreManagerController = fs.readFile(
+      path.join(controllerFolderPath, "StoreManagerController.cs"),
+      "utf8"
+    );
+    expect(
+      (await getAccountController).indexOf("Microsoft.AspNetCore.Mvc")
+    ).not.toBe(-1);
+    expect(
+      (await getStoreManagerController).indexOf("Microsoft.EntityFrameworkCore")
+    ).not.toBe(-1);
   });
 
   test("run through Miniblog", async () => {
@@ -199,6 +314,10 @@ describe("stability check, assess a solution, reassess the solution, check all s
     );
     await addSolution(app, solutionPath);
     await app.client.refresh();
-    return await runThroughSolution(solutionPath, "inplace");
+    const results = await runThroughSolution(solutionPath, "inplace");
+    await validateHighLevelResults(
+      results, 
+      ["1 of 1", "0 of 13", "5 of 169", "0", "(21)"]
+    );
   });
 });

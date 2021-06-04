@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@types/jest": "^25.1.2",
+    "@types/node": "^15.6.2",
     "aws-sdk": "^2.570.0",
     "electron": "10.1.5",
     "jest": "^25.1.0",
