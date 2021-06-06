@@ -91,7 +91,8 @@ describe("stability check, assess a solution, reassess the solution, check all s
 
   const assessSolutionCheck = async (solutionNameTagId: string) => {
     await (await app.client.$("._circle_oh9fc_75")).waitForExist({ 
-      reverse: true, timeout: 600000 
+      reverse: true, 
+      timeout: 1200000 
     });
     await (await app.client.$(solutionNameTagId)).click();
   };
@@ -107,7 +108,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
       await app.client.$("._circle_oh9fc_75")
     ).waitForExist({
       reverse: true,
-      timeout: 600000,
+      timeout: 1200000
     });
     const results = await checkAssessmentResults(solutionPath);
     await (await app.client.$(solutionNameTagId)).click();
