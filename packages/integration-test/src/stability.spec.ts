@@ -198,7 +198,8 @@ describe("stability check, assess a solution, reassess the solution, check all s
       "Miniblog.Core.sln"
     );
     await addSolution(app, solutionPath);
-    await app.client.refresh();
+    await app.stop();
+    app = await startApp();
     return await runThroughSolution(solutionPath, "inplace");
   });
 });
