@@ -43,7 +43,7 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
         label: "View license",
         click: async () => {
           await shell.openExternal(
-            "https://raw.githubusercontent.com/aws/porting-assistant-dotnet-ui/github/LICENSE"
+            "https://raw.githubusercontent.com/aws/porting-assistant-dotnet-ui/develop/LICENSE"
           );
         },
       },
@@ -51,7 +51,7 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
         label: "View 3rd party licenses",
         click: async () => {
           await shell.openExternal(
-            "https://raw.githubusercontent.com/aws/porting-assistant-dotnet-ui/github/LICENSE-THIRD-PARTY"
+            "https://raw.githubusercontent.com/aws/porting-assistant-dotnet-ui/develop/LICENSE-THIRD-PARTY"
           );
         },
       },

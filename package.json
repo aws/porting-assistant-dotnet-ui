@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git@github.com:aws/porting-assistant-dotnet-ui.git"
   },
-  "license": "https://github.com/aws/porting-assistant-dotnet-ui/blob/github/LICENSE",
+  "license": "https://github.com/aws/porting-assistant-dotnet-ui/blob/develop/LICENSE",
   "scripts": {
     "start": "npx lerna run start --scope @porting-assistant/react --scope @porting-assistant/electron --stream --parallel",
     "test": "npx lerna run test --stream",
