@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git@github.com:aws/porting-assistant-dotnet-ui.git"
   },
-  "license": "https://github.com/aws/porting-assistant-dotnet-ui/blob/github/LICENSE",
+  "license": "https://github.com/aws/porting-assistant-dotnet-ui/blob/develop/LICENSE",
   "scripts": {
     "build:download": "npx run-script-os",
     "build:download:win32": "tsc && build-scripts\\build.bat",

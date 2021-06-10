@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git@github.com:aws/porting-assistant-dotnet-ui.git"
   },
-  "license": "https://github.com/aws/porting-assistant-dotnet-ui/blob/github/LICENSE",
+  "license": "https://github.com/aws/porting-assistant-dotnet-ui/blob/develop/LICENSE",
   "main": "ts-dist/electron.js",
   "scripts": {
     "start": "npm run build:typescript && npm run build:csharp && wait-on http://localhost:3000 && electron .",
