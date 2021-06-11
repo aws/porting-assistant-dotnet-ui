@@ -53,7 +53,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const projects: string[] = projectstring.toString().split(",");
     const solutionPage = `=${solutionPath.split("\\").pop()}`;
     console.log(`checking projects for ${solutionNameTagId}`);
-    for (const project of projects) {
+    //todo: decide how many projects to port and clean up
+    for (let i = 0; i < 1; i++) {
+      const project = projects[i]
       await projectTabCheck();
       await (await app.client.$(`#${project}`)).click();
       if (project == projects[0]) {
@@ -92,7 +94,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
   const assessSolutionCheck = async (solutionNameTagId: string) => {
     await (await app.client.$("._circle_oh9fc_75")).waitForExist({ 
       reverse: true, 
-      timeout: 1200000 
+      timeout: 600000 
     });
     await (await app.client.$(solutionNameTagId)).click();
   };
@@ -108,7 +110,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
       await app.client.$("._circle_oh9fc_75")
     ).waitForExist({
       reverse: true,
-      timeout: 1200000
+      timeout: 600000
     });
     const results = await checkAssessmentResults(solutionPath);
     await (await app.client.$(solutionNameTagId)).click();
@@ -232,38 +234,38 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await stopApp(app);
   });
 
-  // test("run through NopCommerce 3.1.0", async () => {
-  //   const solutionFolderPath: string = path.join(
-  //     testSolutionPath(),
-  //     "nopCommerce-release-3.10",
-  //     "src"
-  //   );
-  //   const solutionPath: string = path.join(
-  //     solutionFolderPath,
-  //     "NopCommerce.sln"
-  //   );
-  //   await addSolution(app, solutionPath);
-  //   await app.client.refresh();
-  //   const results =  await runThroughSolution(solutionPath, "inplace");
-  //   await validateHighLevelResults(
-  //     results, 
-  //     ["0 of 40", "37 of 38", "328 of 898", "0", "(1565)"]
-  //   );
+  test("run through NopCommerce 3.1.0", async () => {
+    const solutionFolderPath: string = path.join(
+      testSolutionPath(),
+      "nopCommerce-release-3.10",
+      "src"
+    );
+    const solutionPath: string = path.join(
+      solutionFolderPath,
+      "NopCommerce.sln"
+    );
+    await addSolution(app, solutionPath);
+    await app.client.refresh();
+    const results =  await runThroughSolution(solutionPath, "inplace");
+    await validateHighLevelResults(
+      results, 
+      ["0 of 40", "37 of 38", "328 of 898", "0", "(1565)"]
+    );
 
-  //   const getCatalogController = fs.readFile(
-  //     path.join(
-  //       solutionFolderPath,
-  //       "Libraries",
-  //       "Nop.Core",
-  //       "Nop.Core.csproj"
-  //     ),
-  //     "utf8"
-  //   );
+    const getCatalogController = fs.readFile(
+      path.join(
+        solutionFolderPath,
+        "Libraries",
+        "Nop.Core",
+        "Nop.Core.csproj"
+      ),
+      "utf8"
+    );
 
-  //   expect(
-  //     (await getCatalogController).indexOf('Include="Autofac" Version="4.0.0"')
-  //   ).not.toBe(-1);
-  // });
+    expect(
+      (await getCatalogController).indexOf('Include="Autofac" Version="4.0.0"')
+    ).not.toBe(-1);
+  });
 
   test("run through mvcmusicstore", async () => {
     const solutionFolderPath: string = path.join(
