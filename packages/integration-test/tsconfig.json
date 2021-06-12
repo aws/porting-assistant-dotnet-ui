@@ -16,7 +16,8 @@
     "allowJs": true,
     "checkJs": true,
     "sourceMap": true,
-    "noEmit": true
+    "noEmit": true,
+    "noImplicitAny": false
   },
   "include": ["src"],
   "typeAcquisition": {
