@@ -53,7 +53,6 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const projects: string[] = projectstring.toString().split(",");
     const solutionPage = `=${solutionPath.split("\\").pop()}`;
     console.log(`checking projects for ${solutionNameTagId}`);
-    //todo: decide how many projects to port and clean up
     for (let i = 0; i < 2 && i < projects.length; i++) {
       const project = projects[i]
       await projectTabCheck();
