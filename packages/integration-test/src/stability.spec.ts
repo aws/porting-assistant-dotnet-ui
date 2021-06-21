@@ -28,7 +28,8 @@ describe("stability check, assess a solution, reassess the solution, check all s
 
   const runThroughSolution = async (
     solutionPath: string,
-    protingPlace: string
+    portingPlace: string,
+    targetFramework: string,
   ) => {
     const solutionNameTagId = `#solution-link-${escapeNonAlphaNumeric(
       solutionPath
@@ -58,7 +59,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
       await projectTabCheck();
       await (await app.client.$(`#${project}`)).click();
       if (project == projects[0]) {
-        await portingProjectsCheck(protingPlace);
+        await portingProjectsCheck(portingPlace);
       } else {
         await portingProjectsCheck("other");
       }
@@ -68,7 +69,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
       });
       await (await app.client.$(solutionNameTagId)).click();
     }
-    await checkPortingProjectResults(solutionNameTagId, projects[0]);
+    await checkPortingProjectResults(solutionNameTagId, projects[0], targetFramework);
     return assessmentResults;
   };
 
@@ -178,7 +179,8 @@ describe("stability check, assess a solution, reassess the solution, check all s
 
   const checkPortingProjectResults = async (
     solutionNameTagId: string,
-    firstProjectId: string
+    firstProjectId: string,
+    expectedTargetFramework: string,
   ) => {
     // porting will kick off a new assessment, wait for it to finish before
     // clicking into the solution
@@ -195,7 +197,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const targetFramework = await (
       await app.client.$(`#target-framework-${projectFilePath}`)
     ).getText();
-    expect(targetFramework).toBe("netcoreapp3.1");
+    expect(targetFramework).toBe(expectedTargetFramework);
   };
 
   const validateHighLevelResults = async (
@@ -245,7 +247,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     );
     await addSolution(app, solutionPath);
     await app.client.refresh();
-    const results =  await runThroughSolution(solutionPath, "inplace");
+    const results =  await runThroughSolution(solutionPath, "inplace", "netcoreapp3.1");
     await validateHighLevelResults(
       results, 
       ["0 of 40", "37 of 38", "328 of 898", "0", "(1565)"]
@@ -279,7 +281,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     );
     await addSolution(app, solutionPath);
     await app.client.refresh();
-    const results = await runThroughSolution(solutionPath, "inplace");
+    const results = await runThroughSolution(solutionPath, "inplace", "netcoreapp3.1");
     await validateHighLevelResults(
       results, 
       ["0 of 1", "2 of 6", "34 of 52", "0", "(21)"]
@@ -313,7 +315,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     );
     await addSolution(app, solutionPath);
     await app.client.refresh();
-    const results = await runThroughSolution(solutionPath, "inplace");
+    const results = await runThroughSolution(solutionPath, "inplace", "netcoreapp3.1");
     await validateHighLevelResults(
       results, 
       ["1 of 1", "0 of 13", "5 of 169", "0", "(21)"]
