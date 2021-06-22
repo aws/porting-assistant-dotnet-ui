@@ -11,6 +11,8 @@ using PortingAssistant.Client.Client;
 using PortingAssistant.Client.Model;
 using Serilog;
 using PortingAssistant.VisualStudio;
+using PortingAssistant.Telemetry.Model;
+using PortingAssistant.Telemetry;
 
 namespace PortingAssistant.Api
 {
@@ -55,6 +57,21 @@ namespace PortingAssistant.Api
             configuration.DataStoreSettings.HttpsEndpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.HttpsEndpoint;
             configuration.DataStoreSettings.S3Endpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.S3Endpoint;
             configuration.DataStoreSettings.GitHubEndpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.GitHubEndpoint;
+
+            string metricsFolder = Path.Combine(args[2], "telemetry-logs");
+            TelemetryConfiguration teleConfig = new TelemetryConfiguration{
+              InvokeUrl = portingAssistantPortingConfiguration.PortingAssistantMetrics["InvokeUrl"].ToString(),
+              Region = portingAssistantPortingConfiguration.PortingAssistantMetrics["Region"].ToString(),
+              ServiceName = portingAssistantPortingConfiguration.PortingAssistantMetrics["ServiceName"].ToString(),
+              LogsPath = metricsFolder,
+              Description = portingAssistantPortingConfiguration.PortingAssistantMetrics["Description"].ToString(),
+              LogFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.log"),
+              MetricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics"),
+              Suffix = new List<string>(){".log", ".metrics"},
+              Prefix = portingAssistantPortingConfiguration.PortingAssistantMetrics["Prefix"].ToString()
+            };
+
+            TelemetryCollector.Builder(Log.Logger, teleConfig.MetricsFilePath);
 
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection, configuration);

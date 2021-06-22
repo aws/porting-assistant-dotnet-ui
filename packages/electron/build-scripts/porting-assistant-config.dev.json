@@ -12,6 +12,8 @@
     "ServiceName": "appmodernization-beta",
     "MaxBufferCapacity": 500000,
     "MaxBufferCache": 1000000,
-    "FlushInterval": 120000
+    "FlushInterval": 120000,
+    "Prefix": "ad-test-10",
+    "Description": "Porting Assistant for .NET Telemetry Logs"
     }
 }

@@ -6,6 +6,9 @@ using PortingAssistant.Common.Model;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Client;
 using PortingAssistant.Client.Model;
+using PortingAssistant.Telemetry;
+using PortingAssistant.Telemetry.Model;
+using System.Web.Helpers;
 
 namespace PortingAssistant.Common.Services
 {
@@ -30,25 +33,64 @@ namespace PortingAssistant.Common.Services
         {
             try
             {
+                var startTime = DateTime.Now;
+                string tgtFramework = request.settings.TargetFramework;
+
                 var solutionAnalysisResult = _client.AnalyzeSolutionAsync(request.solutionFilePath, request.settings);
                 solutionAnalysisResult.Wait();
 
                 if (solutionAnalysisResult.IsCompletedSuccessfully)
                 {
-                    solutionAnalysisResult.Result.ProjectAnalysisResults.ForEach(projectAnalysResult =>
+                    var date = DateTime.Now;
+                    string solutionPath = request.solutionFilePath;
+                    if (solutionPath == null) solutionPath = "";
+                    var solutionMetrics = new SolutionMetrics{
+                      MetricsType = MetricsType.solution,
+                      TargetFramework = tgtFramework,
+                      TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
+                      SolutionPath = Crypto.SHA256(solutionPath),
+                      AnalysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds
+                    };
+                    TelemetryCollector.Collect<SolutionMetrics>(solutionMetrics);
+
+                    solutionAnalysisResult.Result.ProjectAnalysisResults.ForEach(projectAnalysisResult =>
                     {
-                        if (projectAnalysResult == null)
+                        if (projectAnalysisResult == null)
                         {
                             return;
                         }
 
-                        projectAnalysResult.PackageAnalysisResults.ToList()
+                        var projectMetrics = new ProjectMetrics{
+                            MetricsType = MetricsType.project,
+                            TargetFramework = tgtFramework,
+                            sourceFrameworks = projectAnalysisResult.TargetFrameworks,
+                            TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
+                            projectGuid = Crypto.SHA256(projectAnalysisResult.ProjectGuid),
+                            projectType = projectAnalysisResult.ProjectType,
+                            numNugets = projectAnalysisResult.PackageReferences.Count,
+                            numReferences = projectAnalysisResult.ProjectReferences.Count,
+                            isBuildFailed = projectAnalysisResult.IsBuildFailed,
+                        };
+                        TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
+
+                        projectAnalysisResult.PackageAnalysisResults.ToList()
                         .ForEach(p =>
                         {
                             p.Value.ContinueWith(result =>
                             {
                                 if (result.IsCompletedSuccessfully)
                                 {
+                                    var nugetMetrics = new NugetMetrics
+                                    {
+                                        MetricsType = MetricsType.nuget,
+                                        TargetFramework = tgtFramework,
+                                        TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
+                                        pacakgeName = result.Result.PackageVersionPair.PackageId,
+                                        packageVersion = result.Result.PackageVersionPair.Version,
+                                        compatibility = result.Result.CompatibilityResults[tgtFramework].Compatibility
+                                    };
+                                    TelemetryCollector.Collect<NugetMetrics>(nugetMetrics);
+
                                     _nugetPackageListeners.ForEach(l => l.Invoke(new Response<PackageAnalysisResult, PackageVersionPair>
                                     {
                                         Value = result.Result,
@@ -65,18 +107,24 @@ namespace PortingAssistant.Common.Services
                             });
                         });
 
-                        if (projectAnalysResult.IsBuildFailed)
+                        projectAnalysisResult.SourceFileAnalysisResults.ToList().ForEach(
+                          sourceFile => {
+                            FileAssessmentCollect(sourceFile, request.settings.TargetFramework);
+                          } 
+                        );
+
+                        if (projectAnalysisResult.IsBuildFailed)
                         {
                             _apiAnalysisListeners.ForEach(listener =>
                                 listener.Invoke(new Response<ProjectApiAnalysisResult, SolutionProject>
                                 {
                                     ErrorValue = new SolutionProject
                                     {
-                                        ProjectPath = projectAnalysResult.ProjectFilePath,
+                                        ProjectPath = projectAnalysisResult.ProjectFilePath,
                                         SolutionPath = request.solutionFilePath
                                     },
                                     Status = Response<ProjectApiAnalysisResult, SolutionProject>
-                                    .Failed(new PortingAssistantClientException($"Errors during compilation in {projectAnalysResult.ProjectName}.", null))
+                                    .Failed(new PortingAssistantClientException($"Errors during compilation in {projectAnalysisResult.ProjectName}.", null))
                                 }));
 
                             return;
@@ -88,11 +136,11 @@ namespace PortingAssistant.Common.Services
                             {
                                 Value = new ProjectApiAnalysisResult
                                 {
-                                    Errors = projectAnalysResult.Errors,
+                                    Errors = projectAnalysisResult.Errors,
                                     SolutionFile = request.solutionFilePath,
-                                    ProjectFile = projectAnalysResult.ProjectFilePath,
-                                    ProjectGuid = projectAnalysResult.ProjectGuid,
-                                    SourceFileAnalysisResults = projectAnalysResult.SourceFileAnalysisResults
+                                    ProjectFile = projectAnalysisResult.ProjectFilePath,
+                                    ProjectGuid = projectAnalysisResult.ProjectGuid,
+                                    SourceFileAnalysisResults = projectAnalysisResult.SourceFileAnalysisResults
                                 },
                                 Status = Response<ProjectApiAnalysisResult, SolutionProject>.Success()
                             });
@@ -147,5 +195,27 @@ namespace PortingAssistant.Common.Services
         {
             _nugetPackageListeners.Add(listener);
         }
+
+        public static void FileAssessmentCollect(SourceFileAnalysisResult result, string targetFramework)
+        {
+            var date = DateTime.Now;
+            foreach (var api in result.ApiAnalysisResults)
+            {
+                var apiMetrics = new APIMetrics
+                {
+                    MetricsType = MetricsType.api,
+                    TargetFramework = targetFramework,
+                    TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
+                    name = api.CodeEntityDetails.Name,
+                    nameSpace = api.CodeEntityDetails.Namespace,
+                    originalDefinition = api.CodeEntityDetails.OriginalDefinition,
+                    compatibility = api.CompatibilityResults[targetFramework].Compatibility,
+                    packageId = api.CodeEntityDetails.Package.PackageId,
+                    packageVersion = api.CodeEntityDetails.Package.Version
+                };
+                TelemetryCollector.Collect<APIMetrics>(apiMetrics);
+            }
+        }
     }
 }
+

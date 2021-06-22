@@ -26,35 +26,23 @@ namespace PortingAssistant.Telemetry
             var userData = args[2];
 
             var portingAssistantPortingConfiguration = JsonSerializer.Deserialize<PortingAssistantPortingConfiguration>(File.ReadAllText(config));
-            // var telemetryConfiguration = JsonSerializer.Deserialize<TelemetryConfiguration>(File.ReadAllText(config));
-            string metricsFolder = Path.Combine(userData, "logs");
-            //string metricsFolder = "/Users/anirdave/testlogs/logs";
+            string metricsFolder = Path.Combine(userData, "telemetry-logs");
+            Directory.CreateDirectory(metricsFolder);
             TelemetryConfiguration teleConfig = new TelemetryConfiguration{
               InvokeUrl = portingAssistantPortingConfiguration.PortingAssistantMetrics["InvokeUrl"].ToString(),
               Region = portingAssistantPortingConfiguration.PortingAssistantMetrics["Region"].ToString(),
               ServiceName = portingAssistantPortingConfiguration.PortingAssistantMetrics["ServiceName"].ToString(),
+              Description = portingAssistantPortingConfiguration.PortingAssistantMetrics["Description"].ToString(),
               LogsPath = metricsFolder,
-              Description = "test-description",
-              LogFilePath = Path.Combine(metricsFolder, "portingAssistant-telemetry-test.log"),
-              MetricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-test.metrics"),
+              LogFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.log"),
+              MetricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics"),
               Suffix = new List<string>(){".log", ".metrics"},
-              Prefix = "ad-test-8"
+              Prefix = portingAssistantPortingConfiguration.PortingAssistantMetrics["Prefix"].ToString()
             };
-            // {DateTime.Today.ToString("yyyyMMdd")}
 
-            var outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
-            var logConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
-            .MinimumLevel.Warning()
-            .WriteTo.File(
-                teleConfig.LogFilePath,
-                outputTemplate: outputTemplate);
-            Log.Logger = logConfiguration.CreateLogger();
 
-            // TelemetryCollector.Builder(Log.Logger, teleConfig.MetricsFilePath);
-
-            // LogWatcher logWatcher =
-            //     new LogWatcher(teleConfig, profile);
-            // logWatcher.Start();
+            LogWatcher logWatcher = new LogWatcher(teleConfig, profile);
+            logWatcher.Start();
         }
 
       private class PortingAssistantPortingConfiguration
