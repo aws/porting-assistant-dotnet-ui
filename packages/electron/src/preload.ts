@@ -113,6 +113,8 @@ contextBridge.exposeInMainWorld("backend", {
     listenBackend("onNugetPackageUpdate", callback),
   listenApiAnalysisUpdate: (callback: (message: string) => void) =>
     listenBackend("onApiAnalysisUpdate", callback),
+  checkInternetAccess: () =>
+    invokeBackend("checkInternetAccess")
 });
 
 contextBridge.exposeInMainWorld("porting", {

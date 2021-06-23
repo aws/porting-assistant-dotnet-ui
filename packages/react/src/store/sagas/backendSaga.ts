@@ -13,6 +13,7 @@ import { isFailed, isLoaded } from "../../utils/Loadable";
 import { nugetPackageKey } from "../../utils/NugetPackageKey";
 import {
   analyzeSolution,
+  checkInternetAccess,
   exportSolution,
   getApiAnalysis,
   init,
@@ -92,6 +93,7 @@ export function* watchApiAnalysisUpdate() {
 
 function* handleInit(action: ReturnType<typeof init>) {
   yield put(ping());
+  yield put(checkInternetAccess());
   const storedSolutions = window.electron.getState("solutions", {});
   const targetFramework = getTargetFramework();
   for (const solution of Object.keys(storedSolutions)) {
@@ -130,6 +132,26 @@ function* handlePing() {
         onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
       }
     ])
+  );
+}
+
+function* handleCheckInternetAccess() {
+  try {
+    const response = yield window.backend.checkInternetAccess();
+    if (response) {
+      return true; 
+    }
+  } catch(err) {}
+  yield put(
+    setCurrentMessageUpdate([{
+      messageId: uuid(),
+      groupId: "internetAccessFailed",
+      type: "error",
+      header: "No Internet Access",
+      content: "Ensure you have internet access before using the application",
+      buttonText: "View prerequisites",
+      onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
+    }])
   );
 }
 
@@ -357,6 +379,10 @@ function* watchOpenInIDE() {
   yield takeEvery(getType(openSolutionInIDE), handleOpenSolutionInIDE);
 }
 
+function* watchCheckInternetAccess() {
+  yield takeEvery(getType(checkInternetAccess), handleCheckInternetAccess);
+}
+
 export default function* backendSaga() {
   yield all([
     watchInit(),
@@ -367,6 +393,7 @@ export default function* backendSaga() {
     watchExportSolution(),
     watchRemoveSolution(),
     watchOpenInIDE(),
-    watchPing()
+    watchPing(),
+    watchCheckInternetAccess()
   ]);
 }
