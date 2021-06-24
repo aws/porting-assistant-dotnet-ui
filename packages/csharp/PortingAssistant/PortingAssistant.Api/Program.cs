@@ -11,8 +11,8 @@ using PortingAssistant.Client.Client;
 using PortingAssistant.Client.Model;
 using Serilog;
 using PortingAssistant.VisualStudio;
-using PortingAssistant.Telemetry.Model;
-using PortingAssistant.Telemetry;
+using PortingAssistantExtensionTelemetry.Model;
+using PortingAssistantExtensionTelemetry;
 
 namespace PortingAssistant.Api
 {
@@ -67,8 +67,7 @@ namespace PortingAssistant.Api
               Description = portingAssistantPortingConfiguration.PortingAssistantMetrics["Description"].ToString(),
               LogFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.log"),
               MetricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics"),
-              Suffix = new List<string>(){".log", ".metrics"},
-              Prefix = portingAssistantPortingConfiguration.PortingAssistantMetrics["Prefix"].ToString()
+              Suffix = new List<string>(){".log", ".metrics"}
             };
 
             TelemetryCollector.Builder(Log.Logger, teleConfig.MetricsFilePath);

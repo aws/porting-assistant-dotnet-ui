@@ -6,9 +6,9 @@ using PortingAssistant.Common.Model;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Client;
 using PortingAssistant.Client.Model;
-using PortingAssistant.Telemetry;
 using PortingAssistant.Telemetry.Model;
 using System.Web.Helpers;
+using PortingAssistantExtensionTelemetry;
 
 namespace PortingAssistant.Common.Services
 {
