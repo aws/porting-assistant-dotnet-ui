@@ -137,10 +137,7 @@ function* handlePing() {
 
 function* handleCheckInternetAccess() {
   try {
-    const response = yield window.backend.checkInternetAccess();
-    if (response) {
-      return true; 
-    }
+    yield window.backend.checkInternetAccess();
   } catch(err) {}
   yield put(
     setCurrentMessageUpdate([{
@@ -157,6 +154,7 @@ function* handleCheckInternetAccess() {
 
 function* handleAnalyzeSolution(action: ReturnType<typeof analyzeSolution.request>) {
   yield put(ping());
+  yield put(checkInternetAccess());
   try {
     const currentSolutionPath = action.payload.solutionPath;
     const solutionToSolutionDetails: ReturnType<typeof selectSolutionToSolutionDetails> = yield select(

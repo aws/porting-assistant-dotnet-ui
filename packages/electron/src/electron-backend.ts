@@ -157,10 +157,10 @@ export const initConnection = (logger: any = console) => {
     });
 
     ipcMain.handle("checkInternetAccess", async (_event) => {
-      const response = await connection.send(
-        "checkInternetAccess",
-        "",
-      );
+      const response = await connection.send("checkInternetAccess", "");
+      if (!response) {
+        throw Error("Application requires internet access");
+      }
       return response;
     });  
 
