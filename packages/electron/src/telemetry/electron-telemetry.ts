@@ -88,22 +88,6 @@ export const logReactMetrics = (response: any) => {
     },
   };
   logger.info(JSON.stringify(errorMetric));
-  putMetricData("portingAssistant-react-errors", "Error", "Count", 1, [
-    {
-      Name: "metricsType",
-      Value: "reactError",
-    },
-    {
-      Name: "portingAssistantVersion",
-      Value: app.getVersion(),
-    },
-    {
-      Name: "targetFramework",
-      Value: targetFramework,
-    },
-  ]).catch((error) => {
-    return;
-  });
 };
 
 export const logSolutionMetrics = (response: any, time: number) => {
@@ -115,40 +99,6 @@ export const logSolutionMetrics = (response: any, time: number) => {
       const targetFramework =
         localStore.get("targetFramework").id || "netcoreapp3.1";
 
-      putMetricData(
-        "portingAssistant-metrics", // Namespace
-        "numSolutions", // Metric Name
-        "Count", // Unit
-        1, // Value
-        [
-          { Name: "metricsType", Value: "Solutions" },
-          { Name: "portingAssistantVersion", Value: app.getVersion() },
-          {
-            Name: "targetFramework",
-            Value: targetFramework,
-          },
-        ]
-      ).catch((error) => {
-        return;
-      });
-
-      putMetricData(
-        "portingAssistant-metrics", // Namespace
-        "numProject", // Metric Name
-        "Count", // Unit
-        solutionDetails.projects.length, // Value
-        [
-          { Name: "metricsType", Value: "Projects" },
-          { Name: "portingAssistantVersion", Value: app.getVersion() },
-          {
-            Name: "targetFramework",
-            Value: targetFramework,
-          },
-        ]
-      ).catch((error) => {
-        return;
-      });
-
       let allpackages = new Set(
         solutionDetails.projects
           .flatMap((project) => {
@@ -156,93 +106,6 @@ export const logSolutionMetrics = (response: any, time: number) => {
           })
           .filter((p) => p !== undefined || p !== null)
       );
-
-      putMetricData(
-        "portingAssistant-metrics", // Namespace
-        "numNugets", // Metric Name
-        "Count", // Unit
-        allpackages.size || 0, // Value
-        [
-          { Name: "metricsType", Value: "NugetPackages" },
-          { Name: "portingAssistantVersion", Value: app.getVersion() },
-          {
-            Name: "targetFramework",
-            Value: targetFramework,
-          },
-        ]
-      ).catch((error) => {
-        return;
-      });
-
-      const SolutionMetrics = {
-        Type: PORTING_ASSISTANT_METRIC,
-        Content: {
-          Metrics: { Status: "success" },
-          TimeStamp: new Date(),
-          ListMetrics: {},
-          Dimensions: [
-            { Name: "metricsType", Value: "Solutions" },
-            {
-              Name: "SolutionPath",
-              Value: crypto
-                .createHash("sha256")
-                .update(solutionDetails.solutionFilePath || "")
-                .digest("hex"),
-            },
-            { Name: "portingAssistantVersion", Value: app.getVersion() },
-            {
-              Name: "targetFramework",
-              Value: targetFramework,
-            },
-          ],
-        },
-      };
-
-      logger.info(JSON.stringify(SolutionMetrics));
-      solutionDetails.projects.forEach((project) => {
-        const projectMetrics = {
-          Type: PORTING_ASSISTANT_METRIC,
-          Content: {
-            Metrics: {
-              numNugets: {
-                Value: project.packageReferences?.length || 0,
-                Unit: "Count",
-              },
-              numReferences: {
-                Value: project.projectReferences?.length || 0,
-                Unit: "Count",
-              },
-            },
-            TimeStamp: new Date(),
-            ListMetrics: {},
-            Dimensions: [
-              { Name: "metricsType", Value: "Project" },
-              { Name: "portingAssistantVersion", Value: app.getVersion() },
-              {
-                Name: "targetFramework",
-                Value: targetFramework,
-              },
-              {
-                Name: "projectGuid",
-                Value: project.projectGuid,
-              },
-              {
-                Name: "isBuildFailed",
-                Value: project.isBuildFailed,
-              },
-              {
-                Name: "projectType",
-                Value: project.projectType,
-              },
-              {
-                Name: "targetFrameworks",
-                Value: project.targetFrameworks,
-              },
-            ],
-          },
-        };
-        logger.info(JSON.stringify(projectMetrics));
-      });
     }
   } catch (err) {}
 };
@@ -255,29 +118,6 @@ export const logApiMetrics = (response: any) => {
     const projectAnalysis: ProjectApiAnalysisResult = response.value;
     const targetFramework =
       localStore.get("targetFramework").id || "netcoreapp3.1";
-    if (projectAnalysis.sourceFileAnalysisResults != null) {
-      // Metric
-      putMetricData(
-        "portingAssistant-metrics", // Namespace
-        "numApis", // Metric Name
-        "Count", // Unit
-        Object.values(projectAnalysis.sourceFileAnalysisResults).reduce(
-          (agg, cur) => agg + cur.apiAnalysisResults.length,
-          0
-        ), // Value
-        [
-          { Name: "metricsType", Value: "apis" },
-          { Name: "portingAssistantVersion", Value: app.getVersion() },
-          {
-            Name: "targetFramework",
-            Value: targetFramework,
-          },
-        ]
-      ).catch((error) => {
-        return;
-      });
-    }
-
     if (
       projectAnalysis.sourceFileAnalysisResults != null &&
       projectAnalysis.projectFile != null
@@ -330,47 +170,6 @@ export const logApiMetrics = (response: any) => {
   } catch (err) {}
 };
 
-export const logNugetMetrics = (response: any) => {
-  try {
-    if (response.status.status !== "Success") {
-      return;
-    }
-    const packageAnalysisResult: PackageAnalysisResult = response.value;
-    const targetFramework =
-      localStore.get("targetFramework").id || "netcoreapp3.1";
-    if (
-      packageAnalysisResult.packageVersionPair != null &&
-      packageAnalysisResult.compatibilityResults != null
-    ) {
-      //Metrics with ListMetrics and MetaData
-      const metrics = {
-        Type: PORTING_ASSISTANT_METRIC,
-        Content: {
-          Metrics: {},
-          TimeStamp: new Date(),
-          ListMetrics: [
-            {
-              packageName: packageAnalysisResult.packageVersionPair.packageId,
-              packageVersion: packageAnalysisResult.packageVersionPair.version,
-              compatibility:
-                packageAnalysisResult.compatibilityResults[targetFramework]
-                  ?.compatibility,
-            },
-          ],
-          Dimensions: [
-            { Name: "metricsType", Value: "nuget" },
-            { Name: "portingAssistantVersion", Value: app.getVersion() },
-            {
-              Name: "targetFramework",
-              Value: targetFramework,
-            },
-          ],
-        },
-      };
-      logger.info(JSON.stringify(metrics));
-    }
-  } catch (err) {}
-};
 
 export const registerLogListeners = (connection: Connection) => {
   const targetFramework =
@@ -418,11 +217,6 @@ export const registerLogListeners = (connection: Connection) => {
     } catch (err) {}
   });
 
-  connection.on("onNugetPackageUpdate", (response) => {
-    try {
-      logNugetMetrics(response);
-    } catch (err) {}
-  });
 };
 
 export const startTimer = () => {
