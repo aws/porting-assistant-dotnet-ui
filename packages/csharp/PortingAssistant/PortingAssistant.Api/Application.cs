@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using ElectronCgi.DotNet;
 using PortingAssistant.Common.Model;
@@ -117,7 +118,7 @@ namespace PortingAssistant.Api
                 try
                 {
                     var fileToDownload = "newtonsoft.json.json.gz";
-                    httpService.DownloadS3FileAsync(fileToDownload).Wait();
+                    using Stream stream = httpService.DownloadS3FileAsync(fileToDownload).Result;
                     _logger.LogDebug("Test Internet Success!");
                     return true;
                 }
