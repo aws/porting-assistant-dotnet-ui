@@ -137,7 +137,10 @@ function* handlePing() {
 
 function* handleCheckInternetAccess() {
   try {
-    yield window.backend.checkInternetAccess();
+    const response:boolean = yield window.backend.checkInternetAccess();
+    if (response){
+      return;
+    }
   } catch(err) {}
   yield put(
     setCurrentMessageUpdate([{
