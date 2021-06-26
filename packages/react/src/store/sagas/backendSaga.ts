@@ -159,6 +159,8 @@ function* handleAnalyzeSolution(action: ReturnType<typeof analyzeSolution.reques
   yield put(ping());
   yield put(checkInternetAccess());
   try {
+    // call backend method again because error will halt assessment
+    yield window.backend.checkInternetAccess();
     const currentSolutionPath = action.payload.solutionPath;
     const solutionToSolutionDetails: ReturnType<typeof selectSolutionToSolutionDetails> = yield select(
       selectSolutionToSolutionDetails
