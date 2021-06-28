@@ -24,7 +24,6 @@ const logFileName = "porting-assistant-%DATE%";
 
 const BACKEND_LOG = "portingAssistant-backend-logs";
 const ELECTRON_LOG = "electron-logs";
-const PORTING_ASSISTANT_METRIC = "portingAssistant-metrics";
 const REACT_ERROR = "react-errors";
 
 const dirName = path.join(app.getPath("userData"), "telemetry-logs");
@@ -135,37 +134,6 @@ export const logApiMetrics = (response: any) => {
             };
           })
       );
-      const metrics = {
-        Type: PORTING_ASSISTANT_METRIC,
-        Content: {
-          Metrics: {},
-          TimeStamp: new Date(),
-          ListMetrics: [...apis],
-          Dimensions: [
-            { Name: "metricsType", Value: "apis" },
-            {
-              Name: "projectName",
-              Value: crypto
-                .createHash("sha256")
-                .update(projectAnalysis.projectFile)
-                .digest("hex"),
-            },
-            { Name: "portingAssistantVersion", Value: app.getVersion() },
-            {
-              Name: "targetFramework",
-              Value: targetFramework,
-            },
-            {
-              Name: "solutionPath",
-              Value: crypto
-                .createHash("sha256")
-                .update(projectAnalysis.solutionFile)
-                .digest("hex"),
-            },
-          ],
-        },
-      };
-      logger.info(JSON.stringify(metrics));
     }
   } catch (err) {}
 };
@@ -234,38 +202,6 @@ export const errorHandler = (response: any, metricsType: string) => {
   const error = response.status.error;
   const targetFramework =
     localStore.get("targetFramework").id || "netcoreapp3.1";
-  const errorMetric = {
-    Type: PORTING_ASSISTANT_METRIC,
-    Content: {
-      Metrics: {
-        Status: "failed",
-        ExceptionType: error.ClassName,
-        ExceptionSource: error.Source,
-      },
-      TimeStamp: new Date(),
-      ListMetrics: [
-        {
-          ErrorValue: errorValue,
-          Error: error,
-        },
-      ],
-      Dimensions: [
-        {
-          Name: "metricsType",
-          Value: metricsType,
-        },
-        {
-          Name: "portingAssistantVersion",
-          Value: app.getVersion(),
-        },
-        {
-          Name: "targetFramework",
-          Value: targetFramework,
-        },
-      ],
-    },
-  };
-  logger.info(JSON.stringify(errorMetric));
   // Error Metric
   putMetricData("portingAssistant-backend-errors", "Error", "Count", 1, [
     {
