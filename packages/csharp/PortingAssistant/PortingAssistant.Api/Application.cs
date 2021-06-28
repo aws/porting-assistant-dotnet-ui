@@ -119,7 +119,6 @@ namespace PortingAssistant.Api
                 {
                     var fileToDownload = "newtonsoft.json.json.gz";
                     using Stream stream = httpService.DownloadS3FileAsync(fileToDownload).Result;
-                    _logger.LogDebug("Test Internet Success!");
                     return true;
                 }
                 catch
