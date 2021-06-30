@@ -12,6 +12,7 @@ import {
   removeCurrentMessageUpdate
 } from "../../store/actions/error";
 import { setPortingProjectConfig } from "../../store/actions/porting";
+import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getPortingPath } from "../../utils/getPortingPath";
 import { getPortingSolutionPath } from "../../utils/getPortingSolutionPath";
 import { getTargetFramework } from "../../utils/getTargetFramework";
@@ -121,20 +122,22 @@ export const handlePortProjectSubmission = async (
       paths[portingSolutionPath] = { solutionPath: portingSolutionPath };
       window.electron.saveState("solutions", paths);
     }
-
-    dispatch(
-      analyzeSolution.request({
-        solutionPath: portingSolutionPath,
-        settings: {
-          ignoredProjects: [],
-          targetFramework: targetFramework,
-          continiousEnabled: false,
-          actionsOnly: false,
-          compatibleOnly: false
-        },
-        force: true
-      })
-    );
+    const haveInternet = await checkInternetAccess(portingSolutionPath, dispatch);
+    if (haveInternet) {
+      dispatch(
+        analyzeSolution.request({
+          solutionPath: portingSolutionPath,
+          settings: {
+            ignoredProjects: [],
+            targetFramework: targetFramework,
+            continiousEnabled: false,
+            actionsOnly: false,
+            compatibleOnly: false
+          },
+          force: true
+        })
+      );
+    }
   } else {
     projects.forEach(p =>
       dispatch(

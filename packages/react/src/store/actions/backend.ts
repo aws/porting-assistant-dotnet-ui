@@ -53,4 +53,3 @@ export const openSolutionInIDE = createAction("openSolutionInIDE")<string>();
 export const setProfileSet = createAction("setProfileSet")<boolean>();
 
 export const ping = createAction("ping")<void>();
-export const checkInternetAccess = createAction("checkInternetAccess")<void>();

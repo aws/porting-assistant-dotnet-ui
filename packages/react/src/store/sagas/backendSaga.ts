@@ -13,7 +13,6 @@ import { isFailed, isLoaded } from "../../utils/Loadable";
 import { nugetPackageKey } from "../../utils/NugetPackageKey";
 import {
   analyzeSolution,
-  checkInternetAccess,
   exportSolution,
   getApiAnalysis,
   init,
@@ -93,23 +92,44 @@ export function* watchApiAnalysisUpdate() {
 
 function* handleInit(action: ReturnType<typeof init>) {
   yield put(ping());
-  yield put(checkInternetAccess());
+  const haveInternet:boolean = yield window.backend.checkInternetAccess();
   const storedSolutions = window.electron.getState("solutions", {});
   const targetFramework = getTargetFramework();
+  if (!haveInternet) {
+    yield put(pushCurrentMessageUpdate({
+      messageId: uuid(),
+      groupId: "internetAccessFailed",
+      type: "error",
+      header: "No Internet Access",
+      content: "Ensure you have internet access before using the application",
+      buttonText: "View prerequisites",
+      onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
+    }));
+  }
   for (const solution of Object.keys(storedSolutions)) {
-    yield put(
-      analyzeSolution.request({
-        solutionPath: solution,
-        settings: {
-          ignoredProjects: [],
-          targetFramework: targetFramework,
-          continiousEnabled: false,
-          actionsOnly: false,
-          compatibleOnly: false
-        },
-        force: action.payload
-      })
-    );
+    if (haveInternet) { 
+      yield put(
+        analyzeSolution.request({
+          solutionPath: solution,
+          settings: {
+            ignoredProjects: [],
+            targetFramework: targetFramework,
+            continiousEnabled: false,
+            actionsOnly: false,
+            compatibleOnly: false
+          },
+          force: action.payload
+        })
+      );
+    }
+    else {
+      yield put(
+        analyzeSolution.failure({
+          error: "Cannot analyze solution witout internet connectivity",
+          solutionPath: solution
+        })
+      )  
+    }
   }
 }
 
@@ -135,32 +155,9 @@ function* handlePing() {
   );
 }
 
-function* handleCheckInternetAccess() {
-  try {
-    const response:boolean = yield window.backend.checkInternetAccess();
-    if (response){
-      return;
-    }
-  } catch(err) {}
-  yield put(
-    setCurrentMessageUpdate([{
-      messageId: uuid(),
-      groupId: "internetAccessFailed",
-      type: "error",
-      header: "No Internet Access",
-      content: "Ensure you have internet access before using the application",
-      buttonText: "View prerequisites",
-      onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
-    }])
-  );
-}
-
 function* handleAnalyzeSolution(action: ReturnType<typeof analyzeSolution.request>) {
   yield put(ping());
-  yield put(checkInternetAccess());
   try {
-    // call backend method again because error will halt assessment
-    yield window.backend.checkInternetAccess();
     const currentSolutionPath = action.payload.solutionPath;
     const solutionToSolutionDetails: ReturnType<typeof selectSolutionToSolutionDetails> = yield select(
       selectSolutionToSolutionDetails
@@ -382,10 +379,6 @@ function* watchOpenInIDE() {
   yield takeEvery(getType(openSolutionInIDE), handleOpenSolutionInIDE);
 }
 
-function* watchCheckInternetAccess() {
-  yield takeEvery(getType(checkInternetAccess), handleCheckInternetAccess);
-}
-
 export default function* backendSaga() {
   yield all([
     watchInit(),
@@ -396,7 +389,6 @@ export default function* backendSaga() {
     watchExportSolution(),
     watchRemoveSolution(),
     watchOpenInIDE(),
-    watchPing(),
-    watchCheckInternetAccess()
+    watchPing()
   ]);
 }
