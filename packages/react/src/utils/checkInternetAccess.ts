@@ -11,10 +11,10 @@ export const checkInternetAccess  = async (solutionPath: string, dispatch: Dispa
     dispatch(
       setCurrentMessageUpdate([{
         messageId: uuid(),
-        groupId: "internetAccessFailed",
+        groupId: "accessPrereqFailed",
         type: "error",
-        header: "No Internet Access",
-        content: "Ensure you have internet access before using the application",
+        header: "Unable to access S3",
+        content: "Please check your internet connection",
         buttonText: "View prerequisites",
         onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
       }])
