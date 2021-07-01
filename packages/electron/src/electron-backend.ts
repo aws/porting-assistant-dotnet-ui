@@ -156,6 +156,11 @@ export const initConnection = (logger: any = console) => {
       return response;
     });
 
+    ipcMain.handle("getAssessmentLog", async (_event) => {
+      const response = await connection.send("getAssessmentLog", new Date().toISOString());
+      return response;
+    });
+
     connection.on("onNugetPackageUpdate", (response) => {
       browserWindow.webContents.send("onNugetPackageUpdate", response);
     });

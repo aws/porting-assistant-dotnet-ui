@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { v4 as uuid } from "uuid";
 
@@ -8,6 +8,15 @@ import { DashboardTableData } from "./DashboardTable";
 export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
   const dispatch = useDispatch();
   const prevLoadingSolutions = useRef(Array<DashboardTableData>());
+  const [logfilePath, setLogFilePath] = useState<string>("");
+
+  useEffect(() => {
+    async function getAssessmentLogFile() {
+      const result:string = await window.backend.getAssessmentLog();
+      setLogFilePath(result);
+    }
+    getAssessmentLogFile();
+  }, []);
 
   useEffect(() => {
     const loadingSolutions: DashboardTableData[] = [];
@@ -54,7 +63,9 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           groupId: "assessSuccess",
           type: "success",
           content: `Successfully assessed ${completed[0].name}.`,
-          dismissible: true
+          dismissible: true,
+          buttonText: "View log file",
+          onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
     }
@@ -65,7 +76,9 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           groupId: "assessSuccess",
           type: "success",
           content: `Successfully assessed ${completed.length} solutions.`,
-          dismissible: true
+          dismissible: true,
+          buttonText: "View log file",
+          onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
     }
@@ -78,7 +91,9 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           groupId: "assessFailed",
           type: "error",
           content: `Failed to assess ${failedSolutions[0].name}. You must be able to build your project in Visual Studio. If this error persists, contact support in the Porting Assistant help menu.`,
-          dismissible: true
+          dismissible: true,
+          buttonText: "View log file",
+          onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
     }
@@ -90,7 +105,9 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           groupId: "assessFailed",
           type: "error",
           content: `Failed to assess ${failedSolutions.length} solutions. You must be able to build your project in Visual Studio. If this error persists, contact support in the Porting Assistant help menu.`,
-          dismissible: true
+          dismissible: true,
+          buttonText: "View log file",
+          onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
     }
@@ -102,5 +119,5 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
     if (loadingSolutions !== prevLoadingSolutions.current) {
       prevLoadingSolutions.current = loadingSolutions;
     }
-  }, [dispatch, tableData]);
+  }, [dispatch, logfilePath, tableData]);
 };

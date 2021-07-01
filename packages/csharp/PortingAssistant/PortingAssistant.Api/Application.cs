@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using ElectronCgi.DotNet;
 using PortingAssistant.Common.Model;
@@ -17,8 +18,9 @@ namespace PortingAssistant.Api
         private IServiceProvider _services { get; set; }
         private Connection _connection;
         private ILogger _logger;
+        private string _logDirectory;
 
-        public Application(IServiceCollection serviceCollection, PortingAssistantSink portingAssistantSink)
+        public Application(IServiceCollection serviceCollection, PortingAssistantSink portingAssistantSink, string logDirectory)
         {
             _services = serviceCollection.BuildServiceProvider();
             _logger = _services.GetRequiredService<ILogger<Application>>();
@@ -27,8 +29,7 @@ namespace PortingAssistant.Api
             {
                 _connection.Send("onDataUpdate", response);
             });
-
-
+            _logDirectory = logDirectory;
         }
 
         private Connection BuildConnection()
@@ -108,6 +109,14 @@ namespace PortingAssistant.Api
                         ErrorValue = ex.Message
                     };
                 }
+            });
+
+            _connection.On<string, string> ("getAssessmentLog", request => {
+                if (!DateTime.TryParse(request, out DateTime date)) {
+                  date = DateTime.Today;
+                }
+                string dateString = date.ToString("yyyyMMdd");
+                return Path.Combine(_logDirectory, $"portingAssistant-assessment-{dateString}.log");
             });
         }
 

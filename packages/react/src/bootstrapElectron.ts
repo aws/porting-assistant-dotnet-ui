@@ -61,6 +61,7 @@ export interface Backend {
   listenApiAnalysisUpdate: (
     callback: (projectAnalysis: Response<ProjectApiAnalysisResult, SolutionProject>) => void
   ) => void;
+  getAssessmentLog: () => Promise<string>;
 }
 
 export interface Porting {

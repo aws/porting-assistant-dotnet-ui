@@ -35,11 +35,12 @@ namespace PortingAssistant.Api
             Serilog.Formatting.Display.MessageTemplateTextFormatter tf =
                 new Serilog.Formatting.Display.MessageTemplateTextFormatter(outputTemplate, CultureInfo.InvariantCulture);
 
+            var logDirectory = Path.Combine(args[2], "logs");
             var portingAssistantSink = new PortingAssistantSink(tf);
             var logConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
                 .MinimumLevel.Debug()
                 .WriteTo.RollingFile(
-                    Path.Combine(args[2], "logs", "portingAssistant-assessment-{Date}.log"),
+                    Path.Combine(logDirectory, "portingAssistant-assessment-{Date}.log"),
                     outputTemplate: outputTemplate)
                 .WriteTo.Sink(portingAssistantSink);
 
@@ -61,7 +62,7 @@ namespace PortingAssistant.Api
 
             try
             {
-                var application = new Application(serviceCollection, portingAssistantSink);
+                var application = new Application(serviceCollection, portingAssistantSink, logDirectory);
                 application.SetupConnection(isConsole);
                 application.Start();
             }

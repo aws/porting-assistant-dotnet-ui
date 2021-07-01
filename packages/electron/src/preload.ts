@@ -113,6 +113,10 @@ contextBridge.exposeInMainWorld("backend", {
     listenBackend("onNugetPackageUpdate", callback),
   listenApiAnalysisUpdate: (callback: (message: string) => void) =>
     listenBackend("onApiAnalysisUpdate", callback),
+  getAssessmentLog: async () => {
+    const logFilePath = await invokeBackend("getAssessmentLog");
+    return logFilePath;
+  }
 });
 
 contextBridge.exposeInMainWorld("porting", {
