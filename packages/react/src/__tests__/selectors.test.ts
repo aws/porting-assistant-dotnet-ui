@@ -956,9 +956,9 @@ describe("checkInternetAccess", () => {
     const expectResult = [{ 
       buttonText: "View prerequisites",
       type: "error", 
-      content: "Ensure you have internet access before using the application",
-      groupId: "internetAccessFailed",
-      header: "No Internet Access",
+      content: "Please check your internet connection",
+      groupId: "accessPrereqFailed",
+      header: "Unable to access S3",
       messageId: currentMessagesUpdates[0].messageId,
       onButtonClick: currentMessagesUpdates[0].onButtonClick
      }
