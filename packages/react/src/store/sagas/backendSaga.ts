@@ -92,22 +92,44 @@ export function* watchApiAnalysisUpdate() {
 
 function* handleInit(action: ReturnType<typeof init>) {
   yield put(ping());
+  const haveInternet:boolean = yield window.backend.checkInternetAccess();
   const storedSolutions = window.electron.getState("solutions", {});
   const targetFramework = getTargetFramework();
+  if (!haveInternet) {
+    yield put(pushCurrentMessageUpdate({
+      messageId: uuid(),
+      groupId: "internetAccessFailed",
+      type: "error",
+      header: "No Internet Access",
+      content: "Ensure you have internet access before using the application",
+      buttonText: "View prerequisites",
+      onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
+    }));
+  }
   for (const solution of Object.keys(storedSolutions)) {
-    yield put(
-      analyzeSolution.request({
-        solutionPath: solution,
-        settings: {
-          ignoredProjects: [],
-          targetFramework: targetFramework,
-          continiousEnabled: false,
-          actionsOnly: false,
-          compatibleOnly: false
-        },
-        force: action.payload
-      })
-    );
+    if (haveInternet) { 
+      yield put(
+        analyzeSolution.request({
+          solutionPath: solution,
+          settings: {
+            ignoredProjects: [],
+            targetFramework: targetFramework,
+            continiousEnabled: false,
+            actionsOnly: false,
+            compatibleOnly: false
+          },
+          force: action.payload
+        })
+      );
+    }
+    else {
+      yield put(
+        analyzeSolution.failure({
+          error: "Cannot analyze solution witout internet connectivity",
+          solutionPath: solution
+        })
+      )  
+    }
   }
 }
 

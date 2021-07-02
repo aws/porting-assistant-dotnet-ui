@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using ElectronCgi.DotNet;
 using PortingAssistant.Common.Model;
@@ -9,6 +10,7 @@ using PortingAssistant.Client.Model;
 using System.Diagnostics;
 using PortingAssistant.Common.Utils;
 using PortingAssistant.VisualStudio;
+using PortingAssistant.Client.NuGet.Interfaces;
 
 namespace PortingAssistant.Api
 {
@@ -107,6 +109,21 @@ namespace PortingAssistant.Api
                         Status = Response<bool, string>.Failed(ex),
                         ErrorValue = ex.Message
                     };
+                }
+            });
+
+            _connection.On<string, bool>("checkInternetAccess", request =>
+            {
+                var httpService = _services.GetRequiredService<IHttpService>();
+                try
+                {
+                    var fileToDownload = "newtonsoft.json.json.gz";
+                    using Stream stream = httpService.DownloadS3FileAsync(fileToDownload).Result;
+                    return true;
+                }
+                catch
+                {
+                    return false;
                 }
             });
         }

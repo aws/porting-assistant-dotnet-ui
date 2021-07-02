@@ -63,6 +63,7 @@ import {
   selectProjectTableData
 } from "../store/selectors/tableSelectors";
 import { selectHelpInfo } from "../store/selectors/toolsSelectors";
+import { checkInternetAccess } from "../utils/checkInternetAccess";
 import { filteringCountText } from "../utils/FilteringCountText";
 import { Failed, Loaded, Loading, Reloading } from "../utils/Loadable";
 
@@ -946,3 +947,22 @@ describe("selectDashboardTableData", () => {
     expect(result).toEqual(expectResult);
   });
 });
+
+describe("checkInternetAccess", () => {
+  it("should add internet access error to messages", async () => {
+    const result = await checkInternetAccess("", dispatch);
+    expect(result).toBe(false);
+    const currentMessagesUpdates = currentMessages(store.getState());
+    const expectResult = [{ 
+      buttonText: "View prerequisites",
+      type: "error", 
+      content: "Please check your internet connection",
+      groupId: "accessPrereqFailed",
+      header: "Unable to access S3",
+      messageId: currentMessagesUpdates[0].messageId,
+      onButtonClick: currentMessagesUpdates[0].onButtonClick
+     }
+    ];
+    expect(currentMessagesUpdates).toEqual(expectResult);
+  });
+})

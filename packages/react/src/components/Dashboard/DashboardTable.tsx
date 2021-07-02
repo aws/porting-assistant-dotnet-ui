@@ -22,6 +22,7 @@ import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../stor
 import { removePortedSolution } from "../../store/actions/porting";
 import { selectSolutionToSolutionDetails } from "../../store/selectors/solutionSelectors";
 import { selectDashboardTableData } from "../../store/selectors/tableSelectors";
+import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { filteringCountText } from "../../utils/FilteringCountText";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isLoaded } from "../../utils/Loadable";
@@ -68,25 +69,28 @@ const DashboardTableInternal: React.FC = () => {
   );
 
   const reassessSolution = useMemo(
-    () => (solutionPath: string) => {
+    () => async (solutionPath: string) => {
       dispatch(
         removeCurrentMessageUpdate({
           groupId: "assessSuccess"
         })
       );
-      dispatch(
-        analyzeSolution.request({
-          solutionPath: solutionPath,
-          settings: {
-            ignoredProjects: [],
-            targetFramework: targetFramework,
-            continiousEnabled: false,
-            actionsOnly: false,
-            compatibleOnly: false
-          },
-          force: true
-        })
-      );
+      const haveInternet = await checkInternetAccess(solutionPath, dispatch);
+      if (haveInternet) {
+        dispatch(
+          analyzeSolution.request({
+            solutionPath: solutionPath,
+            settings: {
+              ignoredProjects: [],
+              targetFramework: targetFramework,
+              continiousEnabled: false,
+              actionsOnly: false,
+              compatibleOnly: false
+            },
+            force: true
+          })
+        );
+      }
     },
     [dispatch, targetFramework]
   );
