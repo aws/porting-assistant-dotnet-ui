@@ -40,6 +40,7 @@ export interface Electron {
   verifyUser: (profile: string) => Promise<boolean>;
   getVersion: () => Promise<string>;
   telemetry: (message: any) => void;
+  getAssessmentLog: () => string;
 }
 
 export interface Backend {
@@ -61,7 +62,6 @@ export interface Backend {
   listenApiAnalysisUpdate: (
     callback: (projectAnalysis: Response<ProjectApiAnalysisResult, SolutionProject>) => void
   ) => void;
-  getAssessmentLog: () => Promise<string>;
 }
 
 export interface Porting {

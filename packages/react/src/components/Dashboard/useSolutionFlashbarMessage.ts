@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { v4 as uuid } from "uuid";
 
@@ -8,17 +8,9 @@ import { DashboardTableData } from "./DashboardTable";
 export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
   const dispatch = useDispatch();
   const prevLoadingSolutions = useRef(Array<DashboardTableData>());
-  const [logfilePath, setLogFilePath] = useState<string>("");
 
   useEffect(() => {
-    async function getAssessmentLogFile() {
-      const result:string = await window.backend.getAssessmentLog();
-      setLogFilePath(result);
-    }
-    getAssessmentLogFile();
-  }, []);
-
-  useEffect(() => {
+    const logfilePath = window.electron.getAssessmentLog();
     const loadingSolutions: DashboardTableData[] = [];
     const failedSolutions: DashboardTableData[] = [];
     tableData.forEach(data => {
@@ -119,5 +111,5 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
     if (loadingSolutions !== prevLoadingSolutions.current) {
       prevLoadingSolutions.current = loadingSolutions;
     }
-  }, [dispatch, logfilePath, tableData]);
+  }, [dispatch, tableData]);
 };
