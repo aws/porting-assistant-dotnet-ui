@@ -14,7 +14,7 @@ mvcmusicstore
 
 https://github.com/SebastiaanLubbers/MvcMusicStore
 
-NopCommerce 3.1.0
+nopCommerce 3.1.0
 
 https://github.com/nopSolutions/nopCommerce/releases/tag/release-3.10
 
