@@ -92,9 +92,7 @@ contextBridge.exposeInMainWorld("electron", {
   getVersion: () => invokeBackend("getVersion"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
   getAssessmentLog: () => {
-    console.log("getting assessment log");
-    const today = new Date();
-    const dateString = today.toISOString().slice(0,10).replace(/-/g,"");
+    const dateString = new Date().toISOString().slice(0,10).replace(/-/g,"");
     return path.join(remote.app.getPath("userData"), "logs", `portingAssistant-assessment-${dateString}.log`);
   }
 });
