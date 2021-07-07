@@ -99,15 +99,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
   };
 
   const assessSolutionCheck = async (solutionNameTagId: string) => {
-<<<<<<< HEAD
     await (await app.client.$("._circle_oh9fc_75")).waitForExist({ 
       reverse: true, 
       timeout: 800000 
-=======
-    await (await app.client.$("._circle_oh9fc_75")).waitForExist({
-      reverse: true,
-      timeout: 600000
->>>>>>> 68c3c93 (Working memory usage monitoring - team to investigate memory usage behavior before merge)
     });
     await (await app.client.$(solutionNameTagId)).click();
   };
@@ -387,14 +381,8 @@ describe("stability check, assess a solution, reassess the solution, check all s
     );
     await addSolution(app, solutionPath);
     await app.client.refresh();
-<<<<<<< HEAD
     const results = await runThroughSolution(solutionPath, "inplace", "netcoreapp3.1");
     await validateHighLevelResults(
-=======
-
-    const results = await runThroughSolution(solutionPath, "inplace");
-    validateHighLevelResults(
->>>>>>> 68c3c93 (Working memory usage monitoring - team to investigate memory usage behavior before merge)
       results, 
       ["1 of 1", "0 of 13", "5 of 169", "0", "(21)"]
     ).then(() => {
