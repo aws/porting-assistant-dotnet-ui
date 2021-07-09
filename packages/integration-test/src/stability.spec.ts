@@ -72,7 +72,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
       }
       await app.client.pause(2000);
       await (await app.client.$("._circle_oh9fc_75")).waitForExist({ 
-        reverse: true, timeout: 1000000 
+        reverse: true, timeout: 1200000 
       });
       await (await app.client.$(solutionNameTagId)).click();
     }
@@ -117,7 +117,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
       await app.client.$("._circle_oh9fc_75")
     ).waitForExist({
       reverse: true,
-      timeout: 1000000
+      timeout: 1200000
     });
     const results = await checkAssessmentResults(solutionPath);
     await (await app.client.$(solutionNameTagId)).click();
@@ -195,7 +195,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     if (await solutionLink.isExisting()) {
       await (await app.client.$("._circle_oh9fc_75")).waitForExist({
         reverse: true,
-        timeout: 800000,
+        timeout: 1200000,
       });
       await solutionLink.click();
     }
@@ -274,17 +274,16 @@ describe("stability check, assess a solution, reassess the solution, check all s
     setupElectronLogs(app);
     await clearSolutions(app);
     await app.client.pause(1000);
-    await app.client.refresh();    
-    appMemoryUsageAfter = (await pidusage(appProcessId)).memory
+    await app.client.refresh();
 
     await sleep(2000).then(async () => {
       // Memory usage after test should drop back to a baseline similar to usage before test
-      appMemoryUsageAfter = (await pidusage(appProcessId)).memory
-      console.log(`Memory usage after test: ${appMemoryUsageAfter}`)
+      appMemoryUsageAfter = (await pidusage(appProcessId)).memory;
+      const baselineIncrease = appMemoryUsageAfter/appMemoryUsageBefore;
+      console.log(`Memory usage after test: ${appMemoryUsageAfter}`);
+      expect(baselineIncrease).toBeLessThan(1.5);
       done()
     });
-
-
   });
 
   afterAll(async () => {
@@ -309,9 +308,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
       results, 
       ["0 of 40", "37 of 38", "328 of 898", "0", "(1565)"]
     ).then(() => {
-      console.log(`Max memory usage: ${appMemoryUsageMax}`)
-      // TODO: This threshold needs to be set still
-      // expect(appMemoryUsageMax).toBeLessThan(200000000);
+      console.log(
+        `Max memory usage: ${appMemoryUsageMax}. Increase of ${appMemoryUsageMax / appMemoryUsageBefore} times.`
+      );
     });
 
     const getCatalogController = fs.readFile(
@@ -327,6 +326,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     expect(
       (await getCatalogController).indexOf('Include="Autofac" Version="4.0.0"')
     ).not.toBe(-1);
+
+    const maxIncrease = appMemoryUsageMax/appMemoryUsageBefore;
+    expect(maxIncrease).toBeLessThan(9.2);
   });
 
   test("run through mvcmusicstore", async () => {
@@ -347,9 +349,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
       results, 
       ["0 of 1", "2 of 6", "34 of 52", "0", "(21)"]
     ).then(() => {
-      console.log(`Max memory usage: ${appMemoryUsageMax}`)
-      // TODO: This threshold needs to be set still
-      // expect(appMemoryUsageMax).toBeLessThan(200000000);
+      console.log(
+        `Max memory usage: ${appMemoryUsageMax}. Increase of ${appMemoryUsageMax / appMemoryUsageBefore} times.`
+      );
     });
 
     const controllerFolderPath: string = path.join(
@@ -371,6 +373,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     expect(
       (await getStoreManagerController).indexOf("Microsoft.EntityFrameworkCore")
     ).not.toBe(-1);
+
+    const maxIncrease = appMemoryUsageMax/appMemoryUsageBefore;
+    expect(maxIncrease).toBeLessThan(1.2);
   });
 
   test("run through Miniblog", async () => {
@@ -386,10 +391,12 @@ describe("stability check, assess a solution, reassess the solution, check all s
       results, 
       ["1 of 1", "0 of 13", "5 of 169", "0", "(21)"]
     ).then(() => {
-      console.log(`Max memory usage: ${appMemoryUsageMax}`)
-      // TODO: This threshold needs to be set still
-      // expect(appMemoryUsageMax).toBeLessThan(200000000);
+      console.log(
+        `Max memory usage: ${appMemoryUsageMax}. Increase of ${appMemoryUsageMax / appMemoryUsageBefore} times.`
+      );
     });
-
-    });
+    
+    const maxIncrease = appMemoryUsageMax/appMemoryUsageBefore;
+    expect(maxIncrease).toBeLessThan(1.2);
+  });
 });
