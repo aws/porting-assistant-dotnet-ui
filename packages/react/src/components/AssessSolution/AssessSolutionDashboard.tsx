@@ -10,6 +10,7 @@ import { Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution, exportSolution, openSolutionInIDE } from "../../store/actions/backend";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
+import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isLoaded, Loadable } from "../../utils/Loadable";
 import { ApiTable } from "../AssessShared/ApiTable";
@@ -128,21 +129,24 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             <Button
               iconName="refresh"
               id="reassess-solution"
-              onClick={() => {
-                dispatch(
-                  analyzeSolution.request({
-                    solutionPath: solution.solutionFilePath,
-                    settings: {
-                      ignoredProjects: [],
-                      targetFramework: targetFramework,
-                      continiousEnabled: false,
-                      actionsOnly: false,
-                      compatibleOnly: false
-                    },
-                    force: true
-                  })
-                );
-                history.push(paths.dashboard);
+              onClick={async () => {
+                const haveInternet = await checkInternetAccess(solution.solutionFilePath, dispatch);
+                if (haveInternet) {
+                  dispatch(
+                    analyzeSolution.request({
+                      solutionPath: solution.solutionFilePath,
+                      settings: {
+                        ignoredProjects: [],
+                        targetFramework: targetFramework,
+                        continiousEnabled: false,
+                        actionsOnly: false,
+                        compatibleOnly: false
+                      },
+                      force: true
+                    })
+                  );
+                  history.push(paths.dashboard);
+                }
               }}
             >
               Reassess solution

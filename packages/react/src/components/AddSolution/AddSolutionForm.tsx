@@ -6,6 +6,7 @@ import { useHistory } from "react-router";
 
 import { externalUrls } from "../../constants/externalUrls";
 import { analyzeSolution } from "../../store/actions/backend";
+import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { InfoLink } from "../InfoLink";
 import { UploadSolutionField } from "./UploadSolutionField";
@@ -23,20 +24,23 @@ const ImportSolutionInternal: React.FC = () => {
       onSubmit={handleSubmit(async data => {
         await addSolution(data);
         const targetFramework = getTargetFramework();
-        dispatch(
-          analyzeSolution.request({
-            solutionPath: data.solutionFilename,
-            settings: {
-              ignoredProjects: [],
-              targetFramework: targetFramework,
-              continiousEnabled: false,
-              actionsOnly: false,
-              compatibleOnly: false
-            },
-            force: true
-          })
-        );
-        history.push("/solutions");
+        const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
+        if (haveInternet) {
+          dispatch(
+            analyzeSolution.request({
+              solutionPath: data.solutionFilename,
+              settings: {
+                ignoredProjects: [],
+                targetFramework: targetFramework,
+                continiousEnabled: false,
+                actionsOnly: false,
+                compatibleOnly: false
+              },
+              force: true
+            })
+          );
+          history.push("/solutions");
+        }
       })}
     >
       <Form
