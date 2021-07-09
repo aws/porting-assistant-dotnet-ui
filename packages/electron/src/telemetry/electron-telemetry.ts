@@ -1,18 +1,10 @@
 import { app } from "electron";
 import {
-  metricsBuffer,
-  electronLogBuffer,
-  backendLogBuffer,
-  reactErrorBuffer,
-} from "../models/buffer";
-import {
   ProjectApiAnalysisResult,
-  PackageAnalysisResult,
 } from "@porting-assistant/react/src/models/project";
 import { SolutionDetails } from "@porting-assistant/react/src/models/solution";
-import crypto from "crypto";
 import fs from "fs";
-import log, { LogMessage, LevelOption, info } from "electron-log";
+import log, { LogMessage, LevelOption } from "electron-log";
 import { Connection } from "electron-cgi/connection";
 import { putMetricData } from "./electron-metrics";
 import { localStore } from "../preload-localStore";
@@ -202,7 +194,6 @@ export const registerLogListeners = (connection: Connection) => {
           targetFramework: targetFramework,
           content: response,
       };
-      console.log("Writing Log to Buffer");
       backendLogger.info(JSON.stringify(logs));
     } catch (err) {}
   });
