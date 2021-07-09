@@ -40,6 +40,7 @@ export interface Electron {
   verifyUser: (profile: string) => Promise<boolean>;
   getVersion: () => Promise<string>;
   telemetry: (message: any) => void;
+  checkInternetAccess: () => Promise<boolean>;
 }
 
 export interface Backend {
