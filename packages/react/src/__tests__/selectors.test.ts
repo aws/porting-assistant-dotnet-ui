@@ -953,16 +953,17 @@ describe("checkInternetAccess", () => {
     const result = await checkInternetAccess("", dispatch);
     expect(result).toBe(false);
     const currentMessagesUpdates = currentMessages(store.getState());
-    const expectResult = [{ 
-      buttonText: "View prerequisites",
-      type: "error", 
-      content: "Please check your internet connection",
-      groupId: "accessPrereqFailed",
-      header: "Unable to access S3",
-      messageId: currentMessagesUpdates[0].messageId,
-      onButtonClick: currentMessagesUpdates[0].onButtonClick
-     }
+    const expectResult = [
+      {
+        buttonText: "View prerequisites",
+        type: "error",
+        content: "Please check your internet connection",
+        groupId: "accessPrereqFailed",
+        header: "Unable to access S3",
+        messageId: currentMessagesUpdates[0].messageId,
+        onButtonClick: currentMessagesUpdates[0].onButtonClick
+      }
     ];
     expect(currentMessagesUpdates).toEqual(expectResult);
   });
-})
+});

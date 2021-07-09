@@ -1,67 +1,119 @@
 import { app } from "electron";
 import {
-  metricsBuffer,
-  electronLogBuffer,
-  backendLogBuffer,
-  reactErrorBuffer,
-} from "../models/buffer";
-import {
   ProjectApiAnalysisResult,
-  PackageAnalysisResult,
 } from "@porting-assistant/react/src/models/project";
 import { SolutionDetails } from "@porting-assistant/react/src/models/solution";
-import crypto from "crypto";
+import fs from "fs";
 import log, { LogMessage, LevelOption } from "electron-log";
 import { Connection } from "electron-cgi/connection";
 import { putMetricData } from "./electron-metrics";
 import { localStore } from "../preload-localStore";
+import path from "path";
+import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
+
+
+const backendLogName = "portingAssistant-backend-%DATE%";
+const electronLogName = "portingAssistant-electron-%DATE%";
+const reactLogName = "portingAssistant-react-%DATE%";
+
+const dirName = path.join(app.getPath("userData"), "logs");
+
+if (!fs.existsSync(dirName))
+  fs.mkdir(dirName, (err) => {
+    console.log("Telemetry Directory Creation Failed.");
+  });
+
+var winstonTransportsBackend = [
+  new DailyRotateFile({
+    datePattern: "YYYY-MM-DD",
+    extension: ".log",
+    filename: backendLogName,
+    dirname: dirName,
+    maxFiles: 20,
+    format: winston.format.combine(
+      winston.format.printf((info) => {
+        return `${info.message}`;
+      })
+    ),
+  }),
+];
+
+var winstonTransportsElectron = [
+  new DailyRotateFile({
+    datePattern: "YYYY-MM-DD",
+    extension: ".log",
+    filename: electronLogName,
+    dirname: dirName,
+    maxFiles: 20,
+    format: winston.format.combine(
+      winston.format.printf((info) => {
+        return `${info.message}`;
+      })
+    ),
+  }),
+];
+
+var winstonTransportsReact = [
+  new DailyRotateFile({
+    datePattern: "YYYY-MM-DD",
+    extension: ".log",
+    filename: reactLogName,
+    dirname: dirName,
+    maxFiles: 20,
+    format: winston.format.combine(
+      winston.format.printf((info) => {
+        return `${info.message}`;
+      })
+    ),
+  }),
+];
+
+var backendLogger = winston.createLogger({
+  transports: winstonTransportsBackend,
+  exitOnError: false,
+});
+
+var electronLogger = winston.createLogger({
+  transports: winstonTransportsElectron,
+  exitOnError: false,
+});
+
+var reactLogger = winston.createLogger({
+  transports: winstonTransportsReact,
+  exitOnError: false,
+});
 
 export const logReactMetrics = (response: any) => {
   const targetFramework =
     localStore.get("targetFramework").id || "netcoreapp3.1";
   // Error with MetaData
   const errorMetric = {
-    Metrics: {
-      Status: "failed",
-    },
-    TimeStamp: new Date(),
-    ListMetrics: [
-      {
-        Error: response,
+      Metrics: {
+        Status: "failed",
       },
-    ],
-    Dimensions: [
-      {
-        Name: "metricsType",
-        Value: "portingAssistant-react-errors",
-      },
-      {
-        Name: "portingAssistantVersion",
-        Value: app.getVersion(),
-      },
-      {
-        Name: "targetFramework",
-        Value: targetFramework,
-      },
-    ],
+      TimeStamp: new Date(),
+      ListMetrics: [
+        {
+          Error: response,
+        },
+      ],
+      Dimensions: [
+        {
+          Name: "metricsType",
+          Value: "portingAssistant-react-errors",
+        },
+        {
+          Name: "portingAssistantVersion",
+          Value: app.getVersion(),
+        },
+        {
+          Name: "targetFramework",
+          Value: targetFramework,
+        },
+      ],
   };
-  reactErrorBuffer.push(JSON.stringify(errorMetric));
-  putMetricData("portingAssistant-react-errors", "Error", "Count", 1, [
-    {
-      Name: "metricsType",
-      Value: "reactError",
-    },
-    {
-      Name: "portingAssistantVersion",
-      Value: app.getVersion(),
-    },
-    {
-      Name: "targetFramework",
-      Value: targetFramework,
-    },
-  ]).catch((error) => {
-    return;
-  });
+  reactLogger.info(JSON.stringify(errorMetric));
 };
 
 export const logSolutionMetrics = (response: any, time: number) => {
@@ -73,40 +125,6 @@ export const logSolutionMetrics = (response: any, time: number) => {
       const targetFramework =
         localStore.get("targetFramework").id || "netcoreapp3.1";
 
-      putMetricData(
-        "portingAssistant-metrics", // Namespace
-        "numSolutions", // Metric Name
-        "Count", // Unit
-        1, // Value
-        [
-          { Name: "metricsType", Value: "Solutions" },
-          { Name: "portingAssistantVersion", Value: app.getVersion() },
-          {
-            Name: "targetFramework",
-            Value: targetFramework,
-          },
-        ]
-      ).catch((error) => {
-        return;
-      });
-
-      putMetricData(
-        "portingAssistant-metrics", // Namespace
-        "numProject", // Metric Name
-        "Count", // Unit
-        solutionDetails.projects.length, // Value
-        [
-          { Name: "metricsType", Value: "Projects" },
-          { Name: "portingAssistantVersion", Value: app.getVersion() },
-          {
-            Name: "targetFramework",
-            Value: targetFramework,
-          },
-        ]
-      ).catch((error) => {
-        return;
-      });
-
       let allpackages = new Set(
         solutionDetails.projects
           .flatMap((project) => {
@@ -114,87 +132,6 @@ export const logSolutionMetrics = (response: any, time: number) => {
           })
           .filter((p) => p !== undefined || p !== null)
       );
-
-      putMetricData(
-        "portingAssistant-metrics", // Namespace
-        "numNugets", // Metric Name
-        "Count", // Unit
-        allpackages.size || 0, // Value
-        [
-          { Name: "metricsType", Value: "NugetPackages" },
-          { Name: "portingAssistantVersion", Value: app.getVersion() },
-          {
-            Name: "targetFramework",
-            Value: targetFramework,
-          },
-        ]
-      ).catch((error) => {
-        return;
-      });
-
-      const SolutionMetrics = {
-        Metrics: { Status: "success" },
-        TimeStamp: new Date(),
-        ListMetrics: {},
-        Dimensions: [
-          { Name: "metricsType", Value: "Solutions" },
-          {
-            Name: "SolutionPath",
-            Value: crypto
-              .createHash("sha256")
-              .update(solutionDetails.solutionFilePath || "")
-              .digest("hex"),
-          },
-          { Name: "portingAssistantVersion", Value: app.getVersion() },
-          {
-            Name: "targetFramework",
-            Value: targetFramework,
-          },
-        ],
-      };
-
-      metricsBuffer.push(JSON.stringify(SolutionMetrics));
-      solutionDetails.projects.forEach((project) => {
-        const projectMetrics = {
-          Metrics: {
-            numNugets: {
-              Value: project.packageReferences?.length || 0,
-              Unit: "Count",
-            },
-            numReferences: {
-              Value: project.projectReferences?.length || 0,
-              Unit: "Count",
-            },
-          },
-          TimeStamp: new Date(),
-          ListMetrics: {},
-          Dimensions: [
-            { Name: "metricsType", Value: "Project" },
-            { Name: "portingAssistantVersion", Value: app.getVersion() },
-            {
-              Name: "targetFramework",
-              Value: targetFramework,
-            },
-            {
-              Name: "projectGuid",
-              Value: project.projectGuid,
-            },
-            {
-              Name: "isBuildFailed",
-              Value: project.isBuildFailed,
-            },
-            {
-              Name: "projectType",
-              Value: project.projectType,
-            },
-            {
-              Name: "targetFrameworks",
-              Value: project.targetFrameworks,
-            },
-          ],
-        };
-        metricsBuffer.push(JSON.stringify(projectMetrics));
-      });
     }
   } catch (err) {}
 };
@@ -207,33 +144,9 @@ export const logApiMetrics = (response: any) => {
     const projectAnalysis: ProjectApiAnalysisResult = response.value;
     const targetFramework =
       localStore.get("targetFramework").id || "netcoreapp3.1";
-    if (projectAnalysis.sourceFileAnalysisResults != null) {
-      // Metric
-      putMetricData(
-        "portingAssistant-metrics", // Namespace
-        "numApis", // Metric Name
-        "Count", // Unit
-        Object.values(projectAnalysis.sourceFileAnalysisResults).reduce(
-          (agg, cur) => agg + cur.apiAnalysisResults.length,
-          0
-        ), // Value
-        [
-          { Name: "metricsType", Value: "apis" },
-          { Name: "portingAssistantVersion", Value: app.getVersion() },
-          {
-            Name: "targetFramework",
-            Value: targetFramework,
-          },
-        ]
-      ).catch((error) => {
-        return;
-      });
-    }
-
     if (
       projectAnalysis.sourceFileAnalysisResults != null &&
-      projectAnalysis.projectFile != null &&
-      projectAnalysis.projectGuid != null
+      projectAnalysis.projectFile != null
     ) {
       //Metrics with ListMetrics and MetaData
       const apis = projectAnalysis.sourceFileAnalysisResults.flatMap(
@@ -245,88 +158,13 @@ export const logApiMetrics = (response: any) => {
               originalDefinition: invocation.codeEntityDetails?.signature,
               compatibility:
                 invocation.compatibilityResults[targetFramework]?.compatibility,
-              packageId: invocation.codeEntityDetails.package?.packageId,
-              packageVersion: invocation.codeEntityDetails.package?.version,
             };
           })
       );
-      const metrics = {
-        Metrics: {},
-        TimeStamp: new Date(),
-        ListMetrics: [...apis],
-        Dimensions: [
-          { Name: "metricsType", Value: "apis" },
-          {
-            Name: "projectName",
-            Value: crypto
-              .createHash("sha256")
-              .update(projectAnalysis.projectFile)
-              .digest("hex"),
-          },
-          {
-            Name: "projectGuid",
-            Value: crypto
-              .createHash("sha256")
-              .update(projectAnalysis.projectGuid)
-              .digest("hex"),
-          },
-          { Name: "portingAssistantVersion", Value: app.getVersion() },
-          {
-            Name: "targetFramework",
-            Value: targetFramework,
-          },
-          {
-            Name: "solutionPath",
-            Value: crypto
-              .createHash("sha256")
-              .update(projectAnalysis.solutionFile)
-              .digest("hex"),
-          },
-        ],
-      };
-      metricsBuffer.push(JSON.stringify(metrics));
     }
   } catch (err) {}
 };
 
-export const logNugetMetrics = (response: any) => {
-  try {
-    if (response.status.status !== "Success") {
-      return;
-    }
-    const packageAnalysisResult: PackageAnalysisResult = response.value;
-    const targetFramework =
-      localStore.get("targetFramework").id || "netcoreapp3.1";
-    if (
-      packageAnalysisResult.packageVersionPair != null &&
-      packageAnalysisResult.compatibilityResults != null
-    ) {
-      //Metrics with ListMetrics and MetaData
-      const metrics = {
-        Metrics: {},
-        TimeStamp: new Date(),
-        ListMetrics: [
-          {
-            packageName: packageAnalysisResult.packageVersionPair.packageId,
-            packageVersion: packageAnalysisResult.packageVersionPair.version,
-            compatibility:
-              packageAnalysisResult.compatibilityResults[targetFramework]
-                ?.compatibility,
-          },
-        ],
-        Dimensions: [
-          { Name: "metricsType", Value: "nuget" },
-          { Name: "portingAssistantVersion", Value: app.getVersion() },
-          {
-            Name: "targetFramework",
-            Value: targetFramework,
-          },
-        ],
-      };
-      metricsBuffer.push(JSON.stringify(metrics));
-    }
-  } catch (err) {}
-};
 
 export const registerLogListeners = (connection: Connection) => {
   const targetFramework =
@@ -337,11 +175,11 @@ export const registerLogListeners = (connection: Connection) => {
       const str: string = message.data[0];
       if (str) {
         const logs = {
-          portingAssistantVersion: app.getVersion(),
-          targetFramework: targetFramework,
-          content: str,
+            portingAssistantVersion: app.getVersion(),
+            targetFramework: targetFramework,
+            content: str,
         };
-        electronLogBuffer.push(JSON.stringify(logs));
+        electronLogger.info(JSON.stringify(logs));
       }
     } catch (err) {}
   };
@@ -352,11 +190,11 @@ export const registerLogListeners = (connection: Connection) => {
   connection.on("onDataUpdate", (response) => {
     try {
       const logs = {
-        portingAssistantVersion: app.getVersion(),
-        targetFramework: targetFramework,
-        content: response,
+          portingAssistantVersion: app.getVersion(),
+          targetFramework: targetFramework,
+          content: response,
       };
-      backendLogBuffer.push(JSON.stringify(logs));
+      backendLogger.info(JSON.stringify(logs));
     } catch (err) {}
   });
 
@@ -367,11 +205,6 @@ export const registerLogListeners = (connection: Connection) => {
     } catch (err) {}
   });
 
-  connection.on("onNugetPackageUpdate", (response) => {
-    try {
-      logNugetMetrics(response);
-    } catch (err) {}
-  });
 };
 
 export const startTimer = () => {
@@ -389,35 +222,6 @@ export const errorHandler = (response: any, metricsType: string) => {
   const error = response.status.error;
   const targetFramework =
     localStore.get("targetFramework").id || "netcoreapp3.1";
-  const errorMetric = {
-    Metrics: {
-      Status: "failed",
-      ExceptionType: error.ClassName,
-      ExceptionSource: error.Source,
-    },
-    TimeStamp: new Date(),
-    ListMetrics: [
-      {
-        ErrorValue: errorValue,
-        Error: error,
-      },
-    ],
-    Dimensions: [
-      {
-        Name: "metricsType",
-        Value: metricsType,
-      },
-      {
-        Name: "portingAssistantVersion",
-        Value: app.getVersion(),
-      },
-      {
-        Name: "targetFramework",
-        Value: targetFramework,
-      },
-    ],
-  };
-  metricsBuffer.push(JSON.stringify(errorMetric));
   // Error Metric
   putMetricData("portingAssistant-backend-errors", "Error", "Count", 1, [
     {

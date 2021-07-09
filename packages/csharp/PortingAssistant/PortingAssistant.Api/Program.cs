@@ -11,6 +11,8 @@ using PortingAssistant.Client.Client;
 using PortingAssistant.Client.Model;
 using Serilog;
 using PortingAssistant.VisualStudio;
+using PortingAssistantExtensionTelemetry.Model;
+using PortingAssistantExtensionTelemetry;
 
 namespace PortingAssistant.Api
 {
@@ -55,6 +57,10 @@ namespace PortingAssistant.Api
             configuration.DataStoreSettings.HttpsEndpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.HttpsEndpoint;
             configuration.DataStoreSettings.S3Endpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.S3Endpoint;
             configuration.DataStoreSettings.GitHubEndpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.GitHubEndpoint;
+
+            string metricsFolder = Path.Combine(args[2], "logs");
+            string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
+            TelemetryCollector.Builder(Log.Logger, metricsFilePath);
 
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection, configuration);

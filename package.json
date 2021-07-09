@@ -40,5 +40,8 @@
     "git-commit-template": "^1.0.5",
     "husky": "^4.2.5",
     "lerna": "^3.20.2"
+  },
+  "dependencies": {
+    "winston": "^3.3.3"
   }
 }

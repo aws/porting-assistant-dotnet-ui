@@ -60,6 +60,8 @@
     "jszip": "^3.5.0",
     "lint-staged": "^10.2.11",
     "ncp": "^2.0.0",
-    "uuid": "^8.1.0"
+    "uuid": "^8.1.0",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5"
   }
 }

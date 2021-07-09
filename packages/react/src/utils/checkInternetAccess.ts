@@ -5,19 +5,21 @@ import { externalUrls } from "../constants/externalUrls";
 import { analyzeSolution } from "../store/actions/backend";
 import { setCurrentMessageUpdate } from "../store/actions/error";
 
-export const checkInternetAccess  = async (solutionPath: string, dispatch: Dispatch) => {
-  const haveInternet:boolean = await window.backend.checkInternetAccess();
+export const checkInternetAccess = async (solutionPath: string, dispatch: Dispatch) => {
+  const haveInternet: boolean = await window.backend.checkInternetAccess();
   if (!haveInternet) {
     dispatch(
-      setCurrentMessageUpdate([{
-        messageId: uuid(),
-        groupId: "accessPrereqFailed",
-        type: "error",
-        header: "Unable to access S3",
-        content: "Please check your internet connection",
-        buttonText: "View prerequisites",
-        onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
-      }])
+      setCurrentMessageUpdate([
+        {
+          messageId: uuid(),
+          groupId: "accessPrereqFailed",
+          type: "error",
+          header: "Unable to access S3",
+          content: "Please check your internet connection",
+          buttonText: "View prerequisites",
+          onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
+        }
+      ])
     );
     dispatch(
       analyzeSolution.failure({
@@ -27,4 +29,4 @@ export const checkInternetAccess  = async (solutionPath: string, dispatch: Dispa
     );
   }
   return haveInternet;
-}
+};
