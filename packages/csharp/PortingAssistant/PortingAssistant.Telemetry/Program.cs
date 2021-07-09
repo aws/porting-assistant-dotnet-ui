@@ -12,7 +12,6 @@ using Amazon.Runtime.CredentialManagement;
 using Aws4RequestSigner;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PortingAssistantExtensionTelemetry;
 using PortingAssistantExtensionTelemetry.Model;
 using System.Threading.Tasks;
 
@@ -20,10 +19,6 @@ namespace PortingAssistant.Telemetry
 {
     class Program
     {
-        // private static Timer logTimer;
-        // private readonly string lastReadTokenFile;
-        // private readonly HttpClient client;
-
         public static void Main(string[] args)
         {
             if (args.Length < 3)
@@ -41,7 +36,7 @@ namespace PortingAssistant.Telemetry
 
             Connection _connection = new ConnectionBuilder().WithLogging().Build();
             var portingAssistantPortingConfiguration = System.Text.Json.JsonSerializer.Deserialize<PortingAssistantPortingConfiguration>(File.ReadAllText(config));
-            string metricsFolder = Path.Combine(userData, "telemetry-logs");
+            string metricsFolder = Path.Combine(userData, "logs");
             Directory.CreateDirectory(metricsFolder);
             TelemetryConfiguration teleConfig = new TelemetryConfiguration{
               InvokeUrl = portingAssistantPortingConfiguration.PortingAssistantMetrics["InvokeUrl"].ToString(),
@@ -70,8 +65,6 @@ namespace PortingAssistant.Telemetry
             // Start the timer
             logTimer.Enabled = true;
 
-            // LogWatcher logWatcher = new LogWatcher(teleConfig, profile, prefix);
-            // logWatcher.Start();
             _connection.Listen();
         }
 
@@ -96,8 +89,28 @@ namespace PortingAssistant.Telemetry
             }
             var initLineNumber = 0;            
             foreach (var file in fileEntries) {
+              var fName = Path.GetFileNameWithoutExtension(file);
               var fileExtension = Path.GetExtension(file);
-              var logName = prefix + fileExtension.Trim().Substring(1);
+              var logName = prefix;
+
+              // Check which type of log file and set the prefix
+              if (fName == "main") {
+                continue;
+              } else {
+                string typeOfLog = fName.Split('-')[1];
+                if (typeOfLog == "assessment") {
+                  continue;
+                } else if (typeOfLog == "telemetry") {
+                  logName = "portingAssistant-metrics"; 
+                } else if (typeOfLog == "backend") {
+                  logName = "portingAssistant-backend-logs";
+                } else if (typeOfLog == "electron") {
+                  logName = "electron-logs";
+                } else if (typeOfLog == "react") {
+                  logName = "react-errors";
+                }
+              }
+              
               var logs = new ArrayList();
 
               // Add new files to fileLineNumberMap

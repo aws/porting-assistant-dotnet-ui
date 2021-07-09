@@ -20,24 +20,23 @@ import path from "path";
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
-const logFileName = "porting-assistant-%DATE%";
 
-const BACKEND_LOG = "portingAssistant-backend-logs";
-const ELECTRON_LOG = "electron-logs";
-const REACT_ERROR = "react-errors";
+const backendLogName = "portingAssistant-backend-%DATE%";
+const electronLogName = "portingAssistant-electron-%DATE%";
+const reactLogName = "portingAssistant-react-%DATE%";
 
-const dirName = path.join(app.getPath("userData"), "telemetry-logs");
+const dirName = path.join(app.getPath("userData"), "logs");
 
 if (!fs.existsSync(dirName))
   fs.mkdir(dirName, (err) => {
     console.log("Telemetry Directory Creation Failed.");
   });
 
-var winstonTransports = [
+var winstonTransportsBackend = [
   new DailyRotateFile({
     datePattern: "YYYY-MM-DD",
     extension: ".log",
-    filename: logFileName,
+    filename: backendLogName,
     dirname: dirName,
     maxSize: 1024 * 1024,
     maxFiles: 20,
@@ -49,8 +48,50 @@ var winstonTransports = [
   }),
 ];
 
-var logger = winston.createLogger({
-  transports: winstonTransports,
+var winstonTransportsElectron = [
+  new DailyRotateFile({
+    datePattern: "YYYY-MM-DD",
+    extension: ".log",
+    filename: electronLogName,
+    dirname: dirName,
+    maxSize: 1024 * 1024,
+    maxFiles: 20,
+    format: winston.format.combine(
+      winston.format.printf((info) => {
+        return `${info.message}`;
+      })
+    ),
+  }),
+];
+
+var winstonTransportsReact = [
+  new DailyRotateFile({
+    datePattern: "YYYY-MM-DD",
+    extension: ".log",
+    filename: reactLogName,
+    dirname: dirName,
+    maxSize: 1024 * 1024,
+    maxFiles: 20,
+    format: winston.format.combine(
+      winston.format.printf((info) => {
+        return `${info.message}`;
+      })
+    ),
+  }),
+];
+
+var backendLogger = winston.createLogger({
+  transports: winstonTransportsBackend,
+  exitOnError: false,
+});
+
+var electronLogger = winston.createLogger({
+  transports: winstonTransportsElectron,
+  exitOnError: false,
+});
+
+var reactLogger = winston.createLogger({
+  transports: winstonTransportsReact,
   exitOnError: false,
 });
 
@@ -59,8 +100,6 @@ export const logReactMetrics = (response: any) => {
     localStore.get("targetFramework").id || "netcoreapp3.1";
   // Error with MetaData
   const errorMetric = {
-    Type: REACT_ERROR,
-    Content: {
       Metrics: {
         Status: "failed",
       },
@@ -84,9 +123,8 @@ export const logReactMetrics = (response: any) => {
           Value: targetFramework,
         },
       ],
-    },
   };
-  logger.info(JSON.stringify(errorMetric));
+  reactLogger.info(JSON.stringify(errorMetric));
 };
 
 export const logSolutionMetrics = (response: any, time: number) => {
@@ -148,14 +186,11 @@ export const registerLogListeners = (connection: Connection) => {
       const str: string = message.data[0];
       if (str) {
         const logs = {
-          Type: ELECTRON_LOG,
-          Content: {
             portingAssistantVersion: app.getVersion(),
             targetFramework: targetFramework,
             content: str,
-          },
         };
-        logger.info(JSON.stringify(logs));
+        electronLogger.info(JSON.stringify(logs));
       }
     } catch (err) {}
   };
@@ -166,15 +201,12 @@ export const registerLogListeners = (connection: Connection) => {
   connection.on("onDataUpdate", (response) => {
     try {
       const logs = {
-        Type: BACKEND_LOG,
-        Content: {
           portingAssistantVersion: app.getVersion(),
           targetFramework: targetFramework,
           content: response,
-        },
       };
       console.log("Writing Log to Buffer");
-      logger.info(JSON.stringify(logs));
+      backendLogger.info(JSON.stringify(logs));
     } catch (err) {}
   });
 

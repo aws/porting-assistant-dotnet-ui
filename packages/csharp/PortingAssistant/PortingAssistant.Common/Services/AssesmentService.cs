@@ -9,6 +9,7 @@ using PortingAssistant.Client.Model;
 using PortingAssistant.Telemetry.Model;
 using System.Web.Helpers;
 using PortingAssistantExtensionTelemetry;
+using PortingAssistant.Common.Utils;
 
 namespace PortingAssistant.Common.Services
 {
@@ -41,37 +42,14 @@ namespace PortingAssistant.Common.Services
 
                 if (solutionAnalysisResult.IsCompletedSuccessfully)
                 {
-                    var date = DateTime.Now;
-                    string solutionPath = request.solutionFilePath;
-                    if (solutionPath == null) solutionPath = "";
-                    var solutionMetrics = new SolutionMetrics{
-                      MetricsType = MetricsType.solution,
-                      TargetFramework = tgtFramework,
-                      TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
-                      SolutionPath = Crypto.SHA256(solutionPath),
-                      AnalysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds
-                    };
-                    TelemetryCollector.Collect<SolutionMetrics>(solutionMetrics);
-
+                    TelemetryCollectionUtils.collectSolutionMetrics(solutionAnalysisResult, request, startTime, tgtFramework);
                     solutionAnalysisResult.Result.ProjectAnalysisResults.ForEach(projectAnalysisResult =>
                     {
                         if (projectAnalysisResult == null)
                         {
                             return;
                         }
-
-                        var projectMetrics = new ProjectMetrics{
-                            MetricsType = MetricsType.project,
-                            TargetFramework = tgtFramework,
-                            sourceFrameworks = projectAnalysisResult.TargetFrameworks,
-                            TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
-                            projectGuid = Crypto.SHA256(projectAnalysisResult.ProjectGuid),
-                            projectType = projectAnalysisResult.ProjectType,
-                            numNugets = projectAnalysisResult.PackageReferences.Count,
-                            numReferences = projectAnalysisResult.ProjectReferences.Count,
-                            isBuildFailed = projectAnalysisResult.IsBuildFailed,
-                        };
-                        TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
+                        TelemetryCollectionUtils.collectProjectMetrics(projectAnalysisResult, tgtFramework);
 
                         projectAnalysisResult.PackageAnalysisResults.ToList()
                         .ForEach(p =>
@@ -80,16 +58,7 @@ namespace PortingAssistant.Common.Services
                             {
                                 if (result.IsCompletedSuccessfully)
                                 {
-                                    var nugetMetrics = new NugetMetrics
-                                    {
-                                        MetricsType = MetricsType.nuget,
-                                        TargetFramework = tgtFramework,
-                                        TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
-                                        pacakgeName = result.Result.PackageVersionPair.PackageId,
-                                        packageVersion = result.Result.PackageVersionPair.Version,
-                                        compatibility = result.Result.CompatibilityResults[tgtFramework].Compatibility
-                                    };
-                                    TelemetryCollector.Collect<NugetMetrics>(nugetMetrics);
+                                    TelemetryCollectionUtils.collectNugetMetrics(result, tgtFramework);
 
                                     _nugetPackageListeners.ForEach(l => l.Invoke(new Response<PackageAnalysisResult, PackageVersionPair>
                                     {
@@ -109,7 +78,7 @@ namespace PortingAssistant.Common.Services
 
                         projectAnalysisResult.SourceFileAnalysisResults.ToList().ForEach(
                           sourceFile => {
-                            FileAssessmentCollect(sourceFile, request.settings.TargetFramework);
+                            TelemetryCollectionUtils.FileAssessmentCollect(sourceFile, request.settings.TargetFramework);
                           } 
                         );
 
@@ -194,27 +163,6 @@ namespace PortingAssistant.Common.Services
         public void AddNugetPackageListener(OnNugetPackageUpdate listener)
         {
             _nugetPackageListeners.Add(listener);
-        }
-
-        public static void FileAssessmentCollect(SourceFileAnalysisResult result, string targetFramework)
-        {
-            var date = DateTime.Now;
-            foreach (var api in result.ApiAnalysisResults)
-            {
-                var apiMetrics = new APIMetrics
-                {
-                    MetricsType = MetricsType.api,
-                    TargetFramework = targetFramework,
-                    TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
-                    name = api.CodeEntityDetails.Name,
-                    nameSpace = api.CodeEntityDetails.Namespace,
-                    originalDefinition = api.CodeEntityDetails.OriginalDefinition,
-                    compatibility = api.CompatibilityResults[targetFramework].Compatibility,
-                    packageId = api.CodeEntityDetails.Package.PackageId,
-                    packageVersion = api.CodeEntityDetails.Package.Version
-                };
-                TelemetryCollector.Collect<APIMetrics>(apiMetrics);
-            }
         }
     }
 }

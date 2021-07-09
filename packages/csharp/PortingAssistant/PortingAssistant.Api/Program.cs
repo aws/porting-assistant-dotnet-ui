@@ -58,19 +58,9 @@ namespace PortingAssistant.Api
             configuration.DataStoreSettings.S3Endpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.S3Endpoint;
             configuration.DataStoreSettings.GitHubEndpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.GitHubEndpoint;
 
-            string metricsFolder = Path.Combine(args[2], "telemetry-logs");
-            TelemetryConfiguration teleConfig = new TelemetryConfiguration{
-              InvokeUrl = portingAssistantPortingConfiguration.PortingAssistantMetrics["InvokeUrl"].ToString(),
-              Region = portingAssistantPortingConfiguration.PortingAssistantMetrics["Region"].ToString(),
-              ServiceName = portingAssistantPortingConfiguration.PortingAssistantMetrics["ServiceName"].ToString(),
-              LogsPath = metricsFolder,
-              Description = portingAssistantPortingConfiguration.PortingAssistantMetrics["Description"].ToString(),
-              LogFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.log"),
-              MetricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics"),
-              Suffix = new List<string>(){".log", ".metrics"}
-            };
-
-            TelemetryCollector.Builder(Log.Logger, teleConfig.MetricsFilePath);
+            string metricsFolder = Path.Combine(args[2], "logs");
+            string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
+            TelemetryCollector.Builder(Log.Logger, metricsFilePath);
 
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection, configuration);
