@@ -166,7 +166,7 @@ export const initConnection = (logger: any = console) => {
 
     connection.onDisconnect = () => {
       // Recreate connection on disconnect
-      logger.log("main disconnected");
+      logger.log("disconnected");
       instance = undefined;
     };
 

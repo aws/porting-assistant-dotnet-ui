@@ -38,7 +38,6 @@ var winstonTransportsBackend = [
     extension: ".log",
     filename: backendLogName,
     dirname: dirName,
-    maxSize: 1024 * 1024,
     maxFiles: 20,
     format: winston.format.combine(
       winston.format.printf((info) => {
@@ -54,7 +53,6 @@ var winstonTransportsElectron = [
     extension: ".log",
     filename: electronLogName,
     dirname: dirName,
-    maxSize: 1024 * 1024,
     maxFiles: 20,
     format: winston.format.combine(
       winston.format.printf((info) => {
@@ -70,7 +68,6 @@ var winstonTransportsReact = [
     extension: ".log",
     filename: reactLogName,
     dirname: dirName,
-    maxSize: 1024 * 1024,
     maxFiles: 20,
     format: winston.format.combine(
       winston.format.printf((info) => {

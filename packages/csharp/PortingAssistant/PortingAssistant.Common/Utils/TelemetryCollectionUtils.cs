@@ -14,7 +14,7 @@ namespace PortingAssistant.Common.Utils
         string solutionPath = request.solutionFilePath;
         if (solutionPath == null) solutionPath = "";
         var solutionMetrics = new SolutionMetrics{
-          MetricsType = MetricsType.solution,
+          MetricsType = MetricsType.Solutions,
           TargetFramework = tgtFramework,
           TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
           SolutionPath = Crypto.SHA256(solutionPath),
@@ -25,7 +25,7 @@ namespace PortingAssistant.Common.Utils
 
       public static void collectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, string tgtFramework) {
         var projectMetrics = new ProjectMetrics{
-            MetricsType = MetricsType.project,
+            MetricsType = MetricsType.Project,
             TargetFramework = tgtFramework,
             sourceFrameworks = projectAnalysisResult.TargetFrameworks,
             TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
@@ -44,7 +44,7 @@ namespace PortingAssistant.Common.Utils
             MetricsType = MetricsType.nuget,
             TargetFramework = tgtFramework,
             TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
-            pacakgeName = result.Result.PackageVersionPair.PackageId,
+            packageName = result.Result.PackageVersionPair.PackageId,
             packageVersion = result.Result.PackageVersionPair.Version,
             compatibility = result.Result.CompatibilityResults[tgtFramework].Compatibility
         };
@@ -58,7 +58,7 @@ namespace PortingAssistant.Common.Utils
             {
                 var apiMetrics = new APIMetrics
                 {
-                    MetricsType = MetricsType.api,
+                    MetricsType = MetricsType.apis,
                     TargetFramework = targetFramework,
                     TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
                     name = api.CodeEntityDetails.Name,

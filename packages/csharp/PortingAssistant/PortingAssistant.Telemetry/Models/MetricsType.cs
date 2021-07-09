@@ -6,9 +6,9 @@ namespace PortingAssistant.Telemetry.Model
 {
     public enum MetricsType
     {
-        project,
-        solution,
-        api,
+        Project,
+        Solutions,
+        apis,
         nuget,
     }
 }
