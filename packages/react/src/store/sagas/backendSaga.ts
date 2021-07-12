@@ -5,6 +5,7 @@ import { getType } from "typesafe-actions";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
+import { internetAccessFailed } from "../../constants/messages";
 import { Message } from "../../models/error";
 import { NugetPackage, PackageAnalysisResult, ProjectApiAnalysisResult, SolutionProject } from "../../models/project";
 import { Response } from "../../models/response";
@@ -96,15 +97,7 @@ function* handleInit(action: ReturnType<typeof init>) {
   const storedSolutions = window.electron.getState("solutions", {});
   const targetFramework = getTargetFramework();
   if (!haveInternet) {
-    yield put(pushCurrentMessageUpdate({
-      messageId: uuid(),
-      groupId: "internetAccessFailed",
-      type: "error",
-      header: "No Internet Access",
-      content: "Ensure you have internet access before using the application",
-      buttonText: "View prerequisites",
-      onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
-    }));
+    yield put(pushCurrentMessageUpdate(internetAccessFailed()));
   }
   for (const solution of Object.keys(storedSolutions)) {
     if (haveInternet) { 
