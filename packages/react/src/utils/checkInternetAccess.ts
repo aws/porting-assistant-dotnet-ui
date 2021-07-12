@@ -24,17 +24,7 @@ export const checkInternetElectron = async (dispatch: Dispatch) => {
   const haveInternet: boolean = await window.electron.checkInternetAccess();
   if (!haveInternet) {
     dispatch(
-      setCurrentMessageUpdate([
-        {
-          messageId: uuid(),
-          groupId: "accessPrereqFailed",
-          type: "error",
-          header: "Unable to access S3",
-          content: "Please check your internet connection",
-          buttonText: "View prerequisites",
-          onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
-        }
-      ])
+      setCurrentMessageUpdate([internetAccessFailed()])
     );
   }
   return haveInternet;
