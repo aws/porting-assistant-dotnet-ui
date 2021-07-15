@@ -13,5 +13,11 @@ namespace PortingAssistant.Telemetry.Model
         public Compatibility compatibility { get; set; }
         public string packageId { get; set; }
         public string packageVersion { get; set; }
+
+        public string apiType { get; set; }
+
+        public bool hasActions { get; set; }
+
+        public int apiCounts { get; set; }
     }
 }

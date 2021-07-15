@@ -5,6 +5,11 @@ using PortingAssistant.Common.Model;
 using PortingAssistant.Telemetry.Model;
 using System.Web.Helpers;
 using PortingAssistantExtensionTelemetry;
+using System.Linq;
+using System.IO;
+using Serilog;
+using System.Collections.Generic;
+using System.Text;
 
 namespace PortingAssistant.Common.Utils
 {
@@ -34,6 +39,7 @@ namespace PortingAssistant.Common.Utils
             numNugets = projectAnalysisResult.PackageReferences.Count,
             numReferences = projectAnalysisResult.ProjectReferences.Count,
             isBuildFailed = projectAnalysisResult.IsBuildFailed,
+            compatibilityResult = projectAnalysisResult.ProjectCompatibilityResult
         };
       TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
       }
@@ -51,25 +57,26 @@ namespace PortingAssistant.Common.Utils
         TelemetryCollector.Collect<NugetMetrics>(nugetMetrics);
       }
 
-      public static void FileAssessmentCollect(SourceFileAnalysisResult result, string targetFramework)
+      public static void FileAssessmentCollect( IEnumerable<ApiAnalysisResult> selectedApis, string targetFramework)
         {
             var date = DateTime.Now;
-            foreach (var api in result.ApiAnalysisResults)
-            {
-                var apiMetrics = new APIMetrics
-                {
-                    MetricsType = MetricsType.apis,
-                    TargetFramework = targetFramework,
-                    TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
-                    name = api.CodeEntityDetails.Name,
-                    nameSpace = api.CodeEntityDetails.Namespace,
-                    originalDefinition = api.CodeEntityDetails.OriginalDefinition,
-                    compatibility = api.CompatibilityResults[targetFramework].Compatibility,
-                    packageId = api.CodeEntityDetails.Package.PackageId,
-                    packageVersion = api.CodeEntityDetails.Package.Version
-                };
-                TelemetryCollector.Collect<APIMetrics>(apiMetrics);
-            }
+            var apiMetrics = selectedApis.GroupBy(elem => new {elem.CodeEntityDetails.Name, elem.CodeEntityDetails.Namespace, elem.CodeEntityDetails.OriginalDefinition,
+                                  elem.CodeEntityDetails.Package?.PackageId, elem.CodeEntityDetails.Signature}).Select(group => new APIMetrics{
+                                        MetricsType = MetricsType.apis,
+                                        TargetFramework = targetFramework,
+                                        TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
+                                        name = group.First().CodeEntityDetails.Name,
+                                        nameSpace = group.First().CodeEntityDetails.Namespace,
+                                        originalDefinition = group.First().CodeEntityDetails.OriginalDefinition,
+                                        compatibility = group.First().CompatibilityResults[targetFramework].Compatibility,
+                                        packageId = group.First().CodeEntityDetails.Package?.PackageId,
+                                        packageVersion = group.First().CodeEntityDetails.Package?.Version,
+                                        apiType = group.First().CodeEntityDetails.CodeEntityType.ToString(),
+                                        hasActions = group.First().Recommendations.RecommendedActions.Any(action => action.RecommendedActionType != RecommendedActionType.NoRecommendation),
+                                        apiCounts = group.Count()
+                                  });
+
+              apiMetrics.ToList().ForEach(metric => TelemetryCollector.Collect(metric));
+          }
         }
-    }
-}
+        }

@@ -60,7 +60,15 @@ namespace PortingAssistant.Api
 
             string metricsFolder = Path.Combine(args[2], "logs");
             string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
-            TelemetryCollector.Builder(Log.Logger, metricsFilePath);
+            
+            
+            var telemetryLogConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
+                .MinimumLevel.Debug()
+                .WriteTo.RollingFile(
+                    Path.Combine(args[2], "logs", "portingAssistantTelemetry.log"),
+                    outputTemplate: outputTemplate)
+                .WriteTo.Sink(portingAssistantSink);
+            TelemetryCollector.Builder(telemetryLogConfiguration.CreateLogger(), metricsFilePath);
 
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection, configuration);

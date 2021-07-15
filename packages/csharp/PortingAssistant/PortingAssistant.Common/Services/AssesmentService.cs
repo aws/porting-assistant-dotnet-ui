@@ -76,11 +76,12 @@ namespace PortingAssistant.Common.Services
                             });
                         });
 
-                        projectAnalysisResult.SourceFileAnalysisResults.ToList().ForEach(
-                          sourceFile => {
-                            TelemetryCollectionUtils.FileAssessmentCollect(sourceFile, request.settings.TargetFramework);
-                          } 
-                        );
+                        if (projectAnalysisResult.SourceFileAnalysisResults != null &&
+                            projectAnalysisResult.ProjectGuid != null &&
+                            projectAnalysisResult.ProjectFilePath != null) {
+                              var selectedApis = projectAnalysisResult.SourceFileAnalysisResults.SelectMany(s => s.ApiAnalysisResults);
+                              TelemetryCollectionUtils.FileAssessmentCollect(selectedApis, request.settings.TargetFramework);
+                            }
 
                         if (projectAnalysisResult.IsBuildFailed)
                         {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
+using PortingAssistant.Client.Common.Model;
+
 
 namespace PortingAssistant.Telemetry.Model
 {
@@ -12,5 +13,7 @@ namespace PortingAssistant.Telemetry.Model
         public bool isBuildFailed { get; set; }
         public string projectType { get; set; }
         public List<String> sourceFrameworks { get; set; }
+
+        public ProjectCompatibilityResult compatibilityResult {get; set;}
     }
 }
