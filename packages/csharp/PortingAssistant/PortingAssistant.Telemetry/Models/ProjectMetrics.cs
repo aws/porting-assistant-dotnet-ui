@@ -1,19 +1,26 @@
 using System;
 using System.Collections.Generic;
 using PortingAssistant.Client.Common.Model;
+using Newtonsoft.Json;
 
 
 namespace PortingAssistant.Telemetry.Model
 {
     public class ProjectMetrics : MetricsBase
     {
-        public int numNugets { get; set; }
-        public int numReferences { get; set; }
-        public string projectGuid { get; set; }
-        public bool isBuildFailed { get; set; }
-        public string projectType { get; set; }
-        public List<String> sourceFrameworks { get; set; }
-
-        public ProjectCompatibilityResult compatibilityResult {get; set;}
+        [JsonProperty("numNugets")]
+        public int NumNugets { get; set; }
+        [JsonProperty("numReferences")]
+        public int NumReferences { get; set; }
+        [JsonProperty("projectGuid")]
+        public string ProjectGuid { get; set; }
+        [JsonProperty("isBuildFailed")]
+        public bool IsBuildFailed { get; set; }
+        [JsonProperty("projectType")]
+        public string ProjectType { get; set; }
+        [JsonProperty("sourceFrameworks")]
+        public List<String> SourceFrameworks { get; set; }
+        [JsonProperty("compatibilityResult")]
+        public ProjectCompatibilityResult CompatibilityResult {get; set;}
     }
 }

@@ -6,18 +6,24 @@ namespace PortingAssistant.Telemetry.Model
 {
     public class APIMetrics : MetricsBase
     {
-        public string name { get; set; }
-        public string nameSpace { get; set; }
-        public string originalDefinition { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        [JsonProperty("nameSpace")]
+        public string NameSpace { get; set; }
+        [JsonProperty("originalDefinition")]
+        public string OriginalDefinition { get; set; }
+        [JsonProperty("compatibility")]
         [JsonConverter(typeof(StringEnumConverter))]
-        public Compatibility compatibility { get; set; }
-        public string packageId { get; set; }
-        public string packageVersion { get; set; }
-
-        public string apiType { get; set; }
-
-        public bool hasActions { get; set; }
-
-        public int apiCounts { get; set; }
+        public Compatibility Compatibility { get; set; }
+        [JsonProperty("packageId")]
+        public string PackageId { get; set; }
+        [JsonProperty("packageVersion")]
+        public string PackageVersion { get; set; }
+        [JsonProperty("apiType")]
+        public string ApiType { get; set; }
+        [JsonProperty("hasActions")]
+        public bool HasActions { get; set; }
+        [JsonProperty("apiCounts")]
+        public int ApiCounts { get; set; }
     }
 }

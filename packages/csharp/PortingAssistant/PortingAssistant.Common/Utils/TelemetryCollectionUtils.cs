@@ -6,20 +6,17 @@ using PortingAssistant.Telemetry.Model;
 using System.Web.Helpers;
 using PortingAssistantExtensionTelemetry;
 using System.Linq;
-using System.IO;
-using Serilog;
 using System.Collections.Generic;
-using System.Text;
 
 namespace PortingAssistant.Common.Utils
 {
     public static class TelemetryCollectionUtils
     {
-      public static void collectSolutionMetrics(Task<SolutionAnalysisResult> solutionAnalysisResult, AnalyzeSolutionRequest request, DateTime startTime, string tgtFramework) {
+      public static void CollectSolutionMetrics(Task<SolutionAnalysisResult> solutionAnalysisResult, AnalyzeSolutionRequest request, DateTime startTime, string tgtFramework) {
         string solutionPath = request.solutionFilePath;
         if (solutionPath == null) solutionPath = "";
         var solutionMetrics = new SolutionMetrics{
-          MetricsType = MetricsType.Solutions,
+          MetricsType = MetricsType.Solution,
           TargetFramework = tgtFramework,
           TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
           SolutionPath = Crypto.SHA256(solutionPath),
@@ -28,31 +25,31 @@ namespace PortingAssistant.Common.Utils
         TelemetryCollector.Collect<SolutionMetrics>(solutionMetrics);
       }
 
-      public static void collectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, string tgtFramework) {
+      public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, string tgtFramework) {
         var projectMetrics = new ProjectMetrics{
             MetricsType = MetricsType.Project,
             TargetFramework = tgtFramework,
-            sourceFrameworks = projectAnalysisResult.TargetFrameworks,
+            SourceFrameworks = projectAnalysisResult.TargetFrameworks,
             TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
-            projectGuid = Crypto.SHA256(projectAnalysisResult.ProjectGuid),
-            projectType = projectAnalysisResult.ProjectType,
-            numNugets = projectAnalysisResult.PackageReferences.Count,
-            numReferences = projectAnalysisResult.ProjectReferences.Count,
-            isBuildFailed = projectAnalysisResult.IsBuildFailed,
-            compatibilityResult = projectAnalysisResult.ProjectCompatibilityResult
+            ProjectGuid = Crypto.SHA256(projectAnalysisResult.ProjectGuid),
+            ProjectType = projectAnalysisResult.ProjectType,
+            NumNugets = projectAnalysisResult.PackageReferences.Count,
+            NumReferences = projectAnalysisResult.ProjectReferences.Count,
+            IsBuildFailed = projectAnalysisResult.IsBuildFailed,
+            CompatibilityResult = projectAnalysisResult.ProjectCompatibilityResult
         };
       TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
       }
 
-      public static void collectNugetMetrics(Task<PackageAnalysisResult> result, string tgtFramework) {
+      public static void CollectNugetMetrics(Task<PackageAnalysisResult> result, string tgtFramework) {
         var nugetMetrics = new NugetMetrics
         {
-            MetricsType = MetricsType.nuget,
+            MetricsType = MetricsType.Nuget,
             TargetFramework = tgtFramework,
             TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
-            packageName = result.Result.PackageVersionPair.PackageId,
-            packageVersion = result.Result.PackageVersionPair.Version,
-            compatibility = result.Result.CompatibilityResults[tgtFramework].Compatibility
+            PackageName = result.Result.PackageVersionPair.PackageId,
+            PackageVersion = result.Result.PackageVersionPair.Version,
+            Compatibility = result.Result.CompatibilityResults[tgtFramework].Compatibility
         };
         TelemetryCollector.Collect<NugetMetrics>(nugetMetrics);
       }
@@ -62,18 +59,18 @@ namespace PortingAssistant.Common.Utils
             var date = DateTime.Now;
             var apiMetrics = selectedApis.GroupBy(elem => new {elem.CodeEntityDetails.Name, elem.CodeEntityDetails.Namespace, elem.CodeEntityDetails.OriginalDefinition,
                                   elem.CodeEntityDetails.Package?.PackageId, elem.CodeEntityDetails.Signature}).Select(group => new APIMetrics{
-                                        MetricsType = MetricsType.apis,
+                                        MetricsType = MetricsType.API,
                                         TargetFramework = targetFramework,
                                         TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
-                                        name = group.First().CodeEntityDetails.Name,
-                                        nameSpace = group.First().CodeEntityDetails.Namespace,
-                                        originalDefinition = group.First().CodeEntityDetails.OriginalDefinition,
-                                        compatibility = group.First().CompatibilityResults[targetFramework].Compatibility,
-                                        packageId = group.First().CodeEntityDetails.Package?.PackageId,
-                                        packageVersion = group.First().CodeEntityDetails.Package?.Version,
-                                        apiType = group.First().CodeEntityDetails.CodeEntityType.ToString(),
-                                        hasActions = group.First().Recommendations.RecommendedActions.Any(action => action.RecommendedActionType != RecommendedActionType.NoRecommendation),
-                                        apiCounts = group.Count()
+                                        Name = group.First().CodeEntityDetails.Name,
+                                        NameSpace = group.First().CodeEntityDetails.Namespace,
+                                        OriginalDefinition = group.First().CodeEntityDetails.OriginalDefinition,
+                                        Compatibility = group.First().CompatibilityResults[targetFramework].Compatibility,
+                                        PackageId = group.First().CodeEntityDetails.Package?.PackageId,
+                                        PackageVersion = group.First().CodeEntityDetails.Package?.Version,
+                                        ApiType = group.First().CodeEntityDetails.CodeEntityType.ToString(),
+                                        HasActions = group.First().Recommendations.RecommendedActions.Any(action => action.RecommendedActionType != RecommendedActionType.NoRecommendation),
+                                        ApiCounts = group.Count()
                                   });
 
               apiMetrics.ToList().ForEach(metric => TelemetryCollector.Collect(metric));

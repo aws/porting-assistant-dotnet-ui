@@ -42,14 +42,14 @@ namespace PortingAssistant.Common.Services
 
                 if (solutionAnalysisResult.IsCompletedSuccessfully)
                 {
-                    TelemetryCollectionUtils.collectSolutionMetrics(solutionAnalysisResult, request, startTime, tgtFramework);
+                    TelemetryCollectionUtils.CollectSolutionMetrics(solutionAnalysisResult, request, startTime, tgtFramework);
                     solutionAnalysisResult.Result.ProjectAnalysisResults.ForEach(projectAnalysisResult =>
                     {
                         if (projectAnalysisResult == null)
                         {
                             return;
                         }
-                        TelemetryCollectionUtils.collectProjectMetrics(projectAnalysisResult, tgtFramework);
+                        TelemetryCollectionUtils.CollectProjectMetrics(projectAnalysisResult, tgtFramework);
 
                         projectAnalysisResult.PackageAnalysisResults.ToList()
                         .ForEach(p =>
@@ -58,7 +58,7 @@ namespace PortingAssistant.Common.Services
                             {
                                 if (result.IsCompletedSuccessfully)
                                 {
-                                    TelemetryCollectionUtils.collectNugetMetrics(result, tgtFramework);
+                                    TelemetryCollectionUtils.CollectNugetMetrics(result, tgtFramework);
 
                                     _nugetPackageListeners.ForEach(l => l.Invoke(new Response<PackageAnalysisResult, PackageVersionPair>
                                     {

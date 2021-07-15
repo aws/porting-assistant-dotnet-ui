@@ -9,9 +9,12 @@ namespace PortingAssistant.Telemetry.Model
 {
     public class NugetMetrics : MetricsBase
     {
-        public string packageName { get; set; }
-        public string packageVersion { get; set; }
+        [JsonProperty("packageName")]
+        public string PackageName { get; set; }
+        [JsonProperty("packageVersion")]
+        public string PackageVersion { get; set; }
+        [JsonProperty("compatibility")]
         [JsonConverter(typeof(StringEnumConverter))]
-        public Compatibility compatibility { get; set; }
+        public Compatibility Compatibility { get; set; }
     }
 }
