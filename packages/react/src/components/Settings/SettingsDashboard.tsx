@@ -62,7 +62,7 @@ const SettingsDashboardInternal: React.FC = () => {
               {
                 text: "Configuring the AWS CLI",
                 externalUrl:
-                  "https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration"
+                  "https://docs.aws.amazon.com/portingassistant/latest/userguide/porting-assistant-prerequisites.html#porting-assistant-iam-profile"
               }
             ]}
           />
