@@ -1,4 +1,4 @@
-import { shell, contextBridge } from "electron";
+import { shell, contextBridge, remote } from "electron";
 import path from "path";
 import fs from "fs";
 import process from "process";
@@ -91,6 +91,10 @@ contextBridge.exposeInMainWorld("electron", {
   verifyUser: (profile: string) => invokeBackend("verifyProfile", profile),
   getVersion: () => invokeBackend("getVersion"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
+  getAssessmentLog: () => {
+    const dateString = new Date().toISOString().slice(0,10).replace(/-/g,"");
+    return path.join(remote.app.getPath("userData"), "logs", `portingAssistant-assessment-${dateString}.log`);
+  }
 });
 
 contextBridge.exposeInMainWorld("backend", {
