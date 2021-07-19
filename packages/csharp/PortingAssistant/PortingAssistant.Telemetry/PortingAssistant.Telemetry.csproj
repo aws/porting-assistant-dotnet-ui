@@ -9,8 +9,8 @@
     <PackageReference Include="Aws4RequestSigner" Version="1.0.3" />
     <PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.8" />
-    <PackageReference Include="PortingAssistant.Client.Client" Version="1.8.29-alpha-g9882a6b8b9" />
+    <PackageReference Include="PortingAssistant.Client.Client" Version="1.8.30-alpha-gbc2643ed5c" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
-    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="1.8.29-alpha-g9882a6b8b9" />
+    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="1.8.30-alpha-gbc2643ed5c" />
   </ItemGroup>
 </Project>

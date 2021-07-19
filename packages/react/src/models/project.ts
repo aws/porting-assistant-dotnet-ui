@@ -79,6 +79,7 @@ export interface ApiRecommendation extends RecommendedAction {
 
 export interface PackageRecommendation extends RecommendedAction {
   PackageId?: string;
+  Version?: string;
   TargetVersions?: string[];
 }
 
