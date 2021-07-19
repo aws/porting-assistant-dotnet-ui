@@ -49,7 +49,7 @@ namespace PortingAssistant.Common.Services
                         {
                             return;
                         }
-                        TelemetryCollectionUtils.CollectProjectMetrics(projectAnalysisResult, tgtFramework);
+                        TelemetryCollectionUtils.CollectProjectMetrics(projectAnalysisResult, request, tgtFramework);
 
                         projectAnalysisResult.PackageAnalysisResults.ToList()
                         .ForEach(p =>
@@ -58,7 +58,7 @@ namespace PortingAssistant.Common.Services
                             {
                                 if (result.IsCompletedSuccessfully)
                                 {
-                                    TelemetryCollectionUtils.CollectNugetMetrics(result, tgtFramework);
+                                    TelemetryCollectionUtils.CollectNugetMetrics(result, request, tgtFramework);
 
                                     _nugetPackageListeners.ForEach(l => l.Invoke(new Response<PackageAnalysisResult, PackageVersionPair>
                                     {
@@ -80,7 +80,7 @@ namespace PortingAssistant.Common.Services
                             projectAnalysisResult.ProjectGuid != null &&
                             projectAnalysisResult.ProjectFilePath != null) {
                               var selectedApis = projectAnalysisResult.SourceFileAnalysisResults.SelectMany(s => s.ApiAnalysisResults);
-                              TelemetryCollectionUtils.FileAssessmentCollect(selectedApis, request.settings.TargetFramework);
+                              TelemetryCollectionUtils.FileAssessmentCollect(selectedApis, request);
                             }
 
                         if (projectAnalysisResult.IsBuildFailed)

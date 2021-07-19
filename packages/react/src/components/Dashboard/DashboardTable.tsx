@@ -80,6 +80,8 @@ const DashboardTableInternal: React.FC = () => {
         dispatch(
           analyzeSolution.request({
             solutionPath: solutionPath,
+            runId: uuid(),
+            triggerType: "UserRequest",
             settings: {
               ignoredProjects: [],
               targetFramework: targetFramework,

@@ -119,7 +119,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
               label: data.targetFrameworkSelection.label
             });
             // Wait for C# backend to restart
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            await new Promise(resolve => setTimeout(resolve, 10000));
             dispatch(init(true));
             dispatch(setProfileSet(true));
             // set pending message and go back to settings dashboard

@@ -113,6 +113,8 @@ function* handleInit(action: ReturnType<typeof init>) {
       yield put(
         analyzeSolution.request({
           solutionPath: solution,
+          runId: uuid(),
+          triggerType: "AutoRequest",
           settings: {
             ignoredProjects: [],
             targetFramework: targetFramework,
@@ -188,6 +190,8 @@ function* handleAnalyzeSolution(action: ReturnType<typeof analyzeSolution.reques
     const solutionDetails: SagaReturnType<typeof window.backend.analyzeSolution> = yield call(
       [window.backend, window.backend.analyzeSolution],
       currentSolutionPath,
+      action.payload.runId,
+      action.payload.triggerType,
       action.payload.settings
     );
 

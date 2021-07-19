@@ -17,6 +17,8 @@ namespace PortingAssistant.Common.Utils
         if (solutionPath == null) solutionPath = "";
         var solutionMetrics = new SolutionMetrics{
           MetricsType = MetricsType.Solution,
+          RunId = request.runId,
+          TriggerType = request.triggerType,
           TargetFramework = tgtFramework,
           TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
           SolutionPath = Crypto.SHA256(solutionPath),
@@ -25,9 +27,11 @@ namespace PortingAssistant.Common.Utils
         TelemetryCollector.Collect<SolutionMetrics>(solutionMetrics);
       }
 
-      public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, string tgtFramework) {
+      public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework) {
         var projectMetrics = new ProjectMetrics{
             MetricsType = MetricsType.Project,
+            RunId = request.runId,
+            TriggerType = request.triggerType,
             TargetFramework = tgtFramework,
             SourceFrameworks = projectAnalysisResult.TargetFrameworks,
             TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
@@ -41,10 +45,12 @@ namespace PortingAssistant.Common.Utils
       TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
       }
 
-      public static void CollectNugetMetrics(Task<PackageAnalysisResult> result, string tgtFramework) {
+      public static void CollectNugetMetrics(Task<PackageAnalysisResult> result, AnalyzeSolutionRequest request, string tgtFramework) {
         var nugetMetrics = new NugetMetrics
         {
             MetricsType = MetricsType.Nuget,
+            RunId = request.runId,
+            TriggerType = request.triggerType,
             TargetFramework = tgtFramework,
             TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
             PackageName = result.Result.PackageVersionPair.PackageId,
@@ -54,18 +60,20 @@ namespace PortingAssistant.Common.Utils
         TelemetryCollector.Collect<NugetMetrics>(nugetMetrics);
       }
 
-      public static void FileAssessmentCollect( IEnumerable<ApiAnalysisResult> selectedApis, string targetFramework)
+      public static void FileAssessmentCollect( IEnumerable<ApiAnalysisResult> selectedApis, AnalyzeSolutionRequest request)
         {
             var date = DateTime.Now;
             var apiMetrics = selectedApis.GroupBy(elem => new {elem.CodeEntityDetails.Name, elem.CodeEntityDetails.Namespace, elem.CodeEntityDetails.OriginalDefinition,
                                   elem.CodeEntityDetails.Package?.PackageId, elem.CodeEntityDetails.Signature}).Select(group => new APIMetrics{
                                         MetricsType = MetricsType.API,
-                                        TargetFramework = targetFramework,
+                                        RunId = request.runId,
+                                        TriggerType = request.triggerType,
+                                        TargetFramework = request.settings.TargetFramework,
                                         TimeStamp = date.ToString("MM/dd/yyyy HH:mm"),
                                         Name = group.First().CodeEntityDetails.Name,
                                         NameSpace = group.First().CodeEntityDetails.Namespace,
                                         OriginalDefinition = group.First().CodeEntityDetails.OriginalDefinition,
-                                        Compatibility = group.First().CompatibilityResults[targetFramework].Compatibility,
+                                        Compatibility = group.First().CompatibilityResults[request.settings.TargetFramework].Compatibility,
                                         PackageId = group.First().CodeEntityDetails.Package?.PackageId,
                                         PackageVersion = group.First().CodeEntityDetails.Package?.Version,
                                         ApiType = group.First().CodeEntityDetails.CodeEntityType.ToString(),

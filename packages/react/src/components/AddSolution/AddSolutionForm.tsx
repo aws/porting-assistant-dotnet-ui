@@ -3,6 +3,7 @@ import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
+import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
 import { analyzeSolution } from "../../store/actions/backend";
@@ -29,6 +30,8 @@ const ImportSolutionInternal: React.FC = () => {
           dispatch(
             analyzeSolution.request({
               solutionPath: data.solutionFilename,
+              runId: uuid(),
+              triggerType: "InitialRequest",
               settings: {
                 ignoredProjects: [],
                 targetFramework: targetFramework,

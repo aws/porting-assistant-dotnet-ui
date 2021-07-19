@@ -46,6 +46,8 @@ export interface Backend {
   ping: () => Promise<string>;
   analyzeSolution: (
     solutionPath: string,
+    runId: string,
+    triggerType: string,
     settings: {
       ignoredProjects: string[];
       targetFramework: string;
