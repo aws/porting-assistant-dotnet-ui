@@ -56,7 +56,7 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           type: "success",
           content: `Successfully assessed ${completed[0].name}.`,
           dismissible: true,
-          buttonText: "View log file",
+          buttonText: "View log",
           onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
@@ -69,7 +69,7 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           type: "success",
           content: `Successfully assessed ${completed.length} solutions.`,
           dismissible: true,
-          buttonText: "View log file",
+          buttonText: "View log",
           onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
@@ -84,7 +84,7 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           type: "error",
           content: `Failed to assess ${failedSolutions[0].name}. You must be able to build your project in Visual Studio. If this error persists, contact support in the Porting Assistant help menu.`,
           dismissible: true,
-          buttonText: "View log file",
+          buttonText: "View log",
           onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
@@ -98,7 +98,7 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           type: "error",
           content: `Failed to assess ${failedSolutions.length} solutions. You must be able to build your project in Visual Studio. If this error persists, contact support in the Porting Assistant help menu.`,
           dismissible: true,
-          buttonText: "View log file",
+          buttonText: "View log",
           onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
