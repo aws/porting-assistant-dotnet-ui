@@ -9,6 +9,7 @@ import { SourceFile } from "../components/AssessShared/FileTable";
 import { NugetPackageTableFields } from "../components/AssessShared/NugetPackageTable";
 import { TableData } from "../components/AssessSolution/ProjectsTable";
 import { DashboardTableData } from "../components/Dashboard/DashboardTable";
+import { internetAccessFailed } from "../constants/messages";
 import {
   apiAnalysisResult1,
   completePortingProject,
@@ -949,21 +950,15 @@ describe("selectDashboardTableData", () => {
 });
 
 describe("checkInternetAccess", () => {
+  window.electron.checkInternetAccess = jest.fn();
+  jest.spyOn(window.electron, "checkInternetAccess").mockReturnValue(Promise.resolve(false));
+
   it("should add internet access error to messages", async () => {
     const result = await checkInternetAccess("", dispatch);
     expect(result).toBe(false);
     const currentMessagesUpdates = currentMessages(store.getState());
-    const expectResult = [
-      {
-        buttonText: "View prerequisites",
-        type: "error",
-        content: "Please check your internet connection",
-        groupId: "accessPrereqFailed",
-        header: "Unable to access S3",
-        messageId: currentMessagesUpdates[0].messageId,
-        onButtonClick: currentMessagesUpdates[0].onButtonClick
-      }
-    ];
-    expect(currentMessagesUpdates).toEqual(expectResult);
+    const expectResult = internetAccessFailed();
+    expect(currentMessagesUpdates[0]["content"]).toEqual(expectResult["content"]);
+    expect(currentMessagesUpdates[0]["header"]).toEqual(expectResult["header"]);
   });
 });

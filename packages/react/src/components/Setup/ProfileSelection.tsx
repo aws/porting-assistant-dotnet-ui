@@ -199,7 +199,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                       event.preventDefault();
                       event.stopPropagation();
                       window.electron.openExternalUrl(
-                        "https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html"
+                        "https://docs.aws.amazon.com/portingassistant/latest/userguide/porting-assistant-prerequisites.html#porting-assistant-iam-profile"
                       );
                     }}
                   >
