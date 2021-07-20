@@ -41,6 +41,7 @@ export interface Electron {
   getVersion: () => Promise<string>;
   telemetry: (message: any) => void;
   getAssessmentLog: () => string;
+  checkInternetAccess: () => Promise<boolean>;
 }
 
 export interface Backend {
@@ -62,7 +63,6 @@ export interface Backend {
   listenApiAnalysisUpdate: (
     callback: (projectAnalysis: Response<ProjectApiAnalysisResult, SolutionProject>) => void
   ) => void;
-  checkInternetAccess: () => Promise<boolean>;
 }
 
 export interface Porting {
