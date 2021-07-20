@@ -10,21 +10,21 @@ using PortingAssistant.Telemetry.Utils;
 namespace PortingAssistant.Telemetry
 {
     class Program
-    {
-        public static void Main(string[] args)
+    {        public static void Main(string[] args)
         {
-            if (args.Length < 3)
+            if (args.Length < 4)
             {
                 throw new ArgumentException
                     (
                     "Must provide a telemetry config file, " +
-                    "aws profile and user data path."
+                    "aws profile, user data path and app version."
                     );
             }
 
             var config = args[0];
             var profile = args[1];
             var userData = args[2];
+            PortingAssistantAppVersion.version = args[3];
 
             Connection _connection = new ConnectionBuilder().WithLogging().Build();
             var portingAssistantPortingConfiguration = System.Text.Json.JsonSerializer.Deserialize<PortingAssistantPortingConfiguration>(File.ReadAllText(config));
@@ -64,5 +64,12 @@ namespace PortingAssistant.Telemetry
             public PortingAssistantConfiguration PortingAssistantConfiguration { get; set; }
             public Dictionary<string, object> PortingAssistantMetrics { get; set; }
         }
+
     }
+
+    public class PortingAssistantAppVersion {
+      public static string version {get; set;}
+
+    }
+
 }

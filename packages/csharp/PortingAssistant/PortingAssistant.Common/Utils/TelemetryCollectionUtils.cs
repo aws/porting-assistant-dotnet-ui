@@ -22,7 +22,8 @@ namespace PortingAssistant.Common.Utils
           TargetFramework = tgtFramework,
           TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
           SolutionPath = Crypto.SHA256(solutionPath),
-          AnalysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds
+          AnalysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds,
+          PortingAssistantVersion = PortingAssistant.Telemetry.PortingAssistantAppVersion.version
         };
         TelemetryCollector.Collect<SolutionMetrics>(solutionMetrics);
       }
@@ -40,7 +41,8 @@ namespace PortingAssistant.Common.Utils
             NumNugets = projectAnalysisResult.PackageReferences.Count,
             NumReferences = projectAnalysisResult.ProjectReferences.Count,
             IsBuildFailed = projectAnalysisResult.IsBuildFailed,
-            CompatibilityResult = projectAnalysisResult.ProjectCompatibilityResult
+            CompatibilityResult = projectAnalysisResult.ProjectCompatibilityResult,
+            PortingAssistantVersion = PortingAssistant.Telemetry.PortingAssistantAppVersion.version
         };
       TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
       }
@@ -55,7 +57,8 @@ namespace PortingAssistant.Common.Utils
             TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
             PackageName = result.Result.PackageVersionPair.PackageId,
             PackageVersion = result.Result.PackageVersionPair.Version,
-            Compatibility = result.Result.CompatibilityResults[tgtFramework].Compatibility
+            Compatibility = result.Result.CompatibilityResults[tgtFramework].Compatibility,
+            PortingAssistantVersion = PortingAssistant.Telemetry.PortingAssistantAppVersion.version
         };
         TelemetryCollector.Collect<NugetMetrics>(nugetMetrics);
       }
@@ -78,7 +81,8 @@ namespace PortingAssistant.Common.Utils
                                         PackageVersion = group.First().CodeEntityDetails.Package?.Version,
                                         ApiType = group.First().CodeEntityDetails.CodeEntityType.ToString(),
                                         HasActions = group.First().Recommendations.RecommendedActions.Any(action => action.RecommendedActionType != RecommendedActionType.NoRecommendation),
-                                        ApiCounts = group.Count()
+                                        ApiCounts = group.Count(),
+                                        PortingAssistantVersion = PortingAssistant.Telemetry.PortingAssistantAppVersion.version
                                   });
 
               apiMetrics.ToList().ForEach(metric => TelemetryCollector.Collect(metric));

@@ -54,7 +54,8 @@ export const initTelemetryConnection = (logger: any = console) => {
                       "porting-assistant-config.json"
                   ),
               localStore.get("profile"),
-              app.getPath("userData")
+              app.getPath("userData"),
+              app.getVersion()
           )
           .build();
 
