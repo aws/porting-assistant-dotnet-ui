@@ -1,1 +1,359 @@
-{"type":"object","properties":{"apiAnalysis":{"type":"object","additionalProperties":{"type":"object","additionalProperties":{"anyOf":[{"type":"object","properties":{"status":{"type":"string","enum":["LOADED"]},"data":{"type":"object","properties":{"solutionFile":{"type":"string"},"projectFile":{"type":"string"},"errors":{"type":"array","items":{"type":"string"}},"sourceFileAnalysisResults":{"type":"array","items":{"type":"object","properties":{"sourceFileName":{"type":"string"},"sourceFilePath":{"type":"string"},"apiAnalysisResults":{"type":"array","items":{"type":"object","properties":{"codeEntityDetails":{"type":"object","properties":{"codeEntityType":{"enum":["Class","ClassAttribute","InstanceAttribute","Method","Namespace","Annotation","Declaration","Using","Enum","Struct"],"type":"string"},"namespace":{"type":"string"},"name":{"type":"string"},"signature":{"type":"string"},"originalDefinition":{"type":"string"},"textSpan":{"type":"object","properties":{"startCharPosition":{"type":["number","null"]},"endCharPosition":{"type":["number","null"]},"startLinePosition":{"type":["number","null"]},"endLinePosition":{"type":["number","null"]}}},"package":{"type":"object","properties":{"packageId":{"type":"string"},"version":{"type":"string"},"packageSourceType":{"type":"string","enum":["SDK","NUGET","PORTABILITY_ANALYZER","RECOMMENDATION","PRIVATE"]}}}}},"compatibilityResults":{"type":"object","additionalProperties":{"type":"object","properties":{"compatibility":{"enum":["COMPATIBLE","DEPRACATED","INCOMPATIBLE","UNKNOWN"],"type":"string"},"compatibleVersions":{"type":"array","items":{"type":"string"}}}}},"recommendations":{"type":"object","properties":{"recommendedActions":{"type":"array","items":{"type":"object","properties":{"recommendedActionType":{"type":"string","enum":["UpgradePackage","ReplaceApi","ReplaceNamespace","ReplacePackage","NoRecommendation"]},"description":{"type":"string"},"textSpan":{"type":"object","properties":{"startCharPosition":{"type":["number","null"]},"endCharPosition":{"type":["number","null"]},"startLinePosition":{"type":["number","null"]},"endLinePosition":{"type":["number","null"]}}},"targetCPU":{"type":"array","items":{"type":"string"}}}}}}}}}},"recommendedActions":{"type":"array","items":{"type":"object","properties":{"recommendedActionType":{"type":"string","enum":["UpgradePackage","ReplaceApi","ReplaceNamespace","ReplacePackage","NoRecommendation"]},"description":{"type":"string"},"textSpan":{"type":"object","properties":{"startCharPosition":{"type":["number","null"]},"endCharPosition":{"type":["number","null"]},"startLinePosition":{"type":["number","null"]},"endLinePosition":{"type":["number","null"]}}},"targetCPU":{"type":"array","items":{"type":"string"}}}}}}}}}}}},{"type":"object","properties":{"status":{"type":"string","enum":["LOADING"]}}},{"type":"object","properties":{"status":{"type":"string","enum":["FAILED"]},"error":{"anyOf":[{"type":"object","properties":{"name":{"type":"string"},"message":{"type":"string"},"stack":{"type":"string"}}},{"type":["null","string"]}]},"message":{"type":["null","string"]}}},{"type":"object","properties":{"status":{"type":"string","enum":["RELOADING"]},"data":{"type":"object","properties":{"solutionFile":{"type":"string"},"projectFile":{"type":"string"},"errors":{"type":"array","items":{"type":"string"}},"sourceFileAnalysisResults":{"type":"array","items":{"type":"object","properties":{"sourceFileName":{"type":"string"},"sourceFilePath":{"type":"string"},"apiAnalysisResults":{"type":"array","items":{"type":"object","properties":{"codeEntityDetails":{"type":"object","properties":{"codeEntityType":{"enum":["Class","ClassAttribute","InstanceAttribute","Method","Namespace","Annotation","Declaration","Using","Enum","Struct"],"type":"string"},"namespace":{"type":"string"},"name":{"type":"string"},"signature":{"type":"string"},"originalDefinition":{"type":"string"},"textSpan":{"type":"object","properties":{"startCharPosition":{"type":["number","null"]},"endCharPosition":{"type":["number","null"]},"startLinePosition":{"type":["number","null"]},"endLinePosition":{"type":["number","null"]}}},"package":{"type":"object","properties":{"packageId":{"type":"string"},"version":{"type":"string"},"packageSourceType":{"type":"string","enum":["SDK","NUGET","PORTABILITY_ANALYZER","RECOMMENDATION","PRIVATE"]}}}}},"compatibilityResults":{"type":"object","additionalProperties":{"type":"object","properties":{"compatibility":{"enum":["COMPATIBLE","DEPRACATED","INCOMPATIBLE","UNKNOWN"],"type":"string"},"compatibleVersions":{"type":"array","items":{"type":"string"}}}}},"recommendations":{"type":"object","properties":{"recommendedActions":{"type":"array","items":{"type":"object","properties":{"recommendedActionType":{"type":"string","enum":["UpgradePackage","ReplaceApi","ReplaceNamespace","ReplacePackage","NoRecommendation"]},"description":{"type":"string"},"textSpan":{"type":"object","properties":{"startCharPosition":{"type":["number","null"]},"endCharPosition":{"type":["number","null"]},"startLinePosition":{"type":["number","null"]},"endLinePosition":{"type":["number","null"]}}},"targetCPU":{"type":"array","items":{"type":"string"}}}}}}}}}},"recommendedActions":{"type":"array","items":{"type":"object","properties":{"recommendedActionType":{"type":"string","enum":["UpgradePackage","ReplaceApi","ReplaceNamespace","ReplacePackage","NoRecommendation"]},"description":{"type":"string"},"textSpan":{"type":"object","properties":{"startCharPosition":{"type":["number","null"]},"endCharPosition":{"type":["number","null"]},"startLinePosition":{"type":["number","null"]},"endLinePosition":{"type":["number","null"]}}},"targetCPU":{"type":"array","items":{"type":"string"}}}}}}}}}}}}]}}},"solutionToSolutionDetails":{"type":"object","additionalProperties":{"anyOf":[{"type":"object","properties":{"status":{"type":"string","enum":["LOADED"]},"data":{"type":"object","properties":{"solutionName":{"type":"string"},"solutionFilePath":{"type":"string"},"failedProjects":{"type":"array","items":{"type":"string"}},"projects":{"type":"array","items":{"type":"object","properties":{"projectName":{"type":["null","string"]},"projectFilePath":{"type":"string"},"projectGuid":{"type":["null","string"]},"projectType":{"type":["null","string"]},"targetFrameworks":{"anyOf":[{"type":"array","items":{"type":"string"}},{"type":"null"}]},"packageReferences":{"anyOf":[{"type":"array","items":{"type":"object","properties":{"packageId":{"type":"string"},"version":{"type":"string"}}}},{"type":"null"}]},"projectReferences":{"anyOf":[{"type":"array","items":{"type":"object","properties":{"referencePath":{"type":"string"}}}},{"type":"null"}]},"isBuildFailed":{"type":"boolean"}}}}}}}},{"type":"object","properties":{"status":{"type":"string","enum":["LOADING"]}}},{"type":"object","properties":{"status":{"type":"string","enum":["FAILED"]},"error":{"anyOf":[{"type":"object","properties":{"name":{"type":"string"},"message":{"type":"string"},"stack":{"type":"string"}}},{"type":["null","string"]}]},"message":{"type":["null","string"]}}},{"type":"object","properties":{"status":{"type":"string","enum":["RELOADING"]},"data":{"type":"object","properties":{"solutionName":{"type":"string"},"solutionFilePath":{"type":"string"},"failedProjects":{"type":"array","items":{"type":"string"}},"projects":{"type":"array","items":{"type":"object","properties":{"projectName":{"type":["null","string"]},"projectFilePath":{"type":"string"},"projectGuid":{"type":["null","string"]},"projectType":{"type":["null","string"]},"targetFrameworks":{"anyOf":[{"type":"array","items":{"type":"string"}},{"type":"null"}]},"packageReferences":{"anyOf":[{"type":"array","items":{"type":"object","properties":{"packageId":{"type":"string"},"version":{"type":"string"}}}},{"type":"null"}]},"projectReferences":{"anyOf":[{"type":"array","items":{"type":"object","properties":{"referencePath":{"type":"string"}}}},{"type":"null"}]},"isBuildFailed":{"type":"boolean"}}}}}}}}]}},"profileSet":{"type":"boolean","default":false}},"$schema":"http://json-schema.org/draft-07/schema#"}
+{
+  "type": "object",
+  "properties": {
+    "apiAnalysis": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [{
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["LOADED"]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "solutionFile": {
+                    "type": "string"
+                  },
+                  "projectFile": {
+                    "type": "string"
+                  },
+                  "errors": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "sourceFileAnalysisResults": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "sourceFileName": {
+                          "type": "string"
+                        },
+                        "sourceFilePath": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }, {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["LOADING"]
+              }
+            }
+          }, {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["FAILED"]
+              },
+              "error": {
+                "anyOf": [{
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "stack": {
+                      "type": "string"
+                    }
+                  }
+                }, {
+                  "type": ["null", "string"]
+                }]
+              },
+              "message": {
+                "type": ["null", "string"]
+              }
+            }
+          }, {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["RELOADING"]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "solutionFile": {
+                    "type": "string"
+                  },
+                  "projectFile": {
+                    "type": "string"
+                  },
+                  "errors": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "sourceFileAnalysisResults": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "sourceFileName": {
+                          "type": "string"
+                        },
+                        "sourceFilePath": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }]
+        }
+      }
+    },
+    "solutionToSolutionDetails": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [{
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["LOADED"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "solutionName": {
+                  "type": "string"
+                },
+                "solutionFilePath": {
+                  "type": "string"
+                },
+                "failedProjects": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "projects": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "projectName": {
+                        "type": ["null", "string"]
+                      },
+                      "projectFilePath": {
+                        "type": "string"
+                      },
+                      "projectGuid": {
+                        "type": ["null", "string"]
+                      },
+                      "projectType": {
+                        "type": ["null", "string"]
+                      },
+                      "targetFrameworks": {
+                        "anyOf": [{
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }, {
+                          "type": "null"
+                        }]
+                      },
+                      "packageReferences": {
+                        "anyOf": [{
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "packageId": {
+                                "type": "string"
+                              },
+                              "version": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }, {
+                          "type": "null"
+                        }]
+                      },
+                      "projectReferences": {
+                        "anyOf": [{
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "referencePath": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }, {
+                          "type": "null"
+                        }]
+                      },
+                      "isBuildFailed": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }, {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["LOADING"]
+            }
+          }
+        }, {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["FAILED"]
+            },
+            "error": {
+              "anyOf": [{
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "stack": {
+                    "type": "string"
+                  }
+                }
+              }, {
+                "type": ["null", "string"]
+              }]
+            },
+            "message": {
+              "type": ["null", "string"]
+            }
+          }
+        }, {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["RELOADING"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "solutionName": {
+                  "type": "string"
+                },
+                "solutionFilePath": {
+                  "type": "string"
+                },
+                "failedProjects": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "projects": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "projectName": {
+                        "type": ["null", "string"]
+                      },
+                      "projectFilePath": {
+                        "type": "string"
+                      },
+                      "projectGuid": {
+                        "type": ["null", "string"]
+                      },
+                      "projectType": {
+                        "type": ["null", "string"]
+                      },
+                      "targetFrameworks": {
+                        "anyOf": [{
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }, {
+                          "type": "null"
+                        }]
+                      },
+                      "packageReferences": {
+                        "anyOf": [{
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "packageId": {
+                                "type": "string"
+                              },
+                              "version": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }, {
+                          "type": "null"
+                        }]
+                      },
+                      "projectReferences": {
+                        "anyOf": [{
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "referencePath": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }, {
+                          "type": "null"
+                        }]
+                      },
+                      "isBuildFailed": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }]
+      }
+    },
+    "profileSet": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
