@@ -1,5 +1,4 @@
 import { createStore } from "redux";
-import  uuid  from 'uuid';
 
 import { ApiAnalysisResult, Project, ProjectApiAnalysisResult, SourceFileToContents } from "../../src/models/project";
 import { createRootReducer } from "../../src/store/reducers";
@@ -951,6 +950,9 @@ describe("selectDashboardTableData", () => {
 });
 
 describe("checkInternetAccess", () => {
+  window.electron.checkInternetAccess = jest.fn();
+  jest.spyOn(window.electron, "checkInternetAccess").mockReturnValue(Promise.resolve(false));
+
   it("should add internet access error to messages", async () => {
     const result = await checkInternetAccess("", dispatch);
     expect(result).toBe(false);

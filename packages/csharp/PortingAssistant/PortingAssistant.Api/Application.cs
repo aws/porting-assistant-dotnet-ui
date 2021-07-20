@@ -111,23 +111,6 @@ namespace PortingAssistant.Api
                     };
                 }
             });
-
-            _connection.On<string, bool>("checkInternetAccess", request =>
-            {
-                var httpService = _services.GetRequiredService<IHttpService>();
-                try
-                {
-                    var file1 = httpService.DownloadS3FileAsync("newtonsoft.json.json.gz");
-                    var file2 = httpService.DownloadS3FileAsync("52projects.json.gz");
-                    var file3 = httpService.DownloadS3FileAsync("2a486f72.mega.json.gz");
-                    Task.WaitAny(file1, file2, file3);
-                    return true;
-                }
-                catch
-                {
-                    return false;
-                }
-            });
         }
 
         public void Start()
