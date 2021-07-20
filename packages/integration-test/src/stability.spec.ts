@@ -283,6 +283,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
 
   beforeEach(async () => {
     await app.client.refresh();
+    console.log(`App process id: ${appProcessId}`);
     appMemoryUsageBefore = (await pidusage(appProcessId)).memory;
     appMemoryUsageMax = appMemoryUsageBefore;
     console.log(`Memory usage before test: ${appMemoryUsageBefore}`);
