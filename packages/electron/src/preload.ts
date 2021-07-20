@@ -93,6 +93,10 @@ contextBridge.exposeInMainWorld("electron", {
   verifyUser: (profile: string) => invokeBackend("verifyProfile", profile),
   getVersion: () => invokeBackend("getVersion"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
+  getAssessmentLog: () => {
+    const dateString = new Date().toISOString().slice(0,10).replace(/-/g,"");
+    return path.join(remote.app.getPath("userData"), "logs", `portingAssistant-assessment-${dateString}.log`);
+  },
   checkInternetAccess: async () => {
     const configFile = isDev
       ? path.join(

@@ -10,6 +10,7 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
   const prevLoadingSolutions = useRef(Array<DashboardTableData>());
 
   useEffect(() => {
+    const logfilePath = window.electron.getAssessmentLog();
     const loadingSolutions: DashboardTableData[] = [];
     const failedSolutions: DashboardTableData[] = [];
     tableData.forEach(data => {
@@ -54,7 +55,9 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           groupId: "assessSuccess",
           type: "success",
           content: `Successfully assessed ${completed[0].name}.`,
-          dismissible: true
+          dismissible: true,
+          buttonText: "View log",
+          onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
     }
@@ -65,7 +68,9 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           groupId: "assessSuccess",
           type: "success",
           content: `Successfully assessed ${completed.length} solutions.`,
-          dismissible: true
+          dismissible: true,
+          buttonText: "View log",
+          onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
     }
@@ -78,7 +83,9 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           groupId: "assessFailed",
           type: "error",
           content: `Failed to assess ${failedSolutions[0].name}. You must be able to build your project in Visual Studio. If this error persists, contact support in the Porting Assistant help menu.`,
-          dismissible: true
+          dismissible: true,
+          buttonText: "View log",
+          onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
     }
@@ -90,7 +97,9 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           groupId: "assessFailed",
           type: "error",
           content: `Failed to assess ${failedSolutions.length} solutions. You must be able to build your project in Visual Studio. If this error persists, contact support in the Porting Assistant help menu.`,
-          dismissible: true
+          dismissible: true,
+          buttonText: "View log",
+          onButtonClick: () => window.electron.openPath(logfilePath)
         })
       );
     }
