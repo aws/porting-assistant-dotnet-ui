@@ -38,6 +38,101 @@
                         },
                         "sourceFilePath": {
                           "type": "string"
+                        },
+                        "apiAnalysisResults": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "codeEntityDetails": {
+                                "type": "object",
+                                "properties": {
+                                  "codeEntityType": {
+                                    "enum": ["Class", "ClassAttribute", "InstanceAttribute", "Method", "Namespace", "Annotation", "Declaration", "Using", "Enum", "Struct"],
+                                    "type": "string"
+                                  },
+                                  "namespace": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "signature": {
+                                    "type": "string"
+                                  },
+                                  "originalDefinition": {
+                                    "type": "string"
+                                  },
+                                  "textSpan": {
+                                    "type": "object",
+                                    "properties": {
+                                      "startCharPosition": {
+                                        "type": "number"
+                                      },
+                                      "endCharPosition": {
+                                        "type": "number"
+                                      },
+                                      "startLinePosition": {
+                                        "type": "number"
+                                      },
+                                      "endLinePosition": {
+                                        "type": "number"
+                                      }
+                                    }
+                                  },
+                                  "package": {
+                                    "type": "object",
+                                    "properties": {
+                                      "packageId": {
+                                        "type": "string"
+                                      },
+                                      "version": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "compatibilityResults": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "object",
+                                  "properties": {
+                                    "compatibility": {
+                                      "enum": ["COMPATIBLE", "DEPRACATED", "INCOMPATIBLE", "UNKNOWN"],
+                                      "type": "string"
+                                    },
+                                    "compatibleVersions": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "recommendations": {
+                                "type": "object",
+                                "properties": {
+                                  "recommendedActions": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "recommendedActionType": {
+                                          "enum": ["NoRecommendation", "ReplaceApi", "ReplaceNamespace", "ReplacePackage", "UpgradePackage"],
+                                          "type": "string"
+                                        },
+                                        "description": {
+                                          "type": ["null", "string"]
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -114,6 +209,101 @@
                         },
                         "sourceFilePath": {
                           "type": "string"
+                        },
+                        "apiAnalysisResults": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "codeEntityDetails": {
+                                "type": "object",
+                                "properties": {
+                                  "codeEntityType": {
+                                    "enum": ["Class", "ClassAttribute", "InstanceAttribute", "Method", "Namespace","Annotation", "Declaration", "Using", "Enum", "Struct"],
+                                    "type": "string"
+                                  },
+                                  "namespace": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "signature": {
+                                    "type": "string"
+                                  },
+                                  "originalDefinition": {
+                                    "type": "string"
+                                  },
+                                  "textSpan": {
+                                    "type": "object",
+                                    "properties": {
+                                      "startCharPosition": {
+                                        "type": "number"
+                                      },
+                                      "endCharPosition": {
+                                        "type": "number"
+                                      },
+                                      "startLinePosition": {
+                                        "type": "number"
+                                      },
+                                      "endLinePosition": {
+                                        "type": "number"
+                                      }
+                                    }
+                                  },
+                                  "package": {
+                                    "type": "object",
+                                    "properties": {
+                                      "packageId": {
+                                        "type": "string"
+                                      },
+                                      "version": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "compatibilityResults": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "object",
+                                  "properties": {
+                                    "compatibility": {
+                                      "enum": ["COMPATIBLE", "DEPRACATED", "INCOMPATIBLE", "UNKNOWN"],
+                                      "type": "string"
+                                    },
+                                    "compatibleVersions": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "recommendations": {
+                                "type": "object",
+                                "properties": {
+                                  "recommendedActions": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "recommendedActionType": {
+                                          "enum": ["NoRecommendation", "ReplaceApi", "ReplaceNamespace", "ReplacePackage", "UpgradePackage"],
+                                          "type": "string"
+                                        },
+                                        "description": {
+                                          "type": ["null", "string"]
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
