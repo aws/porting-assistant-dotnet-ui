@@ -177,7 +177,8 @@ namespace PortingAssistant.Telemetry.Utils
 
                         line = reader.ReadLine();
 
-                        while (line != null)
+                        // If put-log api works keep sending logs else wait and do it next time
+                        while (line != null  && logs.Count <= 1000)
                         {
                             currLineNumber++;
                             logs.Add(line);
