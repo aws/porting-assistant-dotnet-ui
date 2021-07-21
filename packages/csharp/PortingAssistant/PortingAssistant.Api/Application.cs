@@ -9,6 +9,7 @@ using PortingAssistant.VisualStudio;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using PortingAssistant.Client.NuGet.Interfaces;
 
 namespace PortingAssistant.Api
 {
@@ -107,6 +108,22 @@ namespace PortingAssistant.Api
                         Status = Response<bool, string>.Failed(ex),
                         ErrorValue = ex.Message
                     };
+                }
+            });
+
+            _connection.On<string, bool>("checkInternetAccess", request =>
+            {
+                var httpService = _services.GetRequiredService<IHttpService>();
+                try
+                {
+                    using var file1 = httpService.DownloadS3FileAsync("newtonsoft.json.json.gz").Result;
+                    using var file2 = httpService.DownloadS3FileAsync("52projects.json.gz").Result;
+                    using var file3 = httpService.DownloadS3FileAsync("2a486f72.mega.json.gz").Result;
+                    return true;
+                }
+                catch
+                {
+                    return false;
                 }
             });
         }
