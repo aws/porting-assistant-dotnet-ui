@@ -19,13 +19,3 @@ export const checkInternetAccess = async (solutionPath: string, dispatch: Dispat
   }
   return haveInternet;
 };
-
-export const checkInternetElectron = async (dispatch: Dispatch) => {
-  const haveInternet: boolean = await window.electron.checkInternetAccess();
-  if (!haveInternet) {
-    dispatch(
-      setCurrentMessageUpdate([internetAccessFailed()])
-    );
-  }
-  return haveInternet;
-};
