@@ -39,8 +39,5 @@ global.window = {
       throw new Error("not implement");
     },
     dialog: {} as any
-  },
-  backend: {
-    checkInternetAccess: () => false
   }
 } as any;

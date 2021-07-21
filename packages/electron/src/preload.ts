@@ -94,15 +94,44 @@ contextBridge.exposeInMainWorld("electron", {
   getVersion: () => invokeBackend("getVersion"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
   getAssessmentLog: () => {
-    const dateString = new Date().toISOString().slice(0,10).replace(/-/g,"");
+    const dateString = new Date().toLocaleDateString("en-CA").slice(0,10).replace(/-/g,"");
     return path.join(remote.app.getPath("userData"), "logs", `portingAssistant-assessment-${dateString}.log`);
-  }
+  },
+  checkInternetAccess: async () => {
+    const configFile = isDev
+      ? path.join(
+          __dirname,
+          "..",
+          "build-scripts",
+          "porting-assistant-config.dev.json"
+        )
+      : path.join(
+          path.dirname(remote.app.getPath("exe")),
+          "resources",
+          "config",
+          "porting-assistant-config.json"
+        );
+    const config = require(configFile);
+    const s3BaseUrl =
+      config.PortingAssistantConfiguration.DataStoreSettings.HttpsEndpoint;
+    try {
+      const file1 = axios.get(`${s3BaseUrl}newtonsoft.json.json.gz`);
+      const file2 = axios.get(`${s3BaseUrl}52projects.json.gz`);
+      const file3 = axios.get(`${s3BaseUrl}2a486f72.mega.json.gz`);
+      await Promise.any([file1, file2, file3]);
+      return true;
+    } catch {
+      return false;
+    }
+  },
 });
 
 contextBridge.exposeInMainWorld("backend", {
   ping: () => invokeBackend("ping"),
   analyzeSolution: (
     solutionFilePath: string,
+    runId: string,
+    triggerType: string,
     settings: {
       ignoreProjects: string[];
       targetFramework: string;
@@ -110,7 +139,7 @@ contextBridge.exposeInMainWorld("backend", {
       actionsOnly: boolean;
       compatibleOnly: boolean;
     }
-  ) => invokeBackend("analyzeSolution", solutionFilePath, settings),
+  ) => invokeBackend("analyzeSolution", solutionFilePath, runId, triggerType, settings),
   openSolutionInIDE: (solutionFilePath: string) =>
     invokeBackend("openSolutionInIDE", solutionFilePath),
   getFileContents: (sourceFilePath: string) =>

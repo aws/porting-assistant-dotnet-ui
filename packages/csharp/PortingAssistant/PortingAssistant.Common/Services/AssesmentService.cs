@@ -6,6 +6,10 @@ using PortingAssistant.Common.Model;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Client;
 using PortingAssistant.Client.Model;
+using PortingAssistant.Telemetry.Model;
+using System.Web.Helpers;
+using PortingAssistantExtensionTelemetry;
+using PortingAssistant.Common.Utils;
 
 namespace PortingAssistant.Common.Services
 {
@@ -30,25 +34,32 @@ namespace PortingAssistant.Common.Services
         {
             try
             {
+                var startTime = DateTime.Now;
+                string tgtFramework = request.settings.TargetFramework;
+
                 var solutionAnalysisResult = _client.AnalyzeSolutionAsync(request.solutionFilePath, request.settings);
                 solutionAnalysisResult.Wait();
 
                 if (solutionAnalysisResult.IsCompletedSuccessfully)
                 {
-                    solutionAnalysisResult.Result.ProjectAnalysisResults.ForEach(projectAnalysResult =>
+                    TelemetryCollectionUtils.CollectSolutionMetrics(solutionAnalysisResult, request, startTime, tgtFramework);
+                    solutionAnalysisResult.Result.ProjectAnalysisResults.ForEach(projectAnalysisResult =>
                     {
-                        if (projectAnalysResult == null)
+                        if (projectAnalysisResult == null)
                         {
                             return;
                         }
+                        TelemetryCollectionUtils.CollectProjectMetrics(projectAnalysisResult, request, tgtFramework);
 
-                        projectAnalysResult.PackageAnalysisResults.ToList()
+                        projectAnalysisResult.PackageAnalysisResults.ToList()
                         .ForEach(p =>
                         {
                             p.Value.ContinueWith(result =>
                             {
                                 if (result.IsCompletedSuccessfully)
                                 {
+                                    TelemetryCollectionUtils.CollectNugetMetrics(result, request, tgtFramework);
+
                                     _nugetPackageListeners.ForEach(l => l.Invoke(new Response<PackageAnalysisResult, PackageVersionPair>
                                     {
                                         Value = result.Result,
@@ -65,18 +76,25 @@ namespace PortingAssistant.Common.Services
                             });
                         });
 
-                        if (projectAnalysResult.IsBuildFailed)
+                        if (projectAnalysisResult.SourceFileAnalysisResults != null &&
+                            projectAnalysisResult.ProjectGuid != null &&
+                            projectAnalysisResult.ProjectFilePath != null) {
+                              var selectedApis = projectAnalysisResult.SourceFileAnalysisResults.SelectMany(s => s.ApiAnalysisResults);
+                              TelemetryCollectionUtils.FileAssessmentCollect(selectedApis, request);
+                            }
+
+                        if (projectAnalysisResult.IsBuildFailed)
                         {
                             _apiAnalysisListeners.ForEach(listener =>
                                 listener.Invoke(new Response<ProjectApiAnalysisResult, SolutionProject>
                                 {
                                     ErrorValue = new SolutionProject
                                     {
-                                        ProjectPath = projectAnalysResult.ProjectFilePath,
+                                        ProjectPath = projectAnalysisResult.ProjectFilePath,
                                         SolutionPath = request.solutionFilePath
                                     },
                                     Status = Response<ProjectApiAnalysisResult, SolutionProject>
-                                    .Failed(new PortingAssistantClientException($"Errors during compilation in {projectAnalysResult.ProjectName}.", null))
+                                    .Failed(new PortingAssistantClientException($"Errors during compilation in {projectAnalysisResult.ProjectName}.", null))
                                 }));
 
                             return;
@@ -88,11 +106,11 @@ namespace PortingAssistant.Common.Services
                             {
                                 Value = new ProjectApiAnalysisResult
                                 {
-                                    Errors = projectAnalysResult.Errors,
+                                    Errors = projectAnalysisResult.Errors,
                                     SolutionFile = request.solutionFilePath,
-                                    ProjectFile = projectAnalysResult.ProjectFilePath,
-                                    ProjectGuid = projectAnalysResult.ProjectGuid,
-                                    SourceFileAnalysisResults = projectAnalysResult.SourceFileAnalysisResults
+                                    ProjectFile = projectAnalysisResult.ProjectFilePath,
+                                    ProjectGuid = projectAnalysisResult.ProjectGuid,
+                                    SourceFileAnalysisResults = projectAnalysisResult.SourceFileAnalysisResults
                                 },
                                 Status = Response<ProjectApiAnalysisResult, SolutionProject>.Success()
                             });
@@ -149,3 +167,4 @@ namespace PortingAssistant.Common.Services
         }
     }
 }
+

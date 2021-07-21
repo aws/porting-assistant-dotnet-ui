@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aws4RequestSigner" Version="1.0.3" />
+    <PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.8" />
+    <PackageReference Include="PortingAssistant.Client.Client" Version="1.8.37-alpha-g84cb45eb3c" />
+    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
+    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="1.8.37-alpha-g84cb45eb3c" />
+  </ItemGroup>
+</Project>

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Setup.Configuration;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.Setup.Configuration;
 
 namespace PortingAssistant.VisualStudio
 {

@@ -41,12 +41,15 @@ export interface Electron {
   getVersion: () => Promise<string>;
   telemetry: (message: any) => void;
   getAssessmentLog: () => string;
+  checkInternetAccess: () => Promise<boolean>;
 }
 
 export interface Backend {
   ping: () => Promise<string>;
   analyzeSolution: (
     solutionPath: string,
+    runId: string,
+    triggerType: string,
     settings: {
       ignoredProjects: string[];
       targetFramework: string;
@@ -62,7 +65,6 @@ export interface Backend {
   listenApiAnalysisUpdate: (
     callback: (projectAnalysis: Response<ProjectApiAnalysisResult, SolutionProject>) => void
   ) => void;
-  checkInternetAccess: () => Promise<boolean>;
 }
 
 export interface Porting {

@@ -1,16 +1,20 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using ElectronCgi.DotNet;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Common.Services;
+﻿using ElectronCgi.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
-using System.Diagnostics;
+using PortingAssistant.Common.Model;
+using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
 using PortingAssistant.VisualStudio;
-using PortingAssistant.Client.NuGet.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PortingAssistant.Api
 {
@@ -111,7 +115,7 @@ namespace PortingAssistant.Api
                     };
                 }
             });
-
+            
             _connection.On<string, bool>("checkInternetAccess", request =>
             {
                 var httpService = _services.GetRequiredService<IHttpService>();

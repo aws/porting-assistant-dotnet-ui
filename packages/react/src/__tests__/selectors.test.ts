@@ -951,6 +951,9 @@ describe("selectDashboardTableData", () => {
 });
 
 describe("checkInternetAccess", () => {
+  window.electron.checkInternetAccess = jest.fn();
+  jest.spyOn(window.electron, "checkInternetAccess").mockReturnValue(Promise.resolve(false));
+
   it("should add internet access error to messages", async () => {
     const result = await checkInternetAccess("", dispatch);
     expect(result).toBe(false);
@@ -959,4 +962,4 @@ describe("checkInternetAccess", () => {
     expect(currentMessagesUpdates[0]['content']).toEqual(expectResult['content']);
     expect(currentMessagesUpdates[0]['header']).toEqual(expectResult['header'])
   });
-})
+});
