@@ -1,7 +1,7 @@
+using Newtonsoft.Json;
+using PortingAssistant.Client.Common.Model;
 using System;
 using System.Collections.Generic;
-using PortingAssistant.Client.Common.Model;
-using Newtonsoft.Json;
 
 
 namespace PortingAssistant.Telemetry.Model
@@ -21,6 +21,6 @@ namespace PortingAssistant.Telemetry.Model
         [JsonProperty("sourceFrameworks")]
         public List<String> SourceFrameworks { get; set; }
         [JsonProperty("compatibilityResult")]
-        public ProjectCompatibilityResult CompatibilityResult {get; set;}
+        public ProjectCompatibilityResult CompatibilityResult { get; set; }
     }
 }

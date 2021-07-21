@@ -1,9 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using PortingAssistant.Client.Model;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PortingAssistant.Telemetry.Model
 {

@@ -1,5 +1,5 @@
-﻿using PortingAssistant.Common.Model;
-using PortingAssistant.Client.Model;
+﻿using PortingAssistant.Client.Model;
+using PortingAssistant.Common.Model;
 
 namespace PortingAssistant.Common.Listener
 {

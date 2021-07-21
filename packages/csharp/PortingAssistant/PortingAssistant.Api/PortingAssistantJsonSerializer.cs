@@ -1,7 +1,7 @@
-﻿using System;
-using ElectronCgi.DotNet;
+﻿using ElectronCgi.DotNet;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System;
 
 /**
  * Overriding default Json Serializer in https://github.com/ruidfigueiredo/electron-cgi-dotnet.

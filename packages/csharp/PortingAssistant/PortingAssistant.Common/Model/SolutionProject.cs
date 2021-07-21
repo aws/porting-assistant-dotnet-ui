@@ -1,5 +1,4 @@
-﻿using System;
-namespace PortingAssistant.Common.Model
+﻿namespace PortingAssistant.Common.Model
 {
     public class SolutionProject
     {

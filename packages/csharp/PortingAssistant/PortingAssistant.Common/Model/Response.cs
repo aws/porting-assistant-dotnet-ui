@@ -1,6 +1,6 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System;
 
 namespace PortingAssistant.Common.Model
 {
@@ -19,7 +19,7 @@ namespace PortingAssistant.Common.Model
             public Exception Error { get; set; }
         }
 
-        public ResponseStatus Status { get; set;  }
+        public ResponseStatus Status { get; set; }
 
         public T Value { get; set; }
         public E ErrorValue { get; set; }
