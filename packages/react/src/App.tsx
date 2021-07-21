@@ -23,7 +23,7 @@ import { Setup } from "./containers/Setup";
 import { usePortingAssistantSelector } from "./createReduxStore";
 import { init } from "./store/actions/backend";
 import { setCurrentMessageUpdate, setErrorUpdate } from "./store/actions/error";
-import { checkInternetAccess } from "./utils/checkInternetAccess";
+import { checkInternetElectron } from "./utils/checkInternetAccess";
 
 interface RouteWithErrorProps extends RouteProps {
   requireProfile: boolean;
@@ -80,7 +80,7 @@ const AppInternal: React.FC<{}> = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    checkInternetAccess("", dispatch);
+    checkInternetElectron(dispatch);
     const hasProfile = window.electron.getState("profile");
     if (hasProfile) {
       dispatch(init(false));

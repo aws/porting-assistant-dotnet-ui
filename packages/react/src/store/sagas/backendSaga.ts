@@ -93,7 +93,7 @@ export function* watchApiAnalysisUpdate() {
 
 function* handleInit(action: ReturnType<typeof init>) {
   yield put(ping());
-  const haveInternet:boolean = yield window.electron.checkInternetAccess();
+  const haveInternet:boolean = yield window.backend.checkInternetAccess();
   const storedSolutions = window.electron.getState("solutions", {});
   const targetFramework = getTargetFramework();
   if (!haveInternet) {
