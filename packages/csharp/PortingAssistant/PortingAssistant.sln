@@ -6,7 +6,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortingAssistant.Api", "Por
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortingAssistant.Common", "PortingAssistant.Common\PortingAssistant.Common.csproj", "{1F00D537-92AF-477D-B473-ED6C070E0A2C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortingAssistant.VisualStudio", "PortingAssistant.VisualStudio\PortingAssistant.VisualStudio.csproj", "{69FD1BA3-249D-47D7-A2F1-B4FFAEA1D843}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortingAssistant.VisualStudio", "PortingAssistant.VisualStudio\PortingAssistant.VisualStudio.csproj", "{69FD1BA3-249D-47D7-A2F1-B4FFAEA1D843}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortingAssistant.Telemetry", "PortingAssistant.Telemetry\PortingAssistant.Telemetry.csproj", "{62735503-D19D-4BFC-8745-4B655B30853A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +28,10 @@ Global
 		{69FD1BA3-249D-47D7-A2F1-B4FFAEA1D843}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69FD1BA3-249D-47D7-A2F1-B4FFAEA1D843}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69FD1BA3-249D-47D7-A2F1-B4FFAEA1D843}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62735503-D19D-4BFC-8745-4B655B30853A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62735503-D19D-4BFC-8745-4B655B30853A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62735503-D19D-4BFC-8745-4B655B30853A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62735503-D19D-4BFC-8745-4B655B30853A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

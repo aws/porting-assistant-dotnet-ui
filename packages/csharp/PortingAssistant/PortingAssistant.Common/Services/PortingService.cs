@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using PortingAssistant.Common.Model;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Client;
 using PortingAssistant.Client.Model;
+using PortingAssistant.Common.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 
 namespace PortingAssistant.Common.Services

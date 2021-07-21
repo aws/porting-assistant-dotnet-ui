@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -15,8 +15,12 @@
     <Folder Include="Listener\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="PortingAssistant.Client.Client" Version="1.8.23-alpha-g79847935d1" />
+    <PackageReference Include="PortingAssistant.Client.Client" Version="1.8.37-alpha-g84cb45eb3c" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.8" />
+    <PackageReference Include="System.Web.Helpers.Crypto" Version="3.2.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PortingAssistant.Telemetry\PortingAssistant.Telemetry.csproj" />
   </ItemGroup>
 </Project>

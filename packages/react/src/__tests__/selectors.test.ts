@@ -958,7 +958,7 @@ describe("checkInternetAccess", () => {
     expect(result).toBe(false);
     const currentMessagesUpdates = currentMessages(store.getState());
     const expectResult = internetAccessFailed();
-    expect(currentMessagesUpdates[0]['content']).toEqual(expectResult['content']);
-    expect(currentMessagesUpdates[0]['header']).toEqual(expectResult['header'])
+    expect(currentMessagesUpdates[0]["content"]).toEqual(expectResult["content"]);
+    expect(currentMessagesUpdates[0]["header"]).toEqual(expectResult["header"]);
   });
-})
+});

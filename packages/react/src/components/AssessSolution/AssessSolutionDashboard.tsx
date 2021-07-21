@@ -2,6 +2,7 @@ import { Box, Button, Header, NonCancelableCustomEvent, SpaceBetween, Tabs, Tabs
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Redirect, useHistory, useLocation } from "react-router";
+import { v4 as uuid } from "uuid";
 
 import { paths } from "../../constants/paths";
 import { usePortingAssistantSelector } from "../../createReduxStore";
@@ -135,6 +136,8 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
                   dispatch(
                     analyzeSolution.request({
                       solutionPath: solution.solutionFilePath,
+                      runId: uuid(),
+                      triggerType: "UserRequest",
                       settings: {
                         ignoredProjects: [],
                         targetFramework: targetFramework,

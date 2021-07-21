@@ -130,6 +130,8 @@ contextBridge.exposeInMainWorld("backend", {
   ping: () => invokeBackend("ping"),
   analyzeSolution: (
     solutionFilePath: string,
+    runId: string,
+    triggerType: string,
     settings: {
       ignoreProjects: string[];
       targetFramework: string;
@@ -137,7 +139,7 @@ contextBridge.exposeInMainWorld("backend", {
       actionsOnly: boolean;
       compatibleOnly: boolean;
     }
-  ) => invokeBackend("analyzeSolution", solutionFilePath, settings),
+  ) => invokeBackend("analyzeSolution", solutionFilePath, runId, triggerType, settings),
   openSolutionInIDE: (solutionFilePath: string) =>
     invokeBackend("openSolutionInIDE", solutionFilePath),
   getFileContents: (sourceFilePath: string) =>

@@ -7,9 +7,7 @@ import { setCurrentMessageUpdate } from "../store/actions/error";
 export const checkInternetAccess = async (solutionPath: string, dispatch: Dispatch) => {
   const haveInternet: boolean = await window.electron.checkInternetAccess();
   if (!haveInternet) {
-    dispatch(
-      setCurrentMessageUpdate([internetAccessFailed()])
-    );
+    dispatch(setCurrentMessageUpdate([internetAccessFailed()]));
     if (solutionPath !== "") {
       dispatch(
         analyzeSolution.failure({

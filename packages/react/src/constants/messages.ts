@@ -14,4 +14,4 @@ export const internetAccessFailed = () => {
     onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
   };
   return errorMessage;
-}
+};

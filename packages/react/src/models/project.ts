@@ -79,6 +79,7 @@ export interface ApiRecommendation extends RecommendedAction {
 
 export interface PackageRecommendation extends RecommendedAction {
   PackageId?: string;
+  Version?: string;
   TargetVersions?: string[];
 }
 
@@ -112,7 +113,17 @@ export type RecommendedActionType =
   | "ReplaceNamespace"
   | "ReplacePackage"
   | "NoRecommendation";
-export type CodeEntityType = "Namespace" | "Class" | "Method" | "InstanceAttribute" | "ClassAttribute";
+export type CodeEntityType =
+  | "Namespace"
+  | "Class"
+  | "Method"
+  | "InstanceAttribute"
+  | "ClassAttribute"
+  | "Annotation"
+  | "Declaration"
+  | "Using"
+  | "Enum"
+  | "Struct";
 export type PackageSourceType = "SDK" | "NUGET" | "PORTABILITY_ANALYZER" | "RECOMMENDATION" | "PRIVATE";
 export type SolutionToSolutionDetails = { [solutionPath: string]: Loadable<SolutionDetails> };
 export type ProjectToApiAnalysis = { [project: string]: Loadable<ProjectApiAnalysisResult> };

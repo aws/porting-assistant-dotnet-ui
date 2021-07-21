@@ -5,6 +5,8 @@ import { SolutionDetails } from "../../models/solution";
 
 export interface analyzeSolutionRequestPayload {
   solutionPath: string;
+  runId: string;
+  triggerType: string;
   settings: {
     ignoredProjects: string[];
     targetFramework: string;
