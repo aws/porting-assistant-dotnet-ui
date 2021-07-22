@@ -116,9 +116,12 @@ namespace PortingAssistant.Api
                 var httpService = _services.GetRequiredService<IHttpService>();
                 try
                 {
-                    using var file1 = httpService.DownloadS3FileAsync("newtonsoft.json.json.gz").Result;
-                    using var file2 = httpService.DownloadS3FileAsync("52projects.json.gz").Result;
-                    using var file3 = httpService.DownloadS3FileAsync("2a486f72.mega.json.gz").Result;
+                    var file1 = httpService.DownloadS3FileAsync("newtonsoft.json.json.gz");
+                    file1.Wait();
+                    var file2 = httpService.DownloadS3FileAsync("52projects.json.gz");
+                    file2.Wait();
+                    var file3 = httpService.DownloadS3FileAsync("2a486f72.mega.json.gz");
+                    file3.Wait();
                     return true;
                 }
                 catch
