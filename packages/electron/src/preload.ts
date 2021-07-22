@@ -29,11 +29,12 @@ contextBridge.exposeInMainWorld("electron", {
       | "profile"
       | "share"
       | "lastConfirmVersion"
-      | "notification",
+      | "notification"
+      | "email",
     value: any
   ) => localStore.set(key, value),
   getState: (
-    key: "solutions" | "profile" | "targetFramework" | "share",
+    key: "solutions" | "profile" | "targetFramework" | "share" | "email",
     defaultValue: any
   ) => localStore.get(key, defaultValue),
   saveCache: (value: any) => reducerCacheStore.set("reducerCache", value),

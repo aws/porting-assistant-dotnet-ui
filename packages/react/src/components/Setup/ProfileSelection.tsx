@@ -44,6 +44,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
   const dispatch = useDispatch();
   const currentProfile = window.electron.getState("profile");
   const cachedTargetFramework = window.electron.getState("targetFramework");
+  const email = window.electron.getState("email");
   const currentTargetFramework =
     cachedTargetFramework.id === "netstandard2.1"
       ? {}
@@ -118,6 +119,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
               id: data.targetFrameworkSelection.value,
               label: data.targetFrameworkSelection.label
             });
+            window.electron.saveState("email", "test@test.com");
             // Wait for C# backend to restart
             await new Promise(resolve => setTimeout(resolve, 10000));
             dispatch(init(true));
@@ -185,6 +187,9 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                     />
                   </FormField>
                 </div>
+              </div>
+              <div>
+                <Box fontSize="body-m">Hello</Box>
               </div>
               <div>
                 <Box fontSize="body-m">AWS named profile</Box>
