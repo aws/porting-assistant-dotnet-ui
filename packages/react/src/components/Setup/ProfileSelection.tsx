@@ -7,6 +7,7 @@ import {
   Form,
   FormField,
   Header,
+  Input,
   Link,
   Select,
   SelectProps,
@@ -33,6 +34,7 @@ type FormData = {
   profileSelection: string;
   targetFrameworkSelection: SelectProps.Option;
   share: boolean;
+  email: string;
 };
 
 const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) => {
@@ -44,7 +46,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
   const dispatch = useDispatch();
   const currentProfile = window.electron.getState("profile");
   const cachedTargetFramework = window.electron.getState("targetFramework");
-  const email = window.electron.getState("email");
+  const currentEmail = window.electron.getState("email");
   const currentTargetFramework =
     cachedTargetFramework.id === "netstandard2.1"
       ? {}
@@ -55,6 +57,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
 
   const [targetFramework, setTargetFramework] = useState(currentTargetFramework);
   const [profiles, setProfiles] = useState({ label: currentProfile, id: "" } as SelectProps.Option);
+  const [email, setEmail] = useState(currentEmail);
 
   useEffect(() => {
     const profiles = window.electron.getProfiles();
@@ -103,6 +106,11 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
     [profileOptions]
   );
 
+  const onChangeEmail = useCallback(([e]) => {
+    setEmail(e.detail.value);
+    return e.detail.value;
+  }, []);
+
   return (
     <div>
       <form
@@ -119,7 +127,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
               id: data.targetFrameworkSelection.value,
               label: data.targetFrameworkSelection.label
             });
-            window.electron.saveState("email", "test@test.com");
+            window.electron.saveState("email", data.email);
             // Wait for C# backend to restart
             await new Promise(resolve => setTimeout(resolve, 10000));
             dispatch(init(true));
@@ -189,9 +197,6 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                 </div>
               </div>
               <div>
-                <Box fontSize="body-m">Hello</Box>
-              </div>
-              <div>
                 <Box fontSize="body-m">AWS named profile</Box>
                 <Box fontSize="body-s" margin={{ right: "xxs" }} color="text-body-secondary">
                   Select an AWS profile to allow Porting Assistant for .NET to assess your solution for .NET Core
@@ -258,6 +263,25 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                     />
                   </FormField>
                 </div>
+              </div>
+              <div>
+                <Box fontSize="body-m">
+                  E-mail <i>- optional</i>
+                </Box>
+                <Box fontSize="body-s" margin={{ right: "xxs" }} color="text-body-secondary">
+                  Please provide your email in case we need to contact you regarding feedback or contributions to
+                  Porting Assistant.
+                </Box>
+                <FormField>
+                  <Controller
+                    as={Input}
+                    control={control}
+                    onChange={onChangeEmail}
+                    name="email"
+                    defaultValue={email}
+                    value={email}
+                  />
+                </FormField>
               </div>
               <div>
                 <Box fontSize="body-m">Porting Assistant for .NET data usage sharing</Box>
