@@ -111,6 +111,11 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
     return e.detail.value;
   }, []);
 
+  // Used to check if the email string is valid, e.g. example@amazon.com
+  const validEmail = new RegExp(
+    `^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$`
+  );
+
   return (
     <div>
       <form
@@ -118,6 +123,12 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
           if (await window.electron.verifyUser(data.profileSelection)) {
             if (data.targetFrameworkSelection.value == null || data.targetFrameworkSelection.label == null) {
               setError("targetFrameworkSelection", "required", "Target Framework is required.");
+              return;
+            }
+            // Ensure email, if provided, follows correct format
+            if (data.email != "" && !validEmail.test(data.email)) {
+              console.log("Email invalid.");
+              setError("email", "error", "E-mail format must follow example@amazon.com.");
               return;
             }
             window.electron.saveState("profile", data.profileSelection);
@@ -272,7 +283,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                   Please provide your email in case we need to contact you regarding feedback or contributions to
                   Porting Assistant.
                 </Box>
-                <FormField>
+                <FormField id="email-submission" errorText={errors.email?.message}>
                   <Controller
                     as={Input}
                     control={control}
