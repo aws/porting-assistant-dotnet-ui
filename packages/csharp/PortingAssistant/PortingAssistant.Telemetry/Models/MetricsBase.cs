@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Web.Helpers;
 
 namespace PortingAssistant.Telemetry.Model
 {
@@ -19,19 +20,19 @@ namespace PortingAssistant.Telemetry.Model
         /// This property uniquely identifies the customers using porting assistant 
         /// Auto populate this field for all the metric logs
         /// </summary>
-        private string _customerID;
-        public string CustomerID
+        private string _uniqueID;
+        public string UniqueID
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(_customerID))
+                if (string.IsNullOrWhiteSpace(_uniqueID))
                 {
-                    _customerID = NetworkInterface.GetAllNetworkInterfaces()
+                     _uniqueID = Crypto.SHA256(NetworkInterface.GetAllNetworkInterfaces()
                                          .Where(nic => nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
                                          .Select(nic => nic.GetPhysicalAddress().ToString())
-                                         .FirstOrDefault();
+                                         .FirstOrDefault());
                 }
-                return _customerID;
+                return _uniqueID;
             }
         }
     }
