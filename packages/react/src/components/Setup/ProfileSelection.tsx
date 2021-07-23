@@ -112,9 +112,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
   }, []);
 
   // Used to check if the email string is valid, e.g. example@amazon.com
-  const validEmail = new RegExp(
-    `^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$`
-  );
+  const validEmail = new RegExp(`^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$`);
 
   return (
     <div>
@@ -126,7 +124,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
               return;
             }
             // Ensure email, if provided, follows correct format
-            if (data.email != "" && !validEmail.test(data.email)) {
+            if (data.email !== "" && !validEmail.test(data.email)) {
               console.log("Email invalid.");
               setError("email", "error", "E-mail format must follow example@amazon.com.");
               return;
@@ -280,8 +278,8 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                   E-mail <i>- optional</i>
                 </Box>
                 <Box fontSize="body-s" margin={{ right: "xxs" }} color="text-body-secondary">
-                  Please provide your email in case we need to contact you regarding feedback or contributions to
-                  Porting Assistant.
+                  Provide your email in case we need to contact you regarding feedback or contributions to Porting
+                  Assistant.
                 </Box>
                 <FormField id="email-submission" errorText={errors.email?.message}>
                   <Controller
@@ -291,6 +289,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                     name="email"
                     defaultValue={email}
                     value={email}
+                    placeholder="example@amazon.com"
                   />
                 </FormField>
               </div>
