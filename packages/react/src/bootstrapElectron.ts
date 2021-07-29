@@ -39,6 +39,8 @@ export interface Electron {
   writeZipFile: (zipFilename: string, contents: { filename: string; contents: string }[]) => Promise<void>;
   verifyUser: (profile: string) => Promise<boolean>;
   getVersion: () => Promise<string>;
+  getLatestVersion: () => Promise<string>;
+  getOutdatedVersionFlag: () => Promise<boolean>;
   telemetry: (message: any) => void;
   getAssessmentLog: () => string;
   checkInternetAccess: () => Promise<boolean>;

@@ -43,6 +43,7 @@ const createLocalStore = () =>
       share: false,
       lastConfirmVersion: "",
       notification: true,
+      newVersionNotification: true,
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -80,6 +81,9 @@ const createLocalStore = () =>
         type: "string",
       },
       notification: {
+        type: "boolean",
+      },
+      newVersionNotification: {
         type: "boolean",
       },
     },

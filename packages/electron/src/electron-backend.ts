@@ -12,12 +12,19 @@ import {
   registerLogListeners,
 } from "./telemetry/electron-telemetry";
 import { localStore } from "./preload-localStore";
+import { latestVersion, outdatedVersionFlag } from "./electron";
 
 ipcMain.handle("verifyProfile", (_event, profile: string) => {
   return testProfile(profile);
 });
 ipcMain.handle("getConfigPath", (_event) => {
   return app.getPath("userData");
+});
+ipcMain.handle("getLatestVersion", (_event) => {
+  return latestVersion;
+});
+ipcMain.handle("getOutdatedVersionFlag", (_event) => {
+  return outdatedVersionFlag;
 });
 
 export const initTelemetryConnection = (logger: any = console) => {

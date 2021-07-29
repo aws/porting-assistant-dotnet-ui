@@ -29,7 +29,8 @@ contextBridge.exposeInMainWorld("electron", {
       | "profile"
       | "share"
       | "lastConfirmVersion"
-      | "notification",
+      | "notification"
+      | "newVersionNotification",
     value: any
   ) => localStore.set(key, value),
   getState: (
@@ -92,6 +93,8 @@ contextBridge.exposeInMainWorld("electron", {
   },
   verifyUser: (profile: string) => invokeBackend("verifyProfile", profile),
   getVersion: () => invokeBackend("getVersion"),
+  getLatestVersion: () => invokeBackend("getLatestVersion"),
+  getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
   getAssessmentLog: () => {
     const dateString = new Date().toLocaleDateString("en-CA").slice(0,10).replace(/-/g,"");
