@@ -5,6 +5,7 @@ import { useHistory } from "react-router-dom";
 
 interface Props {
   visible: boolean;
+  onSaveExit?: any;
 }
 
 // This function simply checks if the email is currently set
@@ -20,7 +21,7 @@ export const isEmailSet = () => {
   return true;
 };
 
-export const EnterEmailModal: React.FC<Props> = React.memo(({ visible }) => {
+export const EnterEmailModal: React.FC<Props> = React.memo(({ visible, onSaveExit }) => {
   const [isVisible, setVisible] = React.useState(visible);
   const [emailValue, setEmailValue] = React.useState("");
   const [emailError, setEmailError] = React.useState("");
@@ -35,6 +36,9 @@ export const EnterEmailModal: React.FC<Props> = React.memo(({ visible }) => {
       // email is valid, save
       window.electron.saveState("email", emailValue);
       setVisible(false);
+      if (onSaveExit) {
+        onSaveExit();
+      }
     } else {
       // invalid email
       setEmailError("Invalid e-mail format.");
