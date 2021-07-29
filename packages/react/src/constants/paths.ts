@@ -6,7 +6,8 @@ export const paths = {
   sourceFile: "/solutions/:solution/:project/:sourceFile",
   portSolution: "/port-solution/:solution",
   portProject: "/port-solution/:solution/:project",
-  portInitSolution: "/init-port-solution/:solution"
+  portInitSolution: "/init-port-solution/:solution",
+  ruleContribution: "/solutions/:solution/ruleContribution"
 };
 
 export const pathValues = Object.values(paths);

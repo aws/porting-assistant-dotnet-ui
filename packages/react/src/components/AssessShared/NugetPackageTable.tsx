@@ -4,8 +4,10 @@ import StatusIndicator from "@awsui/components-react/status-indicator/internal";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { matchPath, useLocation } from "react-router";
+import { Link } from "react-router-dom";
 
 import { pathValues } from "../../constants/paths";
+import { RuleContribSource } from "../../containers/RuleContribution";
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
 import { Compatibility, NugetPackage } from "../../models/project";
@@ -44,6 +46,19 @@ const NugetPackageTableInternal: React.FC = () => {
       return true;
     }
     return false;
+  };
+
+  const getSourceData = () => {
+    if (selectedItem.length === 0) {
+      return;
+    }
+    const item = selectedItem[0];
+    const sourceData: RuleContribSource = {
+      type: "PACKAGE",
+      packageName: item.packageId,
+      packageVersion: item.version
+    };
+    return sourceData;
   };
 
   const isSingleProject = useMemo(() => {
@@ -92,13 +107,22 @@ const NugetPackageTableInternal: React.FC = () => {
   );
 
   const ruleContributeButton = (
-    <Button
-      // disabled={!canSuggestRule()}
-      disabled={false}
-      variant="normal"
+    <Link
+      to={{
+        pathname: location.pathname + "/ruleContribution",
+        state: {
+          ruleContribSourceInfo: getSourceData()
+        }
+      }}
     >
-      Suggest Replacement
-    </Button>
+      <Button
+        // disabled={!canSuggestRule()}
+        disabled={false}
+        variant="normal"
+      >
+        Suggest Replacement
+      </Button>
+    </Link>
   );
 
   return (
