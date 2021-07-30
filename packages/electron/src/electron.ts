@@ -29,6 +29,8 @@ const upgradeConfig = require(electronIsDev
 const LocalProvider = require("./LocalProvider").LocalProvider;
 
 let mainWindow: Electron.BrowserWindow | undefined;
+export let latestVersion = app.getVersion();
+export let outdatedVersionFlag = false;
 
 const template: Array<MenuItemConstructorOptions | MenuItem> = [
   ...(os.platform() !== "win32"
@@ -156,6 +158,11 @@ function createWindow() {
   autoUpdater.on("error", (err) => {
     log.error(err);
   });
+
+  autoUpdater.on('update-available', (info) => {
+    latestVersion = info.version;
+    outdatedVersionFlag = true;
+  })
 
   autoUpdater.on("update-downloaded", () => {
     dialog
