@@ -105,7 +105,10 @@ const AppInternal: React.FC<{}> = () => {
         <RouteWithError requireProfile={true} path={paths.dashboard} exact strict>
           <Dashboard />
         </RouteWithError>
-        <RouteWithError requireProfile={true} path={paths.ruleContribution} exact strict>
+        <RouteWithError requireProfile={true} path={paths.ruleContributionSolution} exact strict>
+          <RuleContribution />
+        </RouteWithError>
+        <RouteWithError requireProfile={true} path={paths.ruleContributionProject} exact strict>
           <RuleContribution />
         </RouteWithError>
         <RouteWithError requireProfile={true} path={paths.addSolution} exact strict>

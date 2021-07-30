@@ -1,5 +1,5 @@
 import { Box, Header, SpaceBetween } from "@awsui/components-react";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 
@@ -28,6 +28,7 @@ const RuleContributionInternal: React.FC = () => {
   const location = useLocation<HistoryState>();
 
   const { ruleContribSourceInfo } = location.state;
+  const [userEmail, setUserEmail] = useState<string>(window.electron.getState("email"));
 
   const currentSolutionDetails = useSelector((state: RootState) =>
     selectCurrentSolutionDetails(state, location.pathname)
@@ -68,7 +69,7 @@ const RuleContributionInternal: React.FC = () => {
     <PortingAssistantAppLayout
       content={
         <SpaceBetween size="m">
-          <EnterEmailModal visible={!isEmailSet()} />
+          <EnterEmailModal visible={!isEmailSet()} onSaveExit={() => setUserEmail(window.electron.getState("email"))} />
           <Header
             variant="h1"
             info={
@@ -77,7 +78,7 @@ const RuleContributionInternal: React.FC = () => {
           >
             Suggest replacement
           </Header>
-          <PackageRuleContribution source={ruleContribSourceInfo} />
+          <PackageRuleContribution source={ruleContribSourceInfo} email={userEmail} />
         </SpaceBetween>
       }
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumbWithCurrent} />}
