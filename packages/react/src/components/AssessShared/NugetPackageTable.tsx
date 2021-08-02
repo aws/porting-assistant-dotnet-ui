@@ -111,7 +111,8 @@ const NugetPackageTableInternal: React.FC = () => {
       to={{
         pathname: location.pathname + "/ruleContribution",
         state: {
-          ruleContribSourceInfo: getSourceData()
+          ruleContribSourceInfo: getSourceData(),
+          lastPage: location.pathname
         }
       }}
     >

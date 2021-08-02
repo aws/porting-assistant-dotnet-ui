@@ -27,7 +27,7 @@ const RuleContributionInternal: React.FC = () => {
   const dispatch = useDispatch();
   const location = useLocation<HistoryState>();
 
-  const { ruleContribSourceInfo } = location.state;
+  const { ruleContribSourceInfo, lastPage } = location.state;
   const [userEmail, setUserEmail] = useState<string>(window.electron.getState("email"));
 
   const currentSolutionDetails = useSelector((state: RootState) =>
@@ -78,7 +78,7 @@ const RuleContributionInternal: React.FC = () => {
           >
             Suggest replacement
           </Header>
-          <PackageRuleContribution source={ruleContribSourceInfo} email={userEmail} />
+          <PackageRuleContribution source={ruleContribSourceInfo} email={userEmail} pagePath={lastPage} />
         </SpaceBetween>
       }
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumbWithCurrent} />}

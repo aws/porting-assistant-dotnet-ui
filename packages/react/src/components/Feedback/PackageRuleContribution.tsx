@@ -22,6 +22,7 @@ import { targetFrameworkOptions } from "../Setup/ProfileSelection";
 interface Props {
   source: RuleContribSource | undefined;
   email: string;
+  pagePath: string | undefined;
 }
 
 interface KeyValProps {
@@ -38,24 +39,15 @@ interface PackageContribution {
   comments?: string;
 }
 
-const PackageRuleContributionInternal: React.FC<Props> = ({ email, source }) => {
+const PackageRuleContributionInternal: React.FC<Props> = ({ source, email, pagePath }) => {
   const cachedTargetFramework = window.electron.getState("targetFramework");
-  const currentTargetFramework =
-    cachedTargetFramework.id === "netstandard2.1"
-      ? {
-          label: "",
-          value: ""
-        }
-      : {
-          label: cachedTargetFramework.label,
-          value: cachedTargetFramework.id
-        };
   const history = useHistory() as MemoryHistory;
+  const nextPagePath = pagePath ? pagePath : "/solutions";
 
   const [packageName, setPackageName] = useState("");
   const [packageVersion, setPackageVersion] = React.useState("");
   const [useLatestPackageVersion, setUseLatestPackageVersion] = React.useState(false);
-  const [targetFramework, setTargetFramework] = useState(currentTargetFramework);
+  const [targetFramework, setTargetFramework] = useState(cachedTargetFramework);
   const [comments, setComments] = useState("");
 
   const onSelectTargetFramework = useCallback(([e]) => {
@@ -64,7 +56,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ email, source }) => 
   }, []);
 
   const onCancel = () => {
-    history.go(-1);
+    history.goBack();
   };
 
   const onSubmit = () => {
@@ -72,15 +64,11 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ email, source }) => 
       packageName: packageName,
       packageVersion: packageVersion,
       packageVersionLatest: useLatestPackageVersion,
-      targetFramework: {
-        id: targetFramework.value,
-        label: targetFramework.label
-      },
+      targetFramework: targetFramework,
       comments: comments
     };
     // TODO: Actually submit this for verification
-    console.log(submission);
-    history.go(-1);
+    history.push(nextPagePath);
   };
 
   const ValueWithLabel: React.FC<KeyValProps> = ({ label, description, children }) => (
