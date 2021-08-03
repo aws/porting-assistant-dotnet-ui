@@ -4,5 +4,4 @@ export interface HistoryState {
   activeTabId?: string;
   activePage?: number;
   ruleContribSourceInfo?: RuleContribSource;
-  lastPage?: string;
 }

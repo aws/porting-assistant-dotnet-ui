@@ -12,17 +12,19 @@ import {
   SpaceBetween
 } from "@awsui/components-react";
 import { MemoryHistory } from "history";
+import path from "path";
 import React, { useCallback, useState } from "react";
+import { useLocation } from "react-router";
 import { Link, useHistory } from "react-router-dom";
 
+import { EnterEmailModal, isEmailSet } from "../../components/AssessShared/EnterEmailModal";
 import { RuleContribSource } from "../../containers/RuleContribution";
 import { TargetFramework } from "../../models/localStoreSchema";
+import { HistoryState } from "../../models/locationState";
 import { targetFrameworkOptions } from "../Setup/ProfileSelection";
 
 interface Props {
   source: RuleContribSource | undefined;
-  email: string;
-  pagePath: string | undefined;
 }
 
 interface KeyValProps {
@@ -39,14 +41,16 @@ interface PackageContribution {
   comments?: string;
 }
 
-const PackageRuleContributionInternal: React.FC<Props> = ({ source, email, pagePath }) => {
+const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const cachedTargetFramework = window.electron.getState("targetFramework");
   const history = useHistory() as MemoryHistory;
-  const nextPagePath = pagePath ? pagePath : "/solutions";
+  const location = useLocation<HistoryState>();
+  const nextPagePath = path.dirname(location.pathname);
 
+  const [email, setEmail] = useState(window.electron.getState("email"));
   const [packageName, setPackageName] = useState("");
-  const [packageVersion, setPackageVersion] = React.useState("");
-  const [useLatestPackageVersion, setUseLatestPackageVersion] = React.useState(false);
+  const [packageVersion, setPackageVersion] = useState("");
+  const [useLatestPackageVersion, setUseLatestPackageVersion] = useState(false);
   const [targetFramework, setTargetFramework] = useState(cachedTargetFramework);
   const [comments, setComments] = useState("");
 
@@ -145,6 +149,12 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source, email, pageP
 
   return (
     <SpaceBetween size="l">
+      <EnterEmailModal
+        visible={!isEmailSet()}
+        onSaveExit={() => {
+          setEmail(window.electron.getState("email"));
+        }}
+      />
       <Container
         header={
           <Header variant="h2" description="Please confirm that your e-mail and NuGet package details are correct.">

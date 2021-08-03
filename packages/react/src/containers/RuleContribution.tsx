@@ -1,9 +1,8 @@
 import { Box, Header, SpaceBetween } from "@awsui/components-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 
-import { EnterEmailModal, isEmailSet } from "../components/AssessShared/EnterEmailModal";
 import { PackageRuleContribution } from "../components/Feedback/PackageRuleContribution";
 import { InfoLink } from "../components/InfoLink";
 import { PortingAssistantAppLayout } from "../components/PortingAssistantAppLayout";
@@ -27,8 +26,7 @@ const RuleContributionInternal: React.FC = () => {
   const dispatch = useDispatch();
   const location = useLocation<HistoryState>();
 
-  const { ruleContribSourceInfo, lastPage } = location.state;
-  const [userEmail, setUserEmail] = useState<string>(window.electron.getState("email"));
+  const { ruleContribSourceInfo } = location.state;
 
   const currentSolutionDetails = useSelector((state: RootState) =>
     selectCurrentSolutionDetails(state, location.pathname)
@@ -69,7 +67,6 @@ const RuleContributionInternal: React.FC = () => {
     <PortingAssistantAppLayout
       content={
         <SpaceBetween size="m">
-          <EnterEmailModal visible={!isEmailSet()} onSaveExit={() => setUserEmail(window.electron.getState("email"))} />
           <Header
             variant="h1"
             info={
@@ -78,7 +75,7 @@ const RuleContributionInternal: React.FC = () => {
           >
             Suggest replacement
           </Header>
-          <PackageRuleContribution source={ruleContribSourceInfo} email={userEmail} pagePath={lastPage} />
+          <PackageRuleContribution source={ruleContribSourceInfo} />
         </SpaceBetween>
       }
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumbWithCurrent} />}
