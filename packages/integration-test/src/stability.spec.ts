@@ -23,7 +23,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await (await app.client.$("#profile-selection")).click();
     await (await app.client.$('[title="default"]')).click();
     await (await app.client.$("#next-btn")).click();
-    await (await app.client.$("=Assess a new solution")).waitForDisplayed();
+    await(await app.client.$("=Assess a new solution")).waitForDisplayed({
+      timeout: 60000,
+    });
   };
 
   const runThroughSolution = async (
