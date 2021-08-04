@@ -47,7 +47,7 @@ export const EnterEmailModal: React.FC<Props> = React.memo(({ visible, onSaveExi
 
   const exitWithoutSave = () => {
     setVisible(false);
-    history.go(-1);
+    history.goBack();
   };
 
   return (
