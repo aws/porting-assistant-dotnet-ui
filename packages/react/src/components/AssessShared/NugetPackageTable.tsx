@@ -1,11 +1,13 @@
 import { useCollection } from "@awsui/collection-hooks";
-import { Box, Pagination, Table, TableProps, TextFilter } from "@awsui/components-react";
+import { Box, Button, Pagination, Table, TableProps, TextFilter } from "@awsui/components-react";
 import StatusIndicator from "@awsui/components-react/status-indicator/internal";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { matchPath, useLocation } from "react-router";
+import { Link } from "react-router-dom";
 
 import { pathValues } from "../../constants/paths";
+import { RuleContribSource } from "../../containers/RuleContribution";
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
 import { Compatibility, NugetPackage } from "../../models/project";
@@ -32,6 +34,32 @@ const NugetPackageTableInternal: React.FC = () => {
   const nugetPackages = useSelector(selectNugetPackages);
   const nugetPackagesWithFields = usePortingAssistantSelector(state => selectNugetTableData(state, location.pathname));
   const projects = usePortingAssistantSelector(state => selectProjects(state, location.pathname));
+
+  const [selectedItem, setSelectedItem] = React.useState<NugetPackageTableFields[]>([]);
+
+  const canSuggestRule = () => {
+    if (selectedItem.length === 0) {
+      return false;
+    }
+    const item = selectedItem[0];
+    if (item.compatible === "INCOMPATIBLE") {
+      return true;
+    }
+    return false;
+  };
+
+  const getSourceData = () => {
+    if (selectedItem.length === 0) {
+      return;
+    }
+    const item = selectedItem[0];
+    const sourceData: RuleContribSource = {
+      type: "PACKAGE",
+      packageName: item.packageId,
+      packageVersion: item.version
+    };
+    return sourceData;
+  };
 
   const isSingleProject = useMemo(() => {
     const match = matchPath<{ solution: string; project: string }>(location.pathname, {
@@ -78,6 +106,25 @@ const NugetPackageTableInternal: React.FC = () => {
     }
   );
 
+  const ruleContributeButton = (
+    <Link
+      to={{
+        pathname: location.pathname + "/ruleContribution",
+        state: {
+          ruleContribSourceInfo: getSourceData()
+        }
+      }}
+    >
+      <Button
+        // disabled={!canSuggestRule()}
+        disabled={false}
+        variant="normal"
+      >
+        Suggest Replacement
+      </Button>
+    </Link>
+  );
+
   return (
     <Table<NugetPackageTableFields>
       {...collectionProps}
@@ -85,6 +132,9 @@ const NugetPackageTableInternal: React.FC = () => {
       columnDefinitions={columnDefinitionWithProject}
       loading={isTableLoading}
       items={items}
+      selectedItems={selectedItem}
+      selectionType="single"
+      onSelectionChange={({ detail }) => setSelectedItem(detail.selectedItems)}
       filter={
         <TextFilter
           {...filterProps}
@@ -97,6 +147,7 @@ const NugetPackageTableInternal: React.FC = () => {
         <TableHeader
           title="NuGet packages"
           totalItems={nugetPackagesWithFields}
+          actionButtons={ruleContributeButton}
           infoLink={
             <InfoLink
               heading="NuGet packages"
