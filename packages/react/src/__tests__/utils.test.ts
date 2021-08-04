@@ -34,6 +34,7 @@ import { isPortingCompleted } from "../utils/isPortingCompleted";
 import { Failed, Loaded, Loading } from "../utils/Loadable";
 import { logError, logErrorAction } from "../utils/LogError";
 import { nugetPackageKey } from "../utils/NugetPackageKey";
+import { checkPackageExists, validateVersion } from "../utils/validateRuleContrib";
 
 afterEach(() => jest.clearAllMocks());
 declare global {
@@ -433,5 +434,45 @@ describe("CompareSemver", () => {
   });
   it("test target version is invalid", () => {
     expect(compareSemver("3.0.0", "b")).toEqual(1);
+  });
+});
+
+describe("checkPackageExists", () => {
+  it("Azure.ImageOptimizer, version 1.1.0.39, does exist", async () => {
+    const result = await checkPackageExists("Azure.ImageOptimizer", "1.1.0.39");
+    expect(result).toBeTruthy();
+  });
+
+  it("Foo.Bar.Foo, version 0.0.0, does not exist", async () => {
+    const result = await checkPackageExists("Foo.Bar.Foo", "0.0.0");
+    expect(result).toBeFalsy();
+  });
+
+  it("Azure.ImageOptimizer, latest version, does exist", async () => {
+    const result = await checkPackageExists("Azure.ImageOptimizer");
+    expect(result).toBeTruthy();
+  });
+
+  it("Foo.Bar.Foo, latest version, does not exist", async () => {
+    const result = await checkPackageExists("Foo.Bar.Foo");
+    expect(result).toBeFalsy();
+  });
+});
+
+describe("validateVersion", () => {
+  it("1.0.0, valid SemVer", () => {
+    expect(validateVersion("1.0.0")).toBeTruthy();
+  });
+
+  it("ajsdbnjasdajsn, invalid SemVer", () => {
+    expect(validateVersion("ajsdbnjasdajsn")).toBeFalsy();
+  });
+
+  it("1.2.3-prerelease+build, valid SemVer", () => {
+    expect(validateVersion("1.2.3-prerelease+build")).toBeTruthy();
+  });
+
+  it("vsdfs1.2.3, invalid SemVer", () => {
+    expect(validateVersion("vsdfs1.2.3")).toBeFalsy();
   });
 });
