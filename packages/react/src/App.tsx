@@ -18,6 +18,7 @@ import { EditSettings } from "./containers/EditSettings";
 import { Main } from "./containers/Main";
 import { PortProject } from "./containers/PortProject";
 import { PortSolution } from "./containers/PortSolution";
+import { RuleContribution } from "./containers/RuleContribution";
 import { Settings } from "./containers/Settings";
 import { Setup } from "./containers/Setup";
 import { usePortingAssistantSelector } from "./createReduxStore";
@@ -103,6 +104,12 @@ const AppInternal: React.FC<{}> = () => {
         </RouteWithError>
         <RouteWithError requireProfile={true} path={paths.dashboard} exact strict>
           <Dashboard />
+        </RouteWithError>
+        <RouteWithError requireProfile={true} path={paths.ruleContributionSolution} exact strict>
+          <RuleContribution />
+        </RouteWithError>
+        <RouteWithError requireProfile={true} path={paths.ruleContributionProject} exact strict>
+          <RuleContribution />
         </RouteWithError>
         <RouteWithError requireProfile={true} path={paths.addSolution} exact strict>
           <AddSolution />
