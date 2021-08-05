@@ -21,6 +21,7 @@ import { EnterEmailModal, isEmailSet } from "../../components/AssessShared/Enter
 import { RuleContribSource } from "../../containers/RuleContribution";
 import { TargetFramework } from "../../models/localStoreSchema";
 import { HistoryState } from "../../models/locationState";
+import { checkPackageExists, validateVersion } from "../../utils/validateRuleContrib";
 import { targetFrameworkOptions } from "../Setup/ProfileSelection";
 
 interface Props {
@@ -50,6 +51,9 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const [email, setEmail] = useState(window.electron.getState("email"));
   const [packageName, setPackageName] = useState("");
   const [packageVersion, setPackageVersion] = useState("");
+  const [packageError, setPackageError] = useState("");
+  const [versionError, setVersionError] = useState("");
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [useLatestPackageVersion, setUseLatestPackageVersion] = useState(false);
   const [targetFramework, setTargetFramework] = useState(cachedTargetFramework);
   const [comments, setComments] = useState("");
@@ -63,7 +67,10 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     history.goBack();
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
+    setSubmitLoading(true);
+    setPackageError("");
+    setVersionError("");
     const submission: PackageContribution = {
       packageName: packageName,
       packageVersion: packageVersion,
@@ -71,8 +78,39 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
       targetFramework: targetFramework,
       comments: comments
     };
-    // TODO: Actually submit this for verification
-    history.push(nextPagePath);
+    if (await validateInput(submission)) {
+      //TODO: Send to S3 bucket
+      history.push(nextPagePath);
+    }
+    setSubmitLoading(false);
+  };
+
+  const validateInput = async (submission: PackageContribution) => {
+    if (submission.packageName === "") {
+      setPackageError("Required");
+      return false;
+    }
+    if (!submission.packageVersionLatest && submission.packageVersion === "") {
+      setVersionError("Required");
+      return false;
+    }
+    if (submission.packageVersionLatest) {
+      if (!(await checkPackageExists(submission.packageName))) {
+        setPackageError("Package not found");
+        return false;
+      }
+      return true;
+    }
+    if (!validateVersion(submission.packageVersion)) {
+      setVersionError("Invalid version format (SemVer).");
+      return false;
+    }
+    if (!(await checkPackageExists(submission.packageName, submission.packageVersion))) {
+      setPackageError("Package/version combination not found");
+      setVersionError("Package/version combination not found");
+      return false;
+    }
+    return true;
   };
 
   const ValueWithLabel: React.FC<KeyValProps> = ({ label, description, children }) => (
@@ -92,21 +130,31 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
           <Button variant="link" onClick={onCancel}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={onSubmit}>
+          <Button loading={submitLoading} variant="primary" onClick={onSubmit}>
             Submit
           </Button>
         </SpaceBetween>
       }
     >
       <ColumnLayout columns={4}>
-        <FormField label="Package name" description="Official name of the replacement package." stretch={true}>
+        <FormField
+          label="Package name"
+          description="Official name of the replacement package."
+          stretch={true}
+          errorText={packageError}
+        >
           <Input
             value={packageName}
             onChange={({ detail }) => setPackageName(detail.value)}
             placeholder="Example.Package.Name"
           />
         </FormField>
-        <FormField label="Package version" description='Provide a version number or check "Latest."' stretch={true}>
+        <FormField
+          label="Package version"
+          description='Provide a version number or check "Latest."'
+          stretch={true}
+          errorText={versionError}
+        >
           <Input
             value={packageVersion}
             onChange={({ detail }) => setPackageVersion(detail.value)}
@@ -118,6 +166,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
               setUseLatestPackageVersion(detail.checked);
               if (detail.checked) {
                 setPackageVersion("");
+                setVersionError("");
               }
             }}
             checked={useLatestPackageVersion}

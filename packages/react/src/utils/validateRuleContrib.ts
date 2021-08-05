@@ -14,7 +14,7 @@ export const checkPackageExists = async (packageName: string, packageVersion?: s
   }
   const responseData = response.data;
 
-  if (responseData["totalHits"] == 0) {
+  if (responseData["totalHits"] === 0) {
     return false;
   }
 
