@@ -4,6 +4,8 @@ import {
   Checkbox,
   ColumnLayout,
   Container,
+  Flashbar,
+  FlashbarProps,
   Form,
   FormField,
   Header,
@@ -57,6 +59,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const [useLatestPackageVersion, setUseLatestPackageVersion] = useState(false);
   const [targetFramework, setTargetFramework] = useState(cachedTargetFramework);
   const [comments, setComments] = useState("");
+  const [errorItems, setErrorItems] = React.useState<FlashbarProps.MessageDefinition[]>([]);
 
   const onSelectTargetFramework = useCallback(([e]) => {
     setTargetFramework(e.detail.selectedOption);
@@ -86,30 +89,52 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   };
 
   const validateInput = async (submission: PackageContribution) => {
+    // Check that package name is not blank
     if (submission.packageName === "") {
       setPackageError("Required");
       return false;
     }
+    // Check that version, if not latest, is not blank
     if (!submission.packageVersionLatest && submission.packageVersion === "") {
       setVersionError("Required");
       return false;
     }
-    if (submission.packageVersionLatest) {
-      if (!(await checkPackageExists(submission.packageName))) {
-        setPackageError("Package not found");
+    //Error handling for API call
+    try {
+      // Only check if the package name exists, since we can use latest version
+      if (submission.packageVersionLatest) {
+        if (!(await checkPackageExists(submission.packageName))) {
+          setPackageError("Package not found");
+          return false;
+        }
+        return true;
+      }
+      // Ensure SemVer formatting for version
+      if (!validateVersion(submission.packageVersion)) {
+        setVersionError("Invalid version format (SemVer).");
         return false;
       }
-      return true;
-    }
-    if (!validateVersion(submission.packageVersion)) {
-      setVersionError("Invalid version format (SemVer).");
+      // Check package name/version combo
+      if (!(await checkPackageExists(submission.packageName, submission.packageVersion))) {
+        setPackageError("Package/version combination not found");
+        setVersionError("Package/version combination not found");
+        return false;
+      }
+    } catch {
+      // Shows an error flashbar at the top
+      setErrorItems([
+        {
+          header: "Server error",
+          type: "error",
+          content: "Unable to access the server to verify the provided package. Please try again.",
+          dismissible: true,
+          dismissLabel: "Dismiss message",
+          onDismiss: () => setErrorItems([])
+        }
+      ]);
       return false;
     }
-    if (!(await checkPackageExists(submission.packageName, submission.packageVersion))) {
-      setPackageError("Package/version combination not found");
-      setVersionError("Package/version combination not found");
-      return false;
-    }
+
     return true;
   };
 
@@ -198,6 +223,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
 
   return (
     <SpaceBetween size="l">
+      <Flashbar items={errorItems} />
       <EnterEmailModal
         visible={!isEmailSet()}
         onSaveExit={() => {

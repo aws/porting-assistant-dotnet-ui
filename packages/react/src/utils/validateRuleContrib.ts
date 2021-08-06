@@ -1,6 +1,7 @@
 import axios from "axios";
 import { validate } from "compare-versions";
 
+// Use error handling
 export const checkPackageExists = async (packageName: string, packageVersion?: string) => {
   let query = `https://azuresearch-usnc.nuget.org/query?q=${packageName}`;
   if (packageVersion) {
