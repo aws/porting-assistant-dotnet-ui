@@ -1,11 +1,10 @@
 import { Box, Button, FormField, Input, Modal, SpaceBetween } from "@awsui/components-react";
-import { MemoryHistory } from "history";
 import React from "react";
-import { useHistory } from "react-router-dom";
 
 interface Props {
   visible: boolean;
-  onSaveExit?: any;
+  onCancel: any;
+  onSaveExit: any;
 }
 
 // This function simply checks if the email is currently set
@@ -21,11 +20,9 @@ export const isEmailSet = () => {
   return true;
 };
 
-export const EnterEmailModal: React.FC<Props> = React.memo(({ visible, onSaveExit }) => {
-  const [isVisible, setVisible] = React.useState(visible);
+export const EnterEmailModal: React.FC<Props> = React.memo(({ visible, onCancel, onSaveExit }) => {
   const [emailValue, setEmailValue] = React.useState("");
   const [emailError, setEmailError] = React.useState("");
-  const history = useHistory() as MemoryHistory;
 
   // Used to check if the email string is valid, e.g. example@amazon.com
   const validEmail = new RegExp(`^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$`);
@@ -35,31 +32,23 @@ export const EnterEmailModal: React.FC<Props> = React.memo(({ visible, onSaveExi
     if (validEmail.test(emailValue)) {
       // email is valid, save
       window.electron.saveState("email", emailValue);
-      setVisible(false);
-      if (onSaveExit) {
-        onSaveExit();
-      }
+      onSaveExit();
     } else {
       // invalid email
       setEmailError("Invalid e-mail format.");
     }
   };
 
-  const exitWithoutSave = () => {
-    setVisible(false);
-    history.goBack();
-  };
-
   return (
     <Modal
-      onDismiss={() => exitWithoutSave()}
-      visible={isVisible}
+      onDismiss={() => onCancel()}
+      visible={visible}
       closeAriaLabel="Close modal"
       size="medium"
       footer={
         <Box float="right">
           <SpaceBetween direction="horizontal" size="xs">
-            <Button variant="link" onClick={() => exitWithoutSave()}>
+            <Button variant="link" onClick={() => onCancel()}>
               Cancel
             </Button>
             <Button variant="primary" onClick={() => saveAndClose()}>
