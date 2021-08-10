@@ -51,6 +51,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const nextPagePath = path.dirname(location.pathname);
 
   const [email, setEmail] = useState(window.electron.getState("email"));
+  const [showEmailModal, setShowEmailModal] = useState(!isEmailSet());
   const [packageName, setPackageName] = useState("");
   const [packageVersion, setPackageVersion] = useState("");
   const [packageError, setPackageError] = useState("");
@@ -67,6 +68,11 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   }, []);
 
   const onCancel = () => {
+    history.goBack();
+  };
+
+  const declineProvideEmail = () => {
+    setShowEmailModal(false);
     history.goBack();
   };
 
@@ -225,10 +231,12 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     <SpaceBetween size="l">
       <Flashbar items={errorItems} />
       <EnterEmailModal
-        visible={!isEmailSet()}
+        visible={showEmailModal}
         onSaveExit={() => {
           setEmail(window.electron.getState("email"));
+          setShowEmailModal(false);
         }}
+        onCancel={() => declineProvideEmail()}
       />
       <Container
         header={
