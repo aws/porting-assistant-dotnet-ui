@@ -1,4 +1,20 @@
-import { Box, Button, Header, NonCancelableCustomEvent, SpaceBetween, Tabs, TabsProps } from "@awsui/components-react";
+import {
+  Alert,
+  Box,
+  Button,
+  ButtonDropdown,
+  FormField,
+  Header,
+  Input,
+  Modal,
+  NonCancelableCustomEvent,
+  SpaceBetween,
+  Tabs,
+  TabsProps,
+  TextContent
+} from "@awsui/components-react";
+import { systemPreferences } from "electron";
+import { electron } from "process";
 import React, { useCallback, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Redirect, useHistory, useLocation } from "react-router";
@@ -15,6 +31,7 @@ import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isLoaded, Loadable } from "../../utils/Loadable";
 import { ApiTable } from "../AssessShared/ApiTable";
+import { EnterEmailModal, isEmailSet } from "../AssessShared/EnterEmailModal";
 import { FileTable } from "../AssessShared/FileTable";
 import { NugetPackageTable } from "../AssessShared/NugetPackageTable";
 import { ProjectReferences } from "../AssessShared/ProjectReferences";
@@ -37,6 +54,16 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
   const portingLocation = usePortingAssistantSelector(state => selectPortingLocation(state, location.pathname));
   const [showPortingModal, setShowPortingModal] = useState(false);
   const targetFramework = getTargetFramework();
+  const [feedbackModal, setFeedbackModalVisible] = React.useState(false);
+  const [inputValue, setInputValue] = React.useState("");
+  const [category, setCategory] = React.useState("");
+  const [emailModal, setEmailModalVisible] = React.useState(false);
+
+  const [isCategoryEmpty, setIsCategoryEmpty] = React.useState(false);
+  const [isValueEmpty, setIsValueEmpty] = React.useState(false);
+
+  const email = window.electron.getState("email");
+
   useNugetFlashbarMessages(projects);
   useApiAnalysisFlashbarMessage(solution);
 
@@ -84,6 +111,119 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
 
   return (
     <SpaceBetween size="m">
+      <EnterEmailModal
+        visible={emailModal}
+        onCancel={() => setEmailModalVisible(false)}
+        onSaveExit={() => {
+          setEmailModalVisible(false);
+          setFeedbackModalVisible(true);
+        }}
+      ></EnterEmailModal>
+
+      <Modal
+        onDismiss={() => {
+          setFeedbackModalVisible(false);
+          setInputValue("");
+          setCategory("");
+          setIsCategoryEmpty(false);
+          setIsValueEmpty(false);
+        }}
+        visible={feedbackModal}
+        closeAriaLabel="Close modal"
+        size="medium"
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button
+                variant="link"
+                onClick={() => {
+                  setFeedbackModalVisible(false);
+                  setInputValue("");
+                  setCategory("");
+                  setIsCategoryEmpty(false);
+                  setIsValueEmpty(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  if (category === "" || category == null) {
+                    setIsCategoryEmpty(true);
+                  }
+                  if (inputValue === "" || inputValue == null) {
+                    setIsValueEmpty(true);
+                  }
+                }}
+              >
+                Send
+              </Button>
+            </SpaceBetween>
+          </Box>
+        }
+        header={<React.Fragment>Send feeback?</React.Fragment>}
+      >
+        <SpaceBetween size="s">
+          <Alert
+            onDismiss={() => setIsValueEmpty(false)}
+            visible={isValueEmpty}
+            dismissAriaLabel="Close alert"
+            header="No Feedback Entered"
+          >
+            Please enter in non-empty feedback.
+          </Alert>
+          <Alert
+            onDismiss={() => setIsCategoryEmpty(false)}
+            visible={isCategoryEmpty}
+            dismissAriaLabel="Close alert"
+            header="Feedback Category Not Selected"
+          >
+            Please select a category for your feedback.
+          </Alert>
+
+          <TextContent>
+            <h5>All feedback will be sent to the .NET Porting Assistant team. </h5>
+          </TextContent>
+
+          <ButtonDropdown
+            items={[
+              { text: "General", id: "general" },
+              { text: "Question", id: "question" },
+              { text: "Error", id: "error" }
+            ]}
+            onItemClick={e => {
+              setIsCategoryEmpty(false);
+              if (e.detail.id === "general") {
+                console.log("general");
+                setCategory("general");
+              } else if (e.detail.id === "question") {
+                setCategory("question");
+                console.log("question");
+              } else {
+                setCategory("error");
+                console.log("error");
+                //enter additional logic for searching for any errors on screen to send to team
+              }
+            }}
+          >
+            Feedback Category
+          </ButtonDropdown>
+
+          <FormField>
+            <Input
+              value={inputValue}
+              onChange={event => {
+                setInputValue(event.detail.value);
+                setIsValueEmpty(false);
+              }}
+              placeholder="Enter feedback"
+            />
+          </FormField>
+        </SpaceBetween>
+        Email linked with this feedback is: {email}
+      </Modal>
+
       <Header
         variant="h1"
         info={
@@ -154,6 +294,21 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             >
               Reassess solution
             </Button>
+
+            <Button
+              onClick={() => {
+                if (!isEmailSet()) {
+                  console.log("No Email; Entering Email Modal");
+                  setEmailModalVisible(true);
+                } else {
+                  console.log("Email exists; Entering ");
+                  setFeedbackModalVisible(true);
+                }
+              }}
+            >
+              Send Feedback
+            </Button>
+
             <Button
               id="port-solution-button"
               key="port-solution"
