@@ -2,6 +2,7 @@ import { createStore } from "redux";
 
 import { createRootReducer } from "../../src/store/reducers";
 import { Backend, Electron, Porting } from "../bootstrapElectron";
+import { PackageContribution } from "../components/Feedback/PackageRuleContribution";
 import {
   copyPorting,
   inplacePorting,
@@ -34,7 +35,7 @@ import { isPortingCompleted } from "../utils/isPortingCompleted";
 import { Failed, Loaded, Loading } from "../utils/Loadable";
 import { logError, logErrorAction } from "../utils/LogError";
 import { nugetPackageKey } from "../utils/NugetPackageKey";
-import { checkPackageExists, validateVersion } from "../utils/validateRuleContrib";
+import { checkPackageExists, validatePackageInput, validateVersion } from "../utils/validateRuleContrib";
 
 afterEach(() => jest.clearAllMocks());
 declare global {
@@ -474,5 +475,99 @@ describe("validateVersion", () => {
 
   it("vsdfs1.2.3, invalid SemVer", () => {
     expect(validateVersion("vsdfs1.2.3")).toBeFalsy();
+  });
+});
+
+describe("validatePackageInput", () => {
+  it("Azure.ImageOptimizer, version 1.1.0.39, does exist", async () => {
+    const submission: PackageContribution = {
+      packageName: "Azure.ImageOptimizer",
+      packageVersion: "1.1.0.39",
+      packageVersionLatest: false,
+      targetFramework: { id: "", label: "" },
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: true
+    });
+  });
+
+  it("Foo.Bar.Foo, version 0.0.0, does not exist", async () => {
+    const submission: PackageContribution = {
+      packageName: "Foo.Bar.Foo",
+      packageVersion: "0.0.0",
+      packageVersionLatest: false,
+      targetFramework: { id: "", label: "" },
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: false,
+      field: "packageName/packageVersion",
+      message: "Package/version combination not found"
+    });
+  });
+
+  it("Azure.ImageOptimizer, latest version, does exist", async () => {
+    const submission: PackageContribution = {
+      packageName: "Azure.ImageOptimizer",
+      packageVersion: "",
+      packageVersionLatest: true,
+      targetFramework: { id: "", label: "" },
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: true
+    });
+  });
+
+  it("Foo.Bar.Foo, latest version, does not exist", async () => {
+    const submission: PackageContribution = {
+      packageName: "Foo.Bar.Foo",
+      packageVersion: "",
+      packageVersionLatest: true,
+      targetFramework: { id: "", label: "" },
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: false,
+      field: "packageName",
+      message: "Package not found"
+    });
+  });
+
+  it("Azure.ImageOptimizer, version asndjas332, invalid SemVer", async () => {
+    const submission: PackageContribution = {
+      packageName: "Azure.ImageOptimizer",
+      packageVersion: "asndjas332",
+      packageVersionLatest: false,
+      targetFramework: { id: "", label: "" },
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: false,
+      field: "packageVersion",
+      message: "Invalid version format (SemVer)"
+    });
+  });
+
+  it("Azure.ImageOptimizer, version asndjas332, invalid SemVer", async () => {
+    const submission: PackageContribution = {
+      packageName: "Azure.ImageOptimizer",
+      packageVersion: "",
+      packageVersionLatest: false,
+      targetFramework: { id: "", label: "" },
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: false,
+      field: "packageVersion",
+      message: "Required"
+    });
   });
 });

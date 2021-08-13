@@ -4,8 +4,6 @@ import {
   Checkbox,
   ColumnLayout,
   Container,
-  Flashbar,
-  FlashbarProps,
   Form,
   FormField,
   Header,
@@ -16,14 +14,17 @@ import {
 import { MemoryHistory } from "history";
 import path from "path";
 import React, { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useLocation } from "react-router";
 import { Link, useHistory } from "react-router-dom";
+import { v4 as uuid } from "uuid";
 
 import { EnterEmailModal, isEmailSet } from "../../components/AssessShared/EnterEmailModal";
 import { RuleContribSource } from "../../containers/RuleContribution";
 import { TargetFramework } from "../../models/localStoreSchema";
 import { HistoryState } from "../../models/locationState";
-import { checkPackageExists, validateVersion } from "../../utils/validateRuleContrib";
+import { pushCurrentMessageUpdate, pushPendingMessageUpdate } from "../../store/actions/error";
+import { validatePackageInput } from "../../utils/validateRuleContrib";
 import { targetFrameworkOptions } from "../Setup/ProfileSelection";
 
 interface Props {
@@ -36,7 +37,7 @@ interface KeyValProps {
   children: string | undefined;
 }
 
-interface PackageContribution {
+export interface PackageContribution {
   packageName: string;
   packageVersion: string;
   packageVersionLatest: boolean;
@@ -49,6 +50,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const history = useHistory() as MemoryHistory;
   const location = useLocation<HistoryState>();
   const nextPagePath = path.dirname(location.pathname);
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState(window.electron.getState("email"));
   const [showEmailModal, setShowEmailModal] = useState(!isEmailSet());
@@ -60,7 +62,6 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const [useLatestPackageVersion, setUseLatestPackageVersion] = useState(false);
   const [targetFramework, setTargetFramework] = useState(cachedTargetFramework);
   const [comments, setComments] = useState("");
-  const [errorItems, setErrorItems] = React.useState<FlashbarProps.MessageDefinition[]>([]);
 
   const onSelectTargetFramework = useCallback(([e]) => {
     setTargetFramework(e.detail.selectedOption);
@@ -70,6 +71,13 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const onCancel = () => {
     history.goBack();
   };
+
+  const setFlashbar = useCallback(
+    messageContent => {
+      dispatch(pushCurrentMessageUpdate(messageContent));
+    },
+    [dispatch]
+  );
 
   const declineProvideEmail = () => {
     setShowEmailModal(false);
@@ -87,60 +95,56 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
       targetFramework: targetFramework,
       comments: comments
     };
+
     if (await validateInput(submission)) {
       //TODO: Send to S3 bucket
+
+      setFlashbar({
+        messageId: uuid(),
+        type: "success",
+        content: "Successfully submitted replacement suggestion",
+        dismissible: true
+      });
       history.push(nextPagePath);
     }
     setSubmitLoading(false);
   };
 
   const validateInput = async (submission: PackageContribution) => {
-    // Check that package name is not blank
-    if (submission.packageName === "") {
-      setPackageError("Required");
-      return false;
-    }
-    // Check that version, if not latest, is not blank
-    if (!submission.packageVersionLatest && submission.packageVersion === "") {
-      setVersionError("Required");
-      return false;
-    }
     //Error handling for API call
     try {
-      // Only check if the package name exists, since we can use latest version
-      if (submission.packageVersionLatest) {
-        if (!(await checkPackageExists(submission.packageName))) {
-          setPackageError("Package not found");
-          return false;
+      // result is type ValidationResult:
+      // {valid: boolean, field?: string, message?: string}
+      const result = await validatePackageInput(submission);
+      if (!result.valid) {
+        switch (result.field) {
+          case "packageName":
+            if (result.message) setPackageError(result.message);
+            break;
+          case "packageVersion":
+            if (result.message) setVersionError(result.message);
+            break;
+          case "packageName/packageVersion":
+            if (result.message) {
+              setPackageError(result.message);
+              setVersionError(result.message);
+            }
+            break;
+          default:
+            break;
         }
-        return true;
-      }
-      // Ensure SemVer formatting for version
-      if (!validateVersion(submission.packageVersion)) {
-        setVersionError("Invalid version format (SemVer).");
-        return false;
-      }
-      // Check package name/version combo
-      if (!(await checkPackageExists(submission.packageName, submission.packageVersion))) {
-        setPackageError("Package/version combination not found");
-        setVersionError("Package/version combination not found");
         return false;
       }
     } catch {
       // Shows an error flashbar at the top
-      setErrorItems([
-        {
-          header: "Server error",
-          type: "error",
-          content: "Unable to access the server to verify the provided package. Please try again.",
-          dismissible: true,
-          dismissLabel: "Dismiss message",
-          onDismiss: () => setErrorItems([])
-        }
-      ]);
+      setFlashbar({
+        messageId: uuid(),
+        type: "error",
+        content: "Unable to access the server to verify the provided package. Please try again.",
+        dismissible: true
+      });
       return false;
     }
-
     return true;
   };
 
@@ -229,7 +233,6 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
 
   return (
     <SpaceBetween size="l">
-      <Flashbar items={errorItems} />
       <EnterEmailModal
         visible={showEmailModal}
         onSaveExit={() => {
