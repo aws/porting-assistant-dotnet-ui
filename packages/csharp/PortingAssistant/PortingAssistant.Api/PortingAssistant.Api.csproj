@@ -8,7 +8,7 @@
 	<ItemGroup>
 		<PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
 		<PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
-		<PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
     <PackageReference Include="PortingAssistant.Client.Client" Version="1.8.41-g07201d3178" />
 	</ItemGroup>
 	<ItemGroup>
