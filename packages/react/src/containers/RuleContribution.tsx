@@ -28,6 +28,14 @@ const RuleContributionInternal: React.FC = () => {
 
   const { ruleContribSourceInfo } = location.state;
 
+  const emptyRuleContrib: RuleContribSource = {
+    type: "PACKAGE",
+    packageName: "",
+    packageVersion: ""
+  };
+
+  const ruleContribSource = ruleContribSourceInfo ? ruleContribSourceInfo : emptyRuleContrib;
+
   const currentSolutionDetails = useSelector((state: RootState) =>
     selectCurrentSolutionDetails(state, location.pathname)
   );
@@ -75,7 +83,7 @@ const RuleContributionInternal: React.FC = () => {
           >
             Suggest replacement
           </Header>
-          <PackageRuleContribution source={ruleContribSourceInfo} />
+          <PackageRuleContribution source={ruleContribSource} />
         </SpaceBetween>
       }
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumbWithCurrent} />}

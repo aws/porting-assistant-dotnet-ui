@@ -21,10 +21,11 @@ import { EnterEmailModal, isEmailSet } from "../../components/AssessShared/Enter
 import { RuleContribSource } from "../../containers/RuleContribution";
 import { TargetFramework } from "../../models/localStoreSchema";
 import { HistoryState } from "../../models/locationState";
+import { uploadRuleContribution } from "../../utils/uploadToS3Bucket";
 import { targetFrameworkOptions } from "../Setup/ProfileSelection";
 
 interface Props {
-  source: RuleContribSource | undefined;
+  source: RuleContribSource;
 }
 
 interface KeyValProps {
@@ -33,7 +34,9 @@ interface KeyValProps {
   children: string | undefined;
 }
 
-interface PackageContribution {
+export interface PackageContribution {
+  packageNameSource: string;
+  packageVersionSource: string | undefined;
   packageName: string;
   packageVersion: string;
   packageVersionLatest: boolean;
@@ -63,8 +66,10 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     history.goBack();
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     const submission: PackageContribution = {
+      packageNameSource: source.packageName,
+      packageVersionSource: source.packageVersion,
       packageName: packageName,
       packageVersion: packageVersion,
       packageVersionLatest: useLatestPackageVersion,
@@ -72,6 +77,8 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
       comments: comments
     };
     // TODO: Actually submit this for verification
+    const result = await uploadRuleContribution(email, submission);
+    console.log("Upload result: " + result);
     history.push(nextPagePath);
   };
 

@@ -123,6 +123,7 @@ contextBridge.exposeInMainWorld("backend", {
   listenApiAnalysisUpdate: (callback: (message: string) => void) =>
     listenBackend("onApiAnalysisUpdate", callback),
   checkInternetAccess: () => invokeBackend("checkInternetAccess"),
+  uploadRuleContribution: (upload: any) => invokeBackend("uploadRuleContribution", upload),
 });
 
 contextBridge.exposeInMainWorld("porting", {
