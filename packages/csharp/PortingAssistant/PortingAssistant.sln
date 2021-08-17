@@ -10,6 +10,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortingAssistant.VisualStud
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PortingAssistant.Telemetry", "PortingAssistant.Telemetry\PortingAssistant.Telemetry.csproj", "{62735503-D19D-4BFC-8745-4B655B30853A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PortingAssistant.UnitTests", "PortingAssistant.UnitTests\PortingAssistant.UnitTests.csproj", "{FE5131FE-F1E2-4236-B0B6-224325A73832}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{62735503-D19D-4BFC-8745-4B655B30853A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62735503-D19D-4BFC-8745-4B655B30853A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62735503-D19D-4BFC-8745-4B655B30853A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE5131FE-F1E2-4236-B0B6-224325A73832}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE5131FE-F1E2-4236-B0B6-224325A73832}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE5131FE-F1E2-4236-B0B6-224325A73832}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE5131FE-F1E2-4236-B0B6-224325A73832}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
