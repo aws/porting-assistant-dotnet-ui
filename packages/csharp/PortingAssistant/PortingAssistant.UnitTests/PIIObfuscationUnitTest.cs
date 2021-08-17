@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Web.Helpers;
 using PortingAssistant.Common.Utils;
 using System;
@@ -7,10 +7,10 @@ using System.Collections.Generic;
 
 namespace PortingAssistant.UnitTests
 {
-    [TestClass]
+    [TestFixture]
     public class PIIObfuscationUnitTest
     {
-        [TestMethod]
+        [Test]
         public void TestSolutionPath() 
         {
             var solutionPath = "C:/Users/CustomerName/nopCommerce/src/NopCommerce.sln";
@@ -22,7 +22,7 @@ namespace PortingAssistant.UnitTests
             Assert.AreEqual(solutionMetric.SolutionPath, encryptedSolutionPath);
         }
 
-        [TestMethod]
+        [Test]
         public void TestProjectGuid()
         {
             var runId = "1";
