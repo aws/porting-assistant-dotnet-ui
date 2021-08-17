@@ -11,6 +11,7 @@ import {
   Select,
   SpaceBetween
 } from "@awsui/components-react";
+import { OptionDefinition } from "@awsui/components-react/internal/components/option/interfaces";
 import { MemoryHistory } from "history";
 import path from "path";
 import React, { useCallback, useState } from "react";
@@ -21,7 +22,6 @@ import { v4 as uuid } from "uuid";
 
 import { EnterEmailModal, isEmailSet } from "../../components/AssessShared/EnterEmailModal";
 import { RuleContribSource } from "../../containers/RuleContribution";
-import { TargetFramework } from "../../models/localStoreSchema";
 import { HistoryState } from "../../models/locationState";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { uploadRuleContribution } from "../../utils/uploadToS3Bucket";
@@ -44,7 +44,7 @@ export interface PackageContribution {
   packageName: string;
   packageVersion: string;
   packageVersionLatest: boolean;
-  targetFramework: TargetFramework;
+  targetFramework: any;
   comments?: string;
 }
 
@@ -63,13 +63,11 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const [versionError, setVersionError] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
   const [useLatestPackageVersion, setUseLatestPackageVersion] = useState(false);
-  const [targetFramework, setTargetFramework] = useState(cachedTargetFramework);
+  const [targetFramework, setTargetFramework] = useState<OptionDefinition>({
+    label: cachedTargetFramework.label,
+    value: cachedTargetFramework.id
+  });
   const [comments, setComments] = useState("");
-
-  const onSelectTargetFramework = useCallback(([e]) => {
-    setTargetFramework(e.detail.selectedOption);
-    return e.detail.selectedOption;
-  }, []);
 
   const onCancel = () => {
     history.goBack();
@@ -102,7 +100,8 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     };
 
     if (await validateInput(submission)) {
-      const result = await uploadRuleContribution(email, submission);
+      const formattedSubmission = formatPackageContribution(submission);
+      const result = await uploadRuleContribution(email, formattedSubmission, submission.packageNameSource);
       if (result) {
         setFlashbar({
           messageId: uuid(),
@@ -118,9 +117,11 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
           content: "Unable to reach the server to submit your suggestion. Please try again.",
           dismissible: true
         });
+        setSubmitLoading(false);
       }
+    } else {
+      setSubmitLoading(false);
     }
-    setSubmitLoading(false);
   };
 
   const validateInput = async (submission: PackageContribution) => {
@@ -159,6 +160,59 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
       return false;
     }
     return true;
+  };
+
+  const formatPackageContribution = (submission: PackageContribution) => {
+    return {
+      Name: submission.packageNameSource,
+      Version: submission.packageVersionSource,
+      Packages: [
+        {
+          Name: submission.packageNameSource,
+          Type: "Nuget"
+        }
+      ],
+      Recommendations: [
+        {
+          Type: "Namespace",
+          Name: submission.packageNameSource,
+          Value: submission.packageNameSource,
+          KeyType: "Name",
+          ContainingType: "",
+          RecommendedActions: [
+            {
+              Source: "External",
+              Preferred: "Yes",
+              TargetFrameworks: [
+                {
+                  Name: submission.targetFramework.value,
+                  TargetCPU: ["x86", "x64", "ARM32", "ARM64"]
+                }
+              ],
+              Description: "",
+              Actions: submission.packageVersionLatest
+                ? [
+                    {
+                      Name: "AddPackage",
+                      Type: "Package",
+                      Value: submission.packageName,
+                      Description: submission.comments
+                    }
+                  ]
+                : [
+                    {
+                      Name: "AddPackage",
+                      Type: "Package",
+                      Value: submission.packageName,
+                      Version: submission.packageVersion,
+                      Description: submission.comments
+                    }
+                  ]
+            }
+          ]
+        }
+      ]
+    };
   };
 
   const ValueWithLabel: React.FC<KeyValProps> = ({ label, description, children }) => (
@@ -226,7 +280,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
           <Select
             selectedOption={targetFramework}
             options={targetFrameworkOptions}
-            onChange={onSelectTargetFramework}
+            onChange={({ detail }) => setTargetFramework(detail.selectedOption)}
           />
         </FormField>
         <FormField
