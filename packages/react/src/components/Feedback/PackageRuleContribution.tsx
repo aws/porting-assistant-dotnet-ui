@@ -14,14 +14,18 @@ import {
 import { MemoryHistory } from "history";
 import path from "path";
 import React, { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useLocation } from "react-router";
 import { Link, useHistory } from "react-router-dom";
+import { v4 as uuid } from "uuid";
 
 import { EnterEmailModal, isEmailSet } from "../../components/AssessShared/EnterEmailModal";
 import { RuleContribSource } from "../../containers/RuleContribution";
 import { TargetFramework } from "../../models/localStoreSchema";
 import { HistoryState } from "../../models/locationState";
+import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { uploadRuleContribution } from "../../utils/uploadToS3Bucket";
+import { validatePackageInput } from "../../utils/validateRuleContrib";
 import { targetFrameworkOptions } from "../Setup/ProfileSelection";
 
 interface Props {
@@ -49,10 +53,15 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const history = useHistory() as MemoryHistory;
   const location = useLocation<HistoryState>();
   const nextPagePath = path.dirname(location.pathname);
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState(window.electron.getState("email"));
+  const [showEmailModal, setShowEmailModal] = useState(!isEmailSet());
   const [packageName, setPackageName] = useState("");
   const [packageVersion, setPackageVersion] = useState("");
+  const [packageError, setPackageError] = useState("");
+  const [versionError, setVersionError] = useState("");
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [useLatestPackageVersion, setUseLatestPackageVersion] = useState(false);
   const [targetFramework, setTargetFramework] = useState(cachedTargetFramework);
   const [comments, setComments] = useState("");
@@ -66,7 +75,22 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     history.goBack();
   };
 
+  const setFlashbar = useCallback(
+    messageContent => {
+      dispatch(pushCurrentMessageUpdate(messageContent));
+    },
+    [dispatch]
+  );
+
+  const declineProvideEmail = () => {
+    setShowEmailModal(false);
+    history.goBack();
+  };
+
   const onSubmit = async () => {
+    setSubmitLoading(true);
+    setPackageError("");
+    setVersionError("");
     const submission: PackageContribution = {
       packageNameSource: source.packageName,
       packageVersionSource: source.packageVersion,
@@ -76,10 +100,65 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
       targetFramework: targetFramework,
       comments: comments
     };
-    // TODO: Actually submit this for verification
-    const result = await uploadRuleContribution(email, submission);
-    console.log("Upload result: " + result);
-    history.push(nextPagePath);
+
+    if (await validateInput(submission)) {
+      const result = await uploadRuleContribution(email, submission);
+      if (result) {
+        setFlashbar({
+          messageId: uuid(),
+          type: "success",
+          content: "Successfully submitted replacement suggestion",
+          dismissible: true
+        });
+        history.push(nextPagePath);
+      } else {
+        setFlashbar({
+          messageId: uuid(),
+          type: "error",
+          content: "Unable to reach the server to submit your suggestion. Please try again.",
+          dismissible: true
+        });
+      }
+    }
+    setSubmitLoading(false);
+  };
+
+  const validateInput = async (submission: PackageContribution) => {
+    //Error handling for API call
+    try {
+      // result is type ValidationResult:
+      // {valid: boolean, field?: string, message?: string}
+      const result = await validatePackageInput(submission);
+      if (!result.valid) {
+        switch (result.field) {
+          case "packageName":
+            if (result.message) setPackageError(result.message);
+            break;
+          case "packageVersion":
+            if (result.message) setVersionError(result.message);
+            break;
+          case "packageName/packageVersion":
+            if (result.message) {
+              setPackageError(result.message);
+              setVersionError(result.message);
+            }
+            break;
+          default:
+            break;
+        }
+        return false;
+      }
+    } catch {
+      // Shows an error flashbar at the top
+      setFlashbar({
+        messageId: uuid(),
+        type: "error",
+        content: "Unable to reach the server to verify the provided package. Please try again.",
+        dismissible: true
+      });
+      return false;
+    }
+    return true;
   };
 
   const ValueWithLabel: React.FC<KeyValProps> = ({ label, description, children }) => (
@@ -99,21 +178,31 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
           <Button variant="link" onClick={onCancel}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={onSubmit}>
+          <Button loading={submitLoading} variant="primary" onClick={onSubmit}>
             Submit
           </Button>
         </SpaceBetween>
       }
     >
       <ColumnLayout columns={4}>
-        <FormField label="Package name" description="Official name of the replacement package." stretch={true}>
+        <FormField
+          label="Package name"
+          description="Official name of the replacement package."
+          stretch={true}
+          errorText={packageError}
+        >
           <Input
             value={packageName}
             onChange={({ detail }) => setPackageName(detail.value)}
             placeholder="Example.Package.Name"
           />
         </FormField>
-        <FormField label="Package version" description='Provide a version number or check "Latest."' stretch={true}>
+        <FormField
+          label="Package version"
+          description='Provide a version number or check "Latest."'
+          stretch={true}
+          errorText={versionError}
+        >
           <Input
             value={packageVersion}
             onChange={({ detail }) => setPackageVersion(detail.value)}
@@ -125,6 +214,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
               setUseLatestPackageVersion(detail.checked);
               if (detail.checked) {
                 setPackageVersion("");
+                setVersionError("");
               }
             }}
             checked={useLatestPackageVersion}
@@ -157,10 +247,12 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   return (
     <SpaceBetween size="l">
       <EnterEmailModal
-        visible={!isEmailSet()}
+        visible={showEmailModal}
         onSaveExit={() => {
           setEmail(window.electron.getState("email"));
+          setShowEmailModal(false);
         }}
+        onCancel={() => declineProvideEmail()}
       />
       <Container
         header={
