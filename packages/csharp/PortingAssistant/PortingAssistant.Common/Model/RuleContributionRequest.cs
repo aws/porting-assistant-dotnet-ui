@@ -7,6 +7,7 @@ namespace PortingAssistant.Common.Model
         public string accessKey { get; set; }
 
         public string secret { get; set; }
-
+        public string region { get; set; }
+        public string s3BucketName { get; set; }
     }
 }

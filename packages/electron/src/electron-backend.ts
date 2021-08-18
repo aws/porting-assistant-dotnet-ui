@@ -252,9 +252,10 @@ export const initConnection = (logger: any = console) => {
     }); 
     
     ipcMain.handle("uploadRuleContribution", async (_event, upload) => {
-      const authenticated_upload = upload;
-      authenticated_upload['accessKey'] = config.PortingAssistantConfiguration.AWSCredentials.AccessKey;
-      authenticated_upload['secret'] = config.PortingAssistantConfiguration.AWSCredentials.Secret;
+      upload['accessKey'] = config.PortingAssistantConfiguration.RuleContribution.AccessKey;
+      upload['secret'] = config.PortingAssistantConfiguration.RuleContribution.Secret;
+      upload['s3BucketName'] = config.PortingAssistantConfiguration.RuleContribution.S3BucketName;
+      upload['region'] = config.PortingAssistantConfiguration.RuleContribution.Region;
       const response = await connection.send("uploadRuleContribution", upload);
       return response;
     });  

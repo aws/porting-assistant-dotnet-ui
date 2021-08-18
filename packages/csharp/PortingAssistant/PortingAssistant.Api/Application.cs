@@ -134,10 +134,10 @@ namespace PortingAssistant.Api
 
             _connection.On<RuleContributionRequest, bool>("uploadRuleContribution", request =>
             {
-                RegionEndpoint bucketRegion = RegionEndpoint.USWest2;
+                RegionEndpoint bucketRegion = RegionEndpoint.GetBySystemName(request.region);
                 S3Upload upload = new S3Upload(
                     bucketRegion, 
-                    "portingassistantrulecont-paincomingrulecontributi-a6ryjainyowj",
+                    request.s3BucketName,
                     request.accessKey,
                     request.secret
                 );
