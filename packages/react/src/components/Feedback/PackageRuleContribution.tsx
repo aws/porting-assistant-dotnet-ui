@@ -8,7 +8,7 @@ import {
   FormField,
   Header,
   Input,
-  Select,
+  Multiselect,
   SpaceBetween
 } from "@awsui/components-react";
 import { OptionDefinition } from "@awsui/components-react/internal/components/option/interfaces";
@@ -44,7 +44,7 @@ export interface PackageContribution {
   packageName: string;
   packageVersion: string;
   packageVersionLatest: boolean;
-  targetFramework: any;
+  targetFramework: readonly OptionDefinition[];
   comments?: string;
 }
 
@@ -63,10 +63,12 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const [versionError, setVersionError] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
   const [useLatestPackageVersion, setUseLatestPackageVersion] = useState(false);
-  const [targetFramework, setTargetFramework] = useState<OptionDefinition>({
-    label: cachedTargetFramework.label,
-    value: cachedTargetFramework.id
-  });
+  const [targetFramework, setTargetFramework] = useState<readonly OptionDefinition[]>([
+    {
+      label: cachedTargetFramework.label,
+      value: cachedTargetFramework.id
+    }
+  ]);
   const [comments, setComments] = useState("");
 
   const onCancel = () => {
@@ -183,12 +185,10 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
             {
               Source: "External",
               Preferred: "Yes",
-              TargetFrameworks: [
-                {
-                  Name: submission.targetFramework.value,
-                  TargetCPU: ["x86", "x64", "ARM32", "ARM64"]
-                }
-              ],
+              TargetFrameworks: submission.targetFramework.map(t => ({
+                Name: t.value,
+                TargetCPU: ["x86", "x64", "ARM32", "ARM64"]
+              })),
               Description: "",
               Actions: submission.packageVersionLatest
                 ? [
@@ -277,10 +277,10 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
           </Checkbox>
         </FormField>
         <FormField label="Target framework" description="Select the target framework." stretch={true}>
-          <Select
-            selectedOption={targetFramework}
+          <Multiselect
+            selectedOptions={targetFramework}
             options={targetFrameworkOptions}
-            onChange={({ detail }) => setTargetFramework(detail.selectedOption)}
+            onChange={({ detail }) => setTargetFramework(detail.selectedOptions)}
           />
         </FormField>
         <FormField
