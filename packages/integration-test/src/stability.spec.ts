@@ -20,6 +20,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
   const selectProfile = async () => {
     await app.client.pause(3000);
     await (await app.client.$("#start-btn")).click();
+    await addNamedProfileCheck();
     await (await app.client.$("#profile-selection")).click();
     await (await app.client.$('[title="default"]')).click();
     await (await app.client.$("#next-btn")).click();
@@ -28,10 +29,34 @@ describe("stability check, assess a solution, reassess the solution, check all s
     });
   };
 
+  const addNamedProfileCheck = async () => {
+    // profile selection model element is on top of add named profile link
+    // and will intercept the click so we offset by 3 pixels down
+    await (
+      await app.client.$("#add-named-profile")
+    ).click({
+      button: "left",
+      x: 0,
+      y: 3,
+    });
+    await (await app.client.$("#add-profile-button")).click();
+    await (
+      await app.client.$("span=Profile is required")
+    ).waitForExist({
+      timeout: 1000,
+    });
+    await app.client.keys(["Escape"]);
+    await (
+      await app.client.$("#profile-selection")
+    ).waitForExist({
+      timeout: 1000,
+    });
+  };
+
   const runThroughSolution = async (
     solutionPath: string,
     portingPlace: string,
-    targetFramework: string,
+    targetFramework: string
   ) => {
     const solutionNameTagId = `#solution-link-${escapeNonAlphaNumeric(
       solutionPath
@@ -57,7 +82,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const solutionPage = `=${solutionPath.split("\\").pop()}`;
     console.log(`checking projects for ${solutionNameTagId}`);
     for (let i = 0; i < 2 && i < projects.length; i++) {
-      const project = projects[i]
+      const project = projects[i];
       await projectTabCheck();
       await (await app.client.$(`#${project}`)).click();
       if (project == projects[0]) {
@@ -66,37 +91,46 @@ describe("stability check, assess a solution, reassess the solution, check all s
         await portingProjectsCheck("other");
       }
       await app.client.pause(2000);
-      await (await app.client.$("._circle_oh9fc_75")).waitForExist({ 
-        reverse: true, timeout: 1000000 
+      await (
+        await app.client.$("._circle_oh9fc_75")
+      ).waitForExist({
+        reverse: true,
+        timeout: 1000000,
       });
       await (await app.client.$(solutionNameTagId)).click();
     }
-    await checkPortingProjectResults(solutionNameTagId, projects[0], targetFramework);
+    await checkPortingProjectResults(
+      solutionNameTagId,
+      projects[0],
+      targetFramework
+    );
     return assessmentResults;
   };
 
   const checkAssessmentResults = async (solutionPath: string) => {
     const escapedSolutionPath = escapeNonAlphaNumeric(solutionPath);
     return await Promise.all([
-      await(
+      await (
         await app.client.$(`#ported-projects-${escapedSolutionPath}`)
       ).getText(),
-      await(
+      await (
         await app.client.$(`#incompatible-packages-${escapedSolutionPath}`)
       ).getText(),
-      await(
+      await (
         await app.client.$(`#incompatible-apis-${escapedSolutionPath}`)
       ).getText(),
-      await(
+      await (
         await app.client.$(`#build-error-${escapedSolutionPath}`)
       ).getText(),
     ]);
   };
 
   const assessSolutionCheck = async (solutionNameTagId: string) => {
-    await (await app.client.$("._circle_oh9fc_75")).waitForExist({ 
-      reverse: true, 
-      timeout: 800000 
+    await (
+      await app.client.$("._circle_oh9fc_75")
+    ).waitForExist({
+      reverse: true,
+      timeout: 800000,
     });
     await (await app.client.$(solutionNameTagId)).click();
   };
@@ -112,7 +146,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
       await app.client.$("._circle_oh9fc_75")
     ).waitForExist({
       reverse: true,
-      timeout: 1000000
+      timeout: 1000000,
     });
     const results = await checkAssessmentResults(solutionPath);
     await (await app.client.$(solutionNameTagId)).click();
@@ -125,7 +159,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     );
     await projectReferenceTab.waitForExist({ timeout: 100000 });
     await projectReferenceTab.click();
-    await (await app.client.$("#project-dependencies")).waitForExist({
+    await (
+      await app.client.$("#project-dependencies")
+    ).waitForExist({
       timeout: 600000,
     });
     await (await app.client.$(`a[data-testid="nuget-packages"]`)).click();
@@ -134,7 +170,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await (await app.client.$("=APIs")).waitForDisplayed();
     await (await app.client.$(`a[data-testid="source-files"]`)).click();
     await (await app.client.$("=Source files")).waitForDisplayed();
-    const numSourceFiles = await(
+    const numSourceFiles = await (
       await app.client.$("._counter_14rjr_108")
     ).getText();
     await (await app.client.$(`a[data-testid="projects"]`)).click();
@@ -144,7 +180,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
 
   const projectTabCheck = async () => {
     await (await app.client.$(`a[data-testid="project-references"]`)).click();
-    await (await app.client.$("#project-dependencies")).waitForExist({
+    await (
+      await app.client.$("#project-dependencies")
+    ).waitForExist({
       timeout: 400000,
     });
     await (await app.client.$(`a[data-testid="nuget-packages"]`)).click();
@@ -171,7 +209,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
       await (await app.client.$(`icon="folder-open"`)).click();
       await (await app.client.$("#save-button")).click();
       await app.client.pause(3000);
-      await (await app.client.$("#incompatible")).waitForExist({
+      await (
+        await app.client.$("#incompatible")
+      ).waitForExist({
         timeout: 50000,
       });
     }
@@ -182,13 +222,15 @@ describe("stability check, assess a solution, reassess the solution, check all s
   const checkPortingProjectResults = async (
     solutionNameTagId: string,
     firstProjectId: string,
-    expectedTargetFramework: string,
+    expectedTargetFramework: string
   ) => {
     // porting will kick off a new assessment, wait for it to finish before
     // clicking into the solution
     const solutionLink = await app.client.$(solutionNameTagId);
     if (await solutionLink.isExisting()) {
-      await(await app.client.$("._circle_oh9fc_75")).waitForExist({
+      await (
+        await app.client.$("._circle_oh9fc_75")
+      ).waitForExist({
         reverse: true,
         timeout: 800000,
       });
@@ -249,19 +291,21 @@ describe("stability check, assess a solution, reassess the solution, check all s
     );
     await addSolution(app, solutionPath);
     await app.client.refresh();
-    const results =  await runThroughSolution(solutionPath, "inplace", "netcoreapp3.1");
-    await validateHighLevelResults(
-      results, 
-      ["0 of 40", "37 of 38", "447 of 1256", "0", "(1565)"]
+    const results = await runThroughSolution(
+      solutionPath,
+      "inplace",
+      "netcoreapp3.1"
     );
+    await validateHighLevelResults(results, [
+      "0 of 40",
+      "37 of 38",
+      "447 of 1256",
+      "0",
+      "(1565)",
+    ]);
 
     const getCatalogController = fs.readFile(
-      path.join(
-        solutionFolderPath,
-        "Libraries",
-        "Nop.Core",
-        "Nop.Core.csproj"
-      ),
+      path.join(solutionFolderPath, "Libraries", "Nop.Core", "Nop.Core.csproj"),
       "utf8"
     );
 
@@ -283,11 +327,18 @@ describe("stability check, assess a solution, reassess the solution, check all s
     );
     await addSolution(app, solutionPath);
     await app.client.refresh();
-    const results = await runThroughSolution(solutionPath, "inplace", "netcoreapp3.1");
-    await validateHighLevelResults(
-      results, 
-      ["0 of 1", "2 of 6", "50 of 81", "0", "(21)"]
+    const results = await runThroughSolution(
+      solutionPath,
+      "inplace",
+      "netcoreapp3.1"
     );
+    await validateHighLevelResults(results, [
+      "0 of 1",
+      "2 of 6",
+      "50 of 81",
+      "0",
+      "(21)",
+    ]);
     const controllerFolderPath: string = path.join(
       solutionFolderPath,
       "MvcMusicStore",
@@ -317,10 +368,17 @@ describe("stability check, assess a solution, reassess the solution, check all s
     );
     await addSolution(app, solutionPath);
     await app.client.refresh();
-    const results = await runThroughSolution(solutionPath, "inplace", "netcoreapp3.1");
-    await validateHighLevelResults(
-      results, 
-      ["1 of 1", "0 of 13", "5 of 249", "0", "(21)"]
+    const results = await runThroughSolution(
+      solutionPath,
+      "inplace",
+      "netcoreapp3.1"
     );
+    await validateHighLevelResults(results, [
+      "1 of 1",
+      "0 of 13",
+      "5 of 249",
+      "0",
+      "(21)",
+    ]);
   });
 });
