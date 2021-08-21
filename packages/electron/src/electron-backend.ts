@@ -20,6 +20,21 @@ ipcMain.handle("getConfigPath", (_event) => {
   return app.getPath("userData");
 });
 
+const config = require(isDev
+  ? path.join(
+      __dirname,
+      "..",
+      "build-scripts",
+      "porting-assistant-config.dev.json"
+    )
+  : path.join(
+      path.dirname(app.getPath("exe")),
+      "resources",
+      "config",
+      "porting-assistant-config.json"
+    ));
+
+
 export const initTelemetryConnection = (logger: any = console) => {
   let instance: Connection | undefined = undefined;
 
@@ -235,7 +250,20 @@ export const initConnection = (logger: any = console) => {
     ipcMain.handle("checkInternetAccess", async (_event) => {
       const response = await connection.send("checkInternetAccess", "");
       return response;
-    });  
+    });
+
+    ipcMain.handle("sendCustomerFeedback", async (_event, upload) => {
+      const authenticated_upload = upload;
+      // authenticated_upload['accessKey'] = config.PortingAssistantConfiguration.AWSCredentials.AccessKey;
+      // authenticated_upload['secret'] = config.PortingAssistantConfiguration.AWSCredentials.Secret;
+      authenticated_upload['accessKey'] = "xxxx"
+      authenticated_upload['secret'] = "xxxx"
+      //authenticated_upload['keyname'] = "swagswag.json"
+      const response = await connection.send("sendCustomerFeedback", authenticated_upload);
+      return response;
+    });
+    
+    
 
     connection.on("onNugetPackageUpdate", (response) => {
       browserWindow.webContents.send("onNugetPackageUpdate", response);

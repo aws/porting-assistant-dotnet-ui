@@ -66,6 +66,7 @@ export interface Backend {
     callback: (projectAnalysis: Response<ProjectApiAnalysisResult, SolutionProject>) => void
   ) => void;
   checkInternetAccess: () => Promise<boolean>;
+  sendCustomerFeedback: (upload: any) => Promise<boolean>;
 }
 
 export interface Porting {

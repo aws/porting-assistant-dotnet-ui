@@ -2,6 +2,7 @@ using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Aws4RequestSigner;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using PortingAssistantExtensionTelemetry.Model;
 using System;
@@ -10,6 +11,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Web.Helpers;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -228,6 +231,28 @@ namespace PortingAssistant.Telemetry.Utils
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+        private const string DefaultIdentifier = "591E6A97031144D5BADCE980EE3E51B7";
+
+        public static string getUniqueIdentifier() {
+          string _uniqueId;
+                var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(nic => nic.NetworkInterfaceType != NetworkInterfaceType.Loopback
+                                  && (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                                  && nic.Speed > 0).ToList();
+                // wifi network interface will always take higher precedence for retrieving physical address
+                var wifiNetworkInterface = networkInterfaces.FirstOrDefault(wi => wi.NetworkInterfaceType == NetworkInterfaceType.Wireless80211);
+                if (wifiNetworkInterface != null)
+                {
+                    _uniqueId = Crypto.SHA256(wifiNetworkInterface.GetPhysicalAddress().ToString());
+                }
+                else
+                {
+                    var ethernetInterface = networkInterfaces.LastOrDefault(ei => ei.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+                                                && ei.OperationalStatus == OperationalStatus.Up && !ei.Name.Contains("Bluetooth", StringComparison.OrdinalIgnoreCase));
+                    _uniqueId = ethernetInterface != null ? Crypto.SHA256(ethernetInterface.GetPhysicalAddress().ToString()) : DefaultIdentifier;
+                }
+                return _uniqueId;
         }
     }
 }

@@ -1,8 +1,10 @@
-﻿using ElectronCgi.DotNet;
+﻿using Amazon;
+using ElectronCgi.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Common.Model;
+using PortingAssistant.Common.S3Upload;
 using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
 using PortingAssistant.VisualStudio;
@@ -10,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using PortingAssistant.Client.NuGet.Interfaces;
+using PortingAssistant.Telemetry.Utils;
 
 namespace PortingAssistant.Api
 {
@@ -129,6 +132,25 @@ namespace PortingAssistant.Api
                     return false;
                 }
             });
+
+            _connection.On<CustomerFeedbackRequest, bool>("sendCustomerFeedback", request =>
+            {
+
+              RegionEndpoint bucketRegion = RegionEndpoint.USWest2;
+              request.keyname = LogUploadUtils.getUniqueIdentifier() + request.timestamp;
+                S3Upload upload = new S3Upload(
+                    bucketRegion, 
+                    "portingassistantcustomer-customerfeedbackbucketxx-1u90hz3i5ly3l",
+                    request.accessKey,
+                    request.secret
+                );
+                var uploadSuccess = upload.uploadObjWithString(request.keyname, request.contents);
+                return uploadSuccess;
+            });
+
+
+
+
         }
 
         public void Start()

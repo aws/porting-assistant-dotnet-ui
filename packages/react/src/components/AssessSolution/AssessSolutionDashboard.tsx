@@ -30,6 +30,7 @@ import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isLoaded, Loadable } from "../../utils/Loadable";
+import { sendCustomerFeedback } from "../../utils/sendCustomerFeedback";
 import { ApiTable } from "../AssessShared/ApiTable";
 import { EnterEmailModal, isEmailSet } from "../AssessShared/EnterEmailModal";
 import { FileTable } from "../AssessShared/FileTable";
@@ -47,6 +48,13 @@ interface Props {
   projects: Loadable<Project[]>;
 }
 
+export interface CustomerFeedback {
+  feedback: string;
+  category: string;
+  email: string;
+  date: string;
+}
+
 const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -56,7 +64,7 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
   const targetFramework = getTargetFramework();
   const [feedbackModal, setFeedbackModalVisible] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
-  const [category, setCategory] = React.useState("");
+  const [categoryType, setCategory] = React.useState("");
   const [emailModal, setEmailModalVisible] = React.useState(false);
 
   const [isCategoryEmpty, setIsCategoryEmpty] = React.useState(false);
@@ -148,13 +156,30 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               </Button>
               <Button
                 variant="primary"
-                onClick={() => {
-                  if (category === "" || category == null) {
+                onClick={async () => {
+                  if (categoryType === "" || categoryType == null) {
                     setIsCategoryEmpty(true);
                   }
                   if (inputValue === "" || inputValue == null) {
                     setIsValueEmpty(true);
                   }
+                  const cur_date = Date().toString();
+
+                  const submission: CustomerFeedback = {
+                    feedback: inputValue,
+                    category: categoryType,
+                    email: email,
+                    date: cur_date
+                  };
+
+                  const result = await sendCustomerFeedback(submission);
+                  console.log("result: " + result);
+
+                  setFeedbackModalVisible(false);
+                  setInputValue("");
+                  setCategory("");
+                  setIsCategoryEmpty(false);
+                  setIsValueEmpty(false);
                 }}
               >
                 Send
