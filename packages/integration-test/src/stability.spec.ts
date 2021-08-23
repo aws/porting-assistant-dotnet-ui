@@ -270,7 +270,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
 
     // Get Electron process id
     exec(
-      "Get-Process | Select-Object Id, WorkingSet, WorkingSet64, ProcessName, MainWindowTitle | Where-Object {$_.mainWindowTitle -eq 'Porting Assistant for .NET'} | Select-Object -ExpandProperty id",
+      "Get-Process | Select-Object Id, WorkingSet, WorkingSet64, ProcessName, MainWindowTitle | Where-Object {$_.ProcessName -eq 'Porting Assistant for .NET'} | Select-Object -ExpandProperty id",
       { shell: "powershell.exe" },
       (error: any, stdout: any, stderr: any) => {
         appProcessId = String(stdout);
