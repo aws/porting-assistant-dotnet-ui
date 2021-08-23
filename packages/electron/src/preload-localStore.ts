@@ -43,6 +43,7 @@ const createLocalStore = () =>
       share: false,
       lastConfirmVersion: "",
       notification: true,
+      newVersionNotification: true,
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -82,6 +83,9 @@ const createLocalStore = () =>
       notification: {
         type: "boolean",
       },
+      newVersionNotification: {
+        type: "boolean",
+      },
     },
     watch: true,
     cwd:
@@ -111,7 +115,7 @@ const createReducerCacheStore = () =>
         "solution-reducer"
       )),
     },
-    name: "reducer-cache-1.5.2",
+    name: "reducer-cache-1.5.3",
     clearInvalidConfig: true,
     cwd:
       process.env["NODE_ENV"] === "test"

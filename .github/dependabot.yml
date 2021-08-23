@@ -1,0 +1,45 @@
+version: 2
+registries:
+  porting-assistant-nuget:
+    type: nuget-feed
+    url: https://s3-us-west-2.amazonaws.com/aws.portingassistant.dotnet.download/nuget/index.json
+  nuget-org:
+    type: nuget-feed
+    url: https://api.nuget.org/v3/index.json
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+  - package-ecosystem: "nuget"
+    directory: "packages/csharp/PortingAssistant/PortingAssistant.Api"
+    registries:
+      - porting-assistant-nuget
+      - nuget-org
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "nuget"
+    directory: "packages/csharp/PortingAssistant/PortingAssistant.Common"
+    registries:
+      - porting-assistant-nuget
+      - nuget-org
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "Microsoft.AspNetCore.Mvc.NewtonsoftJson"
+  - package-ecosystem: "nuget"
+    directory: "packages/csharp/PortingAssistant/PortingAssistant.Telemetry"
+    registries:
+      - porting-assistant-nuget
+      - nuget-org
+    schedule:
+      interval: "daily"
+    ignore:
+      - dependency-name: "Microsoft.AspNetCore.Mvc.NewtonsoftJson"
+  - package-ecosystem: "nuget"
+    directory: "packages/csharp/PortingAssistant/PortingAssistant.VisualStudio"
+    registries:
+      - porting-assistant-nuget
+      - nuget-org
+    schedule:
+      interval: "daily"

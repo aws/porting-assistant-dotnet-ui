@@ -1,10 +1,7 @@
-﻿using System;
-using Serilog;
-using Serilog.Core;
+﻿using Serilog.Core;
 using Serilog.Events;
-using Serilog.Configuration;
-using System.Collections.Generic;
 using Serilog.Formatting;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -25,7 +22,7 @@ namespace PortingAssistant.Common.Model
 
         public void Emit(LogEvent logEvent)
         {
-            if(logEvent.Level < LogEventLevel.Warning)
+            if (logEvent.Level < LogEventLevel.Warning)
             {
                 return;
             }

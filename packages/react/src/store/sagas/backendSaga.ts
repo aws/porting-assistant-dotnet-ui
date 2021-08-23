@@ -5,6 +5,7 @@ import { getType } from "typesafe-actions";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
+import { internetAccessFailed } from "../../constants/messages";
 import { Message } from "../../models/error";
 import { NugetPackage, PackageAnalysisResult, ProjectApiAnalysisResult, SolutionProject } from "../../models/project";
 import { Response } from "../../models/response";
@@ -92,25 +93,19 @@ export function* watchApiAnalysisUpdate() {
 
 function* handleInit(action: ReturnType<typeof init>) {
   yield put(ping());
-  const haveInternet:boolean = yield window.backend.checkInternetAccess();
+  const haveInternet: boolean = yield window.backend.checkInternetAccess();
   const storedSolutions = window.electron.getState("solutions", {});
   const targetFramework = getTargetFramework();
   if (!haveInternet) {
-    yield put(pushCurrentMessageUpdate({
-      messageId: uuid(),
-      groupId: "internetAccessFailed",
-      type: "error",
-      header: "No Internet Access",
-      content: "Ensure you have internet access before using the application",
-      buttonText: "View prerequisites",
-      onButtonClick: () => window.electron.openExternalUrl(externalUrls.prereq)
-    }));
+    yield put(pushCurrentMessageUpdate(internetAccessFailed()));
   }
   for (const solution of Object.keys(storedSolutions)) {
-    if (haveInternet) { 
+    if (haveInternet) {
       yield put(
         analyzeSolution.request({
           solutionPath: solution,
+          runId: uuid(),
+          triggerType: "AutoRequest",
           settings: {
             ignoredProjects: [],
             targetFramework: targetFramework,
@@ -121,14 +116,13 @@ function* handleInit(action: ReturnType<typeof init>) {
           force: action.payload
         })
       );
-    }
-    else {
+    } else {
       yield put(
         analyzeSolution.failure({
           error: "Cannot analyze solution witout internet connectivity",
           solutionPath: solution
         })
-      )  
+      );
     }
   }
 }
@@ -187,6 +181,8 @@ function* handleAnalyzeSolution(action: ReturnType<typeof analyzeSolution.reques
     const solutionDetails: SagaReturnType<typeof window.backend.analyzeSolution> = yield call(
       [window.backend, window.backend.analyzeSolution],
       currentSolutionPath,
+      action.payload.runId,
+      action.payload.triggerType,
       action.payload.settings
     );
 

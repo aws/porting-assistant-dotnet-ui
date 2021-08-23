@@ -32,7 +32,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await (await app.client.$("#profile-selection")).click();
     await (await app.client.$('[title="default"]')).click();
     await (await app.client.$("#next-btn")).click();
-    await (await app.client.$("=Assess a new solution")).waitForDisplayed();
+    await(await app.client.$("=Assess a new solution")).waitForDisplayed({
+      timeout: 60000,
+    });
   };
 
   const runThroughSolution = async (
@@ -325,7 +327,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const results = await runThroughSolution(solutionPath, "inplace", "netcoreapp3.1");
     await validateHighLevelResults(
       results, 
-      ["0 of 40", "37 of 38", "328 of 898", "0", "(1565)"]
+      ["0 of 40", "37 of 38", "447 of 1256", "0", "(1565)"]
     ).then(() => {
       console.log(`Max memory usage: ${appMemoryUsageMax}`);
     });
@@ -359,11 +361,10 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const results = await runThroughSolution(solutionPath, "inplace", "netcoreapp3.1");
     await validateHighLevelResults(
       results, 
-      ["0 of 1", "2 of 6", "34 of 52", "0", "(21)"]
+      ["0 of 1", "2 of 6", "50 of 81", "0", "(21)"]
     ).then(() => {
       console.log(`Max memory usage: ${appMemoryUsageMax}`);
     });
-
     const controllerFolderPath: string = path.join(
       solutionFolderPath,
       "MvcMusicStore",
@@ -398,7 +399,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const results = await runThroughSolution(solutionPath, "inplace", "netcoreapp3.1");
     await validateHighLevelResults(
       results, 
-      ["1 of 1", "0 of 13", "5 of 169", "0", "(21)"]
+      ["1 of 1", "0 of 13", "5 of 249", "0", "(21)"]
     ).then(() => {
       console.log(`Max memory usage: ${appMemoryUsageMax}`);
     });

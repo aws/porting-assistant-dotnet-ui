@@ -8,6 +8,7 @@ export interface LocalStoreSchema {
   share: boolean;
   lastConfirmVersion: string;
   notification: boolean;
+  newVersionNotification: boolean;
 }
 
 export interface SolutionLocalStoreSchema {

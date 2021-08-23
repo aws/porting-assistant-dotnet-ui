@@ -1,4 +1,4 @@
-import { shell, contextBridge } from "electron";
+import { shell, contextBridge, remote } from "electron";
 import path from "path";
 import fs from "fs";
 import process from "process";
@@ -17,6 +17,8 @@ import {
   Project,
   VersionPair,
 } from "@porting-assistant/react/src/models/project";
+import axios from "axios";
+import isDev from "electron-is-dev";
 
 contextBridge.exposeInMainWorld("electron", {
   openExternalUrl: (url: string) => shell.openExternal(url),
@@ -27,7 +29,8 @@ contextBridge.exposeInMainWorld("electron", {
       | "profile"
       | "share"
       | "lastConfirmVersion"
-      | "notification",
+      | "notification"
+      | "newVersionNotification",
     value: any
   ) => localStore.set(key, value),
   getState: (
@@ -90,13 +93,21 @@ contextBridge.exposeInMainWorld("electron", {
   },
   verifyUser: (profile: string) => invokeBackend("verifyProfile", profile),
   getVersion: () => invokeBackend("getVersion"),
+  getLatestVersion: () => invokeBackend("getLatestVersion"),
+  getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
+  getAssessmentLog: () => {
+    const dateString = new Date().toLocaleDateString("en-CA").slice(0,10).replace(/-/g,"");
+    return path.join(remote.app.getPath("userData"), "logs", `portingAssistant-assessment-${dateString}.log`);
+  },
 });
 
 contextBridge.exposeInMainWorld("backend", {
   ping: () => invokeBackend("ping"),
   analyzeSolution: (
     solutionFilePath: string,
+    runId: string,
+    triggerType: string,
     settings: {
       ignoreProjects: string[];
       targetFramework: string;
@@ -104,7 +115,7 @@ contextBridge.exposeInMainWorld("backend", {
       actionsOnly: boolean;
       compatibleOnly: boolean;
     }
-  ) => invokeBackend("analyzeSolution", solutionFilePath, settings),
+  ) => invokeBackend("analyzeSolution", solutionFilePath, runId, triggerType, settings),
   openSolutionInIDE: (solutionFilePath: string) =>
     invokeBackend("openSolutionInIDE", solutionFilePath),
   getFileContents: (sourceFilePath: string) =>
@@ -113,8 +124,7 @@ contextBridge.exposeInMainWorld("backend", {
     listenBackend("onNugetPackageUpdate", callback),
   listenApiAnalysisUpdate: (callback: (message: string) => void) =>
     listenBackend("onApiAnalysisUpdate", callback),
-  checkInternetAccess: () =>
-    invokeBackend("checkInternetAccess")
+  checkInternetAccess: () => invokeBackend("checkInternetAccess"),
 });
 
 contextBridge.exposeInMainWorld("porting", {

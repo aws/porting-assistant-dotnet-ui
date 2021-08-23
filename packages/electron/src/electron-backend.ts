@@ -12,6 +12,7 @@ import {
   registerLogListeners,
 } from "./telemetry/electron-telemetry";
 import { localStore } from "./preload-localStore";
+import { latestVersion, outdatedVersionFlag } from "./electron";
 
 ipcMain.handle("verifyProfile", (_event, profile: string) => {
   return testProfile(profile);
@@ -19,6 +20,88 @@ ipcMain.handle("verifyProfile", (_event, profile: string) => {
 ipcMain.handle("getConfigPath", (_event) => {
   return app.getPath("userData");
 });
+ipcMain.handle("getLatestVersion", (_event) => {
+  return latestVersion;
+});
+ipcMain.handle("getOutdatedVersionFlag", (_event) => {
+  return outdatedVersionFlag;
+});
+
+export const initTelemetryConnection = (logger: any = console) => {
+  let instance: Connection | undefined = undefined;
+
+  const createConnection = (browserWindow: Electron.BrowserWindow) => {
+      const connection = new ConnectionBuilder()
+          .connectTo(
+              "dotnet",
+              isDev
+                  ? path.join(
+                      __dirname,
+                      "..",
+                      "netcore_build",
+                      "PortingAssistant.Telemetry.dll"
+                  )
+                  : path.join(
+                      path.dirname(app.getPath("exe")),
+                      "resources",
+                      "netcore_build",
+                      "PortingAssistant.Telemetry.dll"
+                  ),
+              isDev
+                  ? path.join(
+                      __dirname,
+                      "..",
+                      "build-scripts",
+                      "porting-assistant-config.dev.json"
+                  )
+                  : path.join(
+                      path.dirname(app.getPath("exe")),
+                      "resources",
+                      "config",
+                      "porting-assistant-config.json"
+                  ),
+              localStore.get("profile"),
+              app.getPath("userData"),
+              app.getVersion()
+          )
+          .build();
+
+      console.log("Telemetry Connection Start.");
+
+      connection.onDisconnect = () => {
+          // Recreate connection on disconnect
+          logger.log("telemetry disconnected");
+          instance = undefined;
+      };
+
+      return connection;
+  };
+
+  return {
+      getConnectionInstance: () => instance,
+      closeConnection: () => {
+          if (instance != null) {
+              instance.close();
+          }
+      },
+      registerListeners: (browserWindow: Electron.BrowserWindow) => {
+          if (!localStore.get("profile")) {
+              console.log("Did not find profile, setting onDidChange");
+              localStore.onDidChange("profile", () => {
+                  console.log("Profile changed, recreating connection");
+                  if (instance != null) {
+                      instance.close();
+                      instance = undefined;
+                  }
+                  instance = createConnection(browserWindow);
+              });
+          } else {
+              console.log("profileFound: " + localStore.get("profile"));
+              instance = createConnection(browserWindow);
+          }
+      },
+  };
+};
 
 export const initConnection = (logger: any = console) => {
   ipcMain.handle("ping", async (_event) => {
@@ -97,8 +180,8 @@ export const initConnection = (logger: any = console) => {
 
     ipcMain.handle(
       "analyzeSolution",
-      async (_event, solutionFilePath, settings) => {
-        const request = { solutionFilePath, settings };
+      async (_event, solutionFilePath, runId, triggerType, settings) => {
+        const request = { solutionFilePath, runId, triggerType, settings };
         const elapseTime = startTimer();
         logger.log(`REQUEST - analyzeSolution: ${JSON.stringify(request)}`);
         const response = await connection.send("analyzeSolution", request);
