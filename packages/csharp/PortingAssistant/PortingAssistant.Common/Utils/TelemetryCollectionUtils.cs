@@ -26,9 +26,9 @@ namespace PortingAssistant.Common.Utils
             TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
         }
 
-        public static void CollectNugetMetrics(Task<PackageAnalysisResult> result, AnalyzeSolutionRequest request, string tgtFramework)
+        public static void CollectNugetMetrics(Task<PackageAnalysisResult> packageAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework)
         {
-            var nugetMetrics = createNugetMetric(request.runId, request.triggerType, tgtFramework, result);
+            var nugetMetrics = createNugetMetric(request.runId, request.triggerType, tgtFramework, packageAnalysisResult);
             TelemetryCollector.Collect<NugetMetrics>(nugetMetrics);
         }
 

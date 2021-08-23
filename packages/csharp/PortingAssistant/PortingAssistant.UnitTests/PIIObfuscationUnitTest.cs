@@ -14,7 +14,7 @@ namespace PortingAssistant.UnitTests
         public void TestSolutionPath() 
         {
             var solutionPath = "C:/Users/CustomerName/nopCommerce/src/NopCommerce.sln";
-            var encryptedSolutionPath = Crypto.SHA256(solutionPath); // 462eb7f46af82bd5155ef9f28ca3f5f638f702a7423b105478fa3d9267a344da
+            var encryptedSolutionPath = Crypto.SHA256(solutionPath);
             var runId = "1";
             var triggerType = "TestRequest";
             var targetFramework = "netcoreapp3.1";
