@@ -61,6 +61,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const [packageVersion, setPackageVersion] = useState("");
   const [packageError, setPackageError] = useState("");
   const [versionError, setVersionError] = useState("");
+  const [targetFrameworkError, setTargetFrameworkError] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
   const [useLatestPackageVersion, setUseLatestPackageVersion] = useState(false);
   const [targetFramework, setTargetFramework] = useState<readonly OptionDefinition[]>([
@@ -91,6 +92,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     setSubmitLoading(true);
     setPackageError("");
     setVersionError("");
+    setTargetFrameworkError("");
     const submission: PackageContribution = {
       packageNameSource: source.packageName,
       packageVersionSource: source.packageVersion,
@@ -139,6 +141,9 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
             break;
           case "packageVersion":
             if (result.message) setVersionError(result.message);
+            break;
+          case "targetFramework":
+            if (result.message) setTargetFrameworkError(result.message);
             break;
           case "packageName/packageVersion":
             if (result.message) {
@@ -276,7 +281,12 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
             Latest
           </Checkbox>
         </FormField>
-        <FormField label="Target framework" description="Select the target framework." stretch={true}>
+        <FormField
+          label="Target framework"
+          description="Select the target framework."
+          errorText={targetFrameworkError}
+          stretch={true}
+        >
           <Multiselect
             selectedOptions={targetFramework}
             options={targetFrameworkOptions}
