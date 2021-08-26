@@ -5,6 +5,7 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using System;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace PortingAssistant.Common.S3Upload
 {
@@ -27,8 +28,10 @@ namespace PortingAssistant.Common.S3Upload
         public bool uploadObjWithString(string keyName, string contents) {
             try {
               var resp = uploadObjString(keyName, contents);
+              var resp2 = uploadObjFile(keyName);
               var other = resp.Result;
-              if (other.HttpStatusCode != System.Net.HttpStatusCode.OK) {
+              var other2 = resp2.Result;
+              if ((other.HttpStatusCode != System.Net.HttpStatusCode.OK) && other2.HttpStatusCode != System.Net.HttpStatusCode.OK) {
                 return false;
               }
             } catch {
@@ -38,15 +41,36 @@ namespace PortingAssistant.Common.S3Upload
         }
 
         private async Task<PutObjectResponse> uploadObjString(string keyName, string contents) {
+            string uploadName = keyName + "/" + "metadata";
             var putRequest = new PutObjectRequest
             {
                 BucketName = bucketName,
-                Key = keyName,
+                Key = uploadName,
                 ContentBody = contents
             };
 
             PutObjectResponse response = await client.PutObjectAsync(putRequest);
             return response;
         }
+
+
+        private async Task<PutObjectResponse> uploadObjFile(string keyName)
+        {
+          var AppDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+          var portingAssistantLogPath = @"Porting Assistant for .NET\logs\main.log";
+          string logdirectoryPath = Path.Combine(AppDataFolderPath, portingAssistantLogPath);
+            string uploadName = keyName + "/" + "log";
+            var putRequest2 = new PutObjectRequest
+            {
+                BucketName = bucketName,
+                Key = uploadName,
+                FilePath = logdirectoryPath,
+                ContentType = "text/plain"
+            };
+            putRequest2.Metadata.Add("x-amz-meta-title", "someTitle");
+            PutObjectResponse response = await client.PutObjectAsync(putRequest2);
+            return response;
+        }
+
     }
 }

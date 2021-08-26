@@ -254,5 +254,49 @@ namespace PortingAssistant.Telemetry.Utils
                 }
                 return _uniqueId;
         }
+
+        // public static string getMainLogFile() {
+        //   var AppDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+        //   var portingAssistantLogPath = @"Porting Assistant for .NET\logs";
+        //   string logdirectoryPath = Path.Combine(AppDataFolderPath, portingAssistantLogPath);
+
+        //   StringBuilder sb = new StringBuilder();
+
+        //   //string logFile;
+
+        //   // if (Directory.Exists(logdirectoryPath)) {
+        //   //   //var logFileName = "main.log";
+        //   //   //logFile = Path.Combine(logdirectoryPath, logFileName);
+        //   //   return "swag"
+            
+        //   // }
+
+          
+        //   // if (Directory.Exists(logdirectoryPath))
+        //   // {
+        //   //   var logFileName = "main.log";
+        //   //   string logFile = Path.Combine(logdirectoryPath, logFileName);
+
+        //   //   if (File.Exists(logFile))
+        //   //   {
+        //   //     StreamReader file = new StreamReader(logFile);
+        //   //     string line;
+        //   //     while ((line = file.ReadLine()) != null)
+        //   //     {
+        //   //       sb.Append(line);
+        //   //     }
+        //   //     file.Close();
+        //   //   }
+        //   //   else
+        //   //   {
+        //   //     Console.WriteLine("File doesn't exist");
+        //   //   }
+        //   //   }
+        //   //   return sb;
+        //   return logdirectoryPath;
+
+        //     //Console.WriteLine(sb.ToString());
+        // }
     }
 }

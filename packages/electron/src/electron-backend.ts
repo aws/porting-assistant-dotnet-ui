@@ -254,11 +254,10 @@ export const initConnection = (logger: any = console) => {
 
     ipcMain.handle("sendCustomerFeedback", async (_event, upload) => {
       const authenticated_upload = upload;
-      // authenticated_upload['accessKey'] = config.PortingAssistantConfiguration.AWSCredentials.AccessKey;
-      // authenticated_upload['secret'] = config.PortingAssistantConfiguration.AWSCredentials.Secret;
-      authenticated_upload['accessKey'] = "xxxx"
-      authenticated_upload['secret'] = "xxxx"
-      //authenticated_upload['keyname'] = "swagswag.json"
+      //The following keys are used to access the Customer Feedback S3 bucket.
+      //They have been temporarily removed for security purposes.
+      authenticated_upload['accessKey'] = "access key for Customer Feedback S3 bucket"
+      authenticated_upload['secret'] = "secret key for Customer Feedback S3 bucket"
       const response = await connection.send("sendCustomerFeedback", authenticated_upload);
       return response;
     });

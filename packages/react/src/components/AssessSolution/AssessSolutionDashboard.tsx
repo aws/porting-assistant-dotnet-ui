@@ -163,13 +163,17 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
                   if (inputValue === "" || inputValue == null) {
                     setIsValueEmpty(true);
                   }
+
+                  if((!(categoryType === "" || categoryType == null)) && (!(inputValue === "" || inputValue == null))) {
+
+                  
                   const cur_date = Date().toString();
 
                   const submission: CustomerFeedback = {
                     feedback: inputValue,
                     category: categoryType,
                     email: email,
-                    date: cur_date
+                    date: cur_date.replace(/[^a-zA-Z0-9]/g, '-')
                   };
 
                   const result = await sendCustomerFeedback(submission);
@@ -180,6 +184,7 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
                   setCategory("");
                   setIsCategoryEmpty(false);
                   setIsValueEmpty(false);
+                }
                 }}
               >
                 Send

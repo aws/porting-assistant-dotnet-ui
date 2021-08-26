@@ -13,6 +13,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using PortingAssistant.Client.NuGet.Interfaces;
 using PortingAssistant.Telemetry.Utils;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace PortingAssistant.Api
 {
@@ -135,21 +138,27 @@ namespace PortingAssistant.Api
 
             _connection.On<CustomerFeedbackRequest, bool>("sendCustomerFeedback", request =>
             {
-
+              string uniqueMachineID = LogUploadUtils.getUniqueIdentifier();
+              request.keyname = uniqueMachineID + "/" + request.timestamp;
               RegionEndpoint bucketRegion = RegionEndpoint.USWest2;
-              request.keyname = LogUploadUtils.getUniqueIdentifier() + request.timestamp;
-                S3Upload upload = new S3Upload(
-                    bucketRegion, 
-                    "portingassistantcustomer-customerfeedbackbucketxx-1u90hz3i5ly3l",
-                    request.accessKey,
-                    request.secret
-                );
-                var uploadSuccess = upload.uploadObjWithString(request.keyname, request.contents);
+              S3Upload upload = new S3Upload(
+                  bucketRegion, 
+                  "portingassistantcustomer-customerfeedbackbucketxx-1u90hz3i5ly3l",
+                  request.accessKey,
+                  request.secret
+              );
+            var contentObj = new Content
+            {
+                feedback = request.feedback,
+                category = request.category,
+                date = request.date,
+                email = request.email,
+                machineID = uniqueMachineID
+            };
+              string serializedContent = JsonConvert.SerializeObject(contentObj);  
+                var uploadSuccess = upload.uploadObjWithString(request.keyname, serializedContent);
                 return uploadSuccess;
             });
-
-
-
 
         }
 
