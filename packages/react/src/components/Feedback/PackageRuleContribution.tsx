@@ -283,7 +283,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
         </FormField>
         <FormField
           label="Target framework"
-          description="Select the target framework."
+          description="Select the target frameworks."
           errorText={targetFrameworkError}
           stretch={true}
         >
