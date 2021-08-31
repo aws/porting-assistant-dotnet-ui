@@ -8,9 +8,10 @@ import {
   FormField,
   Header,
   Input,
-  Select,
+  Multiselect,
   SpaceBetween
 } from "@awsui/components-react";
+import { OptionDefinition } from "@awsui/components-react/internal/components/option/interfaces";
 import { MemoryHistory } from "history";
 import path from "path";
 import React, { useCallback, useState } from "react";
@@ -21,14 +22,14 @@ import { v4 as uuid } from "uuid";
 
 import { EnterEmailModal, isEmailSet } from "../../components/AssessShared/EnterEmailModal";
 import { RuleContribSource } from "../../containers/RuleContribution";
-import { TargetFramework } from "../../models/localStoreSchema";
 import { HistoryState } from "../../models/locationState";
-import { pushCurrentMessageUpdate, pushPendingMessageUpdate } from "../../store/actions/error";
+import { pushCurrentMessageUpdate } from "../../store/actions/error";
+import { uploadRuleContribution } from "../../utils/uploadToS3Bucket";
 import { validatePackageInput } from "../../utils/validateRuleContrib";
 import { targetFrameworkOptions } from "../Setup/ProfileSelection";
 
 interface Props {
-  source: RuleContribSource | undefined;
+  source: RuleContribSource;
 }
 
 interface KeyValProps {
@@ -38,10 +39,12 @@ interface KeyValProps {
 }
 
 export interface PackageContribution {
+  packageNameSource: string;
+  packageVersionSource: string | undefined;
   packageName: string;
   packageVersion: string;
   packageVersionLatest: boolean;
-  targetFramework: TargetFramework;
+  targetFramework: readonly OptionDefinition[];
   comments?: string;
 }
 
@@ -58,15 +61,16 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const [packageVersion, setPackageVersion] = useState("");
   const [packageError, setPackageError] = useState("");
   const [versionError, setVersionError] = useState("");
+  const [targetFrameworkError, setTargetFrameworkError] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
   const [useLatestPackageVersion, setUseLatestPackageVersion] = useState(false);
-  const [targetFramework, setTargetFramework] = useState(cachedTargetFramework);
+  const [targetFramework, setTargetFramework] = useState<readonly OptionDefinition[]>([
+    {
+      label: cachedTargetFramework.label,
+      value: cachedTargetFramework.id
+    }
+  ]);
   const [comments, setComments] = useState("");
-
-  const onSelectTargetFramework = useCallback(([e]) => {
-    setTargetFramework(e.detail.selectedOption);
-    return e.detail.selectedOption;
-  }, []);
 
   const onCancel = () => {
     history.goBack();
@@ -88,7 +92,10 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     setSubmitLoading(true);
     setPackageError("");
     setVersionError("");
+    setTargetFrameworkError("");
     const submission: PackageContribution = {
+      packageNameSource: source.packageName,
+      packageVersionSource: source.packageVersion,
       packageName: packageName,
       packageVersion: packageVersion,
       packageVersionLatest: useLatestPackageVersion,
@@ -97,17 +104,28 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     };
 
     if (await validateInput(submission)) {
-      //TODO: Send to S3 bucket
-
-      setFlashbar({
-        messageId: uuid(),
-        type: "success",
-        content: "Successfully submitted replacement suggestion",
-        dismissible: true
-      });
-      history.push(nextPagePath);
+      const formattedSubmission = formatPackageContribution(submission);
+      const result = await uploadRuleContribution(email, formattedSubmission, submission.packageNameSource);
+      if (result) {
+        setFlashbar({
+          messageId: uuid(),
+          type: "success",
+          content: "Successfully submitted replacement suggestion",
+          dismissible: true
+        });
+        history.push(nextPagePath);
+      } else {
+        setFlashbar({
+          messageId: uuid(),
+          type: "error",
+          content: "Unable to reach the server to submit your suggestion. Please try again.",
+          dismissible: true
+        });
+        setSubmitLoading(false);
+      }
+    } else {
+      setSubmitLoading(false);
     }
-    setSubmitLoading(false);
   };
 
   const validateInput = async (submission: PackageContribution) => {
@@ -123,6 +141,9 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
             break;
           case "packageVersion":
             if (result.message) setVersionError(result.message);
+            break;
+          case "targetFramework":
+            if (result.message) setTargetFrameworkError(result.message);
             break;
           case "packageName/packageVersion":
             if (result.message) {
@@ -140,12 +161,63 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
       setFlashbar({
         messageId: uuid(),
         type: "error",
-        content: "Unable to access the server to verify the provided package. Please try again.",
+        content: "Unable to reach the server to verify the provided package. Please try again.",
         dismissible: true
       });
       return false;
     }
     return true;
+  };
+
+  const formatPackageContribution = (submission: PackageContribution) => {
+    return {
+      Name: submission.packageNameSource,
+      Version: submission.packageVersionSource,
+      Packages: [
+        {
+          Name: submission.packageNameSource,
+          Type: "Nuget"
+        }
+      ],
+      Recommendations: [
+        {
+          Type: "Namespace",
+          Name: submission.packageNameSource,
+          Value: submission.packageNameSource,
+          KeyType: "Name",
+          ContainingType: "",
+          RecommendedActions: [
+            {
+              Source: "External",
+              Preferred: "Yes",
+              TargetFrameworks: submission.targetFramework.map(t => ({
+                Name: t.value,
+                TargetCPU: ["x86", "x64", "ARM32", "ARM64"]
+              })),
+              Description: "",
+              Actions: submission.packageVersionLatest
+                ? [
+                    {
+                      Name: "AddPackage",
+                      Type: "Package",
+                      Value: submission.packageName,
+                      Description: submission.comments
+                    }
+                  ]
+                : [
+                    {
+                      Name: "AddPackage",
+                      Type: "Package",
+                      Value: submission.packageName,
+                      Version: submission.packageVersion,
+                      Description: submission.comments
+                    }
+                  ]
+            }
+          ]
+        }
+      ]
+    };
   };
 
   const ValueWithLabel: React.FC<KeyValProps> = ({ label, description, children }) => (
@@ -209,11 +281,16 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
             Latest
           </Checkbox>
         </FormField>
-        <FormField label="Target framework" description="Select the target framework." stretch={true}>
-          <Select
-            selectedOption={targetFramework}
+        <FormField
+          label="Target framework"
+          description="Select the target frameworks."
+          errorText={targetFrameworkError}
+          stretch={true}
+        >
+          <Multiselect
+            selectedOptions={targetFramework}
             options={targetFrameworkOptions}
-            onChange={onSelectTargetFramework}
+            onChange={({ detail }) => setTargetFramework(detail.selectedOptions)}
           />
         </FormField>
         <FormField

@@ -481,10 +481,12 @@ describe("validateVersion", () => {
 describe("validatePackageInput", () => {
   it("Azure.ImageOptimizer, version 1.1.0.39, does exist", async () => {
     const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
       packageName: "Azure.ImageOptimizer",
       packageVersion: "1.1.0.39",
       packageVersionLatest: false,
-      targetFramework: { id: "", label: "" },
+      targetFramework: [{ label: "", value: "" }],
       comments: ""
     };
     const result = await validatePackageInput(submission);
@@ -495,10 +497,12 @@ describe("validatePackageInput", () => {
 
   it("Foo.Bar.Foo, version 0.0.0, does not exist", async () => {
     const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
       packageName: "Foo.Bar.Foo",
       packageVersion: "0.0.0",
       packageVersionLatest: false,
-      targetFramework: { id: "", label: "" },
+      targetFramework: [{ label: "", value: "" }],
       comments: ""
     };
     const result = await validatePackageInput(submission);
@@ -511,10 +515,12 @@ describe("validatePackageInput", () => {
 
   it("Azure.ImageOptimizer, latest version, does exist", async () => {
     const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
       packageName: "Azure.ImageOptimizer",
       packageVersion: "",
       packageVersionLatest: true,
-      targetFramework: { id: "", label: "" },
+      targetFramework: [{ label: "", value: "" }],
       comments: ""
     };
     const result = await validatePackageInput(submission);
@@ -525,10 +531,12 @@ describe("validatePackageInput", () => {
 
   it("Foo.Bar.Foo, latest version, does not exist", async () => {
     const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
       packageName: "Foo.Bar.Foo",
       packageVersion: "",
       packageVersionLatest: true,
-      targetFramework: { id: "", label: "" },
+      targetFramework: [{ label: "", value: "" }],
       comments: ""
     };
     const result = await validatePackageInput(submission);
@@ -541,10 +549,12 @@ describe("validatePackageInput", () => {
 
   it("Azure.ImageOptimizer, version asndjas332, invalid SemVer", async () => {
     const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
       packageName: "Azure.ImageOptimizer",
       packageVersion: "asndjas332",
       packageVersionLatest: false,
-      targetFramework: { id: "", label: "" },
+      targetFramework: [{ label: "", value: "" }],
       comments: ""
     };
     const result = await validatePackageInput(submission);
@@ -555,12 +565,14 @@ describe("validatePackageInput", () => {
     });
   });
 
-  it("Azure.ImageOptimizer, version asndjas332, invalid SemVer", async () => {
+  it("Azure.ImageOptimizer, empty version, version required", async () => {
     const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
       packageName: "Azure.ImageOptimizer",
       packageVersion: "",
       packageVersionLatest: false,
-      targetFramework: { id: "", label: "" },
+      targetFramework: [{ label: "", value: "" }],
       comments: ""
     };
     const result = await validatePackageInput(submission);
@@ -568,6 +580,24 @@ describe("validatePackageInput", () => {
       valid: false,
       field: "packageVersion",
       message: "Required"
+    });
+  });
+
+  it("Azure.ImageOptimizer, version 9.9.9, does not exist", async () => {
+    const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
+      packageName: "Azure.ImageOptimizer",
+      packageVersion: "9.9.9",
+      packageVersionLatest: false,
+      targetFramework: [{ label: "", value: "" }],
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: false,
+      field: "packageName/packageVersion",
+      message: "Package/version combination not found"
     });
   });
 });

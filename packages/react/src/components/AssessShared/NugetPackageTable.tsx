@@ -1,10 +1,11 @@
 import { useCollection } from "@awsui/collection-hooks";
 import { Box, Button, Pagination, Table, TableProps, TextFilter } from "@awsui/components-react";
 import StatusIndicator from "@awsui/components-react/status-indicator/internal";
+import { MemoryHistory } from "history";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { matchPath, useLocation } from "react-router";
-import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import { pathValues } from "../../constants/paths";
 import { RuleContribSource } from "../../containers/RuleContribution";
@@ -31,6 +32,7 @@ export type NugetPackageTableFields = NugetPackage & {
 
 const NugetPackageTableInternal: React.FC = () => {
   const location = useLocation<HistoryState>();
+  const history = useHistory() as MemoryHistory;
   const nugetPackages = useSelector(selectNugetPackages);
   const nugetPackagesWithFields = usePortingAssistantSelector(state => selectNugetTableData(state, location.pathname));
   const projects = usePortingAssistantSelector(state => selectProjects(state, location.pathname));
@@ -107,22 +109,16 @@ const NugetPackageTableInternal: React.FC = () => {
   );
 
   const ruleContributeButton = (
-    <Link
-      to={{
-        pathname: location.pathname + "/ruleContribution",
-        state: {
-          ruleContribSourceInfo: getSourceData()
-        }
+    <Button
+      disabled={!canSuggestRule()}
+      //disabled={false}
+      variant="normal"
+      onClick={() => {
+        history.push(location.pathname + "/ruleContribution", { ruleContribSourceInfo: getSourceData() });
       }}
     >
-      <Button
-        // disabled={!canSuggestRule()}
-        disabled={false}
-        variant="normal"
-      >
-        Suggest Replacement
-      </Button>
-    </Link>
+      Suggest Replacement
+    </Button>
   );
 
   return (

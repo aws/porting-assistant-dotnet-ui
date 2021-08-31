@@ -11,8 +11,7 @@ import {
   VersionPair
 } from "./models/project";
 import { Response } from "./models/response";
-import { Credentials } from "./models/setup";
-import { Profiles } from "./models/setup";
+import { Credentials, Profiles } from "./models/setup";
 import { SolutionDetails } from "./models/solution";
 import { NugetPackageReducerState, SolutionReducerState } from "./store/reducers";
 import { SolutionToPortingProjects } from "./store/reducers/porting";
@@ -69,6 +68,7 @@ export interface Backend {
   ) => void;
   checkInternetAccess: () => Promise<boolean>;
   sendCustomerFeedback: (upload: any) => Promise<Response<boolean, string>>;
+  uploadRuleContribution: (upload: any) => Promise<boolean>;
 }
 
 export interface Porting {

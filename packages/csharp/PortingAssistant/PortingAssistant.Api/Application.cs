@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Client.NuGet.Interfaces;
 using PortingAssistant.Common.Model;
+using PortingAssistant.Common.S3Upload;
 using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
 using PortingAssistant.Telemetry.Utils;
@@ -152,6 +153,19 @@ namespace PortingAssistant.Api
                         ErrorValue = ex.Message
                     };
                 }
+            _connection.On<RuleContributionRequest, bool>("uploadRuleContribution", request =>
+            {
+                RegionEndpoint bucketRegion = RegionEndpoint.GetBySystemName(request.region);
+                S3Upload upload = new S3Upload(
+                    bucketRegion, 
+                    request.s3BucketName,
+                    request.accessKey,
+                    request.secret
+                );
+                var uploadSuccess = upload.uploadObjWithString(request.keyName, request.contents);
+
+                return uploadSuccess;
+                
             });
         }
 
