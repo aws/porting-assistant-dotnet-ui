@@ -20,6 +20,20 @@ ipcMain.handle("getConfigPath", (_event) => {
   return app.getPath("userData");
 });
 
+const config = require(isDev
+  ? path.join(
+      __dirname,
+      "..",
+      "build-scripts",
+      "porting-assistant-config.dev.json"
+    )
+  : path.join(
+      path.dirname(app.getPath("exe")),
+      "resources",
+      "config",
+      "porting-assistant-config.json"
+    ));
+
 export const initTelemetryConnection = (logger: any = console) => {
   let instance: Connection | undefined = undefined;
 
@@ -234,6 +248,15 @@ export const initConnection = (logger: any = console) => {
 
     ipcMain.handle("checkInternetAccess", async (_event) => {
       const response = await connection.send("checkInternetAccess", "");
+      return response;
+    }); 
+    
+    ipcMain.handle("uploadRuleContribution", async (_event, upload) => {
+      upload['accessKey'] = config.PortingAssistantConfiguration.RuleContribution.AccessKey;
+      upload['secret'] = config.PortingAssistantConfiguration.RuleContribution.Secret;
+      upload['s3BucketName'] = config.PortingAssistantConfiguration.RuleContribution.S3BucketName;
+      upload['region'] = config.PortingAssistantConfiguration.RuleContribution.Region;
+      const response = await connection.send("uploadRuleContribution", upload);
       return response;
     });  
 

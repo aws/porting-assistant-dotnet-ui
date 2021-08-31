@@ -57,7 +57,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
 
   const [targetFramework, setTargetFramework] = useState(currentTargetFramework);
   const [profiles, setProfiles] = useState({ label: currentProfile, id: "" } as SelectProps.Option);
-  const [email, setEmail] = useState(currentEmail);
+  const [email, setEmail] = useState(currentEmail === undefined ? "" : currentEmail);
 
   useEffect(() => {
     const profiles = window.electron.getProfiles();
@@ -125,7 +125,6 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
             }
             // Ensure email, if provided, follows correct format
             if (data.email !== "" && !validEmail.test(data.email)) {
-              console.log("Email invalid.");
               setError("email", "error", "E-mail format must follow example@amazon.com.");
               return;
             }

@@ -29,11 +29,10 @@ export const checkPackageExists = async (packageName: string, packageVersion?: s
 
   // iterate through all results to find match
   for (const result of responseData["data"]) {
-    if (result["id"] === packageName) {
-      if (packageVersion && result["version"] === packageVersion) {
-        return true;
-      }
-      return true;
+    if (packageVersion) {
+      if (result["id"] === packageName && result["version"] === packageVersion) return true;
+    } else {
+      if (result["id"] === packageName) return true;
     }
   }
 
@@ -52,6 +51,10 @@ export const validatePackageInput = async (submission: PackageContribution): Pro
   // Check that version, if not latest, is not blank
   if (!submission.packageVersionLatest && submission.packageVersion === "") {
     return { valid: false, field: "packageVersion", message: "Required" };
+  }
+
+  if (submission.targetFramework.length === 0) {
+    return { valid: false, field: "targetFramework", message: "Required" };
   }
 
   // Only check if the package name exists, since we can use latest version

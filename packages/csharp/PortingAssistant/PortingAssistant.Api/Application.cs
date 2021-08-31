@@ -1,8 +1,10 @@
-﻿using ElectronCgi.DotNet;
+﻿using Amazon;
+using ElectronCgi.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Common.Model;
+using PortingAssistant.Common.S3Upload;
 using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
 using PortingAssistant.VisualStudio;
@@ -128,6 +130,21 @@ namespace PortingAssistant.Api
                 {
                     return false;
                 }
+            });
+
+            _connection.On<RuleContributionRequest, bool>("uploadRuleContribution", request =>
+            {
+                RegionEndpoint bucketRegion = RegionEndpoint.GetBySystemName(request.region);
+                S3Upload upload = new S3Upload(
+                    bucketRegion, 
+                    request.s3BucketName,
+                    request.accessKey,
+                    request.secret
+                );
+                var uploadSuccess = upload.uploadObjWithString(request.keyName, request.contents);
+
+                return uploadSuccess;
+                
             });
         }
 
