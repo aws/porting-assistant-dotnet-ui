@@ -79,8 +79,13 @@ namespace PortingAssistant.Common.Services
                         if (projectAnalysisResult.SourceFileAnalysisResults != null &&
                             projectAnalysisResult.ProjectGuid != null &&
                             projectAnalysisResult.ProjectFilePath != null) {
-                              var selectedApis = projectAnalysisResult.SourceFileAnalysisResults.SelectMany(s => s.ApiAnalysisResults);
-                              TelemetryCollectionUtils.FileAssessmentCollect(selectedApis, request);
+                            var selectedApis = projectAnalysisResult.SourceFileAnalysisResults.SelectMany(s => s.ApiAnalysisResults);
+                            var allActions = projectAnalysisResult.SourceFileAnalysisResults.SelectMany(a => a.RecommendedActions);
+                            allActions.ToList().ForEach(action => {
+                                    var selectedApi = selectedApis.FirstOrDefault(s => s.CodeEntityDetails.TextSpan.Equals(action.TextSpan));
+                                    selectedApi?.Recommendations?.RecommendedActions?.Add(action);
+                                });
+                            TelemetryCollectionUtils.FileAssessmentCollect(selectedApis, request);
                             }
 
                         if (projectAnalysisResult.IsBuildFailed)
