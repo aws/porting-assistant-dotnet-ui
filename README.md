@@ -6,7 +6,7 @@ Porting Assistant for .NET quickly scans .NET Framework applications to identify
 
 **PortingAssistant.UI** package provides the source code of Porting Assistant's UI.
 
-For more information about Porting Assistant and to try the tool, please refer to the documenation: https://aws.amazon.com/porting-assistant-dotnet/
+For more information about Porting Assistant and to try the tool, please refer to the documentation: https://aws.amazon.com/porting-assistant-dotnet/
 
 ## Introduction
 
