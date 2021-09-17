@@ -114,7 +114,7 @@ describe("stability check target .NET 5", () => {
     await validateHighLevelResults(results, [
       "0 of 1",
       "2 of 6",
-      "18 of 78",
+      "50 of 81",
       "162",
       "(21)",
     ]);
