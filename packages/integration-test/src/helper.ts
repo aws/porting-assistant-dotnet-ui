@@ -10,7 +10,7 @@ export const resetTestSolutions = () => {
   if (existsSync("C:\\testsolutions")) {
     rmdirSync("C:\\testsolutions", { recursive: true });
   }
-  createReadStream("C:\\testsolutions.zip").pipe(
+  createReadStream("C:\\test-solutions.zip").pipe(
     unzipper.Extract({ path: "C:\\" })
   );
 };
