@@ -18,8 +18,21 @@ namespace PortingAssistant.UnitTests
             var runId = "1";
             var triggerType = "TestRequest";
             var targetFramework = "netcoreapp3.1";
-            var solutionMetric = TelemetryCollectionUtils.createSolutionMetric(solutionPath, runId, triggerType, targetFramework, DateTime.Now);
+            var solutionAnalysisResult = new SolutionAnalysisResult {
+                SolutionDetails = new SolutionDetails
+                {
+                    SolutionName = "test",
+                    SolutionFilePath = solutionPath,
+                    ApplicationGuid = "test-application-guid",
+                    SolutionGuid = "test-solution-guid",
+                    RepositoryUrl = "https://github.com/test-project",
+                }
+            };
+            var solutionMetric = TelemetryCollectionUtils.createSolutionMetric(solutionAnalysisResult, runId, triggerType, targetFramework, DateTime.Now);
             Assert.AreEqual(solutionMetric.SolutionPath, encryptedSolutionPath);
+            Assert.AreEqual(solutionMetric.ApplicationGuid, "test-application-guid");
+            Assert.AreEqual(solutionMetric.SolutionGuid, "test-solution-guid");
+            Assert.AreEqual(solutionMetric.RepositoryUrl, "https://github.com/test-project");
         }
 
         [Test]

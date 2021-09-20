@@ -42,7 +42,7 @@ namespace PortingAssistant.Common.Services
 
                 if (solutionAnalysisResult.IsCompletedSuccessfully)
                 {
-                    TelemetryCollectionUtils.CollectSolutionMetrics(solutionAnalysisResult, request, startTime, tgtFramework);
+                    TelemetryCollectionUtils.CollectSolutionMetrics(solutionAnalysisResult.Result, request, startTime, tgtFramework);
                     solutionAnalysisResult.Result.ProjectAnalysisResults.ForEach(projectAnalysisResult =>
                     {
                         if (projectAnalysisResult == null)
