@@ -12,11 +12,9 @@ namespace PortingAssistant.Common.Utils
 {
     public static class TelemetryCollectionUtils
     {
-        public static void CollectSolutionMetrics(Task<SolutionAnalysisResult> solutionAnalysisResult, AnalyzeSolutionRequest request, DateTime startTime, string tgtFramework)
+        public static void CollectSolutionMetrics(SolutionAnalysisResult solutionAnalysisResult, AnalyzeSolutionRequest request, DateTime startTime, string tgtFramework)
         {
-            string solutionPath = request.solutionFilePath;
-            if (solutionPath == null) solutionPath = "";
-            var solutionMetrics = createSolutionMetric(solutionPath, request.runId, request.triggerType, tgtFramework, startTime);
+            var solutionMetrics = createSolutionMetric(solutionAnalysisResult, request.runId, request.triggerType, tgtFramework, startTime);
             TelemetryCollector.Collect<SolutionMetrics>(solutionMetrics);
         }
 
@@ -49,7 +47,7 @@ namespace PortingAssistant.Common.Utils
             apiMetrics.ToList().ForEach(metric => TelemetryCollector.Collect(metric));
         }
 
-        public static SolutionMetrics createSolutionMetric(string solutionPath, string runId, string triggerType, string tgtFramework, DateTime startTime)
+        public static SolutionMetrics createSolutionMetric(SolutionAnalysisResult solutionAnalysisResult, string runId, string triggerType, string tgtFramework, DateTime startTime)
         {
             return new SolutionMetrics
             {
@@ -58,7 +56,10 @@ namespace PortingAssistant.Common.Utils
                 TriggerType = triggerType,
                 TargetFramework = tgtFramework,
                 TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
-                SolutionPath = Crypto.SHA256(solutionPath),
+                SolutionPath = Crypto.SHA256(solutionAnalysisResult.SolutionDetails.SolutionFilePath),
+                ApplicationGuid = solutionAnalysisResult.SolutionDetails.ApplicationGuid,
+                SolutionGuid = solutionAnalysisResult.SolutionDetails.SolutionGuid,
+                RepositoryUrl = solutionAnalysisResult.SolutionDetails.RepositoryUrl,
                 AnalysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds,
                 PortingAssistantVersion = PortingAssistant.Telemetry.PortingAssistantAppVersion.version
             };
