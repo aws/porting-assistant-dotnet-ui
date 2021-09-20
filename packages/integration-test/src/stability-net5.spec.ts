@@ -115,7 +115,7 @@ describe("stability check target .NET 5", () => {
       "0 of 1",
       "2 of 6",
       "50 of 81",
-      "162",
+      "0",
       "(21)",
     ]);
   });
