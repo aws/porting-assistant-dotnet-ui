@@ -148,27 +148,27 @@ describe("stability check, assess a solution, reassess the solution, check all s
     ]);
   });
 
-  // test("run through Umbraco", async () => {
-  //   const solutionPath: string = path.join(
-  //     testSolutionPath(),
-  //     "Umbraco-CMS-8-contrib",
-  //     "src",
-  //     "umbraco.sln"
-  //   );
-  //   await addSolution(app, solutionPath);
-  //   await app.client.refresh();
-  //   const results = await runThroughSolution(
-  //     solutionPath,
-  //     "inplace",
-  //     "netcoreapp3.1",
-  //     app
-  //   );
-  //   await validateHighLevelResults(results, [
-  //     "0 of 8",
-  //     "28 of 69",
-  //     "735 of 2764",
-  //     "0",
-  //     "(3182)",
-  //   ]);
-  // });
+  test("run through Umbraco", async () => {
+    const solutionPath: string = path.join(
+      testSolutionPath(),
+      "Umbraco-CMS-8-contrib",
+      "src",
+      "umbraco.sln"
+    );
+    await addSolution(app, solutionPath);
+    await app.client.refresh();
+    const results = await runThroughSolution(
+      solutionPath,
+      "inplace",
+      "netcoreapp3.1",
+      app
+    );
+    await validateHighLevelResults(results, [
+      "0 of 8",
+      "28 of 69",
+      "735 of 2764",
+      "0",
+      "(3182)",
+    ]);
+  });
 });
