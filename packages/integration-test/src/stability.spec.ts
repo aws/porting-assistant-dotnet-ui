@@ -166,7 +166,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await validateHighLevelResults(results, [
       "0 of 8",
       "28 of 69",
-      "735 of 2764",
+      "136 of 4007",
       "0",
       "(3182)",
     ]);
