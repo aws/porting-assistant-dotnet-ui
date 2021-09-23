@@ -149,7 +149,7 @@ const assessSolutionCheck = async (
     await app.client.$("._circle_oh9fc_75")
   ).waitForExist({
     reverse: true,
-    timeout: 800000,
+    timeout: 1000000,
   });
   await (await app.client.$(solutionNameTagId)).click();
 };
@@ -160,7 +160,7 @@ const reassessSolutionCheck = async (
   app: Application
 ) => {
   const reassessSolution = await app.client.$("#reassess-solution");
-  await reassessSolution.waitForEnabled({ timeout: 600000 });
+  await reassessSolution.waitForEnabled({ timeout: 1000000 });
   await reassessSolution.click();
   await (
     await app.client.$("._circle_oh9fc_75")
@@ -256,7 +256,7 @@ const checkPortingProjectResults = async (
       await app.client.$("._circle_oh9fc_75")
     ).waitForExist({
       reverse: true,
-      timeout: 800000,
+      timeout: 1600000,
     });
     await solutionLink.click();
   }
