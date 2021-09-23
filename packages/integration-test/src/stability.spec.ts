@@ -167,7 +167,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
       "0 of 8",
       "28 of 69",
       "136 of 4007",
-      "0",
+      "32086",
       "(3182)",
     ]);
   });
