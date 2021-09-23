@@ -1,6 +1,6 @@
 import { Application } from "spectron";
 var unzipper = require("unzipper");
-import { existsSync, createReadStream, rmdirSync } from "fs";
+import { existsSync, createReadStream, rmdirSync, readFileSync } from "fs";
 
 const escapeNonAlphaNumeric = (solutionPath: string) => {
   return solutionPath.replace(/[^0-9a-zA-Z]/gi, "");
@@ -280,3 +280,29 @@ export const validateHighLevelResults = async (
   expect(results ? results[3] : "").toBe(expectedValues[3]);
   expect(results ? results[4] : "").toBe(expectedValues[4]);
 };
+
+function hashString(str: string){
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		hash += Math.pow(str.charCodeAt(i) * 31, str.length - i);
+		hash = hash & hash; // Convert to 32bit integer
+	}
+	return hash;
+}
+
+export const validatePortingResults = async (
+  expectedResultsPath : string,
+  receivedResultsPath : string
+) => {
+  var expected = JSON.parse(readFileSync(expectedResultsPath, "utf8"));
+  var received  = JSON.parse(readFileSync(receivedResultsPath, "utf8"));
+
+  var expectedHash = 0;
+  var receivedHash = 0;
+  expected.forEach((r: any) => expectedHash += hashString(JSON.stringify(r)));
+  received.forEach((r: any) => receivedHash += hashString(JSON.stringify(r)));
+
+  return expectedHash === receivedHash;
+}
+
+
