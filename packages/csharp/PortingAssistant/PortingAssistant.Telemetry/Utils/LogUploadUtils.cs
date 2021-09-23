@@ -162,6 +162,11 @@ namespace PortingAssistant.Telemetry.Utils
                         {
                             logName = "react-errors";
                         }
+                        else if (typeOfLog == "client")
+                        {
+                            var suffix = Path.GetExtension(file);
+                            logName = suffix == ".log" ? "portingAssistant-client-cli-logs" : "portingAssistant-client-cli-metrics";
+                        }
                     }
 
                     var logs = new ArrayList();
