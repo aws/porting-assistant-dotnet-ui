@@ -15,7 +15,7 @@
     <Folder Include="Listener\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="PortingAssistant.Client.Client" Version="1.8.85-g77755ad0d8" />
+    <PackageReference Include="PortingAssistant.Client.Client" Version="1.9.2" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.8" />
     <PackageReference Include="System.Web.Helpers.Crypto" Version="3.2.3" />
