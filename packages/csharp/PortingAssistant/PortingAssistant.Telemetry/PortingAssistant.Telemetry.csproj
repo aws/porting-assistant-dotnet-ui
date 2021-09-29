@@ -12,6 +12,6 @@
     <PackageReference Include="PortingAssistant.Client.Client" Version="1.8.85-g77755ad0d8" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
     <PackageReference Include="System.Web.Helpers.Crypto" Version="3.2.3" />
-    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="1.8.85-g77755ad0d8" />
+    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="1.9.2" />
   </ItemGroup>
 </Project>
