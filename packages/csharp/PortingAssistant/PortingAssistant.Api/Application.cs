@@ -16,6 +16,7 @@ using PortingAssistant.Telemetry.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace PortingAssistant.Api
@@ -137,26 +138,25 @@ namespace PortingAssistant.Api
 
             _connection.On<CustomerFeedbackRequest, bool>("sendCustomerFeedback", request =>
             {
-              string uniqueMachineID = LogUploadUtils.getUniqueIdentifier();
-              request.keyname = uniqueMachineID + "/" + request.timestamp;
-              RegionEndpoint bucketRegion = RegionEndpoint.USWest2;
-              S3Upload upload = new S3Upload(
-                  bucketRegion, 
-                  "portingassistantcustomer-customerfeedbackbucketxx-1u90hz3i5ly3l",
-                  request.accessKey,
-                  request.secret
-              );
-            var contentObj = new Content
-            {
-                feedback = request.feedback,
-                category = request.category,
-                date = request.date,
-                email = request.email,
-                machineID = uniqueMachineID
-            };
-              string serializedContent = JsonConvert.SerializeObject(contentObj);  
-                var uploadSuccess = upload.uploadObjWithString(request.keyname, serializedContent);
-                return uploadSuccess;
+                // https://mqznodeyd1.execute-api.us-west-2.amazonaws.com/prod/s3?key=testmachine2/testtime2/metadata
+                const string apiEndpoint = "https://mqznodeyd1.execute-api.us-west-2.amazonaws.com/prod/s3";
+                string uniqueMachineID = LogUploadUtils.getUniqueIdentifier();
+                string key = $"{uniqueMachineID}/{request.timestamp}/metadata";
+                string requestUri = $"{apiEndpoint}?key={key}";
+                var contentObj = new Content
+                {
+                    feedback = request.feedback,
+                    category = request.category,
+                    date = request.date,
+                    email = request.email,
+                    machineID = uniqueMachineID
+                };
+                string serializedContent = JsonConvert.SerializeObject(contentObj); 
+                var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
+
+                using var httpClient = new HttpClient();
+                var response = httpClient.PutAsync(requestUri, content).Result;
+                return response.IsSuccessStatusCode;
             });
 
         }
