@@ -16,6 +16,7 @@ using PortingAssistant.Telemetry.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace PortingAssistant.Api
 {
@@ -123,12 +124,10 @@ namespace PortingAssistant.Api
                 try
                 {
                     var file1 = httpService.DownloadS3FileAsync("newtonsoft.json.json.gz");
-                    file1.Wait();
                     var file2 = httpService.DownloadS3FileAsync("52projects.json.gz");
-                    file2.Wait();
                     var file3 = httpService.DownloadS3FileAsync("2a486f72.mega.json.gz");
-                    file3.Wait();
-                    return true;
+                    Task.WhenAll(file1, file2, file3).Wait();
+                    return file1.IsCompletedSuccessfully || file2.IsCompletedSuccessfully || file3.IsCompletedSuccessfully;
                 }
                 catch
                 {
