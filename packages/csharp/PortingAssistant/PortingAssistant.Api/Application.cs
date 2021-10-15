@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Common.Model;
-using PortingAssistant.Common.S3Upload;
 using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
 using PortingAssistant.VisualStudio;
@@ -138,11 +137,9 @@ namespace PortingAssistant.Api
 
             _connection.On<CustomerFeedbackRequest, bool>("sendCustomerFeedback", request =>
             {
-                // https://mqznodeyd1.execute-api.us-west-2.amazonaws.com/prod/s3?key=testmachine2/testtime2/metadata
-                const string apiEndpoint = "https://mqznodeyd1.execute-api.us-west-2.amazonaws.com/prod/s3";
+                var customerFeedbackService = _services.GetRequiredService<ICustomerFeedbackService>();
                 string uniqueMachineID = LogUploadUtils.getUniqueIdentifier();
                 string key = $"{uniqueMachineID}/{request.timestamp}/metadata";
-                string requestUri = $"{apiEndpoint}?key={key}";
                 var contentObj = new Content
                 {
                     feedback = request.feedback,
@@ -151,12 +148,8 @@ namespace PortingAssistant.Api
                     email = request.email,
                     machineID = uniqueMachineID
                 };
-                string serializedContent = JsonConvert.SerializeObject(contentObj); 
-                var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
-
-                using var httpClient = new HttpClient();
-                var response = httpClient.PutAsync(requestUri, content).Result;
-                return response.IsSuccessStatusCode;
+                string serializedContent = JsonConvert.SerializeObject(contentObj);
+                return customerFeedbackService.UploadToS3(key, serializedContent);
             });
 
         }

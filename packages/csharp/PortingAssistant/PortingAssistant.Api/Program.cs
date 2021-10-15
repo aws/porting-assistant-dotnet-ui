@@ -71,7 +71,9 @@ namespace PortingAssistant.Api
             TelemetryCollector.Builder(telemetryLogConfiguration.CreateLogger(), metricsFilePath);
 
             var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection, configuration);
+            ConfigureServices(serviceCollection,
+                configuration,
+                portingAssistantPortingConfiguration.CustomerContributionConfiguration);
 
             try
             {
@@ -85,7 +87,10 @@ namespace PortingAssistant.Api
             }
         }
 
-        static private void ConfigureServices(IServiceCollection serviceCollection, PortingAssistantConfiguration config)
+        static private void ConfigureServices(
+            IServiceCollection serviceCollection,
+            PortingAssistantConfiguration config,
+            CustomerContributionConfiguration customerContributionConfiguration)
         {
             serviceCollection.AddLogging(loggingBuilder => loggingBuilder
                 .SetMinimumLevel(LogLevel.Debug)
@@ -93,6 +98,10 @@ namespace PortingAssistant.Api
             serviceCollection.AddTransient<IAssessmentService, AssessmentService>();
             serviceCollection.AddTransient<IPortingService, PortingService>();
             serviceCollection.AddSingleton<IVisualStudioFinder, VisualStudioFinder>();
+            serviceCollection.AddTransient<ICustomerFeedbackService, CustomerFeedbackService>();
+            serviceCollection.Configure<CustomerContributionConfiguration>(ccconfig => customerContributionConfiguration.DeepCopy(ccconfig));
+            serviceCollection.AddHttpClient("CustomerContribution")
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5));
             serviceCollection.AddAssessment(config);
             serviceCollection.AddOptions();
         }
@@ -101,6 +110,7 @@ namespace PortingAssistant.Api
         {
             public PortingAssistantConfiguration PortingAssistantConfiguration { get; set; }
             public Dictionary<string, object> PortingAssistantMetrics { get; set; }
+            public CustomerContributionConfiguration CustomerContributionConfiguration { get; set; }
         }
     }
 }
