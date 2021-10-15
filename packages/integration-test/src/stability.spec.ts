@@ -10,6 +10,85 @@ import {
 import path from "path";
 import fs from "fs/promises";
 
+const expectedWCFProgram: string =`
+using CoreWCF.Configuration;
+using System.Net;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+
+
+namespace WCFTCPSelfHost
+{
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+      //All Ports set are default.
+			IWebHost host = CreateWebHostBuilder(args).Build();
+      host.Run();
+		}
+
+    public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+      WebHost.CreateDefaultBuilder(args)
+				 .UseKestrel(options => { })
+.UseNetTcp(8000)				 .UseStartup<Startup>();
+	}
+}
+`;
+
+const expectedWCFStartup: string =`
+using CoreWCF.Configuration;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace WCFTCPSelfHost
+{
+   public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            string pathToXml = @"C:\\testsolutions\\wcftcpselfhost\\WCFTCPSelfHost\\corewcf_ported.config";
+            services.AddServiceModelServices();
+            services.AddServiceModelConfigurationManagerFile(pathToXml);
+        }
+
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            app.UseServiceModel();
+        }
+    }
+}
+`;
+
+const expectedWCFConfig: string =
+`<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<configuration>
+  <system.serviceModel>
+    <bindings>
+      <netTcpBinding>
+        <binding name="EndPointConfiguration">
+          <security mode="None" />
+        </binding>
+      </netTcpBinding>
+    </bindings>
+    <behaviors>
+      <serviceBehaviors>
+        <behavior name="mexBehavior">
+          <serviceMetadata httpGetEnabled="true" policyVersion="Policy15" />
+        </behavior>
+      </serviceBehaviors>
+    </behaviors>
+    <services>
+      <service name="WcfServiceLibrary1.Service1" behaviorConfiguration="mexBehavior">
+        <endpoint address="/Service1" binding="netTcpBinding" bindingConfiguration="EndPointConfiguration" contract="WcfServiceLibrary1.IService1" />
+      </service>
+    </services>
+  </system.serviceModel>
+</configuration>`;
+
 describe("stability check, assess a solution, reassess the solution, check all solution tabs make sure loaded, check all projects for all solution, make sure loaded, check porting for all projects", () => {
   let app: Application;
 
@@ -380,5 +459,63 @@ describe("stability check, assess a solution, reassess the solution, check all s
       "0",
       "(21)",
     ]);
+  });
+
+  test("run through wcf", async () => {
+    const solutionFolderPath: string = path.join(
+      testSolutionPath(),
+      "wcftcpselfhost"
+    );
+    const solutionPath: string = path.join(
+      solutionFolderPath,
+      "WCFTCPSelfHost.sln"
+    );
+    await addSolution(app, solutionPath);
+    await app.client.refresh();
+    const results = await runThroughSolution(
+      solutionPath,
+      "inplace",
+      "netcoreapp3.1"
+    );
+    await validateHighLevelResults(results, [
+      "0 of 3",
+      "0 of 0",
+      "8 of 26",
+      "0",
+      "(11)",
+    ]);
+
+    const selfHostProjectPath: string = path.join(
+      solutionFolderPath,
+      "WCFTCPSelfHost",
+    )
+
+    const getCsProj = fs.readFile(
+      path.join(selfHostProjectPath, "WCFTCPSelfHost.csproj"),
+      "utf-8"
+    )
+
+    expect((await getCsProj).indexOf("CoreWCF.Primitives")).not.toBe(-1);
+    expect((await getCsProj).indexOf("CoreWCF.Http")).not.toBe(-1);
+    expect((await getCsProj).indexOf("CoreWCF.NetTcp")).not.toBe(-1);
+
+    const getStartup = fs.readFile(
+      path.join(selfHostProjectPath, "Startup.cs"),
+      "utf-8"
+    )
+
+    const getProgram = fs.readFile(
+      path.join(selfHostProjectPath, "Program.cs"),
+      "utf-8"
+    )
+
+    const getConfig = fs.readFile(
+      path.join(selfHostProjectPath, "corewcf_ported.config"),
+      "utf-8"
+    )
+
+    expect((await getStartup)).toBe(expectedWCFStartup);
+    expect((await getProgram)).toBe(expectedWCFProgram);
+    expect((await getConfig).replace(/(\r\n|\n|\r)/gm, "")).toBe(expectedWCFConfig.replace(/(\r\n|\n|\r)/gm, ""));
   });
 });
