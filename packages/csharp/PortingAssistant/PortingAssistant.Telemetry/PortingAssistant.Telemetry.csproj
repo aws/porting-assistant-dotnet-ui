@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Aws4RequestSigner" Version="1.0.3" />
     <PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.11" />
     <PackageReference Include="PortingAssistant.Client.Client" Version="1.10.2" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
     <PackageReference Include="System.Web.Helpers.Crypto" Version="3.2.3" />
