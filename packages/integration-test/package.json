@@ -1,6 +1,6 @@
 {
   "name": "@porting-assistant/integration-test",
-  "version": "1.5.4",
+  "version": "1.6.0",
   "productName": "Porting Assistant for .NET",
   "description": "Porting Assistant for .NET",
   "author": {
