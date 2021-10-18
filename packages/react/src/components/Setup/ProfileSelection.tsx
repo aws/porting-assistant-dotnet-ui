@@ -46,7 +46,6 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
   const dispatch = useDispatch();
   const currentProfile = window.electron.getState("profile");
   const cachedTargetFramework = window.electron.getState("targetFramework");
-  const currentEmail = window.electron.getState("email");
   const currentTargetFramework =
     cachedTargetFramework.id === "netstandard2.1"
       ? {}
@@ -57,7 +56,6 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
 
   const [targetFramework, setTargetFramework] = useState(currentTargetFramework);
   const [profiles, setProfiles] = useState({ label: currentProfile, id: "" } as SelectProps.Option);
-  const [email, setEmail] = useState(currentEmail);
 
   useEffect(() => {
     const profiles = window.electron.getProfiles();
@@ -106,14 +104,6 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
     [profileOptions]
   );
 
-  const onChangeEmail = useCallback(([e]) => {
-    setEmail(e.detail.value);
-    return e.detail.value;
-  }, []);
-
-  // Used to check if the email string is valid, e.g. example@amazon.com
-  const validEmail = new RegExp(`^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$`);
-
   return (
     <div>
       <form
@@ -123,12 +113,6 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
               setError("targetFrameworkSelection", "required", "Target Framework is required.");
               return;
             }
-            // Ensure email, if provided, follows correct format
-            if (data.email !== "" && !validEmail.test(data.email)) {
-              console.log("Email invalid.");
-              setError("email", "error", "E-mail format must follow example@amazon.com.");
-              return;
-            }
             window.electron.saveState("profile", data.profileSelection);
             window.electron.saveState("lastConfirmVersion", "1.3.0");
             window.electron.saveState("share", data.share);
@@ -136,7 +120,6 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
               id: data.targetFrameworkSelection.value,
               label: data.targetFrameworkSelection.label
             });
-            window.electron.saveState("email", data.email);
             // Wait for C# backend to restart
             await new Promise(resolve => setTimeout(resolve, 10000));
             dispatch(init(true));
@@ -272,26 +255,6 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                     />
                   </FormField>
                 </div>
-              </div>
-              <div>
-                <Box fontSize="body-m">
-                  E-mail <i>- optional</i>
-                </Box>
-                <Box fontSize="body-s" margin={{ right: "xxs" }} color="text-body-secondary">
-                  Provide your email in case we need to contact you regarding feedback or contributions to Porting
-                  Assistant.
-                </Box>
-                <FormField id="email-submission" errorText={errors.email?.message}>
-                  <Controller
-                    as={Input}
-                    control={control}
-                    onChange={onChangeEmail}
-                    name="email"
-                    defaultValue={email}
-                    value={email}
-                    placeholder="example@amazon.com"
-                  />
-                </FormField>
               </div>
               <div>
                 <Box fontSize="body-m">Porting Assistant for .NET data usage sharing</Box>
