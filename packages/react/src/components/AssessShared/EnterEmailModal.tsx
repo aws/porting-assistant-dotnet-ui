@@ -60,10 +60,7 @@ export const EnterEmailModal: React.FC<Props> = React.memo(({ visible, onCancel,
       header="E-mail required"
     >
       <SpaceBetween direction="vertical" size="m">
-        <Box>
-          We require your e-mail to use this feature. It looks like you have not provided your email yet. Please enter
-          your e-mail below. You may change it at anytime in Settings.
-        </Box>
+        <Box>We require your e-mail to use this feature. Please enter your e-mail below.</Box>
         <FormField
           label="E-mail"
           description="We use this to contact you regarding any feedback or contributions to Porting Assistant."
