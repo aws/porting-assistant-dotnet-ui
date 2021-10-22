@@ -105,7 +105,7 @@ const DashboardInternal: React.FC = () => {
                 window.electron.openExternalUrl(externalUrls.visualstudioExtension);
               }}
             >
-              Assess your soluton for .NET Core compatibility and start porting them in Visual Studio.
+              Assess your solution for .NET Core compatibility and start porting them in Visual Studio.
             </Alert>
             <DashboardTable />
           </SpaceBetween>
