@@ -1,4 +1,4 @@
-import { CustomerFeedback } from "../components/AssessSolution/AssessSolutionDashboard";
+import { CustomerFeedback } from "../components/CustomerContribution/CustomerFeedbackModal";
 
 export const sendCustomerFeedback = async (customerfeedback: CustomerFeedback) => {
   const upload = {
@@ -8,8 +8,6 @@ export const sendCustomerFeedback = async (customerfeedback: CustomerFeedback) =
     email: customerfeedback.email,
     timestamp: customerfeedback.date
   };
-
-  const sentFeedback: boolean = await window.backend.sendCustomerFeedback(upload);
-
-  return sentFeedback;
+  const response = await window.backend.sendCustomerFeedback(upload);
+  return response;
 };

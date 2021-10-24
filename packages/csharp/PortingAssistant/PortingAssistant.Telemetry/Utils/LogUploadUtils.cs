@@ -4,6 +4,7 @@ using Aws4RequestSigner;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using PortingAssistant.Telemetry.Model;
 using PortingAssistantExtensionTelemetry.Model;
 using System;
 using System.Collections;
@@ -232,71 +233,28 @@ namespace PortingAssistant.Telemetry.Utils
                 Console.WriteLine(ex.Message);
             }
         }
-        private const string DefaultIdentifier = "591E6A97031144D5BADCE980EE3E51B7";
 
-        public static string getUniqueIdentifier() {
-          string _uniqueId;
-                var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces()
-                    .Where(nic => nic.NetworkInterfaceType != NetworkInterfaceType.Loopback
-                                  && (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-                                  && nic.Speed > 0).ToList();
-                // wifi network interface will always take higher precedence for retrieving physical address
-                var wifiNetworkInterface = networkInterfaces.FirstOrDefault(wi => wi.NetworkInterfaceType == NetworkInterfaceType.Wireless80211);
-                if (wifiNetworkInterface != null)
-                {
-                    _uniqueId = Crypto.SHA256(wifiNetworkInterface.GetPhysicalAddress().ToString());
-                }
-                else
-                {
-                    var ethernetInterface = networkInterfaces.LastOrDefault(ei => ei.NetworkInterfaceType == NetworkInterfaceType.Ethernet
-                                                && ei.OperationalStatus == OperationalStatus.Up && !ei.Name.Contains("Bluetooth", StringComparison.OrdinalIgnoreCase));
-                    _uniqueId = ethernetInterface != null ? Crypto.SHA256(ethernetInterface.GetPhysicalAddress().ToString()) : DefaultIdentifier;
-                }
-                return _uniqueId;
+        public static string getUniqueIdentifier()
+        {
+            string _uniqueId;
+            string DefaultIdentifier = MetricsBase.DefaultIdentifier;
+            var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(nic => nic.NetworkInterfaceType != NetworkInterfaceType.Loopback
+                                && (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                                && nic.Speed > 0).ToList();
+            // wifi network interface will always take higher precedence for retrieving physical address
+            var wifiNetworkInterface = networkInterfaces.FirstOrDefault(wi => wi.NetworkInterfaceType == NetworkInterfaceType.Wireless80211);
+            if (wifiNetworkInterface != null)
+            {
+                _uniqueId = Crypto.SHA256(wifiNetworkInterface.GetPhysicalAddress().ToString());
+            }
+            else
+            {
+                var ethernetInterface = networkInterfaces.LastOrDefault(ei => ei.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+                                            && ei.OperationalStatus == OperationalStatus.Up && !ei.Name.Contains("Bluetooth", StringComparison.OrdinalIgnoreCase));
+                _uniqueId = ethernetInterface != null ? Crypto.SHA256(ethernetInterface.GetPhysicalAddress().ToString()) : DefaultIdentifier;
+            }
+            return _uniqueId;
         }
-
-        // public static string getMainLogFile() {
-        //   var AppDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
-        //   var portingAssistantLogPath = @"Porting Assistant for .NET\logs";
-        //   string logdirectoryPath = Path.Combine(AppDataFolderPath, portingAssistantLogPath);
-
-        //   StringBuilder sb = new StringBuilder();
-
-        //   //string logFile;
-
-        //   // if (Directory.Exists(logdirectoryPath)) {
-        //   //   //var logFileName = "main.log";
-        //   //   //logFile = Path.Combine(logdirectoryPath, logFileName);
-        //   //   return "swag"
-            
-        //   // }
-
-          
-        //   // if (Directory.Exists(logdirectoryPath))
-        //   // {
-        //   //   var logFileName = "main.log";
-        //   //   string logFile = Path.Combine(logdirectoryPath, logFileName);
-
-        //   //   if (File.Exists(logFile))
-        //   //   {
-        //   //     StreamReader file = new StreamReader(logFile);
-        //   //     string line;
-        //   //     while ((line = file.ReadLine()) != null)
-        //   //     {
-        //   //       sb.Append(line);
-        //   //     }
-        //   //     file.Close();
-        //   //   }
-        //   //   else
-        //   //   {
-        //   //     Console.WriteLine("File doesn't exist");
-        //   //   }
-        //   //   }
-        //   //   return sb;
-        //   return logdirectoryPath;
-
-        //     //Console.WriteLine(sb.ToString());
-        // }
     }
 }

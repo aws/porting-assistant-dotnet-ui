@@ -3,15 +3,15 @@ using ElectronCgi.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
+using PortingAssistant.Client.NuGet.Interfaces;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
+using PortingAssistant.Telemetry.Utils;
 using PortingAssistant.VisualStudio;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using PortingAssistant.Client.NuGet.Interfaces;
-using PortingAssistant.Telemetry.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text;
@@ -25,12 +25,15 @@ namespace PortingAssistant.Api
         private IServiceProvider _services { get; set; }
         private Connection _connection;
         private ILogger _logger;
+        private CustomerContributionConfiguration _cccongif;
 
-        public Application(IServiceCollection serviceCollection, PortingAssistantSink portingAssistantSink)
+        public Application(IServiceCollection serviceCollection, PortingAssistantSink portingAssistantSink,
+            CustomerContributionConfiguration contributionConfiguration)
         {
             _services = serviceCollection.BuildServiceProvider();
             _logger = _services.GetRequiredService<ILogger<Application>>();
             _connection = BuildConnection();
+            _cccongif = contributionConfiguration;
             portingAssistantSink.registerOnData((response) =>
             {
                 _connection.Send("onDataUpdate", response);
@@ -135,23 +138,26 @@ namespace PortingAssistant.Api
                 }
             });
 
-            _connection.On<CustomerFeedbackRequest, bool>("sendCustomerFeedback", request =>
+            _connection.On<CustomerFeedbackRequest, Response<bool, string>>("sendCustomerFeedback", request =>
             {
-                var customerFeedbackService = _services.GetRequiredService<ICustomerFeedbackService>();
-                string uniqueMachineID = LogUploadUtils.getUniqueIdentifier();
-                string key = $"{uniqueMachineID}/{request.timestamp}/metadata";
-                var contentObj = new Content
+                try
                 {
-                    feedback = request.feedback,
-                    category = request.category,
-                    date = request.date,
-                    email = request.email,
-                    machineID = uniqueMachineID
-                };
-                string serializedContent = JsonConvert.SerializeObject(contentObj);
-                return customerFeedbackService.UploadToS3(key, serializedContent);
+                    string endPoint = _cccongif.CustomerFeedbackEndpoint;
+                    string uniqueMachineID = LogUploadUtils.getUniqueIdentifier();
+                    string key = $"{uniqueMachineID}/{request.Date}";
+                    request.MachineID = uniqueMachineID;
+                    string serializedContent = JsonConvert.SerializeObject(request);
+                    return CustomerContributionUtils.FeedbackUpload(key, serializedContent, endPoint);
+                }
+                catch (Exception ex)
+                {
+                    return new Response<bool, string>
+                    {
+                        Status = Response<bool, string>.Failed(ex),
+                        ErrorValue = ex.Message
+                    };
+                }
             });
-
         }
 
         public void Start()

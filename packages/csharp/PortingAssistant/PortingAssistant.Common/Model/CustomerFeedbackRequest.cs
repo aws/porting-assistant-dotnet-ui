@@ -2,28 +2,12 @@ using PortingAssistant.Client.Model;
 
 namespace PortingAssistant.Common.Model
 {
-    public class CustomerFeedbackRequest: Content
+    public class CustomerFeedbackRequest
     {
-        public string keyname { get; set; }
-
-        public string accessKey { get; set; }
-
-        public string secret { get; set; }
-
-        public string timestamp { get; set; }
-    }
-
-    public class Content {
-      
-      public string feedback { get; set; }
-
-      public string category { get; set; }
-
-      public string date { get; set; }
-
-      public string email { get; set; }
-
-      public string machineID { get; set; }
-
+        public string Feedback { get; set; }
+        public string Category { get; set; }
+        public string Date { get; set; }
+        public string Email { get; set; }
+        public string MachineID { get; set; }
     }
 }

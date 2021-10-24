@@ -1,9 +1,5 @@
-using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Web.Helpers;
 using PortingAssistant.Telemetry.Utils;
 
 namespace PortingAssistant.Telemetry.Model
@@ -19,7 +15,7 @@ namespace PortingAssistant.Telemetry.Model
         public string TimeStamp { get; set; }
 
         // This identifier will be used as default, if there are no active network interface adapters on the machine
-        private const string DefaultIdentifier = "591E6A97031144D5BADCE980EE3E51B7";
+        public const string DefaultIdentifier = "591E6A97031144D5BADCE980EE3E51B7";
         /// <summary> 
         /// This property uniquely identifies the customers using porting assistant
         /// Auto populate this field for all the metric logs
@@ -29,8 +25,8 @@ namespace PortingAssistant.Telemetry.Model
         {
             get
             {
-              if (!string.IsNullOrWhiteSpace(_uniqueId) && !_uniqueId.Equals(DefaultIdentifier)) return _uniqueId;
-              return LogUploadUtils.getUniqueIdentifier();
+                if (!string.IsNullOrWhiteSpace(_uniqueId) && !_uniqueId.Equals(DefaultIdentifier)) return _uniqueId;
+                return LogUploadUtils.getUniqueIdentifier();
             }
         }
     }

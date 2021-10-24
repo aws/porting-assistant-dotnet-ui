@@ -34,13 +34,6 @@ interface Props {
   projects: Loadable<Project[]>;
 }
 
-export interface CustomerFeedback {
-  feedback: string;
-  category: string;
-  email: string;
-  date: string;
-}
-
 const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) => {
   const dispatch = useDispatch();
   const history = useHistory();

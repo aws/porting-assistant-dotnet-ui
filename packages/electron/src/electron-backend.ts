@@ -20,21 +20,6 @@ ipcMain.handle("getConfigPath", (_event) => {
   return app.getPath("userData");
 });
 
-const config = require(isDev
-  ? path.join(
-      __dirname,
-      "..",
-      "build-scripts",
-      "porting-assistant-config.dev.json"
-    )
-  : path.join(
-      path.dirname(app.getPath("exe")),
-      "resources",
-      "config",
-      "porting-assistant-config.json"
-    ));
-
-
 export const initTelemetryConnection = (logger: any = console) => {
   let instance: Connection | undefined = undefined;
 
@@ -253,12 +238,7 @@ export const initConnection = (logger: any = console) => {
     });
 
     ipcMain.handle("sendCustomerFeedback", async (_event, upload) => {
-      const authenticated_upload = upload;
-      //The following keys are used to access the Customer Feedback S3 bucket.
-      //They have been temporarily removed for security purposes.
-      authenticated_upload['accessKey'] = "access key for Customer Feedback S3 bucket"
-      authenticated_upload['secret'] = "secret key for Customer Feedback S3 bucket"
-      const response = await connection.send("sendCustomerFeedback", authenticated_upload);
+      const response = await connection.send("sendCustomerFeedback", upload);
       return response;
     });
     

@@ -10,7 +10,10 @@ import {
   TextContent
 } from "@awsui/components-react";
 import React from "react";
+import { useDispatch } from "react-redux";
+import { v4 as uuid } from "uuid";
 
+import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { sendCustomerFeedback } from "../../utils/sendCustomerFeedback";
 
 interface Props {
@@ -31,6 +34,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
   const [categoryType, setCategory] = React.useState("");
   const [isCategoryEmpty, setIsCategoryEmpty] = React.useState(false);
   const [isValueEmpty, setIsValueEmpty] = React.useState(false);
+  const dispatch = useDispatch();
 
   const emailValue = window.electron.getState("email");
 
@@ -65,8 +69,29 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
                     date: cur_date.replace(/[^a-zA-Z0-9]/g, "-")
                   };
 
-                  const result = await sendCustomerFeedback(submission);
-                  console.log("result: " + result);
+                  const response = await sendCustomerFeedback(submission);
+                  if (response.status.status === "Success") {
+                    dispatch(
+                      pushCurrentMessageUpdate({
+                        messageId: uuid(),
+                        groupId: "customerFeedback",
+                        content: `Successfully sent your feedback.`,
+                        type: "success",
+                        dismissible: true
+                      })
+                    );
+                  } else {
+                    console.error("Failed to send customer feedback: ", response.errorValue);
+                    dispatch(
+                      pushCurrentMessageUpdate({
+                        messageId: uuid(),
+                        groupId: "customerFeedbackFailed",
+                        type: "error",
+                        content: `Failed to send your feedback. If this error persists, contact support in the Porting Assistant help menu.`,
+                        dismissible: true
+                      })
+                    );
+                  }
 
                   setModalVisible(false);
                   setInputValue("");

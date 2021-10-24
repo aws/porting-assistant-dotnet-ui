@@ -58,10 +58,14 @@ namespace PortingAssistant.Api
             configuration.DataStoreSettings.S3Endpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.S3Endpoint;
             configuration.DataStoreSettings.GitHubEndpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.GitHubEndpoint;
 
+            var contributionConfiguration = new CustomerContributionConfiguration();
+            contributionConfiguration.CustomerFeedbackEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.CustomerFeedbackEndpoint;
+            contributionConfiguration.RuleContributionEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.RuleContributionEndpoint;
+
             string metricsFolder = Path.Combine(args[2], "logs");
             string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
-            
-            
+
+
             var telemetryLogConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
                 .MinimumLevel.Debug()
                 .WriteTo.RollingFile(
@@ -71,13 +75,11 @@ namespace PortingAssistant.Api
             TelemetryCollector.Builder(telemetryLogConfiguration.CreateLogger(), metricsFilePath);
 
             var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection,
-                configuration,
-                portingAssistantPortingConfiguration.CustomerContributionConfiguration);
+            ConfigureServices(serviceCollection, configuration);
 
             try
             {
-                var application = new Application(serviceCollection, portingAssistantSink);
+                var application = new Application(serviceCollection, portingAssistantSink, contributionConfiguration);
                 application.SetupConnection(isConsole);
                 application.Start();
             }
@@ -87,10 +89,7 @@ namespace PortingAssistant.Api
             }
         }
 
-        static private void ConfigureServices(
-            IServiceCollection serviceCollection,
-            PortingAssistantConfiguration config,
-            CustomerContributionConfiguration customerContributionConfiguration)
+        static private void ConfigureServices(IServiceCollection serviceCollection, PortingAssistantConfiguration config)
         {
             serviceCollection.AddLogging(loggingBuilder => loggingBuilder
                 .SetMinimumLevel(LogLevel.Debug)
@@ -98,10 +97,6 @@ namespace PortingAssistant.Api
             serviceCollection.AddTransient<IAssessmentService, AssessmentService>();
             serviceCollection.AddTransient<IPortingService, PortingService>();
             serviceCollection.AddSingleton<IVisualStudioFinder, VisualStudioFinder>();
-            serviceCollection.AddTransient<ICustomerFeedbackService, CustomerFeedbackService>();
-            serviceCollection.Configure<CustomerContributionConfiguration>(ccconfig => customerContributionConfiguration.DeepCopy(ccconfig));
-            serviceCollection.AddHttpClient("CustomerContribution")
-                .SetHandlerLifetime(TimeSpan.FromMinutes(5));
             serviceCollection.AddAssessment(config);
             serviceCollection.AddOptions();
         }
