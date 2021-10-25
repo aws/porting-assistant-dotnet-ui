@@ -37,13 +37,16 @@ namespace PortingAssistant.Api
             Serilog.Formatting.Display.MessageTemplateTextFormatter tf =
                 new Serilog.Formatting.Display.MessageTemplateTextFormatter(outputTemplate, CultureInfo.InvariantCulture);
 
-            var portingAssistantSink = new PortingAssistantSink(tf);
+            var date = DateTime.Today.ToString("yyyy-MM-dd");
             var logConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
                 .MinimumLevel.Debug()
                 .WriteTo.RollingFile(
                     Path.Combine(args[2], "logs", "portingAssistant-assessment-{Date}.log"),
                     outputTemplate: outputTemplate)
-                .WriteTo.Sink(portingAssistantSink);
+                .WriteTo.Logger(lc => lc.MinimumLevel.Error().WriteTo.RollingFile(
+                    Path.Combine(args[2], "logs", "portingAssistant-backend-{Date}.log"), 
+                    outputTemplate: outputTemplate)
+                    );
 
             if (isConsole)
             {
@@ -60,14 +63,13 @@ namespace PortingAssistant.Api
 
             string metricsFolder = Path.Combine(args[2], "logs");
             string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
-            
-            
+
+
             var telemetryLogConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
                 .MinimumLevel.Debug()
                 .WriteTo.RollingFile(
                     Path.Combine(args[2], "logs", "portingAssistantTelemetry.log"),
-                    outputTemplate: outputTemplate)
-                .WriteTo.Sink(portingAssistantSink);
+                    outputTemplate: outputTemplate);
             TelemetryCollector.Builder(telemetryLogConfiguration.CreateLogger(), metricsFilePath);
 
             var serviceCollection = new ServiceCollection();
@@ -75,7 +77,7 @@ namespace PortingAssistant.Api
 
             try
             {
-                var application = new Application(serviceCollection, portingAssistantSink);
+                var application = new Application(serviceCollection);
                 application.SetupConnection(isConsole);
                 application.Start();
             }

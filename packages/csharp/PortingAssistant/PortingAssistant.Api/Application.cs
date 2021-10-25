@@ -19,17 +19,11 @@ namespace PortingAssistant.Api
         private Connection _connection;
         private ILogger _logger;
 
-        public Application(IServiceCollection serviceCollection, PortingAssistantSink portingAssistantSink)
+        public Application(IServiceCollection serviceCollection)
         {
             _services = serviceCollection.BuildServiceProvider();
             _logger = _services.GetRequiredService<ILogger<Application>>();
             _connection = BuildConnection();
-            portingAssistantSink.registerOnData((response) =>
-            {
-                _connection.Send("onDataUpdate", response);
-            });
-
-
         }
 
         private Connection BuildConnection()
