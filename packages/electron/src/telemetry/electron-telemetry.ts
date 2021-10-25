@@ -13,7 +13,6 @@ import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
 
-const backendLogName = "portingAssistant-backend-%DATE%";
 const electronLogName = "portingAssistant-electron-%DATE%";
 const reactLogName = "portingAssistant-react-%DATE%";
 
@@ -23,21 +22,6 @@ if (!fs.existsSync(dirName))
   fs.mkdir(dirName, (err) => {
     console.log("Telemetry Directory Creation Failed.");
   });
-
-var winstonTransportsBackend = [
-  new DailyRotateFile({
-    datePattern: "YYYY-MM-DD",
-    extension: ".log",
-    filename: backendLogName,
-    dirname: dirName,
-    maxFiles: 20,
-    format: winston.format.combine(
-      winston.format.printf((info) => {
-        return `${info.message}`;
-      })
-    ),
-  }),
-];
 
 var winstonTransportsElectron = [
   new DailyRotateFile({
@@ -68,11 +52,6 @@ var winstonTransportsReact = [
     ),
   }),
 ];
-
-var backendLogger = winston.createLogger({
-  transports: winstonTransportsBackend,
-  exitOnError: false,
-});
 
 var electronLogger = winston.createLogger({
   transports: winstonTransportsElectron,
@@ -185,18 +164,6 @@ export const registerLogListeners = (connection: Connection) => {
   };
   transport.level = "warn" as LevelOption;
   log.transports["electron"] = transport;
-
-  //Backend Logs
-  connection.on("onDataUpdate", (response) => {
-    try {
-      const logs = {
-          portingAssistantVersion: app.getVersion(),
-          targetFramework: targetFramework,
-          content: response,
-      };
-      backendLogger.info(JSON.stringify(logs));
-    } catch (err) {}
-  });
 
   //Metrics
   connection.on("onApiAnalysisUpdate", (response) => {
