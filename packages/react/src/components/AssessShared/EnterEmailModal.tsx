@@ -39,16 +39,22 @@ export const EnterEmailModal: React.FC<Props> = React.memo(({ visible, onCancel,
     }
   };
 
+  const close = () => {
+    setEmailValue("");
+    setEmailError("");
+    onCancel();
+  };
+
   return (
     <Modal
-      onDismiss={() => onCancel()}
+      onDismiss={() => close()}
       visible={visible}
       closeAriaLabel="Close modal"
       size="medium"
       footer={
         <Box float="right">
           <SpaceBetween direction="horizontal" size="xs">
-            <Button variant="link" onClick={() => onCancel()}>
+            <Button variant="link" onClick={() => close()}>
               Cancel
             </Button>
             <Button variant="primary" onClick={() => saveAndClose()}>

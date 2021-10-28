@@ -242,8 +242,6 @@ export const initConnection = (logger: any = console) => {
       return response;
     });
     
-    
-
     connection.on("onNugetPackageUpdate", (response) => {
       browserWindow.webContents.send("onNugetPackageUpdate", response);
     });

@@ -108,7 +108,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
       }
       header={<React.Fragment>Send feedback?</React.Fragment>}
     >
-      <SpaceBetween size="s">
+      <SpaceBetween size="xs">
         <Alert
           onDismiss={() => setIsValueEmpty(false)}
           visible={isValueEmpty}
@@ -126,9 +126,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
           Please select a category for your feedback.
         </Alert>
 
-        <TextContent>
-          <h5>All feedback will be sent to the .NET Porting Assistant team. </h5>
-        </TextContent>
+        <TextContent>All feedback will be sent to the .NET Porting Assistant team.</TextContent>
 
         <ButtonDropdown
           items={[
@@ -166,9 +164,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
         </FormField>
       </SpaceBetween>
       Email linked with this feedback is: {emailValue}
-      <Button variant="link" onClick={() => showEmailModal()}>
-        Edit
-      </Button>
+      <Button iconName="settings" variant="icon" onClick={() => showEmailModal()} />
     </Modal>
   );
 });
