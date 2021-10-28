@@ -9,6 +9,7 @@ export interface LocalStoreSchema {
   lastConfirmVersion: string;
   notification: boolean;
   newVersionNotification: boolean;
+  email: string;
 }
 
 export interface SolutionLocalStoreSchema {

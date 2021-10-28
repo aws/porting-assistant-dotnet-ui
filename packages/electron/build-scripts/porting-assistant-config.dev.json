@@ -16,5 +16,9 @@
     "LogTimerInterval": 120000,
     "Prefix": "telemetry-",
     "Description": "Porting Assistant for .NET Telemetry Logs"
-    }
+  },
+  "CustomerContributionConfiguration": {
+    "CustomerFeedbackEndpoint": "https://localhost",
+    "RuleContributionEndpint": "https://localhost"
+  }
 }

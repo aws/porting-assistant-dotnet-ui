@@ -242,8 +242,13 @@ export const initConnection = (logger: any = console) => {
     ipcMain.handle("checkInternetAccess", async (_event) => {
       const response = await connection.send("checkInternetAccess", "");
       return response;
-    });  
+    });
 
+    ipcMain.handle("sendCustomerFeedback", async (_event, upload) => {
+      const response = await connection.send("sendCustomerFeedback", upload);
+      return response;
+    });
+    
     connection.on("onNugetPackageUpdate", (response) => {
       browserWindow.webContents.send("onNugetPackageUpdate", response);
     });

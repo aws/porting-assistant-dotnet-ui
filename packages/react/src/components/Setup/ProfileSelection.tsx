@@ -7,6 +7,7 @@ import {
   Form,
   FormField,
   Header,
+  Input,
   Link,
   Select,
   SelectProps,
@@ -33,6 +34,7 @@ type FormData = {
   profileSelection: string;
   targetFrameworkSelection: SelectProps.Option;
   share: boolean;
+  email: string;
 };
 
 const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) => {
