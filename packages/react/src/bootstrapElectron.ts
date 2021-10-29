@@ -68,7 +68,7 @@ export interface Backend {
   ) => void;
   checkInternetAccess: () => Promise<boolean>;
   sendCustomerFeedback: (upload: any) => Promise<Response<boolean, string>>;
-  uploadRuleContribution: (upload: any) => Promise<boolean>;
+  uploadRuleContribution: (upload: any) => Promise<Response<boolean, string>>;
 }
 
 export interface Porting {

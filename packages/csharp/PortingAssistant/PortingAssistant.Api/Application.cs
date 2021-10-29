@@ -1,11 +1,9 @@
-﻿using Amazon;
-using ElectronCgi.DotNet;
+﻿using ElectronCgi.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Client.NuGet.Interfaces;
 using PortingAssistant.Common.Model;
-using PortingAssistant.Common.S3Upload;
 using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
 using PortingAssistant.Telemetry.Utils;
@@ -14,9 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Text;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace PortingAssistant.Api
@@ -26,7 +21,7 @@ namespace PortingAssistant.Api
         private IServiceProvider _services { get; set; }
         private Connection _connection;
         private ILogger _logger;
-        private CustomerContributionConfiguration _cccongif;
+        private CustomerContributionConfiguration _ccconfig;
 
         public Application(IServiceCollection serviceCollection,
             CustomerContributionConfiguration contributionConfiguration)
@@ -34,7 +29,7 @@ namespace PortingAssistant.Api
             _services = serviceCollection.BuildServiceProvider();
             _logger = _services.GetRequiredService<ILogger<Application>>();
             _connection = BuildConnection();
-            _cccongif = contributionConfiguration;
+            _ccconfig = contributionConfiguration;
             
         }
 
@@ -138,7 +133,7 @@ namespace PortingAssistant.Api
             {
                 try
                 {
-                    string endPoint = _cccongif.CustomerFeedbackEndpoint;
+                    string endPoint = _ccconfig.CustomerFeedbackEndpoint;
                     string uniqueMachineID = LogUploadUtils.getUniqueIdentifier();
                     string key = $"{uniqueMachineID}/{request.Date}";
                     request.MachineID = uniqueMachineID;
@@ -153,19 +148,23 @@ namespace PortingAssistant.Api
                         ErrorValue = ex.Message
                     };
                 }
-            _connection.On<RuleContributionRequest, bool>("uploadRuleContribution", request =>
-            {
-                RegionEndpoint bucketRegion = RegionEndpoint.GetBySystemName(request.region);
-                S3Upload upload = new S3Upload(
-                    bucketRegion, 
-                    request.s3BucketName,
-                    request.accessKey,
-                    request.secret
-                );
-                var uploadSuccess = upload.uploadObjWithString(request.keyName, request.contents);
+            });
 
-                return uploadSuccess;
-                
+            _connection.On<RuleContributionRequest, Response<bool, string>>("uploadRuleContribution", request =>
+            {
+                try
+                {
+                    string endPoint = _ccconfig.RuleContributionEndpoint;
+                    return CustomerContributionUtils.RuleContributionUpload(request.KeyName, request.Contents, endPoint);
+                }
+                catch (Exception ex)
+                {
+                    return new Response<bool, string>
+                    {
+                        Status = Response<bool, string>.Failed(ex),
+                        ErrorValue = ex.Message
+                    };
+                }
             });
         }
 

@@ -60,13 +60,14 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
                   setIsValueEmpty(true);
                 }
                 if (!(categoryType === "" || categoryType == null) && !(inputValue === "" || inputValue == null)) {
-                  const cur_date = Date().toString();
+                  const cur_date = new Date();
+                  let date_str = cur_date.toISOString();
 
                   const submission: CustomerFeedback = {
                     feedback: inputValue,
                     category: categoryType,
                     email: emailValue,
-                    date: cur_date.replace(/[^a-zA-Z0-9]/g, "-")
+                    date: date_str.replace(/[^a-zA-Z0-9]/g, "-")
                   };
 
                   const response = await sendCustomerFeedback(submission);

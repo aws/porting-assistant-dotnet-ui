@@ -9,7 +9,7 @@
   "PortingAssistantMetrics": {
     "InvokeUrl": "https://localhost",
     "Region": "us-east-1",
-    "ServiceName": "",
+    "ServiceName": "service_name",
     "MaxBufferCapacity": 500000,
     "MaxBufferCache": 1000000,
     "FlushInterval": 120000,
@@ -19,6 +19,6 @@
   },
   "CustomerContributionConfiguration": {
     "CustomerFeedbackEndpoint": "https://localhost",
-    "RuleContributionEndpint": "https://localhost"
+    "RuleContributionEndpoint": "https://localhost"
   }
 }

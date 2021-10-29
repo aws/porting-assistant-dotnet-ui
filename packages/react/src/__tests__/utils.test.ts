@@ -2,7 +2,7 @@ import { createStore } from "redux";
 
 import { createRootReducer } from "../../src/store/reducers";
 import { Backend, Electron, Porting } from "../bootstrapElectron";
-import { PackageContribution } from "../components/Feedback/PackageRuleContribution";
+import { PackageContribution } from "../components/CustomerContribution/PackageRuleContribution";
 import {
   copyPorting,
   inplacePorting,

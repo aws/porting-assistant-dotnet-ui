@@ -20,7 +20,7 @@ namespace PortingAssistant.Telemetry.Model
         public string TimeStamp { get; set; }
 
         // This identifier will be used as default, if there are no active network interface adapters on the machine
-        public const string DefaultIdentifier = "591E6A97031144D5BADCE980EE3E51B7";
+        private const string DefaultIdentifier = "591E6A97031144D5BADCE980EE3E51B7";
         /// <summary> 
         /// This property uniquely identifies the customers using porting assistant
         /// Auto populate this field for all the metric logs

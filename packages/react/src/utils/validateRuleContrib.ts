@@ -1,7 +1,7 @@
 import axios from "axios";
 import { validate } from "compare-versions";
 
-import { PackageContribution } from "../components/Feedback/PackageRuleContribution";
+import { PackageContribution } from "../components/CustomerContribution/PackageRuleContribution";
 
 export interface ValidationResult {
   valid: boolean;

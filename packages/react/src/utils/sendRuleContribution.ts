@@ -9,10 +9,10 @@ export const uploadRuleContribution = async (email: string, contribution: any, k
     contribution: contribution
   };
   const upload = {
-    keyName: keyName.toLowerCase() + ".json",
-    contents: JSON.stringify(submission, null, 4)
+    KeyName: keyName.toLowerCase() + ".json",
+    Contents: JSON.stringify(submission, null, 4)
   };
-  const uploadSuccess: boolean = await window.backend.uploadRuleContribution(upload);
+  const uploadSuccess = await window.backend.uploadRuleContribution(upload);
 
   return uploadSuccess;
 };

@@ -242,7 +242,7 @@ namespace PortingAssistant.Telemetry.Utils
         public static string getUniqueIdentifier()
         {
             string _uniqueId;
-            string DefaultIdentifier = MetricsBase.DefaultIdentifier;
+            string DefaultIdentifier = "591E6A97031144D5BADCE980EE3E51B7";
             var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces()
                 .Where(nic => nic.NetworkInterfaceType != NetworkInterfaceType.Loopback
                                 && (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)

@@ -17,14 +17,14 @@ import path from "path";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
 import { EnterEmailModal, isEmailSet } from "../../components/AssessShared/EnterEmailModal";
 import { RuleContribSource } from "../../containers/RuleContribution";
 import { HistoryState } from "../../models/locationState";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
-import { uploadRuleContribution } from "../../utils/uploadToS3Bucket";
+import { uploadRuleContribution } from "../../utils/sendRuleContribution";
 import { validatePackageInput } from "../../utils/validateRuleContrib";
 import { targetFrameworkOptions } from "../Setup/ProfileSelection";
 
@@ -85,7 +85,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
 
   const declineProvideEmail = () => {
     setShowEmailModal(false);
-    history.goBack();
+    //history.goBack();
   };
 
   const onSubmit = async () => {
@@ -106,7 +106,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     if (await validateInput(submission)) {
       const formattedSubmission = formatPackageContribution(submission);
       const result = await uploadRuleContribution(email, formattedSubmission, submission.packageNameSource);
-      if (result) {
+      if (result.status.status === "Success") {
         setFlashbar({
           messageId: uuid(),
           type: "success",
@@ -320,30 +320,20 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
       />
       <Container
         header={
-          <Header variant="h2" description="Please confirm that your e-mail and NuGet package details are correct.">
+          <Header 
+            variant="h2" 
+            description="Please confirm that your e-mail and NuGet package details are correct. 
+            To update your e-mail, please click the setting icon on the right corner."
+            actions={
+            <Button iconName="settings" variant="icon" onClick={() => setShowEmailModal(true)} />
+            }
+            >
             User and NuGet package details
           </Header>
         }
       >
         <ColumnLayout columns={3} variant="text-grid">
-          <ValueWithLabel
-            label="E-mail"
-            description={
-              <div>
-                Your e-mail is used to contact you about your suggestion. To change it, please visit&nbsp;
-                <Link
-                  to={{
-                    pathname: "/edit-settings"
-                  }}
-                >
-                  Settings
-                </Link>
-                .
-              </div>
-            }
-          >
-            {email}
-          </ValueWithLabel>
+          <ValueWithLabel label="E-mail">{email}</ValueWithLabel>
           <ValueWithLabel label="Selected package name">{source?.packageName}</ValueWithLabel>
           <ValueWithLabel label="Selected package version">{source?.packageVersion}</ValueWithLabel>
         </ColumnLayout>

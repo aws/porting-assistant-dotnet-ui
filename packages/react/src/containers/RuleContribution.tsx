@@ -3,7 +3,7 @@ import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 
-import { PackageRuleContribution } from "../components/Feedback/PackageRuleContribution";
+import { PackageRuleContribution } from "../components/CustomerContribution/PackageRuleContribution";
 import { InfoLink } from "../components/InfoLink";
 import { PortingAssistantAppLayout } from "../components/PortingAssistantAppLayout";
 import { PortingAssistantBreadcrumb } from "../components/PortingAssistantBreadcrumb";

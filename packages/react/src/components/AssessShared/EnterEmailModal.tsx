@@ -32,6 +32,8 @@ export const EnterEmailModal: React.FC<Props> = React.memo(({ visible, onCancel,
     if (validEmail.test(emailValue)) {
       // email is valid, save
       window.electron.saveState("email", emailValue);
+      setEmailValue("");
+      setEmailError("");
       onSaveExit();
     } else {
       // invalid email
