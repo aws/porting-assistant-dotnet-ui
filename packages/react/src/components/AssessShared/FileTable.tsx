@@ -26,7 +26,8 @@ const FileTableInternal: React.FC = () => {
   const location = useLocation<HistoryState>();
   const history = useHistory();
   const [selected, setSelected] = useState<SourceFile[]>([]);
-  const [filterText, setFilterText] = useState("");
+  const [filterText, setFilterText] = useState(location.state?.activeFilter || "");
+  const [fromNugetPackageTab, setFromNugetPackageTab] = useState(location.state?.fromNugetPackageTab || false);
   const [sortDetail, setSortDetail] = useState<TableProps.SortingState<SourceFile>>({
     sortingColumn: {
       sortingField: "sourceFilePath"
@@ -39,9 +40,25 @@ const FileTableInternal: React.FC = () => {
 
   const filteredItems = useMemo(() => {
     const allItems = loadedItems;
-    return filterText === ""
-      ? allItems
-      : allItems.filter(i => i.sourceFilePath.toLowerCase().includes(filterText.toLowerCase()));
+    const isEmpty = filterText === "";
+    const filterItems = filterText.split(",");
+    
+    if (isEmpty)
+    {
+      if (fromNugetPackageTab) return [];
+      else return allItems;
+    } 
+    else 
+    {
+      return allItems.filter(
+        item => {
+          return filterItems.some(fitem => {
+            let pathElements = item.sourceFilePath.split("\\")
+            return pathElements[pathElements.length - 1].toLowerCase() === fitem.toLowerCase()
+          })
+        }
+      );
+    }
   }, [filterText, loadedItems]);
 
   const curPage = useMemo(() => location.state?.activePage || 1, [location.state]);
@@ -136,7 +153,7 @@ const FileTableInternal: React.FC = () => {
               />
             </>
           }
-          totalItems={loadedItems}
+          totalItems={filteredItems}
           actionButtons={
             <SpaceBetween direction="horizontal" size="xs">
               <Button

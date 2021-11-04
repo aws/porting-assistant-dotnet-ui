@@ -412,10 +412,9 @@ export const selectNugetTableData = createCachedSelector(
       return [];
     }
     const selectedProjects = project != null ? [project.data] : projects.data;
-
     const fileApiFrequency = selectedProjects
       .flatMap(project => (project.projectFilePath == null ? [] : apiAnalysis[project.projectFilePath]))
-      .reduce<{ [packageVersion: string]: { file: number; api: number } }>((agg, current) => {
+      .reduce<{ [packageVersion: string]: { file: number; api: number; sourceFilesList: string[] } }>((agg, current) => {
         if (!isLoaded(current) || current.data.sourceFileAnalysisResults == null) {
           return agg;
         }
@@ -440,12 +439,13 @@ export const selectNugetTableData = createCachedSelector(
             if (agg[key] !== undefined) {
               agg[key].api += 1;
             } else {
-              agg[key] = { api: 1, file: 0 };
+              agg[key] = { api: 1, file: 0 , sourceFilesList: []};
             }
             packageVersionsInFile.add(key);
           });
           packageVersionsInFile.forEach(packageVersion => {
             agg[packageVersion].file += 1;
+            agg[packageVersion].sourceFilesList.push(sourceFileAnalysisResult.sourceFileName);
           });
         });
         return agg;
@@ -482,6 +482,7 @@ export const selectNugetTableData = createCachedSelector(
                 frequency: 1,
                 apis: fileApiFrequency[key]?.api || 0,
                 sourceFiles: fileApiFrequency[key]?.file || 0,
+                sourceFilesList: fileApiFrequency[key]?.sourceFilesList || [],
                 replacement: replacement,
                 compatible: compatibility,
                 failed: isFailed(packageAnalysisResult),
@@ -493,6 +494,7 @@ export const selectNugetTableData = createCachedSelector(
                 frequency: 1,
                 apis: fileApiFrequency[key]?.api || 0,
                 sourceFiles: fileApiFrequency[key]?.file || 0,
+                sourceFilesList: fileApiFrequency[key]?.sourceFilesList || [],
                 replacement: replacement,
                 compatible: "UNKNOWN",
                 failed: isFailed(packageAnalysisResult),

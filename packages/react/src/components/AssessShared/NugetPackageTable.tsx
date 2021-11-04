@@ -1,25 +1,34 @@
 import { useCollection } from "@awsui/collection-hooks";
 import { Box, Pagination, Table, TableProps, TextFilter } from "@awsui/components-react";
 import StatusIndicator from "@awsui/components-react/status-indicator/internal";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { render } from "react-dom";
 import { useSelector } from "react-redux";
-import { matchPath, useLocation } from "react-router";
+import { matchPath, Route, useLocation } from "react-router";
+import { Link } from "react-router-dom";
 
 import { pathValues } from "../../constants/paths";
 import { usePortingAssistantSelector } from "../../createReduxStore";
+import { project, projectPath, sourceFile } from "../../mockData";
 import { HistoryState } from "../../models/locationState";
-import { Compatibility, NugetPackage } from "../../models/project";
+import { Compatibility, NugetPackage, Project } from "../../models/project";
+import { SolutionDetails } from "../../models/solution";
 import { selectNugetPackages, selectProjects } from "../../store/selectors/solutionSelectors";
 import { selectNugetTableData } from "../../store/selectors/tableSelectors";
 import { filteringCountText } from "../../utils/FilteringCountText";
-import { isFailed, isLoaded } from "../../utils/Loadable";
+import { isFailed, isLoaded, Loadable } from "../../utils/Loadable";
 import { nugetPackageKey } from "../../utils/NugetPackageKey";
+import { AssessProjectDashboard } from "../AssessProject/AssessProjectDashboard";
 import { InfoLink } from "../InfoLink";
+import { LinkComponent } from "../LinkComponent";
+import { PortingAssistantAppLayout } from "../PortingAssistantAppLayout";
 import { TableHeader } from "../TableHeader";
+import { FileTable, SourceFile } from "./FileTable";
 
 export type NugetPackageTableFields = NugetPackage & {
   frequency: number;
   sourceFiles: number;
+  sourceFilesList: string[];
   apis: number;
   replacement: string;
   compatible: Compatibility;
@@ -63,6 +72,80 @@ const NugetPackageTableInternal: React.FC = () => {
     );
   }, [nugetPackages, projects]);
 
+  const columnDefinitions: TableProps.ColumnDefinition<NugetPackageTableFields>[] = [
+    {
+      id: "package-id",
+      header: "Name",
+      cell: item => <div id={`package-id-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.packageId}</div>,
+      sortingField: "packageId"
+    },
+    {
+      id: "package-version",
+      header: "Version",
+      cell: item => <div id={`package-version-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.version}</div>,
+      sortingField: "version"
+    },
+    {
+      id: "projects",
+      header: "Projects",
+      cell: item => <div id={`projects-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.frequency}</div>,
+      sortingField: "frequency"
+    },
+    {
+      id: "source-files",
+      header: "Source Files",
+      cell: item => 
+        <Link to={{
+                pathname: location.pathname ,
+                state: {
+                  activeFilter: item.sourceFilesList.join(),
+                  activeTabId: "source-files",
+                  fromNugetPackageTab: true
+              }
+            }}>
+        <div id={`source-files-${escapeNonAlphaNumeric(item.packageId || "")}`}>
+        {item.sourceFiles}
+        </div>
+        </Link>,
+      sortingField: "sourceFiles"
+    },
+    {
+      id: "apis",
+      header: "APIs",
+      cell: item => <div id={`apis-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.apis}</div>,
+      sortingField: "apis"
+    },
+    {
+      id: "status",
+      header: "Status",
+      cell: item => (
+        <div id={`compatibility-${escapeNonAlphaNumeric(item.packageId || "")}`}>
+          {item.failed ? (
+            <StatusIndicator type="warning">Failed</StatusIndicator>
+          ) : item.compatible === "COMPATIBLE" ? (
+            <StatusIndicator type="success">Compatible</StatusIndicator>
+          ) : item.compatible === "UNKNOWN" ? (
+            <StatusIndicator type="info">Unknown</StatusIndicator>
+          ) : item.deprecated ? (
+            <StatusIndicator type="info">Deprecated</StatusIndicator>
+          ) : (
+            <StatusIndicator type="error">Incompatible</StatusIndicator>
+          )}
+        </div>
+      ),
+      sortingField: "compatible"
+      // minWidth: "150px"
+    },
+    {
+      id: "suggested-replacement",
+      header: "Suggested replacement",
+      cell: item => (
+        <div id={`suggested-replacement-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.replacement}</div>
+      ),
+      sortingField: "replacement"
+    }
+  ];
+  
   const columnDefinitionWithProject = columnDefinitions.filter(
     definition => definition.id !== "projects" || !isSingleProject
   );
@@ -154,67 +237,6 @@ const NugetPackageTableInternal: React.FC = () => {
   );
 };
 
-const columnDefinitions: TableProps.ColumnDefinition<NugetPackageTableFields>[] = [
-  {
-    id: "package-id",
-    header: "Name",
-    cell: item => <div id={`package-id-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.packageId}</div>,
-    sortingField: "packageId"
-  },
-  {
-    id: "package-version",
-    header: "Version",
-    cell: item => <div id={`package-version-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.version}</div>,
-    sortingField: "version"
-  },
-  {
-    id: "projects",
-    header: "Projects",
-    cell: item => <div id={`projects-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.frequency}</div>,
-    sortingField: "frequency"
-  },
-  {
-    id: "source-files",
-    header: "Source files",
-    cell: item => <div id={`source-files-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.sourceFiles}</div>,
-    sortingField: "sourceFiles"
-  },
-  {
-    id: "apis",
-    header: "APIs",
-    cell: item => <div id={`apis-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.apis}</div>,
-    sortingField: "apis"
-  },
-  {
-    id: "status",
-    header: "Status",
-    cell: item => (
-      <div id={`compatibility-${escapeNonAlphaNumeric(item.packageId || "")}`}>
-        {item.failed ? (
-          <StatusIndicator type="warning">Failed</StatusIndicator>
-        ) : item.compatible === "COMPATIBLE" ? (
-          <StatusIndicator type="success">Compatible</StatusIndicator>
-        ) : item.compatible === "UNKNOWN" ? (
-          <StatusIndicator type="info">Unknown</StatusIndicator>
-        ) : item.deprecated ? (
-          <StatusIndicator type="info">Deprecated</StatusIndicator>
-        ) : (
-          <StatusIndicator type="error">Incompatible</StatusIndicator>
-        )}
-      </div>
-    ),
-    sortingField: "compatible"
-    // minWidth: "150px"
-  },
-  {
-    id: "suggested-replacement",
-    header: "Suggested replacement",
-    cell: item => (
-      <div id={`suggested-replacement-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.replacement}</div>
-    ),
-    sortingField: "replacement"
-  }
-];
 
 const empty = (
   <Box textAlign="center">
