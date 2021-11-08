@@ -82,7 +82,7 @@ namespace PortingAssistant.Common.Utils
             }
         }
 
-        private static async Task<(bool status, string msg)> ContentsUpload(HttpClient client, string endPoint, string uploadName, MultipartFormDataContent contents)
+        private static async Task<(bool status, string msg)> ContentsUpload(HttpClient client, string endPoint, string uploadName, HttpContent contents)
         {
             try
             {
@@ -94,21 +94,6 @@ namespace PortingAssistant.Common.Utils
             catch (Exception ex)
             {
                 return (status:false, msg:ex.Message);
-            }
-        }
-
-        private static async Task<(bool status, string msg)> ContentsUpload(HttpClient client, string endPoint, string uploadName, StringContent contents)
-        {
-            try
-            {
-                var apiResponse = await client.PutAsync($"{endPoint}/s3?key={uploadName}", contents);
-                string msgResponse = await apiResponse.Content.ReadAsStringAsync();
-                var response = (status: apiResponse.IsSuccessStatusCode, msg: msgResponse);
-                return response;
-            }
-            catch (Exception ex)
-            {
-                return (status: false, msg: ex.Message);
             }
         }
 
