@@ -34,47 +34,39 @@ const ApiTableInternal: React.FC = () => {
 
   const isLoading = useMemo(() => tableItems == null, [tableItems]);
   const loadedItems = useMemo(() => tableItems || [], [tableItems]);
-
-  const [filterText, setFilterText] = useState("");
   const [sortDetail, setSortDetail] = useState<TableProps.SortingState<ApiTableData>>({
     sortingColumn: { sortingField: "apiName" },
     isDescending: false
   });
-  const filteredItems = useMemo(() => {
-    const allItems = loadedItems;
-    return filterText === ""
-      ? allItems
-      : allItems.filter(i => i.apiName.toLowerCase().includes(filterText.toLowerCase()));
-  }, [filterText, loadedItems]);
 
-  const curPage = useMemo(() => {
-    return location.state?.activePage || 1;
-  }, [location.state]);
-
-  const curItems = useMemo(() => {
-    const descending = sortDetail.isDescending ? -1 : 1;
-    const sortedItems = filteredItems.sort((a, b) => {
-      const column = columnDefinitions.find(c => c.sortingField === sortDetail.sortingColumn.sortingField);
-      if (column?.sortingComparator != null) {
-        return column.sortingComparator(a, b) * descending;
-      }
-      if (column?.sortingField != null) {
-        if ((a as any)[column.sortingField] === (b as any)[column.sortingField]) {
-          return 0;
-        }
-        return ((a as any)[column.sortingField] > (b as any)[column.sortingField] ? 1 : -1) * descending;
-      }
-      return 1 * descending;
-    });
-    return sortedItems.slice((curPage - 1) * PAGE_SIZE, (curPage - 1) * PAGE_SIZE + PAGE_SIZE);
-  }, [curPage, filteredItems, sortDetail.sortingColumn, sortDetail.isDescending]);
-
-  const { items, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(curItems, {
+  const { items, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(loadedItems, {
     filtering: {
+      filteringFunction: (item, filterText) => {
+        var exactMatch = false;
+        if (filterText === "") return true;
+        else {
+            if (filterText.charAt(0) === "\"" && filterText.charAt(filterText.length-1) === "\"") exactMatch = true;
+            filterText = exactMatch? filterText.slice(1, -1): filterText;
+            const filterItems = filterText.toLowerCase().split(";");
+            return exactMatch? 
+                  filterItems.some(
+                    fitem => {
+                      return item.apiName.toLowerCase() === fitem; 
+                    }
+                  )
+                  :
+                  filterItems.some(
+                    fitem => {
+                      return item.apiName.toLowerCase().includes(fitem); 
+                    }
+                  )
+            }
+      },
+      defaultFilteringText: location.state?.activeFilter || "",
       empty: empty,
       noMatch: noMatch
     },
-    pagination: { pageSize: PAGE_SIZE },
+    pagination: {},
     sorting: {}
   });
 
@@ -95,23 +87,11 @@ const ApiTableInternal: React.FC = () => {
           {...filterProps}
           filteringPlaceholder="Search by API name"
           countText={filteringCountText(filteredItemsCount!)}
-          onChange={e => setFilterText(e.detail.filteringText)}
         />
       }
       pagination={
         <Pagination
           {...paginationProps}
-          pagesCount={Math.ceil(filteredItems.length / PAGE_SIZE)}
-          currentPageIndex={curPage}
-          onChange={e => {
-            history.push({
-              pathname: location.pathname,
-              state: {
-                activePage: e.detail.currentPageIndex,
-                activeTabId: location.state?.activeTabId
-              }
-            });
-          }}
         />
       }
       header={

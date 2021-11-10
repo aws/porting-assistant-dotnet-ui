@@ -27,7 +27,6 @@ const FileTableInternal: React.FC = () => {
   const history = useHistory();
   const [selected, setSelected] = useState<SourceFile[]>([]);
   const [filterText, setFilterText] = useState(location.state?.activeFilter || "");
-  const [fromNugetPackageTab, setFromNugetPackageTab] = useState(location.state?.fromNugetPackageTab || false);
   const [sortDetail, setSortDetail] = useState<TableProps.SortingState<SourceFile>>({
     sortingColumn: {
       sortingField: "sourceFilePath"
@@ -45,8 +44,7 @@ const FileTableInternal: React.FC = () => {
     
     if (isEmpty)
     {
-      if (fromNugetPackageTab) return [];
-      else return allItems;
+      return allItems;
     } 
     else 
     {
@@ -107,7 +105,6 @@ const FileTableInternal: React.FC = () => {
           {...filterProps}
           filteringPlaceholder="Search by source file name"
           countText={filteringCountText(filteredItemsCount!)}
-          onChange={e => setFilterText(e.detail.filteringText)}
         />
       }
       pagination={

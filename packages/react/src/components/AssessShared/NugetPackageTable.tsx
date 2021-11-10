@@ -30,6 +30,7 @@ export type NugetPackageTableFields = NugetPackage & {
   sourceFiles: number;
   sourceFilesList: string[];
   apis: number;
+  apiSet: Set<string>;
   replacement: string;
   compatible: Compatibility;
   failed: boolean;
@@ -99,8 +100,7 @@ const NugetPackageTableInternal: React.FC = () => {
                 pathname: location.pathname ,
                 state: {
                   activeFilter: item.sourceFilesList.join(),
-                  activeTabId: "source-files",
-                  fromNugetPackageTab: true
+                  activeTabId: "source-files"
               }
             }}>
         <div id={`source-files-${escapeNonAlphaNumeric(item.packageId || "")}`}>
@@ -112,7 +112,18 @@ const NugetPackageTableInternal: React.FC = () => {
     {
       id: "apis",
       header: "APIs",
-      cell: item => <div id={`apis-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.apis}</div>,
+      cell: item => 
+      <LinkComponent 
+      location = {{
+        pathName: location.pathname ,
+        state: {
+          activeFilter: "\"" + Array.from(item.apiSet).join(";") + "\"",
+          activeTabId: "apis",
+      }
+    }}>
+    <div id={`apis-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.apis}
+    </div>
+    </LinkComponent>,
       sortingField: "apis"
     },
     {

@@ -414,7 +414,7 @@ export const selectNugetTableData = createCachedSelector(
     const selectedProjects = project != null ? [project.data] : projects.data;
     const fileApiFrequency = selectedProjects
       .flatMap(project => (project.projectFilePath == null ? [] : apiAnalysis[project.projectFilePath]))
-      .reduce<{ [packageVersion: string]: { file: number; api: number; sourceFilesList: string[] } }>((agg, current) => {
+      .reduce<{ [packageVersion: string]: { file: number; api: number; sourceFilesList: string[]; apiSet: Set<string> } }>((agg, current) => {
         if (!isLoaded(current) || current.data.sourceFileAnalysisResults == null) {
           return agg;
         }
@@ -438,8 +438,10 @@ export const selectNugetTableData = createCachedSelector(
             const key = nugetPackageKey(apiResult?.codeEntityDetails?.package?.packageId, version);
             if (agg[key] !== undefined) {
               agg[key].api += 1;
+              if (apiResult.codeEntityDetails.originalDefinition) agg[key].apiSet.add(apiResult.codeEntityDetails.originalDefinition);
             } else {
-              agg[key] = { api: 1, file: 0 , sourceFilesList: []};
+              agg[key] = { api: 1, file: 0 , sourceFilesList: [], apiSet: new Set()};
+              if (apiResult?.codeEntityDetails?.originalDefinition) agg[key].apiSet.add(apiResult?.codeEntityDetails?.originalDefinition);
             }
             packageVersionsInFile.add(key);
           });
@@ -481,6 +483,7 @@ export const selectNugetTableData = createCachedSelector(
                 ...current,
                 frequency: 1,
                 apis: fileApiFrequency[key]?.api || 0,
+                apiSet: fileApiFrequency[key]?.apiSet || new Set(),
                 sourceFiles: fileApiFrequency[key]?.file || 0,
                 sourceFilesList: fileApiFrequency[key]?.sourceFilesList || [],
                 replacement: replacement,
@@ -493,6 +496,7 @@ export const selectNugetTableData = createCachedSelector(
                 ...current,
                 frequency: 1,
                 apis: fileApiFrequency[key]?.api || 0,
+                apiSet: fileApiFrequency[key]?.apiSet || new Set(),
                 sourceFiles: fileApiFrequency[key]?.file || 0,
                 sourceFilesList: fileApiFrequency[key]?.sourceFilesList || [],
                 replacement: replacement,
