@@ -26,7 +26,6 @@ const FileTableInternal: React.FC = () => {
   const location = useLocation<HistoryState>();
   const history = useHistory();
   const [selected, setSelected] = useState<SourceFile[]>([]);
-  const [filterText, setFilterText] = useState(location.state?.activeFilter || "");
   const [sortDetail, setSortDetail] = useState<TableProps.SortingState<SourceFile>>({
     sortingColumn: {
       sortingField: "sourceFilePath"
@@ -37,50 +36,37 @@ const FileTableInternal: React.FC = () => {
   const isLoading = useMemo(() => tableItems == null, [tableItems]);
   const loadedItems = useMemo(() => tableItems || [], [tableItems]);
 
-  const filteredItems = useMemo(() => {
-    const allItems = loadedItems;
-    const isEmpty = filterText === "";
-    const filterItems = filterText.split(",");
-    
-    if (isEmpty)
-    {
-      return allItems;
-    } 
-    else 
-    {
-      return allItems.filter(
-        item => {
-          return filterItems.some(fitem => {
-            let pathElements = item.sourceFilePath.split("\\")
-            return pathElements[pathElements.length - 1].toLowerCase() === fitem.toLowerCase()
-          })
-        }
-      );
-    }
-  }, [filterText, loadedItems]);
-
-  const curPage = useMemo(() => location.state?.activePage || 1, [location.state]);
-
-  const curItems = useMemo(() => {
-    const descending = sortDetail.isDescending ? -1 : 1;
-    const sortedItems = filteredItems.sort((a, b) => {
-      const column = columnDefinitions.find(c => c.sortingField === sortDetail.sortingColumn.sortingField);
-      if (column?.sortingField != null) {
-        if ((a as any)[column.sortingField] === (b as any)[column.sortingField]) {
-          return 0;
-        }
-        return ((a as any)[column.sortingField] > (b as any)[column.sortingField] ? 1 : -1) * descending;
-      }
-      return 1 * descending;
-    });
-    return sortedItems.slice((curPage - 1) * PAGE_SIZE, (curPage - 1) * PAGE_SIZE + PAGE_SIZE);
-  }, [curPage, filteredItems, sortDetail.sortingColumn, sortDetail.isDescending]);
-
-  const { items, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(curItems, {
+  const { items, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(loadedItems, {
     filtering: {
-      empty: empty
+      filteringFunction: (item, filterText) => {
+        debugger;
+        var exactMatch = false;
+        if (filterText === "") return true;
+        else {
+            if (filterText.charAt(0) === "\"" && filterText.charAt(filterText.length-1) === "\"") exactMatch = true;
+            filterText = exactMatch? filterText.slice(1, -1): filterText;
+            const filterItems = filterText.toLowerCase().split(";");
+            let sourceFileArr = item.sourceFilePath.split("\\")
+            let sourceFileName = sourceFileArr[sourceFileArr.length-1].toLowerCase();
+            return exactMatch? 
+                  filterItems.some(
+                    fitem => {
+                      return sourceFileName === fitem; 
+                    }
+                  )
+                  :
+                  filterItems.some(
+                    fitem => {
+                      return sourceFileName.includes(fitem); 
+                    }
+                  )
+            }
+      },
+      defaultFilteringText: location.state?.activeFilter || "",
+      empty: empty,
+      noMatch: noMatch
     },
-    pagination: { pageSize: PAGE_SIZE },
+    pagination: {},
     sorting: {}
   });
 
@@ -110,17 +96,6 @@ const FileTableInternal: React.FC = () => {
       pagination={
         <Pagination
           {...paginationProps}
-          pagesCount={Math.ceil(filteredItems.length / PAGE_SIZE)}
-          currentPageIndex={curPage}
-          onChange={e => {
-            history.push({
-              pathname: location.pathname,
-              state: {
-                activePage: e.detail.currentPageIndex,
-                activeTabId: location.state?.activeTabId
-              }
-            });
-          }}
         />
       }
       header={
@@ -150,7 +125,7 @@ const FileTableInternal: React.FC = () => {
               />
             </>
           }
-          totalItems={filteredItems}
+          totalItems={loadedItems}
           actionButtons={
             <SpaceBetween direction="horizontal" size="xs">
               <Button
@@ -186,6 +161,18 @@ const empty = (
 
     <Box variant="p" margin={{ bottom: "xs" }}>
       No source files to display.
+    </Box>
+  </Box>
+);
+
+const noMatch = (
+  <Box textAlign="center">
+    <Box margin={{ bottom: "xxs" }} padding={{ top: "xs" }}>
+      <b>No matches</b>
+    </Box>
+
+    <Box variant="p" margin={{ bottom: "xs" }}>
+      We can’t find a match.
     </Box>
   </Box>
 );

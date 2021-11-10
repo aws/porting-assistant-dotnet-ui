@@ -1,29 +1,22 @@
 import { useCollection } from "@awsui/collection-hooks";
 import { Box, Pagination, Table, TableProps, TextFilter } from "@awsui/components-react";
 import StatusIndicator from "@awsui/components-react/status-indicator/internal";
-import React, { useMemo, useState } from "react";
-import { render } from "react-dom";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { matchPath, Route, useLocation } from "react-router";
-import { Link } from "react-router-dom";
+import { matchPath, useLocation } from "react-router";
 
 import { pathValues } from "../../constants/paths";
 import { usePortingAssistantSelector } from "../../createReduxStore";
-import { project, projectPath, sourceFile } from "../../mockData";
 import { HistoryState } from "../../models/locationState";
-import { Compatibility, NugetPackage, Project } from "../../models/project";
-import { SolutionDetails } from "../../models/solution";
+import { Compatibility, NugetPackage } from "../../models/project";
 import { selectNugetPackages, selectProjects } from "../../store/selectors/solutionSelectors";
 import { selectNugetTableData } from "../../store/selectors/tableSelectors";
 import { filteringCountText } from "../../utils/FilteringCountText";
-import { isFailed, isLoaded, Loadable } from "../../utils/Loadable";
+import { isFailed, isLoaded } from "../../utils/Loadable";
 import { nugetPackageKey } from "../../utils/NugetPackageKey";
-import { AssessProjectDashboard } from "../AssessProject/AssessProjectDashboard";
 import { InfoLink } from "../InfoLink";
 import { LinkComponent } from "../LinkComponent";
-import { PortingAssistantAppLayout } from "../PortingAssistantAppLayout";
 import { TableHeader } from "../TableHeader";
-import { FileTable, SourceFile } from "./FileTable";
 
 export type NugetPackageTableFields = NugetPackage & {
   frequency: number;
@@ -96,18 +89,18 @@ const NugetPackageTableInternal: React.FC = () => {
       id: "source-files",
       header: "Source Files",
       cell: item => 
-        <Link to={{
-                pathname: location.pathname ,
-                state: {
-                  activeFilter: item.sourceFilesList.join(),
-                  activeTabId: "source-files"
-              }
-            }}>
-        <div id={`source-files-${escapeNonAlphaNumeric(item.packageId || "")}`}>
-        {item.sourceFiles}
-        </div>
-        </Link>,
-      sortingField: "sourceFiles"
+      <LinkComponent 
+      location = {{
+        pathName: location.pathname ,
+        state: {
+          activeFilter: "\"" + item.sourceFilesList.join(";") + "\"",
+          activeTabId: "source-files",
+      }
+    }}>
+    <div id={`apis-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.sourceFiles}
+    </div>
+    </LinkComponent>,
+    sortingField: "sourceFiles"
     },
     {
       id: "apis",

@@ -30,7 +30,6 @@ export interface ApiTableData {
 const ApiTableInternal: React.FC = () => {
   const location = useLocation<HistoryState>();
   const tableItems = usePortingAssistantSelector(state => selectApiTableData(state, location.pathname));
-  const history = useHistory();
 
   const isLoading = useMemo(() => tableItems == null, [tableItems]);
   const loadedItems = useMemo(() => tableItems || [], [tableItems]);
