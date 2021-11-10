@@ -67,6 +67,12 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
         },
       },
       {
+        label: "View logs",
+        click: async () => {
+          await shell.openPath(path.dirname(localStore.path)+ "/logs/");
+        },
+      },
+      {
         label: "Porting Assistant for .NET help",
         click: async () => {
           await shell.openExternal(
