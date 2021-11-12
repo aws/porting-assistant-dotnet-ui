@@ -2,7 +2,7 @@ import { useCollection } from "@awsui/collection-hooks";
 import { Box, Pagination, Table, TableProps, TextFilter } from "@awsui/components-react";
 import StatusIndicator from "@awsui/components-react/status-indicator/internal";
 import React, { useMemo, useState } from "react";
-import { useHistory, useLocation } from "react-router";
+import { useLocation } from "react-router";
 
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
@@ -10,6 +10,7 @@ import { Compatibility } from "../../models/project";
 import { selectApiTableData } from "../../store/selectors/tableSelectors";
 import { filteringCountText } from "../../utils/FilteringCountText";
 import { InfoLink } from "../InfoLink";
+import { LinkComponent } from "../LinkComponent";
 import { TableHeader } from "../TableHeader";
 
 export interface ApiTableData {
@@ -44,19 +45,11 @@ const ApiTableInternal: React.FC = () => {
         var exactMatch = false;
         if (filterText === "") return true;
         else {
-            if (filterText.charAt(0) === "\"" && filterText.charAt(filterText.length-1) === "\"") exactMatch = true;
-            filterText = exactMatch? filterText.slice(1, -1): filterText;
             const filterItems = filterText.toLowerCase().split(";");
-            return exactMatch? 
-                  filterItems.some(
+            return filterItems.some(
                     fitem => {
-                      return item.apiName.toLowerCase() === fitem; 
-                    }
-                  )
-                  :
-                  filterItems.some(
-                    fitem => {
-                      return item.apiName.toLowerCase().includes(fitem); 
+                      if (fitem.charAt(0) === "\"" && fitem.charAt(fitem.length-1) === "\"") exactMatch = true;
+                      return exactMatch? item.apiName.toLowerCase() === fitem.slice(1, -1): item.apiName.toLowerCase().includes(fitem); 
                     }
                   )
             }
@@ -69,6 +62,68 @@ const ApiTableInternal: React.FC = () => {
     sorting: {}
   });
 
+  const columnDefinitions: TableProps.ColumnDefinition<ApiTableData>[] = [
+    {
+      id: "api-name",
+      header: "Name",
+      cell: item => item.apiName,
+      sortingField: "apiName"
+      // width: 400
+    },
+    {
+      id: "package-name",
+      header: "Package",
+      cell: item => `${item.packageName} ${item.packageVersion}`,
+      sortingField: "packageName"
+    },
+    {
+      id: "source-files",
+      header: "Source files",
+      cell: item => 
+      <LinkComponent 
+      location = {{
+        pathName: location.pathname ,
+        state: {
+          activeFilter: "\"" + Array.from(item.sourceFiles).join("\";\"") + "\"",
+          activeTabId: "source-files",
+      }
+    }}>
+    {item.sourceFiles.size}
+    </LinkComponent>,
+      sortingField: "sourceFiles",
+      sortingComparator: (a: ApiTableData, b: ApiTableData) => a.sourceFiles.size - b.sourceFiles.size
+    },
+    {
+      id: "calls",
+      header: "Calls  ",
+      cell: item => item.calls,
+      sortingField: "calls"
+    },
+    {
+      id: "status",
+      header: "Status",
+      cell: item =>
+        item.isCompatible === "COMPATIBLE" ? (
+          <StatusIndicator type="success">Compatible</StatusIndicator>
+        ) : item.isCompatible === "UNKNOWN" ? (
+          <StatusIndicator type="info">Unknown</StatusIndicator>
+        ) : item.deprecated ? (
+          <StatusIndicator type="info">Deprecated</StatusIndicator>
+        ) : (
+          <StatusIndicator type="error">Incompatible</StatusIndicator>
+        ),
+      sortingField: "isCompatible"
+      // minWidth: "150px"
+    },
+    {
+      id: "suggested-replacement",
+      header: "Suggested replacement",
+      cell: item => item.replacement,
+      sortingField: "replacement"
+      // width: 600
+    }
+  ];
+  
   return (
     <Table<ApiTableData>
       {...collectionProps}
@@ -143,57 +198,6 @@ const ApiTableInternal: React.FC = () => {
 
 const PAGE_SIZE = 10;
 
-const columnDefinitions: TableProps.ColumnDefinition<ApiTableData>[] = [
-  {
-    id: "api-name",
-    header: "Name",
-    cell: item => item.apiName,
-    sortingField: "apiName"
-    // width: 400
-  },
-  {
-    id: "package-name",
-    header: "Package",
-    cell: item => `${item.packageName} ${item.packageVersion}`,
-    sortingField: "packageName"
-  },
-  {
-    id: "source-files",
-    header: "Source files",
-    cell: item => item.sourceFiles.size,
-    sortingField: "sourceFiles",
-    sortingComparator: (a: ApiTableData, b: ApiTableData) => a.sourceFiles.size - b.sourceFiles.size
-  },
-  {
-    id: "calls",
-    header: "Calls  ",
-    cell: item => item.calls,
-    sortingField: "calls"
-  },
-  {
-    id: "status",
-    header: "Status",
-    cell: item =>
-      item.isCompatible === "COMPATIBLE" ? (
-        <StatusIndicator type="success">Compatible</StatusIndicator>
-      ) : item.isCompatible === "UNKNOWN" ? (
-        <StatusIndicator type="info">Unknown</StatusIndicator>
-      ) : item.deprecated ? (
-        <StatusIndicator type="info">Deprecated</StatusIndicator>
-      ) : (
-        <StatusIndicator type="error">Incompatible</StatusIndicator>
-      ),
-    sortingField: "isCompatible"
-    // minWidth: "150px"
-  },
-  {
-    id: "suggested-replacement",
-    header: "Suggested replacement",
-    cell: item => item.replacement,
-    sortingField: "replacement"
-    // width: 600
-  }
-];
 
 const empty = (
   <Box textAlign="center">

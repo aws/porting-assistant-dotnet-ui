@@ -93,7 +93,7 @@ const NugetPackageTableInternal: React.FC = () => {
       location = {{
         pathName: location.pathname ,
         state: {
-          activeFilter: "\"" + item.sourceFilesList.join(";") + "\"",
+          activeFilter: "\"" + item.sourceFilesList.join("\";\"") + "\"",
           activeTabId: "source-files",
       }
     }}>
@@ -110,7 +110,7 @@ const NugetPackageTableInternal: React.FC = () => {
       location = {{
         pathName: location.pathname ,
         state: {
-          activeFilter: "\"" + Array.from(item.apiSet).join(";") + "\"",
+          activeFilter: "\"" + Array.from(item.apiSet).join("\";\"") + "\"",
           activeTabId: "apis",
       }
     }}>

@@ -39,25 +39,15 @@ const FileTableInternal: React.FC = () => {
   const { items, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(loadedItems, {
     filtering: {
       filteringFunction: (item, filterText) => {
-        debugger;
         var exactMatch = false;
+        debugger;
         if (filterText === "") return true;
         else {
-            if (filterText.charAt(0) === "\"" && filterText.charAt(filterText.length-1) === "\"") exactMatch = true;
-            filterText = exactMatch? filterText.slice(1, -1): filterText;
-            const filterItems = filterText.toLowerCase().split(";");
-            let sourceFileArr = item.sourceFilePath.split("\\")
-            let sourceFileName = sourceFileArr[sourceFileArr.length-1].toLowerCase();
-            return exactMatch? 
-                  filterItems.some(
+            const filterItems = filterText.toLowerCase().split(";");         
+            return filterItems.some(
                     fitem => {
-                      return sourceFileName === fitem; 
-                    }
-                  )
-                  :
-                  filterItems.some(
-                    fitem => {
-                      return sourceFileName.includes(fitem); 
+                      if (fitem.charAt(0) === "\"" && fitem.charAt(fitem.length-1) === "\"") exactMatch = true;
+                      return exactMatch? item.sourceFilePath.toLowerCase() === fitem.slice(1, -1): item.sourceFilePath.toLowerCase().includes(fitem) 
                     }
                   )
             }

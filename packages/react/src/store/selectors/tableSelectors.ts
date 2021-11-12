@@ -303,7 +303,7 @@ export const selectApiTableData = createCachedSelector(
           const apiItem = apiNameToApiItem[apiName];
           if (apiItem != null) {
             apiItem.calls += 1;
-            apiItem.sourceFiles.add(sourceFileAnalysisResult.sourceFileName);
+            apiItem.sourceFiles.add(sourceFileAnalysisResult.sourceFilePath);
             apiItem.locations.push({
               sourcefilePath: sourceFileAnalysisResult.sourceFilePath,
               location: apiResult.codeEntityDetails.textSpan?.startLinePosition || 0
@@ -314,7 +314,7 @@ export const selectApiTableData = createCachedSelector(
               packageName: apiResult.codeEntityDetails.package.packageId || "-",
               packageVersion: apiResult.codeEntityDetails.package.version,
               calls: 1,
-              sourceFiles: new Set<string>([sourceFileAnalysisResult.sourceFileName]),
+              sourceFiles: new Set<string>([sourceFileAnalysisResult.sourceFilePath]),
               locations: new Array<{ sourcefilePath: string; location: number }>({
                 sourcefilePath: sourceFileAnalysisResult.sourceFilePath,
                 location: apiResult.codeEntityDetails.textSpan?.startLinePosition || 0
@@ -447,7 +447,7 @@ export const selectNugetTableData = createCachedSelector(
           });
           packageVersionsInFile.forEach(packageVersion => {
             agg[packageVersion].file += 1;
-            agg[packageVersion].sourceFilesList.push(sourceFileAnalysisResult.sourceFileName);
+            agg[packageVersion].sourceFilesList.push(sourceFileAnalysisResult.sourceFilePath);
           });
         });
         return agg;
