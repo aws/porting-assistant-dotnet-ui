@@ -2,14 +2,17 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
+using PortingAssistant.Client.NuGet.Interfaces;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
+using PortingAssistant.Telemetry.Utils;
 using PortingAssistant.VisualStudio;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using PortingAssistant.Client.NuGet.Interfaces;
+using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace PortingAssistant.Api
 {
@@ -18,12 +21,16 @@ namespace PortingAssistant.Api
         private IServiceProvider _services { get; set; }
         private Connection _connection;
         private ILogger _logger;
+        private CustomerContributionConfiguration _ccconfig;
 
-        public Application(IServiceCollection serviceCollection)
+        public Application(IServiceCollection serviceCollection,
+            CustomerContributionConfiguration contributionConfiguration)
         {
             _services = serviceCollection.BuildServiceProvider();
             _logger = _services.GetRequiredService<ILogger<Application>>();
             _connection = BuildConnection();
+            _ccconfig = contributionConfiguration;
+            
         }
 
         private Connection BuildConnection()
@@ -111,16 +118,52 @@ namespace PortingAssistant.Api
                 try
                 {
                     var file1 = httpService.DownloadS3FileAsync("newtonsoft.json.json.gz");
-                    file1.Wait();
                     var file2 = httpService.DownloadS3FileAsync("52projects.json.gz");
-                    file2.Wait();
                     var file3 = httpService.DownloadS3FileAsync("2a486f72.mega.json.gz");
-                    file3.Wait();
-                    return true;
+                    Task.WhenAll(file1, file2, file3).Wait();
+                    return file1.IsCompletedSuccessfully || file2.IsCompletedSuccessfully || file3.IsCompletedSuccessfully;
                 }
                 catch
                 {
                     return false;
+                }
+            });
+
+            _connection.On<CustomerFeedbackRequest, Response<bool, string>>("sendCustomerFeedback", request =>
+            {
+                try
+                {
+                    string endPoint = _ccconfig.CustomerFeedbackEndpoint;
+                    string uniqueMachineID = LogUploadUtils.getUniqueIdentifier();
+                    string key = $"{uniqueMachineID}/{request.Date}";
+                    request.MachineID = uniqueMachineID;
+                    string serializedContent = JsonConvert.SerializeObject(request);
+                    return CustomerContributionUtils.FeedbackUpload(key, serializedContent, endPoint);
+                }
+                catch (Exception ex)
+                {
+                    return new Response<bool, string>
+                    {
+                        Status = Response<bool, string>.Failed(ex),
+                        ErrorValue = ex.Message
+                    };
+                }
+            });
+
+            _connection.On<RuleContributionRequest, Response<bool, string>>("uploadRuleContribution", request =>
+            {
+                try
+                {
+                    string endPoint = _ccconfig.RuleContributionEndpoint;
+                    return CustomerContributionUtils.RuleContributionUpload(request.KeyName, request.Contents, endPoint);
+                }
+                catch (Exception ex)
+                {
+                    return new Response<bool, string>
+                    {
+                        Status = Response<bool, string>.Failed(ex),
+                        ErrorValue = ex.Message
+                    };
                 }
             });
         }

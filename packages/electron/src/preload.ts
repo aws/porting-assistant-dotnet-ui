@@ -30,11 +30,12 @@ contextBridge.exposeInMainWorld("electron", {
       | "share"
       | "lastConfirmVersion"
       | "notification"
-      | "newVersionNotification",
+      | "newVersionNotification"
+      | "email",
     value: any
   ) => localStore.set(key, value),
   getState: (
-    key: "solutions" | "profile" | "targetFramework" | "share",
+    key: "solutions" | "profile" | "targetFramework" | "share" | "email",
     defaultValue: any
   ) => localStore.get(key, defaultValue),
   saveCache: (value: any) => reducerCacheStore.set("reducerCache", value),
@@ -125,6 +126,8 @@ contextBridge.exposeInMainWorld("backend", {
   listenApiAnalysisUpdate: (callback: (message: string) => void) =>
     listenBackend("onApiAnalysisUpdate", callback),
   checkInternetAccess: () => invokeBackend("checkInternetAccess"),
+  sendCustomerFeedback: (upload: any) => invokeBackend("sendCustomerFeedback", upload),
+  uploadRuleContribution: (upload: any) => invokeBackend("uploadRuleContribution", upload)
 });
 
 contextBridge.exposeInMainWorld("porting", {
