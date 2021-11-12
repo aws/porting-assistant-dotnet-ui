@@ -40,7 +40,6 @@ const FileTableInternal: React.FC = () => {
     filtering: {
       filteringFunction: (item, filterText) => {
         var exactMatch = false;
-        debugger;
         if (filterText === "") return true;
         else {
             const filterItems = filterText.toLowerCase().split(";");         
