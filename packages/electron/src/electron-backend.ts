@@ -8,6 +8,7 @@ import { testProfile } from "./telemetry/electron-metrics";
 import {
   startTimer,
   logSolutionMetrics,
+  logReactError,
   logReactMetrics,
   registerLogListeners,
 } from "./telemetry/electron-telemetry";
@@ -126,6 +127,9 @@ export const initConnection = (logger: any = console) => {
 
   ipcMain.handle("telemetry", async (_event, message) => {
     logReactMetrics(message);
+  });
+  ipcMain.handle("writeReactErrLog", async (_event, message) => {
+    logReactError(message);
   });
   ipcMain.handle("dialogShowOpenDialog", (_event, options: any) =>
     dialog.showOpenDialog(options)

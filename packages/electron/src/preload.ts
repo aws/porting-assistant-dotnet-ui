@@ -97,6 +97,7 @@ contextBridge.exposeInMainWorld("electron", {
   getLatestVersion: () => invokeBackend("getLatestVersion"),
   getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
+  writeReactErrLog: (message: any) => invokeBackend("writeReactErrLog", message),
   getAssessmentLog: () => {
     const dateString = new Date().toLocaleDateString("en-CA").slice(0,10).replace(/-/g,"");
     return path.join(remote.app.getPath("userData"), "logs", `portingAssistant-assessment-${dateString}.log`);
