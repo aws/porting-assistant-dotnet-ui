@@ -60,8 +60,9 @@ namespace PortingAssistant.Api
                 {
                     _connection.Send("onNugetPackageUpdate", response);
                 });
-
-                return assessmentService.AnalyzeSolution(request);
+                // Set UseGenerator to true once for reduced memory consumption
+                //request.settings.UseGenerator = true;
+                return assessmentService.AnalyzeSolution(request).Result;
             });
 
             _connection.On<ProjectFilePortingRequest, Response<List<PortingResult>, List<PortingResult>>>("applyPortingProjectFileChanges", request =>
