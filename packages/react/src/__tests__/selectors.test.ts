@@ -942,7 +942,9 @@ describe("selectDashboardTableData", () => {
         sourceFiles: 1,
         replacement: "test upgrade",
         compatible: "COMPATIBLE",
-        deprecated: false
+        deprecated: false,
+        sourceFilesList: ["test.cs"],
+        apiSet: new Set(["test-api"])
       }
     ];
     expect(result).toEqual(expectResult);
