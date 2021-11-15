@@ -7,6 +7,7 @@ import {
   Form,
   FormField,
   Header,
+  Input,
   Link,
   Select,
   SelectProps,
@@ -33,6 +34,7 @@ type FormData = {
   profileSelection: string;
   targetFrameworkSelection: SelectProps.Option;
   share: boolean;
+  email: string;
 };
 
 const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) => {
@@ -311,7 +313,7 @@ const shareCheckbox = (
   </Checkbox>
 );
 
-const targetFrameworkOptions: SelectProps.Option[] = [
+export const targetFrameworkOptions: SelectProps.Option[] = [
   { label: ".NET 5.0.0", value: "net5.0" },
   { label: ".NET Core 3.1.0", value: "netcoreapp3.1" }
 ];

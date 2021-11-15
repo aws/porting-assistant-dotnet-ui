@@ -57,6 +57,26 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
           );
         },
       },
+      {
+        label: "View Electron license",
+        click: async () => {
+          await shell.openPath(
+            path.join(
+              path.dirname(app.getPath("exe")),
+              "LICENSE.electron"
+          ));
+        },
+      },
+      {
+        label: "View Chrome license",
+        click: async () => {
+          await shell.openPath(
+            path.join(
+              path.dirname(app.getPath("exe")),
+              "LICENSES.chromium"
+          ));
+        },
+      },
       { type: "separator" },
       {
         label: "Report an issue",
