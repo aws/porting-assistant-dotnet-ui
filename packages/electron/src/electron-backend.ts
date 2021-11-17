@@ -128,8 +128,8 @@ export const initConnection = (logger: any = console) => {
   ipcMain.handle("telemetry", async (_event, message) => {
     logReactMetrics(message);
   });
-  ipcMain.handle("writeReactErrLog", async (_event, message) => {
-    logReactError(message);
+  ipcMain.handle("writeReactErrLog", async (_event, source, message, response) => {
+    logReactError(source, message, response);
   });
   ipcMain.handle("dialogShowOpenDialog", (_event, options: any) =>
     dialog.showOpenDialog(options)

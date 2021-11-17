@@ -95,13 +95,13 @@ export const logReactMetrics = (response: any) => {
   reactLogger.info(JSON.stringify(errorMetric));
 };
 
-export const logReactError = (response: any) => {
+export const logReactError = (source: any, message: any ,response: any) => {
   const cur = new Date();
   let curTimeArr = cur.toISOString().split('T');
   let curDate = curTimeArr[0];
   let curTime = curTimeArr[1].split('.')[0];
   let appVersion = app.getVersion();
-  let errorMessage = `[${curDate} ${curTime} ERR] (${appVersion}) ${response}`
+  let errorMessage = `[${curDate} ${curTime} ERR] (${appVersion}) ${source}: ${message}\n${response}`
   reactLogger.info(errorMessage);
 };
 

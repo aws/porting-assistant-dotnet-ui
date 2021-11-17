@@ -115,7 +115,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
         });
         history.push(nextPagePath);
       } else {
-        window.electron.writeReactErrLog("Failed to send rule contribution - PA UI: " + result.errorValue)
+        window.electron.writeReactErrLog("PackageRuleContribution", "Failed to send rule contribution - PA UI", result.errorValue)
         setFlashbar({
           messageId: uuid(),
           type: "error",
