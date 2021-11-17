@@ -63,7 +63,7 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
           await shell.openPath(
             path.join(
               path.dirname(app.getPath("exe")),
-              "LICENSE.electron"
+              "LICENSE.electron.txt"
           ));
         },
       },
@@ -73,7 +73,7 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
           await shell.openPath(
             path.join(
               path.dirname(app.getPath("exe")),
-              "LICENSES.chromium"
+              "LICENSES.chromium.html"
           ));
         },
       },
