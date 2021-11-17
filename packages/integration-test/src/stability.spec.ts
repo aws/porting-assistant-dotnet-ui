@@ -518,4 +518,31 @@ describe("stability check, assess a solution, reassess the solution, check all s
     expect((await getProgram)).toBe(expectedWCFProgram);
     expect((await getConfig).replace(/(\r\n|\n|\r)/gm, "")).toBe(expectedWCFConfig.replace(/(\r\n|\n|\r)/gm, ""));
   });
+
+  test("run through mvcmusicstore on net 6.0", async () => {
+    const solutionFolderPath: string = path.join(
+      testSolutionPath(),
+      "mvcmusicstore",
+      "sourceCode",
+      "mvcmusicstore"
+    );
+    const solutionPath: string = path.join(
+      solutionFolderPath,
+      "MvcMusicStore.sln"
+    );
+    await addSolution(app, solutionPath);
+    await app.client.refresh();
+    const results = await runThroughSolution(
+      solutionPath,
+      "inplace",
+      "net6.0"
+    );
+    await validateHighLevelResults(results, [
+      "0 of 1",
+      "2 of 6",
+      "50 of 81",
+      "0",
+      "(21)",
+    ]);
+  });
 });
