@@ -82,7 +82,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
                       })
                     );
                   } else {
-                    console.error("Failed to send customer feedback: ", response.errorValue);
+                    window.electron.writeReactErrLog("CustomerFeedbackModal", "Failed to send customer feedback - PA UI", response.errorValue)
                     dispatch(
                       pushCurrentMessageUpdate({
                         messageId: uuid(),
