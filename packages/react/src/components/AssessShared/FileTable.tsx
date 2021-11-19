@@ -26,7 +26,6 @@ const FileTableInternal: React.FC = () => {
   const location = useLocation<HistoryState>();
   const history = useHistory();
   const [selected, setSelected] = useState<SourceFile[]>([]);
-  const [filterText, setFilterText] = useState("");
   const [sortDetail, setSortDetail] = useState<TableProps.SortingState<SourceFile>>({
     sortingColumn: {
       sortingField: "sourceFilePath"
@@ -37,35 +36,26 @@ const FileTableInternal: React.FC = () => {
   const isLoading = useMemo(() => tableItems == null, [tableItems]);
   const loadedItems = useMemo(() => tableItems || [], [tableItems]);
 
-  const filteredItems = useMemo(() => {
-    const allItems = loadedItems;
-    return filterText === ""
-      ? allItems
-      : allItems.filter(i => i.sourceFilePath.toLowerCase().includes(filterText.toLowerCase()));
-  }, [filterText, loadedItems]);
-
-  const curPage = useMemo(() => location.state?.activePage || 1, [location.state]);
-
-  const curItems = useMemo(() => {
-    const descending = sortDetail.isDescending ? -1 : 1;
-    const sortedItems = filteredItems.sort((a, b) => {
-      const column = columnDefinitions.find(c => c.sortingField === sortDetail.sortingColumn.sortingField);
-      if (column?.sortingField != null) {
-        if ((a as any)[column.sortingField] === (b as any)[column.sortingField]) {
-          return 0;
-        }
-        return ((a as any)[column.sortingField] > (b as any)[column.sortingField] ? 1 : -1) * descending;
-      }
-      return 1 * descending;
-    });
-    return sortedItems.slice((curPage - 1) * PAGE_SIZE, (curPage - 1) * PAGE_SIZE + PAGE_SIZE);
-  }, [curPage, filteredItems, sortDetail.sortingColumn, sortDetail.isDescending]);
-
-  const { items, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(curItems, {
+  const { items, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(loadedItems, {
     filtering: {
-      empty: empty
+      filteringFunction: (item, filterText) => {
+        var exactMatch = false;
+        if (filterText === "") return true;
+        else {
+            const filterItems = filterText.toLowerCase().split(";");         
+            return filterItems.some(
+                    fitem => {
+                      if (fitem.charAt(0) === "\"" && fitem.charAt(fitem.length-1) === "\"") exactMatch = true;
+                      return exactMatch? item.sourceFilePath.toLowerCase() === fitem.slice(1, -1): item.sourceFilePath.toLowerCase().includes(fitem) 
+                    }
+                  )
+            }
+      },
+      defaultFilteringText: location.state?.activeFilter || "",
+      empty: empty,
+      noMatch: noMatch
     },
-    pagination: { pageSize: PAGE_SIZE },
+    pagination: {},
     sorting: {}
   });
 
@@ -90,23 +80,11 @@ const FileTableInternal: React.FC = () => {
           {...filterProps}
           filteringPlaceholder="Search by source file name"
           countText={filteringCountText(filteredItemsCount!)}
-          onChange={e => setFilterText(e.detail.filteringText)}
         />
       }
       pagination={
         <Pagination
           {...paginationProps}
-          pagesCount={Math.ceil(filteredItems.length / PAGE_SIZE)}
-          currentPageIndex={curPage}
-          onChange={e => {
-            history.push({
-              pathname: location.pathname,
-              state: {
-                activePage: e.detail.currentPageIndex,
-                activeTabId: location.state?.activeTabId
-              }
-            });
-          }}
         />
       }
       header={
@@ -172,6 +150,18 @@ const empty = (
 
     <Box variant="p" margin={{ bottom: "xs" }}>
       No source files to display.
+    </Box>
+  </Box>
+);
+
+const noMatch = (
+  <Box textAlign="center">
+    <Box margin={{ bottom: "xxs" }} padding={{ top: "xs" }}>
+      <b>No matches</b>
+    </Box>
+
+    <Box variant="p" margin={{ bottom: "xs" }}>
+      We can’t find a match.
     </Box>
   </Box>
 );

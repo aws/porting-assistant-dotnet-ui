@@ -7,6 +7,8 @@ interface Props extends LinkProps {
     pathName: string;
     state?: {
       solutionOnly?: boolean;
+      activeFilter?: string;
+      activeTabId?: string;
     };
   };
 }
