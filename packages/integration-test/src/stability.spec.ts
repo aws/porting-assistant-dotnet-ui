@@ -179,7 +179,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
   const sendRuleContributionCheck = async () => {
     await (await app.client.$(`a[data-testid="nuget-packages"]`)).click();
     await (await app.client.$("=NuGet packages")).waitForDisplayed();
-    await (await app.client.$('._input_wtz7u_3')).setValue('Microsoft.Web.Infrastructure');
+    await (await app.client.$('._input_wtz7u_3')).setValue('jQuery.vsdoc');
     await (await app.client.$('._label_4pfx5_7')).click();
     await (await app.client.$('#rule-contribution-btn')).click();
     await (await app.client.$("=Suggest replacement")).waitForDisplayed();
@@ -443,8 +443,8 @@ describe("stability check, assess a solution, reassess the solution, check all s
       solutionPath,
       "inplace",
       "netcoreapp3.1",
-      true,
-      true
+      false,
+      false
     );
     await validateHighLevelResults(results, [
       "0 of 40",
@@ -481,15 +481,15 @@ describe("stability check, assess a solution, reassess the solution, check all s
       solutionPath,
       "inplace",
       "netcoreapp3.1",
-      false,
-      false
+      true,
+      true
     );
     await validateHighLevelResults(results, [
-      "1 of 1",
-      "0 of 6",
-      "7 of 97",
-      "36",
-      "(23)",
+      "0 of 1",
+      "2 of 6",
+      "50 of 81",
+      "0",
+      "(21)",
     ]);
     const controllerFolderPath: string = path.join(
       solutionFolderPath,
