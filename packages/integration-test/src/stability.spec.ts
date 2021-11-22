@@ -132,10 +132,70 @@ describe("stability check, assess a solution, reassess the solution, check all s
     });
   };
 
+  const emptyEmailCheck = async () => {
+    await (await app.client.$("#feedback-btn")).click();
+    await (await app.client.$('#email-btn')).click();
+    await (
+      await app.client.$("span=Invalid e-mail format.")
+    ).waitForExist({
+      timeout: 1000,
+    });
+    await app.client.keys(["Escape"]);
+  };
+
+  const invalidEmailCheck = async () => {
+    await (await app.client.$("#feedback-btn")).click();
+    await (await app.client.$('#email-input input')).setValue("integration.test.com");
+    await (await app.client.$('#email-btn')).click();
+    await (
+      await app.client.$("span=Invalid e-mail format.")
+    ).waitForExist({
+      timeout: 1000,
+    });
+    await app.client.keys(["Escape"]);
+  }
+
+  const setupEmail = async () => {
+    await (await app.client.$('#email-input input')).setValue("integration@test.com");
+    await (await app.client.$('#email-btn')).click();
+  };
+
+  const sendFeedbackCheck = async () => {
+    await (await app.client.$("#feedback-btn")).click();
+    await setupEmail();
+    await (await app.client.$("#fb-category-selection")).click();
+    await (await app.client.$('[data-testid="general"]')).click();
+    await (await app.client.$('#fb-text input')).setValue("integration-test-feedback");
+    await (await app.client.$("#send-feedback-btn")).click();
+    console.log("Sent customer feedback success");
+  };
+
+  const emptyFeedbackCheck = async () => {
+    await (await app.client.$("#feedback-btn")).click();
+    await (await app.client.$("#send-feedback-btn")).click();
+    await app.client.keys(["Escape"]);
+  };
+
+  const sendRuleContributionCheck = async () => {
+    await (await app.client.$(`a[data-testid="nuget-packages"]`)).click();
+    await (await app.client.$("=NuGet packages")).waitForDisplayed();
+    await (await app.client.$('._input_wtz7u_3')).setValue('jQuery.vsdoc');
+    await (await app.client.$('._label_4pfx5_7')).click();
+    await (await app.client.$('#rule-contribution-btn')).click();
+    await (await app.client.$("=Suggest replacement")).waitForDisplayed();
+    await (await app.client.$('#rc-package-name input')).setValue("Azure.ImageOptimizer");
+    await (await app.client.$('#rc-version-check-box')).click();
+    await (await app.client.$('#rc-comment input')).setValue("integration-test-rule-contribution");
+    await (await app.client.$("#rc-send-btn")).click();
+    console.log("Sent rule contribution success");
+  };
+
   const runThroughSolution = async (
     solutionPath: string,
     portingPlace: string,
-    targetFramework: string
+    targetFramework: string,
+    sendFeedback: boolean,
+    sendRuleContribution: boolean,
   ) => {
     const solutionNameTagId = `#solution-link-${escapeNonAlphaNumeric(
       solutionPath
@@ -143,6 +203,15 @@ describe("stability check, assess a solution, reassess the solution, check all s
     console.log(`assessing solution ${solutionNameTagId}....`);
     await assessSolutionCheck(solutionNameTagId);
     console.log(`assess solution ${solutionNameTagId} success`);
+    if (sendFeedback) {
+      await invalidEmailCheck();
+      await emptyEmailCheck();
+      await sendFeedbackCheck();
+      await emptyFeedbackCheck();
+    }
+    if (sendRuleContribution) {
+      await sendRuleContributionCheck();
+    }
     console.log(`reassessing solution ${solutionNameTagId}....`);
     const assessmentResults = await reassessSolutionCheck(
       solutionNameTagId,
@@ -373,7 +442,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const results = await runThroughSolution(
       solutionPath,
       "inplace",
-      "netcoreapp3.1"
+      "netcoreapp3.1",
+      false,
+      false
     );
     await validateHighLevelResults(results, [
       "0 of 40",
@@ -409,7 +480,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const results = await runThroughSolution(
       solutionPath,
       "inplace",
-      "netcoreapp3.1"
+      "netcoreapp3.1",
+      true,
+      true
     );
     await validateHighLevelResults(results, [
       "0 of 1",
@@ -450,7 +523,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const results = await runThroughSolution(
       solutionPath,
       "inplace",
-      "netcoreapp3.1"
+      "netcoreapp3.1",
+      false,
+      false
     );
     await validateHighLevelResults(results, [
       "1 of 1",
@@ -475,7 +550,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const results = await runThroughSolution(
       solutionPath,
       "inplace",
-      "netcoreapp3.1"
+      "netcoreapp3.1",
+      false,
+      false
     );
     await validateHighLevelResults(results, [
       "0 of 3",
