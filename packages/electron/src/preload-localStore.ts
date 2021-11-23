@@ -39,7 +39,7 @@ const createLocalStore = () =>
     defaults: {
       solutions: {},
       profile: "",
-      targetFramework: { label: ".NET Core 3.1.0", id: "netcoreapp3.1" },
+      targetFramework: { label: ".NET 6.0.0", id: "net6.0" },
       share: false,
       lastConfirmVersion: "",
       notification: true,

@@ -519,6 +519,31 @@ describe("stability check, assess a solution, reassess the solution, check all s
     expect((await getConfig).replace(/(\r\n|\n|\r)/gm, "")).toBe(expectedWCFConfig.replace(/(\r\n|\n|\r)/gm, ""));
   });
 
+  test("run through wcf on net 6.0", async () => {
+    const solutionFolderPath: string = path.join(
+      testSolutionPath(),
+      "wcftcpselfhost"
+    );
+    const solutionPath: string = path.join(
+      solutionFolderPath,
+      "WCFTCPSelfHost.sln"
+    );
+    await addSolution(app, solutionPath);
+    await app.client.refresh();
+    const results = await runThroughSolution(
+      solutionPath,
+      "inplace",
+      "netcoreapp3.1"
+    );
+    await validateHighLevelResults(results, [
+      "0 of 3",
+      "0 of 0",
+      "8 of 26",
+      "0",
+      "(11)",
+    ]);
+  });
+
   test("run through mvcmusicstore on net 6.0", async () => {
     const solutionFolderPath: string = path.join(
       testSolutionPath(),
