@@ -505,9 +505,9 @@ describe("tableSelectors utils apis", () => {
     const result = portedProjects(
       solutionDetails,
       { "/test/testsolution": Loaded(solutionDetails) },
-      { "/test/testsolution": { projectPath: "", steps: { projectFileStep: "complete" } } }
+      { "/test/testsolution": { projectPath: "/test/testproject", steps: { projectFileStep: "complete" } } }
     );
-    expect(result).toEqual(3);
+    expect(result).toEqual(1);
   });
 
   it("poretedProjects with loading projects", () => {
