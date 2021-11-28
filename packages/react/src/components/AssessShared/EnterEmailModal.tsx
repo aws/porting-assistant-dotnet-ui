@@ -59,7 +59,7 @@ export const EnterEmailModal: React.FC<Props> = React.memo(({ visible, onCancel,
             <Button variant="link" onClick={() => close()}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={() => saveAndClose()}>
+            <Button id="email-btn" variant="primary" onClick={() => saveAndClose()}>
               Save
             </Button>
           </SpaceBetween>
@@ -70,19 +70,20 @@ export const EnterEmailModal: React.FC<Props> = React.memo(({ visible, onCancel,
       <SpaceBetween direction="vertical" size="m">
         <Box>We require your e-mail to use this feature. Please enter your e-mail below.</Box>
         <FormField
+          id = "email-form"
           label="E-mail"
           description="We use this to contact you regarding any feedback or contributions to Porting Assistant."
           errorText={emailError}
         >
           <Input
+            id = "email-input"
             onChange={({ detail }) => setEmailValue(detail.value)}
             value={emailValue}
             placeholder="example@amazon.com"
           />
         </FormField>
         <Box>
-          This action saves your e-mail locally on your machine. Your e-mail is never sent to our team without your
-          permission.
+          This action saves your e-mail locally on your machine.
         </Box>
       </SpaceBetween>
     </Modal>

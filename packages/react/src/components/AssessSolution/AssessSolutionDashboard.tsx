@@ -181,6 +181,7 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             </Button>
 
             <Button
+              id = "feedback-btn"
               onClick={() => {
                 if (!isEmailSet()) {
                   console.log("No Email; Entering Email Modal");

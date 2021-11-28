@@ -63,7 +63,7 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
           await shell.openPath(
             path.join(
               path.dirname(app.getPath("exe")),
-              "LICENSE.electron"
+              "LICENSE.electron.txt"
           ));
         },
       },
@@ -73,7 +73,7 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
           await shell.openPath(
             path.join(
               path.dirname(app.getPath("exe")),
-              "LICENSES.chromium"
+              "LICENSES.chromium.html"
           ));
         },
       },
@@ -84,6 +84,12 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
           await shell.openExternal(
             "mailto:aws-porting-assistant-support@amazon.com"
           );
+        },
+      },
+      {
+        label: "View logs",
+        click: async () => {
+          await shell.openPath(path.dirname(localStore.path)+ "/logs/");
         },
       },
       {

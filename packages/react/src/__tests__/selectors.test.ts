@@ -768,7 +768,7 @@ describe("selectDashboardTableData", () => {
         locations: [{ sourcefilePath: "/test/testproject/get.ts", location: 13 }],
         replacement: "",
         isCompatible: "COMPATIBLE",
-        sourceFiles: new Set<string>(["get.ts"])
+        sourceFiles: new Set<string>(["/test/testproject/get.ts"])
       },
       {
         apiName: "abcd",
@@ -779,7 +779,7 @@ describe("selectDashboardTableData", () => {
         locations: [{ sourcefilePath: "/test/testproject/test.ts", location: 13 }],
         replacement: "test",
         isCompatible: "INCOMPATIBLE",
-        sourceFiles: new Set<string>(["test.ts"])
+        sourceFiles: new Set<string>(["/test/testproject/test.ts"])
       }
     ];
     expect(result).toEqual(expectResult);
@@ -942,7 +942,9 @@ describe("selectDashboardTableData", () => {
         sourceFiles: 1,
         replacement: "test upgrade",
         compatible: "COMPATIBLE",
-        deprecated: false
+        deprecated: false,
+        sourceFilesList: ["/test/testproject/get.ts"],
+        apiSet: new Set(["abcd"])
       }
     ];
     expect(result).toEqual(expectResult);

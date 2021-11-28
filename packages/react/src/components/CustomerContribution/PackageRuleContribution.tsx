@@ -115,6 +115,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
         });
         history.push(nextPagePath);
       } else {
+        window.electron.writeReactErrLog("PackageRuleContribution", "Failed to send rule contribution - PA UI", result.errorValue)
         setFlashbar({
           messageId: uuid(),
           type: "error",
@@ -237,7 +238,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
           <Button variant="link" onClick={onCancel}>
             Cancel
           </Button>
-          <Button loading={submitLoading} variant="primary" onClick={onSubmit}>
+          <Button id="rc-send-btn" loading={submitLoading} variant="primary" onClick={onSubmit}>
             Submit
           </Button>
         </SpaceBetween>
@@ -245,6 +246,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     >
       <ColumnLayout columns={4}>
         <FormField
+          id = "rc-package-name"
           label="Package name"
           description="Official name of the replacement package."
           stretch={true}
@@ -252,7 +254,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
         >
           <Input
             value={packageName}
-            onChange={({ detail }) => setPackageName(detail.value)}
+            onChange={({ detail }) => setPackageName(detail.value.trim())}
             placeholder="Example.Package.Name"
           />
         </FormField>
@@ -269,6 +271,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
             placeholder="1.0.0"
           />
           <Checkbox
+            id = "rc-version-check-box"
             onChange={({ detail }) => {
               setUseLatestPackageVersion(detail.checked);
               if (detail.checked) {
@@ -294,6 +297,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
           />
         </FormField>
         <FormField
+          id = "rc-comment"
           label={
             <span>
               Comments <i>- optional</i>

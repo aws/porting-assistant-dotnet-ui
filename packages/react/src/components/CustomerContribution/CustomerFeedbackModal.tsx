@@ -31,7 +31,7 @@ export interface CustomerFeedback {
 
 export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, setModalVisible, showEmailModal }) => {
   const [inputValue, setInputValue] = React.useState("");
-  const [categoryType, setCategory] = React.useState("");
+  const [categoryType, setCategory] = React.useState("Feedback Category");
   const [isCategoryEmpty, setIsCategoryEmpty] = React.useState(false);
   const [isValueEmpty, setIsValueEmpty] = React.useState(false);
   const dispatch = useDispatch();
@@ -51,15 +51,16 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
               Cancel
             </Button>
             <Button
+              id = "send-feedback-btn"
               variant="primary"
               onClick={async () => {
-                if (categoryType === "" || categoryType == null) {
+                if (categoryType === "Feedback Category" || categoryType == null) {
                   setIsCategoryEmpty(true);
                 }
                 if (inputValue === "" || inputValue == null) {
                   setIsValueEmpty(true);
                 }
-                if (!(categoryType === "" || categoryType == null) && !(inputValue === "" || inputValue == null)) {
+                if (!(categoryType === "Feedback Category" || categoryType == null) && !(inputValue === "" || inputValue == null)) {
                   const cur_date = new Date();
                   let date_str = cur_date.toISOString();
 
@@ -82,7 +83,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
                       })
                     );
                   } else {
-                    console.error("Failed to send customer feedback: ", response.errorValue);
+                    window.electron.writeReactErrLog("CustomerFeedbackModal", "Failed to send customer feedback - PA UI", response.errorValue)
                     dispatch(
                       pushCurrentMessageUpdate({
                         messageId: uuid(),
@@ -96,7 +97,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
 
                   setModalVisible(false);
                   setInputValue("");
-                  setCategory("");
+                  setCategory("Feedback Category");
                   setIsCategoryEmpty(false);
                   setIsValueEmpty(false);
                 }
@@ -130,6 +131,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
         <TextContent>All feedback will be sent to the .NET Porting Assistant team.</TextContent>
 
         <ButtonDropdown
+          id = "fb-category-selection"
           items={[
             { text: "General", id: "general" },
             { text: "Question", id: "question" },
@@ -138,22 +140,19 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
           onItemClick={e => {
             setIsCategoryEmpty(false);
             if (e.detail.id === "general") {
-              console.log("general");
-              setCategory("general");
+              setCategory("General");
             } else if (e.detail.id === "question") {
-              setCategory("question");
-              console.log("question");
+              setCategory("Question");
             } else {
-              setCategory("error");
-              console.log("error");
+              setCategory("Error");
               //enter additional logic for searching for any errors on screen to send to team
             }
           }}
         >
-          Feedback Category
+        {categoryType}
         </ButtonDropdown>
 
-        <FormField>
+        <FormField id = "fb-text">
           <Input
             value={inputValue}
             onChange={event => {
@@ -164,8 +163,10 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
           />
         </FormField>
       </SpaceBetween>
-      Email linked with this feedback is: {emailValue}
+      E-mail linked with this feedback is: {emailValue}
       <Button iconName="settings" variant="icon" onClick={() => showEmailModal()} />
+      <br/>
+      By clicking send you consent to sending your e-mail to the .NET Porting Assistant team. 
     </Modal>
   );
 });
