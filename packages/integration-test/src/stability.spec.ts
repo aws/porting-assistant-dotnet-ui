@@ -544,6 +544,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     ]);
   });
 
+	
   test("run through mvcmusicstore on net 6.0", async () => {
     const solutionFolderPath: string = path.join(
       testSolutionPath(),
