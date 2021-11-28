@@ -128,7 +128,7 @@ describe("getCompatibleApi", () => {
       projectFilePath: "/test/test",
       projectGuid: "xxxx",
       projectReferences: [{ referencePath: "/test/a" }, { referencePath: "/test/b" }],
-      targetFrameworks: ["netcoreapp3.1"],
+      targetFrameworks: ["net6.0"],
       packageReferences: [{ packageId: "testpackage", version: "3.0.0" }],
       isBuildFailed: false
     };
@@ -173,7 +173,7 @@ describe("getCompatibleApi", () => {
                   }
                 },
                 compatibilityResults: {
-                  "netcoreapp3.1": {
+                  "net6.0": {
                     compatibility: "INCOMPATIBLE",
                     compatibleVersions: ["3.0.0"]
                   }
@@ -239,7 +239,7 @@ describe("getCompatibleNuget.ts", () => {
     "testpackage-3.0.0": Loaded(packageAnalysisResultWithDate),
     "test-1.1.0": Loaded(packageAnalysisResult)
   };
-  jest.spyOn(window.electron, "getState").mockReturnValue("netcoreapp3.1");
+  jest.spyOn(window.electron, "getState").mockReturnValue("net6.0");
 
   it("should return 1 compatible and 1 incompatiible", () => {
     const result = getCompatibleNugetsAgg(nugetPackages, packageToNugetPackage);
@@ -358,13 +358,13 @@ describe("isPortingCompleted", () => {
     const result = isPortingCompleted("/test/soluton.sln", project, portingProjects);
     expect(result).toEqual(true);
   });
-  it("should return complete when targetFramework is netcoreapp3.1", () => {
+  it("should return complete when targetFramework is net6.0", () => {
     var project: Project = {
       projectName: "testProject",
       projectFilePath: "/test/testproject",
       projectGuid: "xxxx",
       projectReferences: [{ referencePath: "/test/a" }, { referencePath: "/test/b" }],
-      targetFrameworks: ["netcoreapp3.1"],
+      targetFrameworks: ["net6.0"],
       packageReferences: [{ packageId: "testpackage", version: "3.0.0" }],
       isBuildFailed: false
     };

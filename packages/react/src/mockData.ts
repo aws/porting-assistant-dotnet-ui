@@ -27,7 +27,7 @@ import { SolutionToPortingLocation, SolutionToPortingProjects } from "./store/re
 import { Failed, Loaded, Loading, Reloading } from "./utils/Loadable";
 
 // fake test data
-export const compatibleTargets: CompatibleTargets = "netcoreapp3.1";
+export const compatibleTargets: CompatibleTargets = "net6.0";
 export const projectPath = "/test/testproject";
 export const sourceFile = "/test/testproject/get.ts";
 
@@ -93,7 +93,7 @@ export const apiAnalysisResult1: ApiAnalysisResult = {
   codeEntityDetails: codeEntityDetail2,
   recommendations: { recommendedActions: [noRecommendations] },
   compatibilityResults: {
-    "netcoreapp3.1": {
+    "net6.0": {
       compatibility: "COMPATIBLE",
       compatibleVersions: ["3.0.0", "3.1.0"]
     }
@@ -104,7 +104,7 @@ export const apiAnalysisResult2: ApiAnalysisResult = {
   codeEntityDetails: codeEntityDetail1,
   recommendations: { recommendedActions: [apiRecommendations] },
   compatibilityResults: {
-    "netcoreapp3.1": {
+    "net6.0": {
       compatibility: "INCOMPATIBLE",
       compatibleVersions: ["3.0.0", "3.1.0"]
     }
@@ -115,7 +115,7 @@ export const apiAnalysisResult3: ApiAnalysisResult = {
   codeEntityDetails: {} as CodeEntityDetails,
   recommendations: { recommendedActions: [apiRecommendations] },
   compatibilityResults: {
-    "netcoreapp3.1": {
+    "net6.0": {
       compatibility: "INCOMPATIBLE",
       compatibleVersions: ["3.0.0", "3.1.0"]
     }
@@ -128,7 +128,7 @@ export const packageAnalysisResult: PackageAnalysisResult = {
     version: "1.1.0"
   },
   compatibilityResults: {
-    "netcoreapp3.1": {
+    "net6.0": {
       compatibility: "INCOMPATIBLE",
       compatibleVersions: ["1.1.0", "1.0.0"]
     }
@@ -142,7 +142,7 @@ export const packageAnalysisResultModify: PackageAnalysisResult = {
     version: "1.0.0"
   },
   compatibilityResults: {
-    "netcoreapp3.1": {
+    "net6.0": {
       compatibility: "COMPATIBLE",
       compatibleVersions: ["1.1.0", "1.0.0"]
     }
@@ -155,7 +155,7 @@ export const project: Project = {
   projectFilePath: "/test/testproject",
   projectGuid: "xxxx",
   projectReferences: [{ referencePath: "/test/a" }, { referencePath: "/test/b" }],
-  targetFrameworks: ["netcoreapp3.1"],
+  targetFrameworks: ["net6.0"],
   packageReferences: [{ packageId: "testpackage", version: "3.0.0" }],
   isBuildFailed: false
 };
@@ -242,7 +242,7 @@ export const packageAnalysisResultWithDate: PackageAnalysisResultWithDate = {
     version: "1.0.0"
   },
   compatibilityResults: {
-    "netcoreapp3.1": {
+    "net6.0": {
       compatibility: "COMPATIBLE",
       compatibleVersions: ["1.1.0", "1.0.0"]
     }
