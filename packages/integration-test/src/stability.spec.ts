@@ -610,7 +610,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const results = await runThroughSolution(
       solutionPath,
       "inplace",
-      "netcoreapp3.1"
+      "netcoreapp3.1",
+      false,
+      false
     );
     await validateHighLevelResults(results, [
       "0 of 3",
@@ -637,7 +639,9 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const results = await runThroughSolution(
       solutionPath,
       "inplace",
-      "net6.0"
+      "net6.0",
+      false,
+      false
     );
     await validateHighLevelResults(results, [
       "0 of 1",
