@@ -7,7 +7,7 @@ export const getCompatibleApi = (
   invocations: ProjectToApiAnalysis | null,
   projectPath?: string | null,
   sourceFile?: string | null,
-  target = "netcoreapp3.1"
+  target = "net6.0"
 ) => {
   if (invocations == null) {
     return { failureCount: 0, isApisLoading: true, values: [0, 0] };

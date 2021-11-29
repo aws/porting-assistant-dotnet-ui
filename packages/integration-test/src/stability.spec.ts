@@ -595,4 +595,60 @@ describe("stability check, assess a solution, reassess the solution, check all s
     expect((await getProgram)).toBe(expectedWCFProgram);
     expect((await getConfig).replace(/(\r\n|\n|\r)/gm, "")).toBe(expectedWCFConfig.replace(/(\r\n|\n|\r)/gm, ""));
   });
+
+  test("run through wcf on net 6.0", async () => {
+    const solutionFolderPath: string = path.join(
+      testSolutionPath(),
+      "wcftcpselfhost"
+    );
+    const solutionPath: string = path.join(
+      solutionFolderPath,
+      "WCFTCPSelfHost.sln"
+    );
+    await addSolution(app, solutionPath);
+    await app.client.refresh();
+    const results = await runThroughSolution(
+      solutionPath,
+      "inplace",
+      "netcoreapp3.1",
+      false,
+      false
+    );
+    await validateHighLevelResults(results, [
+      "0 of 3",
+      "0 of 0",
+      "8 of 26",
+      "0",
+      "(11)",
+    ]);
+  });
+
+  test("run through mvcmusicstore on net 6.0", async () => {
+    const solutionFolderPath: string = path.join(
+      testSolutionPath(),
+      "mvcmusicstore",
+      "sourceCode",
+      "mvcmusicstore"
+    );
+    const solutionPath: string = path.join(
+      solutionFolderPath,
+      "MvcMusicStore.sln"
+    );
+    await addSolution(app, solutionPath);
+    await app.client.refresh();
+    const results = await runThroughSolution(
+      solutionPath,
+      "inplace",
+      "net6.0",
+      false,
+      false
+    );
+    await validateHighLevelResults(results, [
+      "0 of 1",
+      "2 of 6",
+      "50 of 81",
+      "0",
+      "(21)",
+    ]);
+  });
 });

@@ -314,6 +314,7 @@ const shareCheckbox = (
 );
 
 export const targetFrameworkOptions: SelectProps.Option[] = [
+  { label: ".NET 6.0.0", value: "net6.0" },
   { label: ".NET 5.0.0", value: "net5.0" },
   { label: ".NET Core 3.1.0", value: "netcoreapp3.1" }
 ];
