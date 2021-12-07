@@ -12,6 +12,7 @@ import { InfoLink } from "../InfoLink";
 import { handlePortProjectSubmission } from "../PortShared/handlePortProjectSubmission";
 import { NugetPackageUpgrades } from "../PortShared/NugetPackageUpgrades";
 import { PortSettings } from "../PortShared/PortSettings";
+import { useWebFormsFlashbarMessage } from "../PortShared/useWebFormsFlashbarMessage";
 import { PortSolutionSummary } from "./PortSolutionSummary";
 
 interface Props {
@@ -30,9 +31,21 @@ const PortSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) 
   const portingLocation = usePortingAssistantSelector(state => selectPortingLocation(state, location.pathname));
   const targetFramework = window.electron.getState("targetFramework");
 
+  var hasWebForms = false;
+
+  for(var project of projects) {
+    if (project.featureType === "WebForms") {
+      hasWebForms = true;
+      break;
+    }
+  }
+
+  useWebFormsFlashbarMessage(hasWebForms);
+
   if (projects?.length === 0 || portingLocation == null) {
     return <Redirect to={`/solutions/${encodeURIComponent(solution.solutionFilePath)}`} />;
   }
+
   return (
     <form
       onSubmit={handleSubmit(async data => {
