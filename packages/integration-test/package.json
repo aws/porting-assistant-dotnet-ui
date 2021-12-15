@@ -18,6 +18,9 @@
     "build:download:win32": "tsc && build-scripts\\build.bat",
     "build:download:default": "build-scripts/build.sh",
     "test": "npx jest --runInBand",
+    "test:canary": "npx jest --runInBand --testPathPattern='canary.spec.ts'",
+    "test:netcore31": "npx jest --runInBand --testPathPattern='netcore31.spec.ts'",
+    "test:stability": "npx jest --runInBand --testPathPattern='stability.spec.ts'",
     "license-checker": "npx license-checker --production --exclude MIT,Apache-2.0,Unlicense,BSD-2-Clause,BSD-3-Clause",
     "generate-attribution": "npx generate-attribution"
   },
