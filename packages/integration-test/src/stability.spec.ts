@@ -37,7 +37,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await addSolution(app, solutionPath);
     await app.client.refresh();
     const results = await runner.runThroughSolution(solutionPath, "inplace", "net6.0", false, false);
-    await runner.validateHighLevelResults(results, ["0 of 3", "0 of 0", "8 of 26", "0", "(11)"]);
+    await runner.validateHighLevelResults(results, ["0 of 3", "0 of 0", "14 of 46", "0", "(11)"]);
   });
 
   test("run through mvcmusicstore on net 6.0", async () => {
@@ -46,6 +46,6 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await addSolution(app, solutionPath);
     await app.client.refresh();
     const results = await runner.runThroughSolution(solutionPath, "inplace", "net6.0", false, false);
-    await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "59 of 81", "0", "(21)"]);
+    await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "59 of 85", "0", "(21)"]);
   });
 });

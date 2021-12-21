@@ -51,7 +51,7 @@ describe("netcore 3.1 test suite", () => {
     await addSolution(app, solutionPath);
     await app.client.refresh();
     const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
-    await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "49 of 81", "0", "(21)"]);
+    await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "49 of 85", "0", "(21)"]);
     const controllerFolderPath: string = path.join(solutionFolderPath, "MvcMusicStore", "Controllers");
     const getAccountController = fs.readFile(path.join(controllerFolderPath, "AccountController.cs"), "utf8");
     const getStoreManagerController = fs.readFile(path.join(controllerFolderPath, "StoreManagerController.cs"), "utf8");
@@ -65,7 +65,7 @@ describe("netcore 3.1 test suite", () => {
     await addSolution(app, solutionPath);
     await app.client.refresh();
     const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
-    await runner.validateHighLevelResults(results, ["0 of 3", "0 of 0", "8 of 26", "0", "(11)"]);
+    await runner.validateHighLevelResults(results, ["0 of 3", "0 of 0", "14 of 46", "0", "(11)"]);
 
     const selfHostProjectPath: string = path.join(solutionFolderPath, "WCFTCPSelfHost");
 
@@ -92,7 +92,7 @@ describe("netcore 3.1 test suite", () => {
     await addSolution(app, solutionPath);
     await app.client.refresh();
     const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
-    await runner.validateHighLevelResults(results, ["0 of 40", "37 of 38", "447 of 1256", "0", "(1565)"]);
+    await runner.validateHighLevelResults(results, ["0 of 40", "37 of 38", "469 of 1357", "0", "(1565)"]);
 
     const getCatalogController = fs.readFile(
       path.join(solutionFolderPath, "Libraries", "Nop.Core", "Nop.Core.csproj"),
