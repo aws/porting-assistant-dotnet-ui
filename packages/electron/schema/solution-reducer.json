@@ -357,6 +357,9 @@
                       "projectType": {
                         "type": ["null", "string"]
                       },
+                      "featureType": {
+                        "type": ["null", "string"]
+                      },
                       "targetFrameworks": {
                         "anyOf": [{
                           "type": "array",
@@ -483,6 +486,9 @@
                         "type": ["null", "string"]
                       },
                       "projectType": {
+                        "type": ["null", "string"]
+                      },
+                      "featureType": {
                         "type": ["null", "string"]
                       },
                       "targetFrameworks": {

@@ -11,6 +11,7 @@ import { InfoLink } from "../InfoLink";
 import { handlePortProjectSubmission } from "../PortShared/handlePortProjectSubmission";
 import { NugetPackageUpgrades } from "../PortShared/NugetPackageUpgrades";
 import { PortSettings } from "../PortShared/PortSettings";
+import { useWebFormsFlashbarMessage } from "../PortShared/useWebFormsFlashbarMessage";
 
 interface Props {
   solution: SolutionDetails;
@@ -24,6 +25,10 @@ const PortProjectDashboardInternal: React.FC<Props> = ({ solution, project, port
   const history = useHistory();
   const dispatch = useDispatch();
   const targetFramework = window.electron.getState("targetFramework");
+
+  const hasWebForms = (project.featureType == "WebForms");
+
+  useWebFormsFlashbarMessage(hasWebForms);
 
   return (
     <form

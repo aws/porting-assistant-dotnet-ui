@@ -11,6 +11,7 @@ export interface Project {
   projectFilePath: string;
   projectGuid?: string | null;
   projectType?: string | null;
+  featureType?: string | null;
   targetFrameworks?: string[] | null;
   packageReferences?: NugetPackage[] | null;
   projectReferences?: ProjectReference[] | null;
