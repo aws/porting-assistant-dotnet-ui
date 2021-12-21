@@ -43,7 +43,7 @@ describe("canary test suite", () => {
     await addSolution(app, solutionPath);
     await app.client.refresh();
     const results = await runner.runThroughSolution(solutionPath, "inplace", "net6.0", false, false);
-    await runner.validateHighLevelResults(results, ["1 of 1", "2 of 13", "72 of 249", "0", "(21)"]);
+    await runner.validateHighLevelResults(results, ["1 of 1", "2 of 13", "75 of 268", "0", "(21)"]);
   });
 
   test("run through mvcmusicstore", async () => {
@@ -58,7 +58,7 @@ describe("canary test suite", () => {
     await addSolution(app, solutionPath);
     await app.client.refresh();
     const results = await runner.runThroughSolution(solutionPath, "inplace", "net6.0", true, true);
-    await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "59 of 81", "0", "(21)"]);
+    await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "59 of 85", "0", "(21)"]);
     const controllerFolderPath: string = path.join(solutionFolderPath, "MvcMusicStore", "Controllers");
     const getAccountController = fs.readFile(path.join(controllerFolderPath, "AccountController.cs"), "utf8");
     const getStoreManagerController = fs.readFile(path.join(controllerFolderPath, "StoreManagerController.cs"), "utf8");

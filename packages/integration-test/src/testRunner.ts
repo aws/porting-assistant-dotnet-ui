@@ -245,7 +245,9 @@ export class TestRunner {
   };
 
   portingProjectsCheck = async (selectLocation: string) => {
-    await (await this.app.client.$("#port-project-button")).click();
+    const portProjectButton = await this.app.client.$("#port-project-button");
+    await portProjectButton.scrollIntoView(false);
+    await portProjectButton.click();
     if (selectLocation == "inplace") {
       await (await this.app.client.$("#select-location-button")).click();
       await (await this.app.client.$(`div[data-value="inplace"]`)).click();
