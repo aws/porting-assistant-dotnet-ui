@@ -15,7 +15,7 @@ export const useWebFormsFlashbarMessage = (hasWebForms: boolean) => {
                 groupId: "port",
                 type: "info",
                 loading: false,
-                content: `WebForms Projects will be ported to Blazor.`,
+                content: `Web Forms Projects will be ported to Blazor.`,
                 dismissible: true
             })
         )
