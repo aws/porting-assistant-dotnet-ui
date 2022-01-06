@@ -33,6 +33,8 @@ const createClient = (
     | undefined = getProfileCredentials(profileName);
   const awsAccessKeyId: string | undefined = credentials?.accessKeyId;
   const awsSecretAccessKey: string | undefined = credentials?.secretAccessKey;
+  const awsSessionToken: string | undefined = credentials?.sessionToken;
+
   if (awsAccessKeyId === undefined || awsSecretAccessKey === undefined) {
     console.error(`Credentials are undefined for profile: ${profileName}`);
     return null;
@@ -42,6 +44,7 @@ const createClient = (
     region: region,
     accessKey: awsAccessKeyId,
     secretKey: awsSecretAccessKey,
+    sessionToken: awsSessionToken,
   });
   return apigClient;
 };
