@@ -109,7 +109,7 @@ namespace PortingAssistant.Telemetry.Utils
 
                     var response = await client.SendAsync(request);
 
-                    var strResp = await response.Content.ReadAsStringAsync();
+                     await response.Content.ReadAsStringAsync();
 
                     return response.IsSuccessStatusCode;
                 }
