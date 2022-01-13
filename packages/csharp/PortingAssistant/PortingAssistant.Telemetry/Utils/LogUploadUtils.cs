@@ -99,11 +99,17 @@ namespace PortingAssistant.Telemetry.Utils
                         Content = requestContent
                     };
 
+
+                    if (!string.IsNullOrEmpty(awsCredentials.GetCredentials().Token))
+                    {
+                        request.Headers.Add("x-amz-security-token", awsCredentials.GetCredentials().Token);
+                    }
+
                     request = await signer.Sign(request, "execute-api", region);
 
                     var response = await client.SendAsync(request);
 
-                    await response.Content.ReadAsStringAsync();
+                    var strResp = await response.Content.ReadAsStringAsync();
 
                     return response.IsSuccessStatusCode;
                 }
