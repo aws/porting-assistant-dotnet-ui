@@ -43,12 +43,11 @@ namespace PortingAssistant.Telemetry
             };
             var lastReadTokenFile = Path.Combine(teleConfig.LogsPath, "lastToken.json");
             string prefix = portingAssistantPortingConfiguration.PortingAssistantMetrics["Prefix"].ToString();
-            var client = new HttpClient();
-
+            
             var logTimer = new System.Timers.Timer();
             logTimer.Interval = Convert.ToDouble(portingAssistantPortingConfiguration.PortingAssistantMetrics["LogTimerInterval"].ToString());
 
-            logTimer.Elapsed += (source, e) => LogUploadUtils.OnTimedEvent(source, e, teleConfig, lastReadTokenFile, client, profile, prefix);
+            logTimer.Elapsed += (source, e) => LogUploadUtils.OnTimedEvent(source, e, teleConfig, lastReadTokenFile, profile, prefix);
 
             logTimer.AutoReset = true;
 
