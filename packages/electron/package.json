@@ -48,6 +48,11 @@
     "yargs": "^14.2.0"
   },
   "dependencies": {
+    "@aws-crypto/sha256-browser": "^2.0.1",
+    "@aws-sdk/node-http-handler": "^3.47.1",
+    "@aws-sdk/protocol-http": "^3.47.1",
+    "@aws-sdk/signature-v4": "^3.47.1",
+    "@aws-sdk/types": "^3.47.1",
     "@porting-assistant/react": "^1.6.4",
     "aws-sdk": "^2.570.0",
     "axios": "^0.18.0",
