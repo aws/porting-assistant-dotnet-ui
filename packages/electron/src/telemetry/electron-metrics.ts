@@ -146,13 +146,17 @@ async function createAndSignRequest(
   method: string,
   credentials: Credentials
 ) {
+  var invokeUrl = new URL(config.PortingAssistantMetrics.InvokeUrl);
+  if (invokeUrl.pathname !== "/") {
+    pathTemplate = invokeUrl.pathname + pathTemplate;
+  }
   var request = new HttpRequest({
     body: JSON.stringify(body),
     headers: {
       "Content-Type": "application/json",
-      host: config.PortingAssistantMetrics.InvokeUrl.replace("https://", ""),
+      host: invokeUrl.host,
     },
-    hostname: config.PortingAssistantMetrics.InvokeUrl.replace("https://", ""),
+    hostname: invokeUrl.hostname,
     method: method,
     path: pathTemplate,
   });
