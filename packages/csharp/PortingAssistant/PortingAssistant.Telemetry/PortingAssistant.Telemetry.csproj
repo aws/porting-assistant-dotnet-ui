@@ -12,6 +12,6 @@
     <PackageReference Include="PortingAssistant.Client.Telemetry" Version="1.12.8-alpha-g262e0902bb" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
     <PackageReference Include="System.Web.Helpers.Crypto" Version="3.2.3" />
-    <PackageReference Include="AWSSDK.Core" Version="3.7.3.11" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.6.2" />
   </ItemGroup>
 </Project>
