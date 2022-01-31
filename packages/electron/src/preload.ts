@@ -3,7 +3,6 @@ import path from "path";
 import fs from "fs";
 import process from "process";
 import { invokeBackend, listenBackend } from "./preload-backend";
-import { copyDirectory } from "./preload-porting";
 import { IniLoader } from "aws-sdk/global";
 import { writeProfile } from "./setup";
 import jsZip from "jszip";
@@ -132,12 +131,12 @@ contextBridge.exposeInMainWorld("backend", {
 });
 
 contextBridge.exposeInMainWorld("porting", {
-  portingStores: {},
-  copyDirectory: (solutionPath: string, destinationPath: string) =>
-    copyDirectory(solutionPath, destinationPath),
-  getConfig: () => portingStore.get("solutions"),
-  setConfig: (data: any) => portingStore.set("solutions", data),
-  applyPortingProjectFileChanges: (
+    portingStores: {},
+    copyDirectory: (solutionPath: string, destinationPath: string) =>
+        invokeBackend("copyDirectory",  solutionPath, destinationPath),
+    getConfig: () => portingStore.get("solutions"),
+    setConfig: (data: any) => portingStore.set("solutions", data),
+    applyPortingProjectFileChanges: (
     projects: Project[],
     solutionPath: string,
     targetFramework: string,
