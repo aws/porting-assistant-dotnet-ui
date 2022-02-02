@@ -44,7 +44,7 @@ namespace PortingAssistant.Common.Utils
 
                     if (!IsSubPathOf(slnDirPath, projPath))
                     {
-                        string relativeSrc = Path.GetRelativePath(solutionPath, projPath);
+                        string relativeSrc = Path.GetRelativePath(slnDirPath, projPath);
                         string projName = Path.GetFileName(project);
                         string relDestPath = Path.Combine(destinationPath, relativeSrc);
                         CopyFolderToTemp(projName, projPath, relDestPath);
