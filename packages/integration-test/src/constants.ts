@@ -75,3 +75,59 @@ export const expectedWCFConfig: string = `<?xml version="1.0" encoding="utf-16" 
     </services>
   </system.serviceModel>
 </configuration>`;
+
+
+export const expectedWebFormsProgramcs: string = `
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+
+namespace eShopLegacyWebForms
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            CreateHostBuilder(args).Build().Run();
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
+    }
+}`
+
+
+export const expectedMVCAppWithIISConfigProgramcs: string = `
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace MVCAppWithIISConfig
+{
+
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            CreateHostBuilder(args).Build().Run();
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+webBuilder.UseKestrel(options =>{options.Limits.MaxRequestBodySize = 52428800;});                });
+    }
+
+
+}`
