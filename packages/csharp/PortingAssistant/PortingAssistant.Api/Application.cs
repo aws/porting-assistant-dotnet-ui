@@ -71,6 +71,21 @@ namespace PortingAssistant.Api
                 return assessmentService.AnalyzeSolution(request);
             });
 
+
+            _connection.On<CopyDirectoryRequest>("copyDirectory", request =>
+             {
+                 try
+                 {
+                     PortingAssistantUtils.CopyDirectory(request.solutionPath, request.destinationPath);
+                 }
+                 catch (Exception ex)
+                 {
+                     _logger.LogError(ex, "Failed to copy the solution to new location");
+                     throw;
+                 }
+
+             });
+
             _connection.On<ProjectFilePortingRequest, Response<List<PortingResult>, List<PortingResult>>>("applyPortingProjectFileChanges", request =>
             {
                 var portingService = _services.GetRequiredService<IPortingService>();
@@ -111,6 +126,8 @@ namespace PortingAssistant.Api
                     };
                 }
             });
+
+
 
             _connection.On<string, bool>("checkInternetAccess", request =>
             {
