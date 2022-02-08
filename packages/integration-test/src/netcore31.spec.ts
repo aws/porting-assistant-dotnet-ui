@@ -92,7 +92,7 @@ describe("netcore 3.1 test suite", () => {
       await addSolution(app, solutionPath);
       await app.client.refresh();
       const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
-      await runner.validateHighLevelResults(results, ["0 of 40", "37 of 38", "469 of 1357", "0", "(1565)"]);
+      await runner.validateHighLevelResults(results, ["0 of 40", "37 of 38", "471 of 1357", "0", "(1565)"]);
 
       const getCatalogController = fs.readFile(
         path.join(solutionFolderPath, "Libraries", "Nop.Core", "Nop.Core.csproj"),
