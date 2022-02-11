@@ -11,6 +11,7 @@ namespace PortingAssistant.Telemetry.Model
     
     public class MetricsBase
     {
+        public static string Version { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]
         public MetricsType MetricsType { get; set; }
         public string RunId { get; set; }
