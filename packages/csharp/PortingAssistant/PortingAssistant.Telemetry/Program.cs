@@ -25,7 +25,6 @@ namespace PortingAssistant.Telemetry
             var config = args[0];
             var profile = args[1];
             var userData = args[2];
-            PortingAssistantAppVersion.version = args[3];
 
             Connection _connection = new ConnectionBuilder().WithLogging().Build();
             var portingAssistantPortingConfiguration = System.Text.Json.JsonSerializer.Deserialize<PortingAssistantPortingConfiguration>(File.ReadAllText(config));
@@ -61,12 +60,6 @@ namespace PortingAssistant.Telemetry
             public PortingAssistantConfiguration PortingAssistantConfiguration { get; set; }
             public Dictionary<string, object> PortingAssistantMetrics { get; set; }
         }
-
-    }
-
-    public class PortingAssistantAppVersion
-    {
-        public static string version { get; set; }
 
     }
 

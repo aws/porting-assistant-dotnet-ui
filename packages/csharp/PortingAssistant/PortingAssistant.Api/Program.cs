@@ -32,6 +32,7 @@ namespace PortingAssistant.Api
             {
                 // Args[3] is version number if not --console
                 outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] (" + args[3] + ") {SourceContext}: {Message:lj}{NewLine}{Exception}";
+                Telemetry.Model.MetricsBase.Version = args[3];
             }
 
             Serilog.Formatting.Display.MessageTemplateTextFormatter tf =

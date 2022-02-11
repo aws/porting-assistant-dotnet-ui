@@ -61,7 +61,7 @@ namespace PortingAssistant.Common.Utils
                 SolutionGuid = solutionAnalysisResult.SolutionDetails.SolutionGuid,
                 RepositoryUrl = solutionAnalysisResult.SolutionDetails.RepositoryUrl,
                 AnalysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds,
-                PortingAssistantVersion = PortingAssistant.Telemetry.PortingAssistantAppVersion.version
+                PortingAssistantVersion = MetricsBase.Version
             };
         }
         public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult)
@@ -80,7 +80,7 @@ namespace PortingAssistant.Common.Utils
                 NumReferences = projectAnalysisResult.ProjectReferences.Count,
                 IsBuildFailed = projectAnalysisResult.IsBuildFailed,
                 CompatibilityResult = projectAnalysisResult.ProjectCompatibilityResult,
-                PortingAssistantVersion = PortingAssistant.Telemetry.PortingAssistantAppVersion.version
+                PortingAssistantVersion = MetricsBase.Version
             };
         }
 
@@ -96,7 +96,7 @@ namespace PortingAssistant.Common.Utils
                 PackageName = result.Result.PackageVersionPair.PackageId,
                 PackageVersion = result.Result.PackageVersionPair.Version,
                 Compatibility = result.Result.CompatibilityResults[tgtFramework].Compatibility,
-                PortingAssistantVersion = PortingAssistant.Telemetry.PortingAssistantAppVersion.version
+                PortingAssistantVersion = MetricsBase.Version
             };
         }
 
@@ -118,7 +118,7 @@ namespace PortingAssistant.Common.Utils
                 ApiType = api.CodeEntityDetails.CodeEntityType.ToString(),
                 HasActions = api.Recommendations.RecommendedActions.Any(action => action.RecommendedActionType != RecommendedActionType.NoRecommendation),
                 ApiCounts = count,
-                PortingAssistantVersion = PortingAssistant.Telemetry.PortingAssistantAppVersion.version
+                PortingAssistantVersion = MetricsBase.Version
             };
         }
     }
