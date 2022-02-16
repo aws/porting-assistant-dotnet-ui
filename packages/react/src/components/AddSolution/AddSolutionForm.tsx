@@ -7,8 +7,10 @@ import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
 import { analyzeSolution } from "../../store/actions/backend";
+import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
+import { logError } from "../../utils/LogError";
 import { InfoLink } from "../InfoLink";
 import { UploadSolutionField } from "./UploadSolutionField";
 
@@ -23,26 +25,40 @@ const ImportSolutionInternal: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit(async data => {
-        await addSolution(data);
-        const targetFramework = getTargetFramework();
-        const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
-        if (haveInternet) {
+        if (await checkIfSolutionContainsVBproject(data.solutionFilename)) {
           dispatch(
-            analyzeSolution.request({
-              solutionPath: data.solutionFilename,
-              runId: uuid(),
-              triggerType: "InitialRequest",
-              settings: {
-                ignoredProjects: [],
-                targetFramework: targetFramework,
-                continiousEnabled: false,
-                actionsOnly: false,
-                compatibleOnly: false
-              },
-              force: true
+            pushCurrentMessageUpdate({
+                messageId: uuid(),
+                groupId: "addsolution",
+                type: "error",
+                loading: false,
+                content: `The selected solution contains .vbproj files. Porting Assistant currently does not support Visual Basic projects.`,
+                dismissible: true
             })
-          );
-          history.push("/solutions");
+        );
+        }
+        else {
+          await addSolution(data);
+          const targetFramework = getTargetFramework();
+          const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
+          if (haveInternet) {
+            dispatch(
+              analyzeSolution.request({
+                solutionPath: data.solutionFilename,
+                runId: uuid(),
+                triggerType: "InitialRequest",
+                settings: {
+                  ignoredProjects: [],
+                  targetFramework: targetFramework,
+                  continiousEnabled: false,
+                  actionsOnly: false,
+                  compatibleOnly: false
+                },
+                force: true
+              })
+            );
+            history.push("/solutions");
+          }
         }
       })}
     >
@@ -148,5 +164,15 @@ const addSolution = async (data: Record<string, any>) => {
   paths[data.solutionFilename] = { solutionPath: data.solutionFilename };
   window.electron.saveState("solutions", paths);
 };
+
+const checkIfSolutionContainsVBproject = async (solutionFilename: string) => {
+  var slnFileContents = "";
+  try {
+    slnFileContents = await window.backend.getFileContents(solutionFilename);    
+  } catch (error) {
+    logError("AddSolutionForm.tsx", "Unable to read solution file.", error);
+  }
+  return slnFileContents.includes(".vbproj");
+}
 
 export const ImportSolution = React.memo(ImportSolutionInternal);
