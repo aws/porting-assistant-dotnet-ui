@@ -1,6 +1,9 @@
 import os from "os";
 import path from "path";
 import fs, { promises as fsPromises } from "fs";
+import readline from "readline";
+import events from "events";
+import { app } from "electron";
 
 interface Credentials {
   aws_access_key_id: string;
@@ -41,4 +44,29 @@ function getHomeDir() {
     return os.homedir();
   }
   throw new Error("Cannot load credentials, HOME path not set");
+}
+
+export function getTodaysDate(): string {
+  // we want a local datetime in format YYYYmmdd, en-CA happens to work
+  return new Date().toLocaleDateString("en-CA").slice(0, 10).replace(/-/g, "");
+}
+
+export async function searchTextInFile(
+  file: string,
+  targetText: string
+): Promise<boolean> {
+  let targetTextFound = false;
+  const rl = readline.createInterface({
+    input: fs.createReadStream(file),
+    crlfDelay: Infinity,
+  });
+  rl.on("line", (line) => {
+    if (line.includes(targetText)) {
+      targetTextFound = true;
+      rl.close();
+      rl.removeAllListeners();
+    }
+  });
+  await events.once(rl, "close");
+  return targetTextFound;
 }

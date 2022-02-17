@@ -4,7 +4,7 @@ import fs from "fs";
 import process from "process";
 import { invokeBackend, listenBackend } from "./preload-backend";
 import { IniLoader } from "aws-sdk/global";
-import { writeProfile } from "./setup";
+import { writeProfile, getTodaysDate, searchTextInFile } from "./setup";
 import jsZip from "jszip";
 import {
   localStore,
@@ -16,8 +16,6 @@ import {
   Project,
   VersionPair,
 } from "@porting-assistant/react/src/models/project";
-import axios from "axios";
-import isDev from "electron-is-dev";
 
 contextBridge.exposeInMainWorld("electron", {
   openExternalUrl: (url: string) => shell.openExternal(url),
@@ -96,10 +94,43 @@ contextBridge.exposeInMainWorld("electron", {
   getLatestVersion: () => invokeBackend("getLatestVersion"),
   getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
-  writeReactErrLog: (source: any, message: any, response: any) => invokeBackend("writeReactErrLog", source, message, response),
+  writeReactErrLog: (source: any, message: any, response: any) =>
+    invokeBackend("writeReactErrLog", source, message, response),
   getAssessmentLog: () => {
-    const dateString = new Date().toLocaleDateString("en-CA").slice(0,10).replace(/-/g,"");
-    return path.join(remote.app.getPath("userData"), "logs", `portingAssistant-assessment-${dateString}.log`);
+    return path.join(
+      remote.app.getPath("userData"),
+      "logs",
+      `portingAssistant-assessment-${getTodaysDate()}.log`
+    );
+  },
+  checkCommonErrors: async (): Promise<
+    { error: string; message: string }[]
+  > => {
+    const commonErrors: { error: string; message: string }[] = [
+      { error: "UnauthorizedAccessException", message: "Message Text" },
+      { error: "Missing MSBuild Path", message: "Message Text" },
+      {
+        error: "Duplicate packages in packages.config",
+        message: "Message Text",
+      },
+    ];
+    let errorsFound = [];
+    try {
+      const todaysBackendLog = path.join(
+        remote.app.getPath("userData"),
+        "logs",
+        `portingAssistant-backend-${getTodaysDate()}.log`
+      );
+      for (const e of commonErrors) {
+        if (await searchTextInFile(todaysBackendLog, e.error)) {
+          errorsFound.push(e);
+        }
+      }
+      return errorsFound;
+    } catch (err) {
+      console.error(err);
+      return errorsFound;
+    }
   },
 });
 

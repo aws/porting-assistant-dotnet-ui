@@ -14,6 +14,7 @@ import { isFailed, isLoaded } from "../../utils/Loadable";
 import { nugetPackageKey } from "../../utils/NugetPackageKey";
 import {
   analyzeSolution,
+  checkCommonErrors,
   exportSolution,
   getApiAnalysis,
   init,
@@ -149,6 +150,26 @@ function* handlePing() {
   );
 }
 
+function* handleCheckCommonErrors() {
+  try {
+    const errorsFound: { error: string; message: string }[] = yield window.electron.checkCommonErrors();
+    for (const error of errorsFound) {
+      yield put(
+        pushCurrentMessageUpdate({
+          messageId: uuid(),
+          groupId: "common errors",
+          type: "warning",
+          header: error.error,
+          content: error.message,
+          dismissible: true
+        })
+      );
+    }
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 function* handleAnalyzeSolution(action: ReturnType<typeof analyzeSolution.request>) {
   yield put(ping());
   try {
@@ -205,6 +226,7 @@ function* handleAnalyzeSolution(action: ReturnType<typeof analyzeSolution.reques
   } catch (e) {
     yield put(analyzeSolution.failure({ solutionPath: action.payload.solutionPath, error: e }));
   }
+  yield put(checkCommonErrors());
 }
 
 function* handleGetFileContents(action: ReturnType<typeof getFileContents.request>) {
@@ -375,6 +397,10 @@ function* watchOpenInIDE() {
   yield takeEvery(getType(openSolutionInIDE), handleOpenSolutionInIDE);
 }
 
+function* watchCheckCommonErrors() {
+  yield takeEvery(getType(checkCommonErrors), handleCheckCommonErrors);
+}
+
 export default function* backendSaga() {
   yield all([
     watchInit(),
@@ -385,6 +411,7 @@ export default function* backendSaga() {
     watchExportSolution(),
     watchRemoveSolution(),
     watchOpenInIDE(),
-    watchPing()
+    watchPing(),
+    watchCheckCommonErrors()
   ]);
 }
