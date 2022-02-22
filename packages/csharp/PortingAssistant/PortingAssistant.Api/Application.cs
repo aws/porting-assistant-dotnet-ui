@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace PortingAssistant.Api
 {
@@ -127,17 +128,22 @@ namespace PortingAssistant.Api
                 }
             });
 
-
-
-            _connection.On<string, bool>("checkInternetAccess", request =>
-            {
-                var httpService = _services.GetRequiredService<IHttpService>();
-                var file1 = httpService.DownloadS3FileAsync("newtonsoft.json.json.gz");
-                var file2 = httpService.DownloadS3FileAsync("giger.json.gz");
-                var file3 = httpService.DownloadS3FileAsync("github.json.gz");
-                Task.WhenAll(file1, file2, file3).Wait();
-                return file1.IsCompletedSuccessfully || file2.IsCompletedSuccessfully || file3.IsCompletedSuccessfully;
-            });
+            _connection.On<string, bool>("checkInternetAccess",
+                request =>
+                {
+                    var httpService = _services.GetRequiredService<IHttpService>();
+                    string[] files =
+                    {
+                        "newtonsoft.json.json.gz",
+                        "github.json.gz",
+                        "giger.json.gz",
+                    };
+                    Task<bool>[] tasks = files.Select((file) =>
+                            HttpServiceUtils.TryGetFile(httpService, file))
+                        .ToArray();
+                    Task.WhenAll(tasks).Wait();
+                    return tasks.Any((task) => task.Result);
+                });
 
             _connection.On<CustomerFeedbackRequest, Response<bool, string>>("sendCustomerFeedback", request =>
             {
