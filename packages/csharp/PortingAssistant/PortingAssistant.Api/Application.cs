@@ -138,11 +138,7 @@ namespace PortingAssistant.Api
                         "github.json.gz",
                         "giger.json.gz",
                     };
-                    Task<bool>[] tasks = files.Select((file) =>
-                            HttpServiceUtils.TryGetFile(httpService, file))
-                        .ToArray();
-                    Task.WhenAll(tasks).Wait();
-                    return tasks.Any((task) => task.Result);
+                    return HttpServiceUtils.CheckInternetAccess(httpService, files);
                 });
 
             _connection.On<CustomerFeedbackRequest, Response<bool, string>>("sendCustomerFeedback", request =>
