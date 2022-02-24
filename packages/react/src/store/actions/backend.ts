@@ -56,4 +56,4 @@ export const setProfileSet = createAction("setProfileSet")<boolean>();
 
 export const ping = createAction("ping")<void>();
 
-export const checkCommonErrors = createAction("checkCommonErrors")<void>();
+export const checkCommonErrors = createAction("checkCommonErrors")<Date>();

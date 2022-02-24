@@ -44,7 +44,7 @@ export interface Electron {
   writeReactErrLog: (source: any, message: any, response: any) => void;
   getAssessmentLog: () => string;
   checkInternetAccess: () => Promise<boolean>;
-  checkCommonErrors: () => Promise<string>;
+  checkCommonErrors: (start: Date) => Promise<{ error: string; message: string }[]>;
 }
 
 export interface Backend {
