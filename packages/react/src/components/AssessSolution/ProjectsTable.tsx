@@ -101,7 +101,7 @@ const ProjectsTableInternal: React.FC<Props> = ({ solution }) => {
                     <Box variant="strong">Name</Box> - Name of the project.
                   </Box>
                   <Box variant="p">
-                    <Box variant="strong">Project framework</Box> - Source framework of the project.
+                    <Box variant="strong">Project framework</Box> - Target framework of the project.
                   </Box>
                   <Box variant="p">
                     <Box variant="strong">Referenced projects</Box> - Number of other projects that are referenced by
