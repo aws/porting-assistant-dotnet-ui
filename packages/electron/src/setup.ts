@@ -1,9 +1,6 @@
 import os from "os";
 import path from "path";
 import fs, { promises as fsPromises } from "fs";
-import readline from "readline";
-import events from "events";
-import { app } from "electron";
 
 interface Credentials {
   aws_access_key_id: string;
@@ -51,39 +48,3 @@ export function getTodaysDate(): string {
   return new Date().toLocaleDateString("en-CA").slice(0, 10).replace(/-/g, "");
 }
 
-function lineIsFromRecentRun(start: Date, line: string): boolean {
-  var startIndex = line.indexOf("[");
-  var endIndex = line.indexOf("]");
-  var timeStamp = new Date(line.substring(startIndex + 1, endIndex - 4));
-  return timeStamp > start;
-}
-
-export async function searchTextInFile(
-  file: string,
-  targetText: string,
-  start: Date
-): Promise<string> {
-  let targetTextLine = "";
-  const rl = readline.createInterface({
-    input: fs.createReadStream(file),
-    crlfDelay: Infinity,
-  });
-  rl.on("line", (line) => {
-    if (lineIsFromRecentRun(start, line)) {
-      if (line.includes(targetText)) {
-        targetTextLine = line;
-        rl.close();
-        rl.removeAllListeners();
-      }
-    }
-  });
-  await events.once(rl, "close");
-  return targetTextLine;
-}
-
-export function findNoAccessFile(line: string): string {
-  // space intention to avoid getting index of "AccessException"
-  const start = line.search("Access ");
-  const end = line.search("denied.") + 6;
-  return line.substring(start, end);
-}

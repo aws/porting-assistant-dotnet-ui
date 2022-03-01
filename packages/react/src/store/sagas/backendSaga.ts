@@ -153,7 +153,10 @@ function* handlePing() {
 function* handleCheckCommonErrors(action: ReturnType<typeof checkCommonErrors>) {
   const start: Date = action.payload;
   try {
-    const errorsFound: { error: string; message: string }[] = yield window.electron.checkCommonErrors(start);
+    const errorsFound: { error: string; message: string }[] = yield window.electron.checkCommonErrors(
+      start,
+      window.electron.getBackendLog()
+    );
     for (const error of errorsFound) {
       yield put(
         pushCurrentMessageUpdate({

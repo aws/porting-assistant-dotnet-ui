@@ -4,12 +4,7 @@ import fs from "fs";
 import process from "process";
 import { invokeBackend, listenBackend } from "./preload-backend";
 import { IniLoader } from "aws-sdk/global";
-import {
-  writeProfile,
-  getTodaysDate,
-  searchTextInFile,
-  findNoAccessFile,
-} from "./setup";
+import { writeProfile, getTodaysDate } from "./setup";
 import jsZip from "jszip";
 import {
   localStore,
@@ -21,7 +16,7 @@ import {
   Project,
   VersionPair,
 } from "@porting-assistant/react/src/models/project";
-import { commonErrors } from "./constants";
+import { checkCommonErrors } from "./utils/checkCommonErrors";
 
 contextBridge.exposeInMainWorld("electron", {
   openExternalUrl: (url: string) => shell.openExternal(url),
@@ -109,34 +104,18 @@ contextBridge.exposeInMainWorld("electron", {
       `portingAssistant-assessment-${getTodaysDate()}.log`
     );
   },
+  getBackendLog: () => {
+    return path.join(
+      remote.app.getPath("userData"),
+      "logs",
+      `portingAssistant-backend-${getTodaysDate()}.log`
+    );
+  },
   checkCommonErrors: async (
-    start: Date
+    start: Date,
+    log: string
   ): Promise<{ error: string; message: string }[]> => {
-    let errorsFound = [];
-    try {
-      const todaysBackendLog = path.join(
-        remote.app.getPath("userData"),
-        "logs",
-        `portingAssistant-backend-${getTodaysDate()}.log`
-      );
-      for (const e of commonErrors) {
-        const line = await searchTextInFile(
-          todaysBackendLog,
-          e.searchText,
-          start
-        );
-        if (line !== "") {
-          if (e.searchText === "UnauthorizedAccessException") {
-            e.message = e.message.replace("{}", findNoAccessFile(line));
-          }
-          errorsFound.push(e);
-        }
-      }
-      return errorsFound;
-    } catch (err) {
-      console.error(err);
-      return errorsFound;
-    }
+    return checkCommonErrors(start, log);
   },
 });
 
