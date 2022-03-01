@@ -26,18 +26,28 @@ const sendRequest = async (
 ): Promise<boolean> => {
   const metricsEnabled = localStore.get("share");
   const profileName = newProfile || localStore.get("profile");
-  const credentials: AWS.SharedIniFileCredentials | undefined = getProfileCredentials(profileName);
+  const credentials: AWS.SharedIniFileCredentials | undefined =
+    getProfileCredentials(profileName);
 
-  if (!metricsEnabled) {
+  // new profile verification just needs to ping endpoint so bypass flag
+  if (!metricsEnabled && !newProfile) {
     return true;
   }
-  if (credentials?.accessKeyId === undefined || credentials?.secretAccessKey === undefined) {
+  if (
+    credentials?.accessKeyId === undefined ||
+    credentials?.secretAccessKey === undefined
+  ) {
     console.error(`Credentials are undefined for profile: ${profileName}`);
     return false;
   }
 
   try {
-    var signedRequest = await createAndSignRequest(body, pathTemplate, method, credentials);
+    var signedRequest = await createAndSignRequest(
+      body,
+      pathTemplate,
+      method,
+      credentials
+    );
     var client = new NodeHttpHandler();
     var { response } = await client.handle(signedRequest as HttpRequest);
     logResponse(response);
