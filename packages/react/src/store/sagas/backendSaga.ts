@@ -153,23 +153,22 @@ function* handlePing() {
 function* handleCheckCommonErrors(action: ReturnType<typeof checkCommonErrors>) {
   const start: Date = action.payload;
   try {
-    const errorsFound: { error: string; message: string }[] = yield window.electron.checkCommonErrors(
-      start,
-      window.electron.getBackendLog()
-    );
-    for (const error of errorsFound) {
-      yield put(
-        pushCurrentMessageUpdate({
-          messageId: uuid(),
-          groupId: "common errors",
-          type: "warning",
-          header: error.error,
-          content: error.message,
-          dismissible: true
-        })
-      );
-    }
-  } catch (e) {
+        const errorsFound: { error: string; message: string }[] = yield window.electron.checkCommonErrors(
+          start,
+          window.electron.getBackendLog()
+        );
+        for (const error of errorsFound) {
+          yield put(
+            pushCurrentMessageUpdate({
+              messageId: uuid(),
+              type: "warning",
+              header: error.error,
+              content: error.message,
+              dismissible: true
+            })
+          );
+        }
+      } catch (e) {
     console.log(e);
   }
 }
