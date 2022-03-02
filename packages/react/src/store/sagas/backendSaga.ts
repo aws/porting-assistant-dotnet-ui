@@ -14,6 +14,7 @@ import { isFailed, isLoaded } from "../../utils/Loadable";
 import { nugetPackageKey } from "../../utils/NugetPackageKey";
 import {
   analyzeSolution,
+  checkCommonErrors,
   exportSolution,
   getApiAnalysis,
   init,
@@ -149,8 +150,32 @@ function* handlePing() {
   );
 }
 
+function* handleCheckCommonErrors(action: ReturnType<typeof checkCommonErrors>) {
+  const start: Date = action.payload;
+  try {
+        const errorsFound: { error: string; message: string }[] = yield window.electron.checkCommonErrors(
+          start,
+          window.electron.getBackendLog()
+        );
+        for (const error of errorsFound) {
+          yield put(
+            pushCurrentMessageUpdate({
+              messageId: uuid(),
+              type: "warning",
+              header: error.error,
+              content: error.message,
+              dismissible: true
+            })
+          );
+        }
+      } catch (e) {
+    console.log(e);
+  }
+}
+
 function* handleAnalyzeSolution(action: ReturnType<typeof analyzeSolution.request>) {
   yield put(ping());
+  const start = new Date();
   try {
     const currentSolutionPath = action.payload.solutionPath;
     const solutionToSolutionDetails: ReturnType<typeof selectSolutionToSolutionDetails> = yield select(
@@ -205,6 +230,7 @@ function* handleAnalyzeSolution(action: ReturnType<typeof analyzeSolution.reques
   } catch (e) {
     yield put(analyzeSolution.failure({ solutionPath: action.payload.solutionPath, error: e }));
   }
+  yield put(checkCommonErrors(start));
 }
 
 function* handleGetFileContents(action: ReturnType<typeof getFileContents.request>) {
@@ -375,6 +401,10 @@ function* watchOpenInIDE() {
   yield takeEvery(getType(openSolutionInIDE), handleOpenSolutionInIDE);
 }
 
+function* watchCheckCommonErrors() {
+  yield takeEvery(getType(checkCommonErrors), handleCheckCommonErrors);
+}
+
 export default function* backendSaga() {
   yield all([
     watchInit(),
@@ -385,6 +415,7 @@ export default function* backendSaga() {
     watchExportSolution(),
     watchRemoveSolution(),
     watchOpenInIDE(),
-    watchPing()
+    watchPing(),
+    watchCheckCommonErrors()
   ]);
 }

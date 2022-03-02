@@ -42,3 +42,9 @@ function getHomeDir() {
   }
   throw new Error("Cannot load credentials, HOME path not set");
 }
+
+export function getTodaysDate(): string {
+  // we want a local datetime in format YYYYmmdd, en-CA happens to work
+  return new Date().toLocaleDateString("en-CA").slice(0, 10).replace(/-/g, "");
+}
+

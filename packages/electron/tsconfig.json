@@ -17,7 +17,7 @@
     "sourceMap": true,
     "noEmit": false,
     "outDir": "ts-dist",
-    "typeRoots": ["src/types"]
+    "types": ["@types/jest", "node"],
   },
   "include": ["src"]
 }

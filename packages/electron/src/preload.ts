@@ -4,7 +4,7 @@ import fs from "fs";
 import process from "process";
 import { invokeBackend, listenBackend } from "./preload-backend";
 import { IniLoader } from "aws-sdk/global";
-import { writeProfile } from "./setup";
+import { writeProfile, getTodaysDate } from "./setup";
 import jsZip from "jszip";
 import {
   localStore,
@@ -16,8 +16,7 @@ import {
   Project,
   VersionPair,
 } from "@porting-assistant/react/src/models/project";
-import axios from "axios";
-import isDev from "electron-is-dev";
+import { checkCommonErrors } from "./utils/checkCommonErrors";
 
 contextBridge.exposeInMainWorld("electron", {
   openExternalUrl: (url: string) => shell.openExternal(url),
@@ -96,10 +95,27 @@ contextBridge.exposeInMainWorld("electron", {
   getLatestVersion: () => invokeBackend("getLatestVersion"),
   getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
-  writeReactErrLog: (source: any, message: any, response: any) => invokeBackend("writeReactErrLog", source, message, response),
+  writeReactErrLog: (source: any, message: any, response: any) =>
+    invokeBackend("writeReactErrLog", source, message, response),
   getAssessmentLog: () => {
-    const dateString = new Date().toLocaleDateString("en-CA").slice(0,10).replace(/-/g,"");
-    return path.join(remote.app.getPath("userData"), "logs", `portingAssistant-assessment-${dateString}.log`);
+    return path.join(
+      remote.app.getPath("userData"),
+      "logs",
+      `portingAssistant-assessment-${getTodaysDate()}.log`
+    );
+  },
+  getBackendLog: () => {
+    return path.join(
+      remote.app.getPath("userData"),
+      "logs",
+      `portingAssistant-backend-${getTodaysDate()}.log`
+    );
+  },
+  checkCommonErrors: async (
+    start: Date,
+    log: string
+  ): Promise<{ error: string; message: string }[]> => {
+    return checkCommonErrors(start, log);
   },
 });
 
