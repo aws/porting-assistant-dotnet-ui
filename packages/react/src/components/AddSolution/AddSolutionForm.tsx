@@ -11,7 +11,6 @@ import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { checkIfSolutionContainsVBproject } from "../../utils/checkVBProjects";
 import { getTargetFramework } from "../../utils/getTargetFramework";
-import { logError } from "../../utils/LogError";
 import { InfoLink } from "../InfoLink";
 import { UploadSolutionField } from "./UploadSolutionField";
 
