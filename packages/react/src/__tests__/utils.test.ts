@@ -1,3 +1,4 @@
+import path from "path";
 import { createStore } from "redux";
 
 import { createRootReducer } from "../../src/store/reducers";
@@ -24,6 +25,7 @@ import {
   ProjectToApiAnalysis
 } from "../models/project";
 import { SolutionDetails } from "../models/solution";
+import { checkIfSolutionContainsVBproject } from "../utils/checkVBProjects";
 import { compareSemver } from "../utils/compareSemver";
 import { filteringCountText } from "../utils/FilteringCountText";
 import { getCompatibleApi } from "../utils/getCompatibleApi";
@@ -600,4 +602,18 @@ describe("validatePackageInput", () => {
       message: "Package/version combination not found"
     });
   });
+});
+
+describe("vbProjectCheck", () => {
+    it("vbProject returns True", async () => {
+        const solutionPath = path.join(__dirname + "/resources/VBTestProject.sln");
+        const result = await checkIfSolutionContainsVBproject(solutionPath);
+        expect(result).toEqual(true);
+    });
+
+    it("non vbProject returns False", async () => {
+        const solutionPath = path.join(__dirname + "/resources/NopCommerce.sln");
+        const result = await checkIfSolutionContainsVBproject(solutionPath);
+        expect(result).toEqual(false);
+    });
 });

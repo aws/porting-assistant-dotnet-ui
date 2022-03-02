@@ -1,6 +1,8 @@
+import * as fs from 'fs';
 import { LocalStoreSchema } from "./models/localStoreSchema";
 import { Credentials } from "./models/setup";
 import { NugetPackageReducerState, SolutionReducerState } from "./store/reducers";
+
 
 global.window = {
   electron: {
@@ -41,6 +43,10 @@ global.window = {
     dialog: {} as any
   },
   backend: {
-    checkInternetAccess: () => false
+      checkInternetAccess: () => false,
+      getFileContents: (sourceFilePath: string) => {
+          const fileContents = fs.readFileSync(sourceFilePath).toString();
+          return fileContents;
+      }
   }
 } as any;

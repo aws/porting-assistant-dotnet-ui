@@ -9,6 +9,7 @@ import { externalUrls } from "../../constants/externalUrls";
 import { analyzeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
+import { checkIfSolutionContainsVBproject } from "../../utils/checkVBProjects";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { logError } from "../../utils/LogError";
 import { InfoLink } from "../InfoLink";
@@ -164,20 +165,5 @@ const addSolution = async (data: Record<string, any>) => {
   paths[data.solutionFilename] = { solutionPath: data.solutionFilename };
   window.electron.saveState("solutions", paths);
 };
-
-const checkIfSolutionContainsVBproject = async (solutionFilename: string) => {
-  var slnFileContents = "";
-  try {
-    slnFileContents = await window.backend.getFileContents(solutionFilename);
-    var lines = slnFileContents.split("\n");
-    const pattern = /Project\("\{.*\}"\)/;
-    for (const line of lines) {
-      if (line.match(pattern)!== null && line.includes(".vbproj")) return true;
-    }
-  } catch (error) {
-    logError("AddSolutionForm.tsx", "Unable to read solution file.", error);
-  }
-  return false;
-}
 
 export const ImportSolution = React.memo(ImportSolutionInternal);
