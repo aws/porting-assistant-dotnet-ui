@@ -26,12 +26,6 @@ const FileTableInternal: React.FC = () => {
   const location = useLocation<HistoryState>();
   const history = useHistory();
   const [selected, setSelected] = useState<SourceFile[]>([]);
-  const [sortDetail, setSortDetail] = useState<TableProps.SortingState<SourceFile>>({
-    sortingColumn: {
-      sortingField: "sourceFilePath"
-    },
-    isDescending: false
-  });
   const tableItems = usePortingAssistantSelector(state => selectFileTableData(state, location.pathname));
   const isLoading = useMemo(() => tableItems == null, [tableItems]);
   const loadedItems = useMemo(() => tableItems || [], [tableItems]);
@@ -42,14 +36,14 @@ const FileTableInternal: React.FC = () => {
         var exactMatch = false;
         if (filterText === "") return true;
         else {
-            const filterItems = filterText.toLowerCase().split(";");         
-            return filterItems.some(
-                    fitem => {
-                      if (fitem.charAt(0) === "\"" && fitem.charAt(fitem.length-1) === "\"") exactMatch = true;
-                      return exactMatch? item.sourceFilePath.toLowerCase() === fitem.slice(1, -1): item.sourceFilePath.toLowerCase().includes(fitem) 
-                    }
-                  )
-            }
+          const filterItems = filterText.toLowerCase().split(";");
+          return filterItems.some(fitem => {
+            if (fitem.charAt(0) === '"' && fitem.charAt(fitem.length - 1) === '"') exactMatch = true;
+            return exactMatch
+              ? item.sourceFilePath.toLowerCase() === fitem.slice(1, -1)
+              : item.sourceFilePath.toLowerCase().includes(fitem);
+          });
+        }
       },
       defaultFilteringText: location.state?.activeFilter || "",
       empty: empty,
@@ -63,11 +57,6 @@ const FileTableInternal: React.FC = () => {
     <Table<SourceFile>
       {...collectionProps}
       loadingText="Loading source files"
-      sortingColumn={sortDetail?.sortingColumn}
-      sortingDescending={sortDetail?.isDescending}
-      onSortingChange={e => {
-        setSortDetail(e.detail);
-      }}
       columnDefinitions={columnDefinitions}
       loading={isLoading}
       items={items}
@@ -82,11 +71,7 @@ const FileTableInternal: React.FC = () => {
           countText={filteringCountText(filteredItemsCount!)}
         />
       }
-      pagination={
-        <Pagination
-          {...paginationProps}
-        />
-      }
+      pagination={<Pagination {...paginationProps} />}
       header={
         <TableHeader
           title="Source files"
