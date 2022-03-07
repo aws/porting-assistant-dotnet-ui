@@ -3,6 +3,7 @@ import { startApp, stopApp, setupElectronLogs, testSolutionPath, addSolution, cl
 import path from "path";
 import { TestRunner } from "./testRunner";
 import fs from "fs/promises";
+import { SortingCheckRequest } from "./models/sortingCheckRequest";
 
 describe("stability check, assess a solution, reassess the solution, check all solution tabs make sure loaded, check all projects for all solution, make sure loaded, check porting for all projects", () => {
   let app: Application;
@@ -45,7 +46,16 @@ describe("stability check, assess a solution, reassess the solution, check all s
     const solutionPath: string = path.join(solutionFolderPath, "MvcMusicStore.sln");
     await addSolution(app, solutionPath);
     await app.client.refresh();
-    const results = await runner.runThroughSolution(solutionPath, "inplace", "net6.0", false, false);
+    const results = await runner.runThroughSolution(solutionPath, "inplace", "net6.0", false, false, {
+      apis: {
+        first: "td=ActionName",
+        last: "td=ViewResult",
+      },
+      sourceFiles: {
+        first: "=MvcMusicStore\\Controllers\\AccountController.cs",
+        last: "=MvcMusicStore\\ViewModels\\ShoppingCartViewModel.cs",
+      },
+    } as SortingCheckRequest);
     await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "59 of 85", "0", "(21)"]);
   });
 });
