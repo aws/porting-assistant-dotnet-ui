@@ -13,8 +13,18 @@ import { NodeHttpHandler } from "@aws-sdk/node-http-handler";
 
 // Configuraion
 export const config = require(electronIsDev
-  ? path.join(__dirname, "../..", "build-scripts", "porting-assistant-config.dev.json")
-  : path.join(path.dirname(app.getPath("exe")), "resources", "config", "porting-assistant-config.json"));
+  ? path.join(
+      __dirname,
+      "../..",
+      "build-scripts",
+      "porting-assistant-config.dev.json"
+    )
+  : path.join(
+      path.dirname(app.getPath("exe")),
+      "resources",
+      "config",
+      "porting-assistant-config.json"
+    ));
 
 const sendRequest = async (
   pathParams: { [key: string]: string },
@@ -26,17 +36,16 @@ const sendRequest = async (
 ): Promise<boolean> => {
   const metricsEnabled = localStore.get("share");
   const profileName = newProfile || localStore.get("profile");
-  const credentials: AWS.SharedIniFileCredentials | undefined =
-    getProfileCredentials(profileName);
+  const credentials = await getProfileCredentials(profileName);
+  const awsAccessKeyId: string | undefined = credentials?.accessKeyId;
+  const awsSecretAccessKey: string | undefined = credentials?.secretAccessKey;
+  const awsSessionToken: string | undefined = credentials?.sessionToken;
 
-  // new profile verification just needs to ping endpoint so bypass flag
   if (!metricsEnabled && !newProfile) {
     return true;
   }
-  if (
-    credentials?.accessKeyId === undefined ||
-    credentials?.secretAccessKey === undefined
-  ) {
+
+  if (awsAccessKeyId === undefined || awsSecretAccessKey === undefined) {
     console.error(`Credentials are undefined for profile: ${profileName}`);
     return false;
   }
@@ -92,7 +101,13 @@ export const putLogData = async (logName: string, logData: string) => {
       logData: logData,
     },
   };
-  return await sendRequest(pathParams, pathTemplate, method, additionalParams, body);
+  return await sendRequest(
+    pathParams,
+    pathTemplate,
+    method,
+    additionalParams,
+    body
+  );
 };
 
 // Create putMetricData request
@@ -126,7 +141,13 @@ export const putMetricData = async (
       },
     ],
   };
-  return await sendRequest(pathParams, pathTemplate, method, additionalParams, body);
+  return await sendRequest(
+    pathParams,
+    pathTemplate,
+    method,
+    additionalParams,
+    body
+  );
 };
 
 export const testProfile = async (profile: string) => {
@@ -181,4 +202,3 @@ async function createAndSignRequest(
   var signedRequest = await signer.sign(request);
   return signedRequest;
 }
-

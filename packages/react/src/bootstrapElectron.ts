@@ -33,7 +33,8 @@ export interface Electron {
   getPathSeparator: () => string;
   joinPaths: (...paths: string[]) => string;
   pathExists: (path: string) => boolean;
-  getProfiles: () => Profiles;
+  getProfiles: () => Promise<Profiles>;
+  getCredentials: (profile?: string) => Promise<{ [key: string]: string | undefined }>;
   writeProfile: (profileName: string, credentials: Credentials) => void;
   writeZipFile: (zipFilename: string, contents: { filename: string; contents: string }[]) => Promise<void>;
   verifyUser: (profile: string) => Promise<boolean>;

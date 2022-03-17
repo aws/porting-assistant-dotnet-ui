@@ -1,12 +1,18 @@
 import os from "os";
 import path from "path";
 import fs, { promises as fsPromises } from "fs";
+import { getAwsProfiles } from "./telemetry/electron-get-profile-credentials";
 
 interface Credentials {
   aws_access_key_id: string;
   aws_secret_access_key: string;
   aws_session_token: string;
 }
+
+const sharedConfigFileNames = {
+  credentials: "credentials",
+  config: "config",
+};
 
 export async function writeProfile(
   profileName: string,
@@ -27,6 +33,17 @@ export async function writeProfile(
     );
   }
   await fsPromises.appendFile(getDefaultFilePath(), profile);
+}
+
+async function getFilePath(profileName: string) {
+  const sharedConfigFiles = await getAwsProfiles();
+  if (sharedConfigFiles.credentialsFile[profileName] !== undefined) {
+    return sharedConfigFileNames.credentials;
+  } else if (sharedConfigFiles.configFile[profileName] !== undefined) {
+    return sharedConfigFileNames.config;
+  } else {
+    return sharedConfigFileNames.credentials;
+  }
 }
 
 function getDefaultFilePath() {

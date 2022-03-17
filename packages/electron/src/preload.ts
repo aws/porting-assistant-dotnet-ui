@@ -18,6 +18,10 @@ import {
 } from "@porting-assistant/react/src/models/project";
 import axios from "axios";
 import isDev from "electron-is-dev";
+import {
+  getAwsProfiles,
+  getProfileCredentials,
+} from "./telemetry/electron-get-profile-credentials";
 
 contextBridge.exposeInMainWorld("electron", {
   openExternalUrl: (url: string) => shell.openExternal(url),
@@ -68,13 +72,11 @@ contextBridge.exposeInMainWorld("electron", {
   pathExists: (path: string) => {
     return fs.existsSync(path);
   },
-  getProfiles: () => {
-    try {
-      const iniLoder = new IniLoader();
-      return iniLoder.loadFrom({});
-    } catch (err) {
-      return [];
-    }
+  getProfiles: async () => {
+    return await getAwsProfiles();
+  },
+  getCredentials: async (profileId?: string) => {
+    return await getProfileCredentials(profileId);
   },
   writeProfile,
   writeZipFile: (
@@ -96,10 +98,18 @@ contextBridge.exposeInMainWorld("electron", {
   getLatestVersion: () => invokeBackend("getLatestVersion"),
   getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
-  writeReactErrLog: (source: any, message: any, response: any) => invokeBackend("writeReactErrLog", source, message, response),
+  writeReactErrLog: (source: any, message: any, response: any) =>
+    invokeBackend("writeReactErrLog", source, message, response),
   getAssessmentLog: () => {
-    const dateString = new Date().toLocaleDateString("en-CA").slice(0,10).replace(/-/g,"");
-    return path.join(remote.app.getPath("userData"), "logs", `portingAssistant-assessment-${dateString}.log`);
+    const dateString = new Date()
+      .toLocaleDateString("en-CA")
+      .slice(0, 10)
+      .replace(/-/g, "");
+    return path.join(
+      remote.app.getPath("userData"),
+      "logs",
+      `portingAssistant-assessment-${dateString}.log`
+    );
   },
 });
 
@@ -116,7 +126,14 @@ contextBridge.exposeInMainWorld("backend", {
       actionsOnly: boolean;
       compatibleOnly: boolean;
     }
-  ) => invokeBackend("analyzeSolution", solutionFilePath, runId, triggerType, settings),
+  ) =>
+    invokeBackend(
+      "analyzeSolution",
+      solutionFilePath,
+      runId,
+      triggerType,
+      settings
+    ),
   openSolutionInIDE: (solutionFilePath: string) =>
     invokeBackend("openSolutionInIDE", solutionFilePath),
   getFileContents: (sourceFilePath: string) =>
@@ -126,17 +143,19 @@ contextBridge.exposeInMainWorld("backend", {
   listenApiAnalysisUpdate: (callback: (message: string) => void) =>
     listenBackend("onApiAnalysisUpdate", callback),
   checkInternetAccess: () => invokeBackend("checkInternetAccess"),
-  sendCustomerFeedback: (upload: any) => invokeBackend("sendCustomerFeedback", upload),
-  uploadRuleContribution: (upload: any) => invokeBackend("uploadRuleContribution", upload)
+  sendCustomerFeedback: (upload: any) =>
+    invokeBackend("sendCustomerFeedback", upload),
+  uploadRuleContribution: (upload: any) =>
+    invokeBackend("uploadRuleContribution", upload),
 });
 
 contextBridge.exposeInMainWorld("porting", {
-    portingStores: {},
-    copyDirectory: (solutionPath: string, destinationPath: string) =>
-        invokeBackend("copyDirectory",  solutionPath, destinationPath),
-    getConfig: () => portingStore.get("solutions"),
-    setConfig: (data: any) => portingStore.set("solutions", data),
-    applyPortingProjectFileChanges: (
+  portingStores: {},
+  copyDirectory: (solutionPath: string, destinationPath: string) =>
+    invokeBackend("copyDirectory", solutionPath, destinationPath),
+  getConfig: () => portingStore.get("solutions"),
+  setConfig: (data: any) => portingStore.set("solutions", data),
+  applyPortingProjectFileChanges: (
     projects: Project[],
     solutionPath: string,
     targetFramework: string,

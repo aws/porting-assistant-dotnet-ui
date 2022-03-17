@@ -58,13 +58,18 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
   const [profiles, setProfiles] = useState({ label: currentProfile, id: "" } as SelectProps.Option);
 
   useEffect(() => {
-    const profiles = window.electron.getProfiles();
-    setProfileOptions(
-      Object.keys(profiles).map((profileName, index) => ({
-        label: profileName,
-        id: String(index)
-      }))
-    );
+    window.electron
+      .getProfiles()
+      .then(profiles => {
+        const allProfiles = Object.assign(profiles.configFile, profiles.credentialsFile);
+        setProfileOptions(
+          Object.keys(allProfiles).map((profileName, index) => ({
+            label: profileName,
+            id: index
+          }))
+        );
+      })
+      .catch(err => console.log(`Failed to get profiles ${err.stack}`));
   }, []);
 
   const actionButton = useMemo(
