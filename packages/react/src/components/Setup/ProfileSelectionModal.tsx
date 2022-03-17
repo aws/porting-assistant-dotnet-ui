@@ -1,4 +1,4 @@
-import { Box, Button, ColumnLayout, FormField, Input, Link, Modal } from "@awsui/components-react";
+import { Box, Button, ColumnLayout, FormField, Input, Link, Modal, Textarea } from "@awsui/components-react";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -8,6 +8,7 @@ type FormData = {
   profileName: string;
   accessKeyID: string;
   secretAccessKey: string;
+  sessionToken: string;
 };
 
 interface Props {
@@ -20,8 +21,12 @@ const ProfileSelectionModalInternal: React.FC<Props> = ({ onAddProfile, onSetMod
   const { control, errors, reset, handleSubmit, getValues } = useForm<FormData>();
 
   const onSubmit = handleSubmit(data => {
-    const { profileName, accessKeyID, secretAccessKey } = data;
-    const credentials: Credentials = { aws_access_key_id: accessKeyID, aws_secret_access_key: secretAccessKey };
+    const { profileName, accessKeyID, secretAccessKey, sessionToken } = data;
+    const credentials: Credentials = {
+      aws_access_key_id: accessKeyID,
+      aws_secret_access_key: secretAccessKey,
+      aws_session_token: sessionToken
+    };
     window.electron.writeProfile(profileName, credentials);
     onAddProfile(profileName);
     onSetModalVisibility(false);
@@ -94,7 +99,7 @@ const ProfileSelectionModalInternal: React.FC<Props> = ({ onAddProfile, onSetMod
               onChange={([e]) => e.detail.value}
               rules={{
                 required: "AWS access key ID is required",
-                pattern: { value: new RegExp("^AKIA"), message: "AWS access key is invalid" }
+                pattern: { value: new RegExp("^AKIA|^ASIA"), message: "AWS access key is invalid" }
               }}
               placeholder="Please enter AWS access key ID"
               value={getValues().accessKeyID}
@@ -109,6 +114,24 @@ const ProfileSelectionModalInternal: React.FC<Props> = ({ onAddProfile, onSetMod
               rules={{ required: "AWS secret access key is required" }}
               placeholder="Please enter AWS secret access key"
               value={getValues().secretAccessKey}
+            />
+          </FormField>
+          <FormField
+            id="session-token"
+            label={
+              <span>
+                AWS session token <i>- optional</i>
+              </span>
+            }
+          >
+            <Controller
+              as={Textarea}
+              name="sessionToken"
+              rows={5}
+              control={control}
+              onChange={([e]) => e.detail.value}
+              placeholder="Please enter AWS session token"
+              value={getValues().sessionToken}
             />
           </FormField>
         </ColumnLayout>
