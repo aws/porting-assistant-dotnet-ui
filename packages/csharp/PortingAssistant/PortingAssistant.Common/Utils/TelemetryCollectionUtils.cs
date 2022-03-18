@@ -1,12 +1,12 @@
 using PortingAssistant.Client.Model;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Telemetry.Model;
+using PortingAssistant.Telemetry.Utils;
 using PortingAssistantExtensionTelemetry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Helpers;
 
 namespace PortingAssistant.Common.Utils
 {
@@ -56,7 +56,7 @@ namespace PortingAssistant.Common.Utils
                 TriggerType = triggerType,
                 TargetFramework = tgtFramework,
                 TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
-                SolutionPath = Crypto.SHA256(solutionAnalysisResult.SolutionDetails.SolutionFilePath),
+                SolutionPath = CryptoUtil.HashString(solutionAnalysisResult.SolutionDetails.SolutionFilePath),
                 ApplicationGuid = solutionAnalysisResult.SolutionDetails.ApplicationGuid,
                 SolutionGuid = solutionAnalysisResult.SolutionDetails.SolutionGuid,
                 RepositoryUrl = solutionAnalysisResult.SolutionDetails.RepositoryUrl,
@@ -74,7 +74,7 @@ namespace PortingAssistant.Common.Utils
                 TargetFramework = tgtFramework,
                 SourceFrameworks = projectAnalysisResult.TargetFrameworks,
                 TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
-                ProjectGuid = Crypto.SHA256(projectAnalysisResult.ProjectGuid),
+                ProjectGuid = CryptoUtil.HashString(projectAnalysisResult.ProjectGuid),
                 ProjectType = projectAnalysisResult.ProjectType,
                 NumNugets = projectAnalysisResult.PackageReferences.Count,
                 NumReferences = projectAnalysisResult.ProjectReferences.Count,
