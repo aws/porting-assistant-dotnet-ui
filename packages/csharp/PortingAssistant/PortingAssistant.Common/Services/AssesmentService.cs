@@ -6,16 +6,12 @@ using PortingAssistant.Common.Model;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Client;
 using PortingAssistant.Client.Model;
-using PortingAssistant.Telemetry.Model;
-using System.Web.Helpers;
-using PortingAssistantExtensionTelemetry;
 using PortingAssistant.Common.Utils;
 
 namespace PortingAssistant.Common.Services
 {
     public class AssessmentService : IAssessmentService
     {
-
         private readonly ILogger _logger;
         private readonly IPortingAssistantClient _client;
         private readonly List<OnApiAnalysisUpdate> _apiAnalysisListeners;

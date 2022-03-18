@@ -1,9 +1,9 @@
 using NUnit.Framework;
-using System.Web.Helpers;
 using PortingAssistant.Common.Utils;
 using System;
 using PortingAssistant.Client.Model;
 using System.Collections.Generic;
+using PortingAssistant.Telemetry.Utils;
 
 namespace PortingAssistant.UnitTests
 {
@@ -14,7 +14,7 @@ namespace PortingAssistant.UnitTests
         public void TestSolutionPath() 
         {
             var solutionPath = "C:/Users/CustomerName/nopCommerce/src/NopCommerce.sln";
-            var encryptedSolutionPath = Crypto.SHA256(solutionPath);
+            var encryptedSolutionPath = CryptoUtil.HashString(solutionPath);
             var runId = "1";
             var triggerType = "TestRequest";
             var targetFramework = "netcoreapp3.1";
@@ -42,7 +42,7 @@ namespace PortingAssistant.UnitTests
             var triggerType = "TestRequest";
             var targetFramework = "netcoreapp3.1";
             var projectGuid = Guid.NewGuid().ToString();
-            var encryptedProjectGuid = Crypto.SHA256(projectGuid);
+            var encryptedProjectGuid = CryptoUtil.HashString(projectGuid);
             var projectAnalysisResult = new ProjectAnalysisResult
             {
                 ProjectName = "TestProject",

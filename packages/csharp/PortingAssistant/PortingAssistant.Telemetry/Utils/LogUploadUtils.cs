@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Helpers;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
@@ -81,7 +80,7 @@ namespace PortingAssistant.Telemetry.Utils
 
                     var requestContent = new StringContent(body.ToString(Formatting.None), Encoding.UTF8, "application/json");
 
-                    var config = new TelemetryConfig
+                    var config = new TelemetryClientConfig
                     {
                         RegionEndpoint = RegionEndpoint.GetBySystemName(region),
                         MaxErrorRetry = 2,
@@ -248,13 +247,18 @@ namespace PortingAssistant.Telemetry.Utils
             var wifiNetworkInterface = networkInterfaces.FirstOrDefault(wi => wi.NetworkInterfaceType == NetworkInterfaceType.Wireless80211);
             if (wifiNetworkInterface != null)
             {
-                _uniqueId = Crypto.SHA256(wifiNetworkInterface.GetPhysicalAddress().ToString());
+                _uniqueId = CryptoUtil.HashString(wifiNetworkInterface.GetPhysicalAddress().ToString());
             }
             else
             {
-                var ethernetInterface = networkInterfaces.LastOrDefault(ei => ei.NetworkInterfaceType == NetworkInterfaceType.Ethernet
-                                            && ei.OperationalStatus == OperationalStatus.Up && !ei.Name.Contains("Bluetooth", StringComparison.OrdinalIgnoreCase));
-                _uniqueId = ethernetInterface != null ? Crypto.SHA256(ethernetInterface.GetPhysicalAddress().ToString()) : DefaultIdentifier;
+                var ethernetInterface = networkInterfaces.LastOrDefault(ei => 
+                    ei.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+                    && ei.OperationalStatus == OperationalStatus.Up 
+                    && !ei.Name.Contains("Bluetooth", StringComparison.OrdinalIgnoreCase));
+
+                _uniqueId = ethernetInterface != null 
+                    ? CryptoUtil.HashString(ethernetInterface.GetPhysicalAddress().ToString()) 
+                    : DefaultIdentifier;
             }
             return _uniqueId;
         }
