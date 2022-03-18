@@ -1,10 +1,11 @@
 import { Application } from "spectron";
+import { SortingCheckRequest } from "./models/sortingCheckRequest";
 
 export const TargetFrameworks = {
   net6: ".NET 6.0.0",
   net5: ".NET 5.0.0",
-  netcore31: ".NET Core 3.1.0" 
-}
+  netcore31: ".NET Core 3.1.0",
+};
 
 export class TestRunner {
   app: Application;
@@ -41,7 +42,7 @@ export class TestRunner {
   addNamedProfile = async (profileName: string, accessKeyId: string, secretAccessKey: string) => {
     await (
       await this.app.client.$("#add-named-profile")
-    ).click({ 
+    ).click({
       button: "left",
       x: 0,
       y: 3,
@@ -52,16 +53,16 @@ export class TestRunner {
     await (await this.app.client.$('[name="secretAccessKey"]')).setValue(secretAccessKey);
 
     await (await this.app.client.$("#add-profile-button")).click();
-  }
+  };
 
-  selectNamedProfile = async (profileName:string, targetFramework: string = "") => {
+  selectNamedProfile = async (profileName: string, targetFramework: string = "") => {
     if (targetFramework !== "") {
       await this.selectTargetFramework(targetFramework);
     }
     await (await this.app.client.$("#profile-selection")).click();
-    await (await this.app.client.$(`[title="${ profileName }"]`)).click();
+    await (await this.app.client.$(`[title="${profileName}"]`)).click();
     await (await this.app.client.$("#next-btn")).click();
-  }
+  };
 
   addNamedProfileCheck = async () => {
     // profile selection model element is on top of add named profile link
@@ -149,7 +150,8 @@ export class TestRunner {
     portingPlace: string,
     targetFramework: string,
     sendFeedback: boolean,
-    sendRuleContribution: boolean
+    sendRuleContribution: boolean,
+    sortingCheckRequest?: SortingCheckRequest
   ) => {
     const solutionNameTagId = `#solution-link-${this.escapeNonAlphaNumeric(solutionPath)}`;
     console.log(`assessing solution ${solutionNameTagId}....`);
@@ -168,7 +170,7 @@ export class TestRunner {
     const assessmentResults = await this.reassessSolutionCheck(solutionNameTagId, solutionPath);
     console.log(`reassess solution ${solutionNameTagId} success`);
     console.log(`checking tabs in solution ${solutionNameTagId}`);
-    const numSourceFiles = await this.solutionTabCheck();
+    const numSourceFiles = await this.solutionTabCheck(sortingCheckRequest);
     assessmentResults.push(numSourceFiles);
     const projectName = await this.app.client.$(".project-name");
     if (!projectName.isExisting()) {
@@ -235,12 +237,12 @@ export class TestRunner {
     return results;
   };
 
-  nugetPackageTabCheck = async () => {
+  nugetPackageTabCheck = async (sortingCheckRequest?: SortingCheckRequest) => {
     await (await this.app.client.$(`button[data-testid="nuget-packages"]`)).click();
     await (await this.app.client.$('input[placeholder="Search NuGet package by name"]')).waitForDisplayed();
   };
 
-  tabsCheck = async () => {
+  tabsCheck = async (sortingCheckRequest?: SortingCheckRequest) => {
     const projectReferenceTab = await this.app.client.$(`button[data-testid="project-references"]`);
     await projectReferenceTab.waitForExist({ timeout: 100000 });
     await projectReferenceTab.click();
@@ -250,16 +252,14 @@ export class TestRunner {
       timeout: 600000,
     });
     await this.nugetPackageTabCheck();
-    await (await this.app.client.$(`button[data-testid="apis"]`)).click();
-    await (await this.app.client.$('input[placeholder="Search by API name"]')).waitForDisplayed();
-    await (await this.app.client.$(`button[data-testid="source-files"]`)).click();
-    await (await this.app.client.$('input[placeholder="Search by source file name"]')).waitForDisplayed();
+    await this.apisTabCheck(sortingCheckRequest);
+    await this.sourceFilesTabCheck(sortingCheckRequest);
     const numSourceFiles = await (await this.app.client.$(".awsui_counter_2qdw9_bb1i6_175")).getText();
     return numSourceFiles;
   };
 
-  solutionTabCheck = async () => {
-    const numSourceFiles = await this.tabsCheck();
+  solutionTabCheck = async (sortingCheckRequest?: SortingCheckRequest) => {
+    const numSourceFiles = await this.tabsCheck(sortingCheckRequest);
     await (await this.app.client.$(`button[data-testid="projects"]`)).click();
     await (await this.app.client.$('input[placeholder="Search by project name"]')).waitForDisplayed();
     return numSourceFiles;
@@ -328,9 +328,35 @@ export class TestRunner {
 
   validateComponentExists = async (componentSelector: string) => {
     expect(
-      await (await this.app.client.$(componentSelector)).
-      waitForExist({
-          timeout: 60000
-  })).toBe(true);
+      await (
+        await this.app.client.$(componentSelector)
+      ).waitForExist({
+        timeout: 60000,
+      })
+    ).toBe(true);
   };
+
+  private async sourceFilesTabCheck(sortingCheckRequest: SortingCheckRequest | undefined) {
+    await (await this.app.client.$(`button[data-testid="source-files"]`)).click();
+    await (await this.app.client.$('input[placeholder="Search by source file name"]')).waitForDisplayed();
+    if (sortingCheckRequest?.sourceFiles) {
+      const nameColumn = await this.app.client.$("div=Source file name");
+      await nameColumn.click();
+      await this.validateComponentExists(sortingCheckRequest.sourceFiles.first);
+      await nameColumn.click();
+      await this.validateComponentExists(sortingCheckRequest.sourceFiles.last);
+    }
+  }
+
+  private async apisTabCheck(sortingCheckRequest: SortingCheckRequest | undefined) {
+    await (await this.app.client.$(`button[data-testid="apis"]`)).click();
+    await (await this.app.client.$('input[placeholder="Search by API name"]')).waitForDisplayed();
+    if (sortingCheckRequest?.apis) {
+      const nameColumn = await this.app.client.$("div=Name");
+      await nameColumn.click();
+      await this.validateComponentExists(sortingCheckRequest.apis.first);
+      await nameColumn.click();
+      await this.validateComponentExists(sortingCheckRequest.apis.last);
+    }
+  }
 }
