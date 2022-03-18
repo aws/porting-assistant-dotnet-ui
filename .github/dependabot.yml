@@ -17,14 +17,14 @@ updates:
       - porting-assistant-nuget
       - nuget-org
     schedule:
-      interval: "daily"
+      interval: "weekly"
   - package-ecosystem: "nuget"
     directory: "packages/csharp/PortingAssistant/PortingAssistant.Common"
     registries:
       - porting-assistant-nuget
       - nuget-org
     schedule:
-      interval: "daily"
+      interval: "weekly"
     ignore:
       - dependency-name: "Microsoft.AspNetCore.Mvc.NewtonsoftJson"
   - package-ecosystem: "nuget"
@@ -33,7 +33,7 @@ updates:
       - porting-assistant-nuget
       - nuget-org
     schedule:
-      interval: "daily"
+      interval: "weekly"
     ignore:
       - dependency-name: "Microsoft.AspNetCore.Mvc.NewtonsoftJson"
   - package-ecosystem: "nuget"
@@ -42,4 +42,4 @@ updates:
       - porting-assistant-nuget
       - nuget-org
     schedule:
-      interval: "daily"
+      interval: "weekly"

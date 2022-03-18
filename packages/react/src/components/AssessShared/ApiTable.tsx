@@ -34,10 +34,6 @@ const ApiTableInternal: React.FC = () => {
 
   const isLoading = useMemo(() => tableItems == null, [tableItems]);
   const loadedItems = useMemo(() => tableItems || [], [tableItems]);
-  const [sortDetail, setSortDetail] = useState<TableProps.SortingState<ApiTableData>>({
-    sortingColumn: { sortingField: "apiName" },
-    isDescending: false
-  });
 
   const { items, filteredItemsCount, collectionProps, filterProps, paginationProps } = useCollection(loadedItems, {
     filtering: {
@@ -45,14 +41,14 @@ const ApiTableInternal: React.FC = () => {
         var exactMatch = false;
         if (filterText === "") return true;
         else {
-            const filterItems = filterText.toLowerCase().split(";");
-            return filterItems.some(
-                    fitem => {
-                      if (fitem.charAt(0) === "\"" && fitem.charAt(fitem.length-1) === "\"") exactMatch = true;
-                      return exactMatch? item.apiName.toLowerCase() === fitem.slice(1, -1): item.apiName.toLowerCase().includes(fitem); 
-                    }
-                  )
-            }
+          const filterItems = filterText.toLowerCase().split(";");
+          return filterItems.some(fitem => {
+            if (fitem.charAt(0) === '"' && fitem.charAt(fitem.length - 1) === '"') exactMatch = true;
+            return exactMatch
+              ? item.apiName.toLowerCase() === fitem.slice(1, -1)
+              : item.apiName.toLowerCase().includes(fitem);
+          });
+        }
       },
       defaultFilteringText: location.state?.activeFilter || "",
       empty: empty,
@@ -79,17 +75,19 @@ const ApiTableInternal: React.FC = () => {
     {
       id: "source-files",
       header: "Source files",
-      cell: item => 
-      <LinkComponent 
-      location = {{
-        pathName: location.pathname ,
-        state: {
-          activeFilter: "\"" + Array.from(item.sourceFiles).join("\";\"") + "\"",
-          activeTabId: "source-files",
-      }
-    }}>
-    {item.sourceFiles.size}
-    </LinkComponent>,
+      cell: item => (
+        <LinkComponent
+          location={{
+            pathName: location.pathname,
+            state: {
+              activeFilter: '"' + Array.from(item.sourceFiles).join('";"') + '"',
+              activeTabId: "source-files"
+            }
+          }}
+        >
+          {item.sourceFiles.size}
+        </LinkComponent>
+      ),
       sortingField: "sourceFiles",
       sortingComparator: (a: ApiTableData, b: ApiTableData) => a.sourceFiles.size - b.sourceFiles.size
     },
@@ -123,17 +121,12 @@ const ApiTableInternal: React.FC = () => {
       // width: 600
     }
   ];
-  
+
   return (
     <Table<ApiTableData>
       {...collectionProps}
       loadingText="Loading source files"
       columnDefinitions={columnDefinitions}
-      sortingColumn={sortDetail?.sortingColumn}
-      sortingDescending={sortDetail?.isDescending}
-      onSortingChange={e => {
-        setSortDetail(e.detail);
-      }}
       loading={isLoading}
       items={items}
       filter={
@@ -143,11 +136,7 @@ const ApiTableInternal: React.FC = () => {
           countText={filteringCountText(filteredItemsCount!)}
         />
       }
-      pagination={
-        <Pagination
-          {...paginationProps}
-        />
-      }
+      pagination={<Pagination {...paginationProps} />}
       header={
         <TableHeader
           title="APIs"
