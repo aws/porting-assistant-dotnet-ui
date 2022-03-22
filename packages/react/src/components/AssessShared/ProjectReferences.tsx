@@ -91,9 +91,9 @@ const ProjectReferencesInternal: React.FC<Props> = ({ projects }) => {
         randomSeed: 3
       },
       interaction: {
-        zoomView: false,
-        dragNodes: false,
-        dragView: false
+        zoomView: true,
+        dragNodes: true,
+        dragView: true
       },
       physics: {
         enabled: true,

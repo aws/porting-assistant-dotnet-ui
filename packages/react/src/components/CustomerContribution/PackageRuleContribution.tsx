@@ -85,7 +85,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
 
   const declineProvideEmail = () => {
     setShowEmailModal(false);
-    //history.goBack();
+    history.goBack();
   };
 
   const onSubmit = async () => {
@@ -300,10 +300,10 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
           id = "rc-comment"
           label={
             <span>
-              Comments <i>- optional</i>
+              Comments
             </span>
           }
-          description="Include any additonal information."
+          description="Please provide a short description."
           stretch={true}
         >
           <Input value={comments} onChange={({ detail }) => setComments(detail.value)} />
