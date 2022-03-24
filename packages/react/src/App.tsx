@@ -23,7 +23,7 @@ import { Settings } from "./containers/Settings";
 import { Setup } from "./containers/Setup";
 import { usePortingAssistantSelector } from "./createReduxStore";
 import { init } from "./store/actions/backend";
-import { setCurrentMessageUpdate, setErrorUpdate } from "./store/actions/error";
+import { pushCurrentMessageUpdate, setCurrentMessageUpdate, setErrorUpdate } from "./store/actions/error";
 
 interface RouteWithErrorProps extends RouteProps {
   requireProfile: boolean;
@@ -35,6 +35,26 @@ const RouteWithError: React.FC<RouteWithErrorProps> = ({ children, requireProfil
   if (requireProfile && !profileSet) {
     return <Redirect to="/main" />;
   }
+
+  const watchDefaultCredentialsAreValid = () => {
+    setInterval(async () => {
+      const profile = window.electron.getState("profile");
+      const profileVerfied = (await window.electron.verifyUser(profile));
+      if (!profileVerfied) {
+        dispatch(
+          pushCurrentMessageUpdate({
+              messageId: uuid(),
+              groupId: "verify-defualt-creds",
+              type: "error",
+              loading: false,
+              content: `The current credentials have expired. Please review and update AWS credentials.`,
+              dismissible: true
+          })
+      );
+    }
+  }, 900000)
+}
+  watchDefaultCredentialsAreValid();
 
   return (
     <Route {...props}>
