@@ -91,7 +91,7 @@ const SettingsDashboardInternal: React.FC = () => {
               <Box margin={{ bottom: "xxxs" }} color="text-label">
                 AWS named profile
               </Box>
-              <div id="current-profile-name">{profileName.current}</div>
+              <div id="current-profile-name">{profileName.current || "Using Default Credentials"}</div>
               {profileValid === false && (
                 <Box margin={{ top: "xxs" }} id="current-profile-status">
                   <Box variant="small">

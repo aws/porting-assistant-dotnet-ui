@@ -8,13 +8,11 @@ import {
   FormField,
   Header,
   Icon,
-  Input,
   Link,
   Select,
   SelectProps,
   Spinner,
-  Tiles,
-  TilesProps
+  Tiles
 } from "@awsui/components-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -59,12 +57,11 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
 
   const [targetFramework, setTargetFramework] = useState(currentTargetFramework);
   const [profiles, setProfiles] = useState({ label: currentProfile, id: "" } as SelectProps.Option);
-  // const [profileSet, setProfileSet] = useState(false);
   const [defaultCredentialsAccessKeyID, setDefaultCredentialsAccessKeyID] = useState("");
   const [useDefaultCredentials, setUseDefaultCredentials] = useState(false);
-  const [value, setValue] = React.useState("");
   const enableDefaultCredentials = true;
   const [profileErrorText, setProfileErrorText] = useState("");
+  const [selectedProfile, setSelectedProfile] = useState(currentProfile);
 
 
   useEffect(() => {
@@ -82,13 +79,19 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
       .catch(err => console.log(`Failed to get profiles ${err.stack}`));
   }, []);
 
+  // Set Default Profile
+  useEffect(() => {
+    if (!useDefaultCredentials && !selectedProfile && profileOptions.length > 0) {
+      const selectedId = currentProfile || profileOptions[0].label || "";
+      setSelectedProfile(selectedId);
+    }
+  }, [useDefaultCredentials, selectedProfile, profileOptions]);
+
   // Retrieve AWS SDK default credentials     
   useEffect(() => {
-    console.log("Calling this use effect");
     window.electron
     .getCredentials()
     .then(credentials => {
-      console.log("Use Effet creds: ", credentials);
       setDefaultCredentialsAccessKeyID(credentials?.accessKeyId || "");
     }).catch(err => console.log(`Failed to retrieve AWS SDK default credentials ${err.stack}`));
   }, [useDefaultCredentials]);
@@ -110,26 +113,23 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
 
   const onUseDefaultCredentialsChanged = (event: { detail: { value: string; }; }) => {
     const useDefault = event.detail.value === "default";
-    // validateProfile("vfv", "vdf", useDefault);     
-    // dispatch(setSetupFormUseDefaultCredentials(useDefault));
     setUseDefaultCredentials(useDefault);     
-    // let selectedId = selectedProfile;     
-    // if (useDefault) {
-    //   selectedId = "";     
-    //   dispatch(setSetupFormProfileId(""));     
-    //   setSelectedProfile("");     
-    // } else {     
-    //   selectedId = settings.profileId || profileOptions[0]?.id || "";
-    // }
-    // console.log("Access Key Id: ", defaultCredentialsAccessKeyID);
-    validateProfile("", defaultCredentialsAccessKeyID, useDefault);
-    console.log(profileErrorText);
+    let selectedId = selectedProfile;     
+    if (useDefault) {
+      selectedId = "";     
+      setSelectedProfile("");
+    } else {     
+      selectedId =  window.electron.getState("profile") || profileOptions[0]?.label || "";
+    }
+    validateProfile(selectedId, defaultCredentialsAccessKeyID, useDefault);
   }
 
   const onSelectProfile = useCallback(([e]) => {
     setProfiles(e.detail.selectedOption);
+    setSelectedProfile(e.detail.selectedOption.label);
+    validateProfile(selectedProfile, defaultCredentialsAccessKeyID, false);
     return e.detail.selectedOption.label;
-  }, []);
+  }, [defaultCredentialsAccessKeyID, selectedProfile]);
 
   const onSelectTargetFramework = useCallback(([e]) => {
     setTargetFramework(e.detail.selectedOption);
@@ -161,35 +161,20 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
     return isValid;
   }
 
-  const getTextWithLink = (text: string, url: string) => {
-    return (
-      <div>
-        <span>{text}</span>
-        <a
-          href="#/"
-          onClick={(e: any) => {
-            e.preventDefault();
-            window.electron.openExternalUrl(url);
-          }}
-          >
-            <span>Learn more </span>
-            <Icon name="external" />
-            </a>
-            </div>
-            )
-          }
-
-
   return (
     <div>
       <form
         onSubmit={handleSubmit(async data => {
-          if (await window.electron.verifyUser(data.profileSelection)) {
+          const isValidProile = validateProfile(selectedProfile, defaultCredentialsAccessKeyID, useDefaultCredentials);
+          if (!isValidProile) {
+            return;
+          }
+          if (await window.electron.verifyUser(selectedProfile)) {
             if (data.targetFrameworkSelection.value == null || data.targetFrameworkSelection.label == null) {
               setError("targetFrameworkSelection", "required", "Target Framework is required.");
               return;
             }
-            window.electron.saveState("profile", data.profileSelection);
+            window.electron.saveState("profile", selectedProfile);
             window.electron.saveState("lastConfirmVersion", "1.3.0");
             window.electron.saveState("share", data.share);
             window.electron.saveState("targetFramework", {
@@ -206,7 +191,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
             setError(
               "profileSelection",
               "error",
-              `${data.profileSelection} does not have the correct IAM policies. If you need help setting up your profile see Learn more above.`
+              `${selectedProfile || "Default Profile"} does not have the correct IAM policies. If you need help setting up your profile see Learn more above.`
             );
           }
         })}
@@ -267,9 +252,9 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
               <div>
                 <Box fontSize="body-m">Profile Selection</Box>
                 <Box fontSize="body-s" margin={{ right: "xxs" }} color="text-body-secondary">
-                  TODO: Add Text Here.
+                  Select an AWS Profile to allow Porting Assistant for .NET to access your application. You can also add an AWS named profile using the AWS CLI.
                 </Box>
-                <FormField id="profile-selection" errorText={errors.targetFrameworkSelection?.message}>
+                <FormField id="profile-selection" errorText={profileErrorText}>
                 {enableDefaultCredentials && <Tiles
                 onChange={onUseDefaultCredentialsChanged}
                 value={useDefaultCredentials? "default" : "custom"}
@@ -283,13 +268,14 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                 useDefaultCredentials && 
                 <div>
                   <div className="awsui-util-label">AWS access key ID</div>
+                  {/* TODO: Add or condition */}
                   <div>{defaultCredentialsAccessKeyID}</div>
                 </div>
               }
               {
                 !useDefaultCredentials &&
                 <div>
-                                <div>
+                <div>
                 <Box fontSize="body-m">AWS named profile</Box>
                 <Box fontSize="body-s" margin={{ right: "xxs" }} color="text-body-secondary">
                   Select an AWS profile to allow Porting Assistant for .NET to assess your solution for .NET Core
