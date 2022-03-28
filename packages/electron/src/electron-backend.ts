@@ -63,7 +63,8 @@ export const initTelemetryConnection = (logger: any = console) => {
                   ),
               localStore.get("profile"),
               app.getPath("userData"),
-              app.getVersion()
+              app.getVersion(),
+              localStore.get("useDefaultCreds")
           )
           .build();
 
