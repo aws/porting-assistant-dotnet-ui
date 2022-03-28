@@ -86,7 +86,7 @@ export const initTelemetryConnection = (logger: any = console) => {
           }
       },
       registerListeners: (browserWindow: Electron.BrowserWindow) => {
-          if (!localStore.get("profile")) {
+          if (!localStore.get("profile") && !localStore.get("useDefaultCreds")) {
               console.log("Did not find profile, setting onDidChange");
               localStore.onDidChange("profile", () => {
                   console.log("Profile changed, recreating connection");
@@ -97,7 +97,7 @@ export const initTelemetryConnection = (logger: any = console) => {
                   instance = createConnection(browserWindow);
               });
           } else {
-              console.log("profileFound: " + localStore.get("profile"));
+              console.log("profileFound: " + (localStore.get("profile") || "Default") );
               instance = createConnection(browserWindow);
           }
       },
@@ -286,7 +286,7 @@ export const initConnection = (logger: any = console) => {
       }
     },
     registerListeners: (browserWindow: Electron.BrowserWindow) => {
-      if (!localStore.get("profile")) {
+      if (!localStore.get("profile") && !localStore.get("useDefaultCreds")) {
         console.log("Did not find profile, setting onDidChange");
         localStore.onDidChange("profile", () => {
           console.log("Profile changed, recreating connection");
@@ -298,7 +298,7 @@ export const initConnection = (logger: any = console) => {
           registerLogListeners(instance);
         });
       } else {
-        console.log("profileFound: " + localStore.get("profile"));
+        console.log("profileFound: " + (localStore.get("profile") || 'Default') );
         instance = createConnection(browserWindow);
         registerLogListeners(instance);
       }

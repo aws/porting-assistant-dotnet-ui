@@ -5,6 +5,7 @@ import {
   SharedConfigFiles,
 } from "@aws-sdk/shared-ini-file-loader";
 import { fromIni } from "@aws-sdk/credential-providers";
+import { localStore } from "../preload-localStore";
 
 // Get shared credentials
 export const getProfileCredentials = async (
@@ -16,7 +17,7 @@ export const getProfileCredentials = async (
 export const getAwsCredentialsProvider = (
   profile?: string
 ): CredentialProvider => {
-  if (profile === undefined) {
+  if (localStore.get("useDefaultCreds")) {
     console.log(`Fetching AWS credentials using default provider.`);
     return defaultProvider();
   } else {

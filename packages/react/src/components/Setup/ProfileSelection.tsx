@@ -7,7 +7,6 @@ import {
   Form,
   FormField,
   Header,
-  Icon,
   Link,
   Select,
   SelectProps,
@@ -85,7 +84,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
       const selectedId = currentProfile || profileOptions[0].label || "";
       setSelectedProfile(selectedId);
     }
-  }, [useDefaultCredentials, selectedProfile, profileOptions]);
+  }, [useDefaultCredentials, selectedProfile, profileOptions, currentProfile]);
 
   // Retrieve AWS SDK default credentials     
   useEffect(() => {
@@ -118,8 +117,10 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
     if (useDefault) {
       selectedId = "";     
       setSelectedProfile("");
+      window.electron.saveState("useDefaultCreds", true);
     } else {     
       selectedId =  window.electron.getState("profile") || profileOptions[0]?.label || "";
+      window.electron.saveState("useDefaultCreds", false);
     }
     validateProfile(selectedId, defaultCredentialsAccessKeyID, useDefault);
   }
@@ -149,8 +150,6 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
   );
 
   const validateProfile = (profile: string, accessKeyID: string, useDefault: boolean): boolean => {
-    console.log("Using Default SDK Chain", useDefault);
-    console.log("Access Key ID: ", accessKeyID);
     let isValid = true;
     if ((!useDefault && !profile) || (useDefault && !accessKeyID)) {
       isValid = false;
