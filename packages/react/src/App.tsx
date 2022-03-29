@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useDispatch } from "react-redux";
-import { MemoryRouter, Redirect, Route, RouteProps, Switch } from "react-router-dom";
+import { MemoryRouter, Redirect, Route, RouteProps, Switch, useHistory } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
 import { PortingAssistantAppLayout } from "./components/PortingAssistantAppLayout";
@@ -31,6 +31,8 @@ interface RouteWithErrorProps extends RouteProps {
 
 const RouteWithError: React.FC<RouteWithErrorProps> = ({ children, requireProfile, ...props }) => {
   const dispatch = useDispatch();
+  const history = useHistory();
+
   const profileSet = usePortingAssistantSelector(state => state.solution.profileSet);
   if (requireProfile && !profileSet) {
     return <Redirect to="/main" />;
@@ -45,10 +47,12 @@ const RouteWithError: React.FC<RouteWithErrorProps> = ({ children, requireProfil
           pushCurrentMessageUpdate({
               messageId: uuid(),
               groupId: "verify-defualt-creds",
-              type: "error",
-              loading: false,
+              type: "warning",
+              // loading: false,
               content: `The current credentials have expired. Please review and update AWS credentials.`,
-              dismissible: true
+              dismissible: true,
+              buttonText: "Update Credentials",
+              onButtonClick: () => {history.push('/settings')}
           })
       );
     }
