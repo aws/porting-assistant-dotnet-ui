@@ -94,7 +94,7 @@ const getStateFromCache = (): Partial<RS> => {
       apiAnalysis: Object.assign({} as SolutionToApiAnalysis, apiAnalysis),
       solutionToSolutionDetails: Object.assign({} as SolutionToSolutionDetails, filteredSolutionToSolutionDetails),
       profileSet:
-        ((profile === "" && useDefaultCreds) ||
+        ((useDefaultCreds) ||
         (profile != null &&
         profile.length > 0)) &&
         share === true &&
