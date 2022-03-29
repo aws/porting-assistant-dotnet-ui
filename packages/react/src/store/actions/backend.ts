@@ -14,6 +14,7 @@ export interface analyzeSolutionRequestPayload {
     compatibleOnly: boolean;
     actionsOnly: boolean;
   };
+  preTriggerData:string[];
   force?: boolean;
 }
 export interface analyzeSolutionSuccessPayload {

@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Telemetry.Model;
@@ -18,9 +19,9 @@ namespace PortingAssistant.Common.Utils
             TelemetryCollector.Collect<SolutionMetrics>(solutionMetrics);
         }
 
-        public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework)
+        public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework, ProjectTableData preTriggerData = null)
         {
-            var projectMetrics = createProjectMetric(request.runId, request.triggerType, tgtFramework, projectAnalysisResult);
+            var projectMetrics = createProjectMetric(request.runId, request.triggerType, tgtFramework, projectAnalysisResult, preTriggerData);
             TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
         }
 
@@ -64,7 +65,7 @@ namespace PortingAssistant.Common.Utils
                 PortingAssistantVersion = MetricsBase.Version
             };
         }
-        public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult)
+        public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult, ProjectTableData preTriggerData = null)
         {
             return new ProjectMetrics
             {
@@ -80,7 +81,10 @@ namespace PortingAssistant.Common.Utils
                 NumReferences = projectAnalysisResult.ProjectReferences.Count,
                 IsBuildFailed = projectAnalysisResult.IsBuildFailed,
                 CompatibilityResult = projectAnalysisResult.ProjectCompatibilityResult,
-                PortingAssistantVersion = MetricsBase.Version
+                PortingAssistantVersion = MetricsBase.Version,
+                PreTriggerApiInCompatibilityCount = preTriggerData?.incompatibleApis,
+                PreTriggerFramework = preTriggerData?.targetFramework,
+                PreTriggerBuildErrorCount = preTriggerData?.buildErrors
             };
         }
 

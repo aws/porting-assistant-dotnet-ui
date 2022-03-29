@@ -113,6 +113,7 @@ function* handleInit(action: ReturnType<typeof init>) {
             actionsOnly: false,
             compatibleOnly: false
           },
+          preTriggerData:[], // ignore the preTriggerData at initialzation stage
           force: action.payload
         })
       );
@@ -183,7 +184,8 @@ function* handleAnalyzeSolution(action: ReturnType<typeof analyzeSolution.reques
       currentSolutionPath,
       action.payload.runId,
       action.payload.triggerType,
-      action.payload.settings
+      action.payload.settings,
+      action.payload.preTriggerData
     );
 
     if (solutionDetails.status.status === "Success") {
@@ -388,3 +390,4 @@ export default function* backendSaga() {
     watchPing()
   ]);
 }
+
