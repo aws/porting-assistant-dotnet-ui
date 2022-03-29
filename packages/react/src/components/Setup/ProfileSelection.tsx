@@ -151,10 +151,14 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
 
   const validateProfile = (profile: string, accessKeyID: string, useDefault: boolean): boolean => {
     let isValid = true;
-    if ((!useDefault && !profile) || (useDefault && !accessKeyID)) {
+    if (!useDefault && !profile) {
       isValid = false;
       setProfileErrorText("AWS named profile is required.");
-    } else {
+    } else if ((useDefault && !accessKeyID)) {
+      isValid = false;
+      setProfileErrorText("AWS profile not found.");
+    }
+    else {
       setProfileErrorText("");
     }
     return isValid;
