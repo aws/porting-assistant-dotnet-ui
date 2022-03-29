@@ -416,5 +416,4 @@ const columnDefinitions: TableProps.ColumnDefinition<DashboardTableData>[] = [
 ];
 
 const inProgress = () => <StatusIndicator type="in-progress">In progress</StatusIndicator>;
-
 export const DashboardTable = React.memo(DashboardTableInternal);
