@@ -50,7 +50,7 @@ const RouteWithError: React.FC<RouteWithErrorProps> = ({ children, requireProfil
               type: "warning",
               // loading: false,
               content: `The current credentials have expired. Please review and update AWS credentials.`,
-              dismissible: true,
+              dismissible: false,
               buttonText: "Update Credentials",
               onButtonClick: () => {history.push('/settings')}
           })

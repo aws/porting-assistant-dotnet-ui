@@ -87,7 +87,7 @@ export const initTelemetryConnection = (logger: any = console) => {
           }
       },
       registerListeners: (browserWindow: Electron.BrowserWindow) => {
-          if (!localStore.get("profile") && !localStore.get("useDefaultCreds")) {
+          if (!localStore.get("profile")) {
               console.log("Did not find profile, setting onDidChange");
               localStore.onDidChange("profile", () => {
                   console.log("Profile changed, recreating connection");
@@ -97,8 +97,16 @@ export const initTelemetryConnection = (logger: any = console) => {
                   }
                   instance = createConnection(browserWindow);
               });
+              localStore.onDidChange("useDefaultCreds", () => {
+                console.log("Profile changed, recreating connection");
+                if (instance != null) {
+                    instance.close();
+                    instance = undefined;
+                }
+                instance = createConnection(browserWindow);
+            });
           } else {
-              console.log("profileFound: " + (localStore.get("profile") || "Default") );
+              console.log("profileFound: " + localStore.get("profile") );
               instance = createConnection(browserWindow);
           }
       },
@@ -287,8 +295,10 @@ export const initConnection = (logger: any = console) => {
       }
     },
     registerListeners: (browserWindow: Electron.BrowserWindow) => {
-      if (!localStore.get("profile") && !localStore.get("useDefaultCreds")) {
+      if (!localStore.get("profile")) {
         console.log("Did not find profile, setting onDidChange");
+        console.log("Profile: ", localStore.get("profile"))
+        console.log("use default creds: ", localStore.get("useDefaultCreds"))
         localStore.onDidChange("profile", () => {
           console.log("Profile changed, recreating connection");
           if (instance != null) {
@@ -298,8 +308,16 @@ export const initConnection = (logger: any = console) => {
           instance = createConnection(browserWindow);
           registerLogListeners(instance);
         });
+        localStore.onDidChange("useDefaultCreds", () => {
+          console.log("Default creds option changed, recreating connection");
+          if (instance != null) {
+              instance.close();
+              instance = undefined;
+          }
+          instance = createConnection(browserWindow);
+      });
       } else {
-        console.log("profileFound: " + (localStore.get("profile") || 'Default') );
+        console.log("profileFound: " + localStore.get("profile"));
         instance = createConnection(browserWindow);
         registerLogListeners(instance);
       }
