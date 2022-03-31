@@ -20,6 +20,7 @@ import { useHistory } from "react-router";
 
 import { externalUrls } from "../../constants/externalUrls";
 import { init, setProfileSet } from "../../store/actions/backend";
+import { getProfileName } from "../../utils/getProfileName";
 import { InfoLink } from "../InfoLink";
 import styles from "./ProfileSelection.module.scss";
 import { ProfileSelectionModal } from "./ProfileSelectionModal";
@@ -200,13 +201,13 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
               setError(
                 "profileSelection",
                 "error",
-                `${selectedProfile || "Default Profile"} does not have the correct IAM policies. If you need help setting up your profile see Learn more above.`
+                `${getProfileName(selectedProfile)} does not have the correct IAM policies. If you need help setting up your profile see Learn more above.`
               );
             } else {
               setError(
                 "useDefaultCreds",
                 "error",
-                `${selectedProfile || "Default Profile"} does not have the correct IAM policies. If you need help setting up your profile see Learn more above.`
+                `${getProfileName(selectedProfile)} does not have the correct IAM policies. If you need help setting up your profile see Learn more above.`
               );
             }
 
@@ -285,7 +286,6 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                 useDefaultCredentials && 
                 <div>
                   <div className="awsui-util-label">AWS access key ID</div>
-                  {/* TODO: Add or condition */}
                   <div>{defaultCredentialsAccessKeyID}</div>
                 </div>
               }

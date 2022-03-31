@@ -12,6 +12,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { externalUrls } from "../../constants/externalUrls";
+import { getProfileName } from "../../utils/getProfileName";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { InfoLink } from "../InfoLink";
 
@@ -44,13 +45,6 @@ const SettingsDashboardInternal: React.FC = () => {
   const shareState = window.electron.getState("share");
   isShared.current = shareState ? "Enabled" : "Disabled";
 
-  const getProfileName = (profileName: string|undefined) => {
-    if (profileName === "DEFAULT_SDK_CHAIN_PROVIDER_CREDENTIAL_PROFILE"){
-      return "Using Default Credentials"} 
-    else {
-      return profileName
-    }
-  }
   return (
     <SpaceBetween size="m">
       <Header
