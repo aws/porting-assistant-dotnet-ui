@@ -17,6 +17,10 @@ export class TestRunner {
     return solutionPath.replace(/[^0-9a-zA-Z]/gi, "");
   };
 
+  delay = async (s: number) => {
+      return new Promise(resolve => setTimeout(resolve, s*1000));
+    }
+
   selectTargetFramework = async (targetFramework: string) => {
     await (await this.app.client.$("#targetFramework-selection")).click();
     await (await this.app.client.$(`[title="${targetFramework}"`)).click();
@@ -51,14 +55,19 @@ export class TestRunner {
     await (await this.app.client.$('[name="profileName"]')).setValue(profileName);
     await (await this.app.client.$('[name="accessKeyID"]')).setValue(accessKeyId);
     await (await this.app.client.$('[name="secretAccessKey"]')).setValue(secretAccessKey);
-
     await (await this.app.client.$("#add-profile-button")).click();
-  };
+    };
+
+    selectDefaultCredentials = async () => {
+        await (
+            await this.app.client.$("[data-value=\"default\"]")
+        ).click();
+    };
 
   selectNamedProfile = async (profileName: string, targetFramework: string = "") => {
     if (targetFramework !== "") {
       await this.selectTargetFramework(targetFramework);
-    }
+     }
     await (await this.app.client.$("#profile-selection")).click();
     await (await this.app.client.$(`[title="${profileName}"]`)).click();
     await (await this.app.client.$("#next-btn")).click();

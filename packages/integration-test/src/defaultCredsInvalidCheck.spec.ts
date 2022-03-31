@@ -34,8 +34,8 @@ describe("default creds check, check behavior with invalid profile", () => {
         await app.client.pause(3000);
         await (await app.client.$("#start-btn")).click();
         await runner.selectDefaultCredentials();
-        await runner.validateComponentExists('div=InValid');
-
+        await (await app.client.$("#next-btn")).click();
+        await runner.validateComponentExists('span=Default Credentials does not have the correct IAM policies. If you need help setting up your profile see Learn more above.');
     });
 }
 )
