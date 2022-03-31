@@ -44,6 +44,13 @@ const SettingsDashboardInternal: React.FC = () => {
   const shareState = window.electron.getState("share");
   isShared.current = shareState ? "Enabled" : "Disabled";
 
+  const getProfileName = (profileName: string|undefined) => {
+    if (profileName === "DEFAULT_SDK_CHAIN_PROVIDER_CREDENTIAL_PROFILE"){
+      return "Using Default Credentials"} 
+    else {
+      return profileName
+    }
+  }
   return (
     <SpaceBetween size="m">
       <Header
@@ -91,7 +98,7 @@ const SettingsDashboardInternal: React.FC = () => {
               <Box margin={{ bottom: "xxxs" }} color="text-label">
                 AWS named profile
               </Box>
-              <div id="current-profile-name">{profileName.current || "Using Default Credentials"}</div>
+              <div id="current-profile-name">{getProfileName(profileName.current)}</div>
               {profileValid === false && (
                 <Box margin={{ top: "xxs" }} id="current-profile-status">
                   <Box variant="small">

@@ -36,12 +36,13 @@ const sendRequest = async (
 ): Promise<boolean> => {
   const metricsEnabled = localStore.get("share");
   const profileName = newProfile || localStore.get("profile");
+  const useDefaultCreds = localStore.get("useDefaultCreds");
   const credentials: Credentials | undefined = await getProfileCredentials(profileName);
   const awsAccessKeyId: string | undefined = credentials?.accessKeyId;
   const awsSecretAccessKey: string | undefined = credentials?.secretAccessKey;
   const awsSessionToken: string | undefined = credentials?.sessionToken;
 
-  if (!metricsEnabled && !newProfile) {
+  if (!metricsEnabled && !newProfile && !useDefaultCreds) {
     return true;
   }
 

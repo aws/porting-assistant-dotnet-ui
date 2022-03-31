@@ -35,6 +35,7 @@ type FormData = {
   targetFrameworkSelection: SelectProps.Option;
   share: boolean;
   email: string;
+  useDefaultCreds: boolean;
 };
 
 const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) => {
@@ -45,6 +46,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
   const { isSubmitting } = formState;
   const dispatch = useDispatch();
   const currentProfile = window.electron.getState("profile");
+  const cachedUseDefaultCreds = window.electron.getState("useDefaultCreds");
   const cachedTargetFramework = window.electron.getState("targetFramework");
   const currentTargetFramework =
     cachedTargetFramework.id === "netstandard2.1"
@@ -57,11 +59,10 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
   const [targetFramework, setTargetFramework] = useState(currentTargetFramework);
   const [profiles, setProfiles] = useState({ label: currentProfile, id: "" } as SelectProps.Option);
   const [defaultCredentialsAccessKeyID, setDefaultCredentialsAccessKeyID] = useState("");
-  const [useDefaultCredentials, setUseDefaultCredentials] = useState(false);
+  const [useDefaultCredentials, setUseDefaultCredentials] = useState(false || cachedUseDefaultCreds);
   const enableDefaultCredentials = true;
   const [profileErrorText, setProfileErrorText] = useState("");
   const [selectedProfile, setSelectedProfile] = useState(currentProfile);
-
 
   useEffect(() => {
     window.electron
@@ -88,11 +89,15 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
 
   // Retrieve AWS SDK default credentials     
   useEffect(() => {
-    window.electron
-    .getCredentials()
-    .then(credentials => {
-      setDefaultCredentialsAccessKeyID(credentials?.accessKeyId || "");
-    }).catch(err => console.log(`Failed to retrieve AWS SDK default credentials ${err.stack}`));
+    async function fetchDefaultProfile() {
+      try {
+        const creds = await window.electron.getCredentials();
+        setDefaultCredentialsAccessKeyID(creds?.accessKeyId || "");  
+      } catch (error) {
+        console.log(`Failed to retrieve AWS SDK default credentials ${error.stack}`)
+      }
+    }
+    fetchDefaultProfile();
   }, [useDefaultCredentials]);
   
   const actionButton = useMemo(
@@ -115,8 +120,8 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
     setUseDefaultCredentials(useDefault);     
     let selectedId = selectedProfile;     
     if (useDefault) {
-      selectedId = "";     
-      setSelectedProfile("");
+      selectedId = "";    
+      setSelectedProfile("DEFAULT_SDK_CHAIN_PROVIDER_CREDENTIAL_PROFILE");
       window.electron.saveState("useDefaultCreds", true);
     } else {     
       selectedId =  window.electron.getState("profile") || profileOptions[0]?.label || "";
@@ -191,11 +196,20 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
             // set pending message and go back to settings dashboard
             next && next();
           } else {
-            setError(
-              "profileSelection",
-              "error",
-              `${selectedProfile || "Default Profile"} does not have the correct IAM policies. If you need help setting up your profile see Learn more above.`
-            );
+            if (!useDefaultCredentials) {
+              setError(
+                "profileSelection",
+                "error",
+                `${selectedProfile || "Default Profile"} does not have the correct IAM policies. If you need help setting up your profile see Learn more above.`
+              );
+            } else {
+              setError(
+                "useDefaultCreds",
+                "error",
+                `${selectedProfile || "Default Profile"} does not have the correct IAM policies. If you need help setting up your profile see Learn more above.`
+              );
+            }
+
           }
         })}
       >
@@ -257,7 +271,7 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
                 <Box fontSize="body-s" margin={{ right: "xxs" }} color="text-body-secondary">
                   Select an AWS Profile to allow Porting Assistant for .NET to access your application. You can also add an AWS named profile using the AWS CLI.
                 </Box>
-                <FormField id="profile-selection" errorText={profileErrorText}>
+                <FormField id="profile-selection" errorText={profileErrorText || errors.useDefaultCreds?.message}>
                 {enableDefaultCredentials && <Tiles
                 onChange={onUseDefaultCredentialsChanged}
                 value={useDefaultCredentials? "default" : "custom"}
