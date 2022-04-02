@@ -51,7 +51,7 @@ describe("netcore 3.1 test suite", () => {
       await addSolution(app, solutionPath);
       await app.client.refresh();
       const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
-      await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "49 of 85", "0", "(21)"]);
+      await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "50 of 85", "0", "(21)"]);
       const controllerFolderPath: string = path.join(solutionFolderPath, "MvcMusicStore", "Controllers");
       const getAccountController = fs.readFile(path.join(controllerFolderPath, "AccountController.cs"), "utf8");
       const getStoreManagerController = fs.readFile(path.join(controllerFolderPath, "StoreManagerController.cs"), "utf8");
@@ -92,7 +92,7 @@ describe("netcore 3.1 test suite", () => {
       await addSolution(app, solutionPath);
       await app.client.refresh();
       const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
-      await runner.validateHighLevelResults(results, ["0 of 40", "37 of 38", "471 of 1357", "0", "(1565)"]);
+      await runner.validateHighLevelResults(results, ["0 of 40", "37 of 38", "498 of 1357", "0", "(1565)"]);
 
       const getCatalogController = fs.readFile(
         path.join(solutionFolderPath, "Libraries", "Nop.Core", "Nop.Core.csproj"),
@@ -111,7 +111,7 @@ describe("netcore 3.1 test suite", () => {
         await addSolution(app, solutionPath);
         await app.client.refresh();
         const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
-        await runner.validateHighLevelResults(results, ['0 of 1', '16 of 44', '55 of 147', '0', '(37)']);
+        await runner.validateHighLevelResults(results, ['0 of 1', '16 of 44', '56 of 147', '0', '(37)']);
         const layoutFolderPath: string = path.join(solutionFolderPath, "src", "eShopLegacyWebForms", "Layouts");
         const siteRazorFile = fs.readFile(path.join(layoutFolderPath, "site.razor.cs"), "utf8");
         const getProgramcsFile = fs.readFile(path.join(solutionFolderPath,"src", "eShopLegacyWebForms", "Program.cs"), "utf8");
@@ -134,7 +134,7 @@ describe("netcore 3.1 test suite", () => {
         await addSolution(app, solutionPath);
         await app.client.refresh();
         const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
-        await runner.validateHighLevelResults(results, ['0 of 1', '8 of 14', '15 of 24', '0', '(9)']);
+        await runner.validateHighLevelResults(results, ['0 of 1', '8 of 14', '16 of 24', '0', '(9)']);
         const getStartcsFile = fs.readFile(path.join(solutionFolderPath, "MVCAppWithIISConfig", "Startup.cs"), "utf-8");
         const getProgramcsFile = fs.readFile(path.join(solutionFolderPath, "MVCAppWithIISConfig", "Program.cs"), "utf-8");
         const getMiddlewareHandlerFile = fs.readFile(path.join(solutionFolderPath, "MVCAppWithIISConfig","Middleware", "AppShutDownHandler.cs"), "utf-8");
