@@ -43,7 +43,7 @@ describe("canary test suite", () => {
     await addSolution(app, solutionPath);
     await app.client.refresh();
     const results = await runner.runThroughSolution(solutionPath, "inplace", "net6.0", false, false);
-    await runner.validateHighLevelResults(results, ["1 of 1", "2 of 13", "12 of 268", "84", "(21)"]);
+    await runner.validateHighLevelResults(results, ["1 of 1", "2 of 13", "12 of 268", "0", "(21)"]);
   });
 
   test("run through mvcmusicstore", async () => {
