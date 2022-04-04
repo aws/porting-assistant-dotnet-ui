@@ -66,41 +66,38 @@ export const initTelemetryConnection = (logger: any = console) => {
               app.getVersion()
           )
           .build();
+    console.log("Telemetry Connection Start.");
+    connection.onDisconnect = () => {
+      // Recreate connection on disconnect
+      logger.log("telemetry disconnected");
+      instance = undefined;
+    };
 
-      console.log("Telemetry Connection Start.");
-
-      connection.onDisconnect = () => {
-          // Recreate connection on disconnect
-          logger.log("telemetry disconnected");
-          instance = undefined;
-      };
-
-      return connection;
+    return connection;
   };
 
   return {
-      getConnectionInstance: () => instance,
-      closeConnection: () => {
-          if (instance != null) {
-              instance.close();
-          }
-      },
-      registerListeners: (browserWindow: Electron.BrowserWindow) => {
-          if (!localStore.get("profile")) {
-              console.log("Did not find profile, setting onDidChange");
-              localStore.onDidChange("profile", () => {
-                  console.log("Profile changed, recreating connection");
-                  if (instance != null) {
-                      instance.close();
-                      instance = undefined;
-                  }
-                  instance = createConnection(browserWindow);
-              });
-          } else {
-              console.log("profileFound: " + localStore.get("profile"));
-              instance = createConnection(browserWindow);
-          }
-      },
+    getConnectionInstance: () => instance,
+    closeConnection: () => {
+      if (instance != null) {
+        instance.close();
+      }
+    },
+    registerListeners: (browserWindow: Electron.BrowserWindow) => {
+      if (localStore.get("profile")) {
+        console.log("profileFound: " + localStore.get("profile"));
+        instance = createConnection(browserWindow);
+      }
+
+      localStore.onDidChange("profile", () => {
+        console.log("Profile changed, recreating telemetry connection");
+        if (instance != null) {
+          instance.close();
+          instance = undefined;
+        }
+        instance = createConnection(browserWindow);
+      });
+    },
   };
 };
 
@@ -128,9 +125,12 @@ export const initConnection = (logger: any = console) => {
   ipcMain.handle("telemetry", async (_event, message) => {
     logReactMetrics(message);
   });
-  ipcMain.handle("writeReactErrLog", async (_event, source, message, response) => {
-    logReactError(source, message, response);
-  });
+  ipcMain.handle(
+    "writeReactErrLog",
+    async (_event, source, message, response) => {
+      logReactError(source, message, response);
+    }
+  );
   ipcMain.handle("dialogShowOpenDialog", (_event, options: any) =>
     dialog.showOpenDialog(options)
   );
@@ -247,26 +247,29 @@ export const initConnection = (logger: any = console) => {
       const response = await connection.send("checkInternetAccess", "");
       return response;
     });
-    
+
     ipcMain.handle("sendCustomerFeedback", async (_event, upload) => {
       const response = await connection.send("sendCustomerFeedback", upload);
       return response;
     });
 
-    ipcMain.handle("copyDirectory", async (_event, solutionPath, destinationPath) => {
-       const request = {
-           solutionPath,
-           destinationPath
-          };
-       const response = await connection.send("copyDirectory", request);
-       return response;
-    });
+    ipcMain.handle(
+      "copyDirectory",
+      async (_event, solutionPath, destinationPath) => {
+        const request = {
+          solutionPath,
+          destinationPath,
+        };
+        const response = await connection.send("copyDirectory", request);
+        return response;
+      }
+    );
 
     ipcMain.handle("uploadRuleContribution", async (_event, upload) => {
       const response = await connection.send("uploadRuleContribution", upload);
       return response;
     });
-    
+
     connection.on("onNugetPackageUpdate", (response) => {
       browserWindow.webContents.send("onNugetPackageUpdate", response);
     });
@@ -286,22 +289,8 @@ export const initConnection = (logger: any = console) => {
       }
     },
     registerListeners: (browserWindow: Electron.BrowserWindow) => {
-      if (!localStore.get("profile")) {
-        console.log("Did not find profile, setting onDidChange");
-        localStore.onDidChange("profile", () => {
-          console.log("Profile changed, recreating connection");
-          if (instance != null) {
-            instance.close();
-            instance = undefined;
-          }
-          instance = createConnection(browserWindow);
-          registerLogListeners(instance);
-        });
-      } else {
-        console.log("profileFound: " + localStore.get("profile"));
-        instance = createConnection(browserWindow);
-        registerLogListeners(instance);
-      }
+      instance = createConnection(browserWindow);
+      registerLogListeners(instance);
     },
   };
 };
