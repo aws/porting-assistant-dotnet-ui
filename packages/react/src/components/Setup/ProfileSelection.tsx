@@ -92,8 +92,10 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
   useEffect(() => {
     async function fetchDefaultProfile() {
       try {
-        const creds = await window.electron.getCredentials();
-        setDefaultCredentialsAccessKeyID(creds?.accessKeyId || "");  
+        if (useDefaultCredentials) {
+          const creds = await window.electron.getCredentials();
+          setDefaultCredentialsAccessKeyID(creds?.accessKeyId || ""); 
+        }
       } catch (error) {
         console.log(`Failed to retrieve AWS SDK default credentials ${error.stack}`)
       }
@@ -128,7 +130,6 @@ const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) =
       selectedId =  window.electron.getState("profile") || profileOptions[0]?.label || "";
       window.electron.saveState("useDefaultCreds", false);
     }
-    validateProfile(selectedId, defaultCredentialsAccessKeyID, useDefault);
   }
 
   const onSelectProfile = useCallback(([e]) => {
