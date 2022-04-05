@@ -13,6 +13,7 @@ namespace PortingAssistant.UnitTests
         [Test]
         public void TestSolutionPath() 
         {
+            Telemetry.Model.MetricsBase.UsingDefault = true;
             var solutionPath = "C:/Users/CustomerName/nopCommerce/src/NopCommerce.sln";
             var encryptedSolutionPath = Crypto.SHA256(solutionPath);
             var runId = "1";
@@ -33,6 +34,7 @@ namespace PortingAssistant.UnitTests
             Assert.AreEqual(solutionMetric.ApplicationGuid, "test-application-guid");
             Assert.AreEqual(solutionMetric.SolutionGuid, "test-solution-guid");
             Assert.AreEqual(solutionMetric.RepositoryUrl, "https://github.com/test-project");
+            Assert.AreEqual(solutionMetric.UsingDefaultCreds, true);
         }
 
         [Test]
