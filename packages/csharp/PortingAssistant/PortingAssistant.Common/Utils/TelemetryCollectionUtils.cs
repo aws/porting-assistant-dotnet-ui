@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using PortingAssistant.Client.Common.Model;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Telemetry.Model;
@@ -19,7 +20,7 @@ namespace PortingAssistant.Common.Utils
             TelemetryCollector.Collect<SolutionMetrics>(solutionMetrics);
         }
 
-        public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework, ProjectTableData preTriggerData = null)
+        public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework, PreTriggerData preTriggerData = null)
         {
             var projectMetrics = createProjectMetric(request.runId, request.triggerType, tgtFramework, projectAnalysisResult, preTriggerData);
             TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
@@ -65,7 +66,7 @@ namespace PortingAssistant.Common.Utils
                 PortingAssistantVersion = MetricsBase.Version
             };
         }
-        public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult, ProjectTableData preTriggerData = null)
+        public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult, PreTriggerData preTriggerData = null)
         {
             return new ProjectMetrics
             {
@@ -81,12 +82,84 @@ namespace PortingAssistant.Common.Utils
                 NumReferences = projectAnalysisResult.ProjectReferences.Count,
                 IsBuildFailed = projectAnalysisResult.IsBuildFailed,
                 CompatibilityResult = projectAnalysisResult.ProjectCompatibilityResult,
+                PreCompatibilityResult = GenerateCompatibilityResults(preTriggerData?.sourceFileAnalysisResults?.ToList(),
+                    preTriggerData?.projectPath, preTriggerData?.ported),
                 PortingAssistantVersion = MetricsBase.Version,
-                PreTriggerApiInCompatibilityCount = preTriggerData?.incompatibleApis,
-                PreTriggerFramework = preTriggerData?.targetFramework,
-                PreTriggerBuildErrorCount = preTriggerData?.buildErrors
+                PreApiInCompatibilityCount = preTriggerData?.incompatibleApis,
+                PostApiInCompatibilityCount = GetIncompatibleApiCount(projectAnalysisResult),
+                PreFramework = preTriggerData?.targetFramework,
+                PreBuildErrorCount = preTriggerData?.buildErrors,
+                PostBuildErrorCount = projectAnalysisResult.Errors.Count
             };
         }
+
+        public static int GetIncompatibleApiCount(ProjectAnalysisResult projectAnalysisResult) {
+            var dictionary = new Dictionary<string, bool>();
+            var sourceFileAnalysisResults = projectAnalysisResult.SourceFileAnalysisResults;
+            sourceFileAnalysisResults.ForEach(SourceFileAnalysisResult =>
+            {
+                SourceFileAnalysisResult.ApiAnalysisResults.ForEach(apiAnalysisResult =>
+                {
+                    var compatibility = apiAnalysisResult.CompatibilityResults?.FirstOrDefault().Value?.Compatibility;
+                    bool isCompatible = (compatibility == Compatibility.UNKNOWN || compatibility == Compatibility.COMPATIBLE);
+                    var key = apiAnalysisResult.CodeEntityDetails?.OriginalDefinition + "-" +
+                        apiAnalysisResult.CodeEntityDetails?.Package?.PackageId?.ToLower() + "-" +
+                        apiAnalysisResult.CodeEntityDetails?.Package?.Version?.ToLower();
+                    if (!dictionary.ContainsKey(key))
+                    {
+                        dictionary.Add(key, isCompatible);
+                    }
+                });
+            });
+            return dictionary.Count - dictionary.Count(c => c.Value);
+        }
+
+        public static ProjectCompatibilityResult GenerateCompatibilityResults(List<SourceFileAnalysisResult> sourceFileAnalysisResults, string projectPath, bool? isPorted)
+        {
+            if (sourceFileAnalysisResults == null || sourceFileAnalysisResults.Count == 0)
+                return null;
+
+            var projectCompatibilityResult = new ProjectCompatibilityResult() { IsPorted = isPorted.HasValue? isPorted.Value:false, ProjectPath = projectPath };
+
+            sourceFileAnalysisResults.ForEach(SourceFileAnalysisResult =>
+            {
+                SourceFileAnalysisResult.ApiAnalysisResults.ForEach(apiAnalysisResult =>
+                {
+                    var currentEntity = projectCompatibilityResult.CodeEntityCompatibilityResults.First(r => r.CodeEntityType == apiAnalysisResult.CodeEntityDetails.CodeEntityType);
+
+                    var hasAction = SourceFileAnalysisResult.RecommendedActions.Any(ra => ra.TextSpan.Equals(apiAnalysisResult.CodeEntityDetails.TextSpan));
+                    if (hasAction)
+                    {
+                        currentEntity.Actions++;
+                    }
+                    var compatibility = apiAnalysisResult.CompatibilityResults?.FirstOrDefault().Value?.Compatibility;
+                    if (compatibility == Compatibility.COMPATIBLE)
+                    {
+                        currentEntity.Compatible++;
+                    }
+                    else if (compatibility == Compatibility.INCOMPATIBLE)
+                    {
+                        currentEntity.Incompatible++;
+                    }
+                    else if (compatibility == Compatibility.UNKNOWN)
+                    {
+                        currentEntity.Unknown++;
+
+                    }
+                    else if (compatibility == Compatibility.DEPRECATED)
+                    {
+                        currentEntity.Deprecated++;
+                    }
+                    else
+                    {
+                        currentEntity.Unknown++;
+                    }
+                });
+            });
+
+            return projectCompatibilityResult;
+        }
+
 
         public static NugetMetrics createNugetMetric(string runId, string triggerType, string tgtFramework, Task<PackageAnalysisResult> result)
         { 

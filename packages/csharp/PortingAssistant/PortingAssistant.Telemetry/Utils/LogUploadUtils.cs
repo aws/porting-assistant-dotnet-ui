@@ -141,7 +141,8 @@ namespace PortingAssistant.Telemetry.Utils
                     }
                     else
                     {
-                        string typeOfLog = fName.Split('-')[1];
+
+                        string typeOfLog = (fName.Split('-').Length > 1) ? fName.Split('-')[1]: String.Empty;
                         if (typeOfLog == "assessment")
                         {
                             continue;

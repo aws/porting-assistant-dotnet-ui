@@ -17,6 +17,7 @@ import { useHistory } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
+import { PreTriggerData } from "../../models/project";
 import { analyzeSolution, exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import { removePortedSolution } from "../../store/actions/porting";
@@ -29,7 +30,6 @@ import { getCompatibleApi } from "../../utils/getCompatibleApi";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isLoaded } from "../../utils/Loadable";
 import { useNugetFlashbarMessages } from "../AssessShared/useNugetFlashbarMessages";
-import { TableData } from "../AssessSolution/ProjectsTable";
 import { InfoLink } from "../InfoLink";
 import { LinkComponent } from "../LinkComponent";
 import { TableHeader } from "../TableHeader";
@@ -79,11 +79,11 @@ const DashboardTableInternal: React.FC = () => {
         })
       );
 
-      let projectTableData: TableData[] = [];
+      let projectTableData: PreTriggerData[] = [];
       const solutionDetails = solutionToSolutionDetails[solutionPath];
       const projectToApiAnalysis = apiAnalysis[solutionPath];
       if (isLoaded(solutionDetails)) {
-          projectTableData = solutionDetails.data.projects.map<TableData>(project => {
+          projectTableData = solutionDetails.data.projects.map<PreTriggerData>(project => {
             const apis = getCompatibleApi(
               solutionDetails,
               projectToApiAnalysis,
@@ -91,20 +91,19 @@ const DashboardTableInternal: React.FC = () => {
               null,
               targetFramework
             );
+            var projectApiAnalysisResult = projectToApiAnalysis[project.projectFilePath];
+            var sourceFileAnalysisResults = (isLoaded(projectApiAnalysisResult))?
+                 projectApiAnalysisResult.data.sourceFileAnalysisResults: null;
             return {
               projectName: project.projectName || "-",
               projectPath: project.projectFilePath || "-",
               solutionPath: solutionPath || "-",
               targetFramework: project.targetFrameworks?.join(", ") || "-",
-              referencedProjects: project.projectReferences?.length || 0,
-              incompatiblePackages: null,
-              totalPackages: project.packageReferences?.length || 0,
               incompatibleApis: apis.isApisLoading ? null : apis.values[1] - apis.values[0],
               totalApis: apis.values[1],
               buildErrors: getErrorCounts(projectToApiAnalysis, project.projectFilePath, null),
-              portingActions: null,
               ported: false,
-              buildFailed: false
+              sourceFileAnalysisResults: sourceFileAnalysisResults
             };
           });
       }

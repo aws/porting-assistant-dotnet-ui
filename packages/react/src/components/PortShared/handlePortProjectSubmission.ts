@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { v4 as uuid } from "uuid";
 
 import { PortingLocation } from "../../models/porting";
-import { Project, VersionPair } from "../../models/project";
+import { PreTriggerData, Project, VersionPair } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution } from "../../store/actions/backend";
 import {
@@ -24,7 +24,7 @@ export const handlePortProjectSubmission = async (
     projects: Project[],
     targetFramework: string,
     portingLocation: PortingLocation,
-    preTriggerProjectsTableData: TableData[],
+    preTriggerData: PreTriggerData[],
     dispatch: ReturnType<typeof useDispatch>
 ) => {
     dispatch(
@@ -39,7 +39,7 @@ export const handlePortProjectSubmission = async (
     );
 
     let preTriggerDataArray: string[] = [];
-    preTriggerProjectsTableData.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
+    preTriggerData.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
 
     const portingSolutionPath = getPortingSolutionPath(solution, portingLocation);
     if (portingLocation.type === "copy" && !window.electron.pathExists(portingSolutionPath)) {

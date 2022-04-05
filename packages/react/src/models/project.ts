@@ -106,6 +106,19 @@ export interface VersionPair {
   upgradeVersion: string;
 }
 
+export interface PreTriggerData {
+  projectName: string;
+  projectPath: string;
+  solutionPath: string;
+  targetFramework: string;
+  incompatibleApis: number | null;
+  totalApis: number | null;
+  buildErrors: number | null;
+  ported: boolean;
+  sourceFileAnalysisResults: SourceFileAnalysisResult[] | null;
+
+}
+
 export type CompatibleTargets = string;
 export type Compatibility = "UNKNOWN" | "COMPATIBLE" | "INCOMPATIBLE" | "DEPRACATED";
 export type RecommendedActionType =

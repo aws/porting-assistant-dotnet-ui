@@ -37,13 +37,11 @@ namespace PortingAssistant.Common.Services
                 var solutionAnalysisResult = _client.AnalyzeSolutionAsync(request.solutionFilePath, request.settings);
                 solutionAnalysisResult.Wait();
 
-                _logger.LogInformation("get preTriggerData");
-                var preProjectTriggerDataDictionary = new Dictionary<string, ProjectTableData>();
+                var preProjectTriggerDataDictionary = new Dictionary<string, PreTriggerData>();
                 if (request.preTriggerData != null && request.preTriggerData.Length > 0)
                 {
                     Array.ForEach(request.preTriggerData, prop => {
-                        var proj = JsonConvert.DeserializeObject<ProjectTableData>(prop);
-                        _logger.LogInformation(proj.projectName + ": incompatibleApi " + proj.incompatibleApis);
+                        var proj = JsonConvert.DeserializeObject<PreTriggerData>(prop);
                         if (!preProjectTriggerDataDictionary.ContainsKey(proj.projectName))
                         {
                             preProjectTriggerDataDictionary.Add(proj.projectName, proj);
@@ -63,10 +61,8 @@ namespace PortingAssistant.Common.Services
                         {
                             return;
                         }
-                        _logger.LogInformation("projectAnalysisResult.ProjectName: " + projectAnalysisResult.ProjectName);
                         var preTriggerProjectData = preProjectTriggerDataDictionary.ContainsKey(projectAnalysisResult.ProjectName) ?
                             preProjectTriggerDataDictionary[projectAnalysisResult.ProjectName] : null;
-                        _logger.LogInformation("preTriggerProjectData is null? " + (preTriggerProjectData == null));
                         TelemetryCollectionUtils.CollectProjectMetrics(projectAnalysisResult, request, tgtFramework, preTriggerProjectData);
 
                         projectAnalysisResult.PackageAnalysisResults.ToList()
