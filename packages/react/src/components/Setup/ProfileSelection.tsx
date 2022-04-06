@@ -39,7 +39,7 @@ type FormData = {
   useDefaultCreds: boolean;
 };
 
-const ProfileSelecionInternal: React.FC<Props> = ({ title, next, buttonText }) => {
+const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) => {
   const { control, errors, handleSubmit, setError, formState } = useForm<FormData>();
   const [profileOptions, setProfileOptions] = useState(new Array<SelectProps.Option>());
   const [showModal, setShowModal] = useState(false);
@@ -428,4 +428,4 @@ export const targetFrameworkOptions: SelectProps.Option[] = [
   { label: ".NET Core 3.1.0", value: "netcoreapp3.1" }
 ];
 
-export const ProfileSelecion = React.memo(ProfileSelecionInternal);
+export const ProfileSelection = React.memo(ProfileSelectionInternal);
