@@ -46,10 +46,7 @@ namespace PortingAssistant.Common.Services
                         {
                             preProjectTriggerDataDictionary.Add(proj.projectName, proj);
                         }
-                    }
-                    );
-                    _logger.LogInformation("request.preTriggerData.keys:" + String.Join("::", preProjectTriggerDataDictionary.Keys));
-
+                    });
                 }
 
                 if (solutionAnalysisResult.IsCompletedSuccessfully)

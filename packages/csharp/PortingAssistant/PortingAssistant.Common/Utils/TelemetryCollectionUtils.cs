@@ -1,5 +1,4 @@
-using Newtonsoft.Json;
-using PortingAssistant.Client.Common.Model;
+using PortingAssistant.Client.Common.Utils;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Telemetry.Model;
@@ -82,8 +81,9 @@ namespace PortingAssistant.Common.Utils
                 NumReferences = projectAnalysisResult.ProjectReferences.Count,
                 IsBuildFailed = projectAnalysisResult.IsBuildFailed,
                 CompatibilityResult = projectAnalysisResult.ProjectCompatibilityResult,
-                PreCompatibilityResult = GenerateCompatibilityResults(preTriggerData?.sourceFileAnalysisResults?.ToList(),
-                    preTriggerData?.projectPath, preTriggerData?.ported),
+
+                PreCompatibilityResult = AnalysisUtils.GenerateCompatibilityResults(preTriggerData?.sourceFileAnalysisResults?.ToList(),
+                    preTriggerData?.projectPath, preTriggerData?.ported?? false),
                 PortingAssistantVersion = MetricsBase.Version,
                 PreApiInCompatibilityCount = preTriggerData?.incompatibleApis,
                 PostApiInCompatibilityCount = GetIncompatibleApiCount(projectAnalysisResult),
@@ -113,53 +113,6 @@ namespace PortingAssistant.Common.Utils
             });
             return dictionary.Count - dictionary.Count(c => c.Value);
         }
-
-        public static ProjectCompatibilityResult GenerateCompatibilityResults(List<SourceFileAnalysisResult> sourceFileAnalysisResults, string projectPath, bool? isPorted)
-        {
-            if (sourceFileAnalysisResults == null || sourceFileAnalysisResults.Count == 0)
-                return null;
-
-            var projectCompatibilityResult = new ProjectCompatibilityResult() { IsPorted = isPorted.HasValue? isPorted.Value:false, ProjectPath = projectPath };
-
-            sourceFileAnalysisResults.ForEach(SourceFileAnalysisResult =>
-            {
-                SourceFileAnalysisResult.ApiAnalysisResults.ForEach(apiAnalysisResult =>
-                {
-                    var currentEntity = projectCompatibilityResult.CodeEntityCompatibilityResults.First(r => r.CodeEntityType == apiAnalysisResult.CodeEntityDetails.CodeEntityType);
-
-                    var hasAction = SourceFileAnalysisResult.RecommendedActions.Any(ra => ra.TextSpan.Equals(apiAnalysisResult.CodeEntityDetails.TextSpan));
-                    if (hasAction)
-                    {
-                        currentEntity.Actions++;
-                    }
-                    var compatibility = apiAnalysisResult.CompatibilityResults?.FirstOrDefault().Value?.Compatibility;
-                    if (compatibility == Compatibility.COMPATIBLE)
-                    {
-                        currentEntity.Compatible++;
-                    }
-                    else if (compatibility == Compatibility.INCOMPATIBLE)
-                    {
-                        currentEntity.Incompatible++;
-                    }
-                    else if (compatibility == Compatibility.UNKNOWN)
-                    {
-                        currentEntity.Unknown++;
-
-                    }
-                    else if (compatibility == Compatibility.DEPRECATED)
-                    {
-                        currentEntity.Deprecated++;
-                    }
-                    else
-                    {
-                        currentEntity.Unknown++;
-                    }
-                });
-            });
-
-            return projectCompatibilityResult;
-        }
-
 
         public static NugetMetrics createNugetMetric(string runId, string triggerType, string tgtFramework, Task<PackageAnalysisResult> result)
         { 

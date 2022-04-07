@@ -214,7 +214,6 @@ const DashboardTableInternal: React.FC = () => {
               key="reassess-solution"
               disabled={selectedItems.length === 0}
               onClick={() => {
-                
                 reassessSolution(selectedItems[0].path);
               }}
               iconName="refresh"
