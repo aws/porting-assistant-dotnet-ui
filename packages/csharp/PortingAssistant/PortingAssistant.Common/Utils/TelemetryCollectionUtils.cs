@@ -67,6 +67,9 @@ namespace PortingAssistant.Common.Utils
         }
         public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult, PreTriggerData preTriggerData = null)
         {
+            var preCompatibilityResult = (preTriggerData == null || preTriggerData?.sourceFileAnalysisResults == null || preTriggerData.sourceFileAnalysisResults.Length == 0)
+                ? null : AnalysisUtils.GenerateCompatibilityResults(preTriggerData?.sourceFileAnalysisResults?.ToList(),
+                    preTriggerData?.projectPath, preTriggerData?.ported ?? false);
             return new ProjectMetrics
             {
                 MetricsType = MetricsType.Project,
@@ -81,9 +84,7 @@ namespace PortingAssistant.Common.Utils
                 NumReferences = projectAnalysisResult.ProjectReferences.Count,
                 IsBuildFailed = projectAnalysisResult.IsBuildFailed,
                 CompatibilityResult = projectAnalysisResult.ProjectCompatibilityResult,
-
-                PreCompatibilityResult = AnalysisUtils.GenerateCompatibilityResults(preTriggerData?.sourceFileAnalysisResults?.ToList(),
-                    preTriggerData?.projectPath, preTriggerData?.ported?? false),
+                PreCompatibilityResult = preCompatibilityResult,
                 PortingAssistantVersion = MetricsBase.Version,
                 PreApiInCompatibilityCount = preTriggerData?.incompatibleApis,
                 PostApiInCompatibilityCount = GetIncompatibleApiCount(projectAnalysisResult),
