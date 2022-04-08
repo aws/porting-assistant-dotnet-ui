@@ -28,7 +28,14 @@
     "precommit": "lint-staged"
   },
   "devDependencies": {
+    "@babel/core": "^7.16.7",
+    "@babel/preset-env": "7.16.7",
+    "@babel/preset-typescript": "7.16.7",
+    "@testing-library/jest-dom": "5.16.1",
+    "@testing-library/react": "^13.0.0",
+    "@testing-library/user-event": "13.5.0",
     "@types/classnames": "^2.2.10",
+    "@types/enzyme-adapter-react-16": "1.0.6",
     "@types/jest": "^25.2.3",
     "@types/node": "^13.9.0",
     "@types/react": "^17.0.36",
@@ -41,29 +48,66 @@
     "@types/uuid": "^8.0.0",
     "@types/xmldom": "^0.1.29",
     "cross-env": "^7.0.2",
+    "enzyme": "3.11.0",
+    "enzyme-adapter-react-16": "1.15.6",
     "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-flowtype": "^3.13.0",
     "eslint-plugin-simple-import-sort": "^5.0.3",
+    "jest": "26.6.3",
+    "jest-canvas-mock": "2.3.1",
+    "jest-environment-node": "26.6.2",
     "lint-staged": "^10.5.0",
     "node-sass": "^4.14.1",
     "prettier": "^1.19.1",
     "react-scripts": "4.0.0",
-    "ts-jest": "^23.0.0",
+    "redux-mock-store": "1.5.4",
+    "ts-jest": "^23.10.5",
     "typescript": "^3.9.7",
     "vis-data": "^6.5.1"
+  },
+  "jest": {
+    "preset": "react-native",
+    "transform": {
+      ".(js|jsx)": "babel-jest",
+      ".(ts|tsx)": "ts-jest"
+    },
+    "transformIgnorePatterns": [
+      ".json",
+      "/node_modules/(?!@amzn).+\\.js$"
+    ],
+    "coverageReporters": [
+      "html"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 32,
+        "functions": 46,
+        "lines": 45,
+        "statements": 44
+      }
+    }
+  },
+  "resolutions": {
+    "jest-environment-jsdom": "^26.0.1"
   },
   "dependencies": {
     "@awsui/collection-hooks": "^1.0.0",
     "@awsui/components-react": "^3.0",
     "@awsui/design-tokens": "^3.0",
     "@awsui/global-styles": "^1.0.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.17.9",
+    "@types/enzyme": "^3.10.11",
+    "@types/enzyme-adapter-react-16": "^1.0.6",
     "ace-builds": "^1.4.9",
     "axios": "^0.21.1",
     "axios-retry": "^3.1.2",
+    "babel-jest": "^27.5.1",
     "classnames": "^2.2.6",
     "compare-versions": "^3.6.0",
     "csv-stringify": "^5.5.0",
     "electron": "^10.4.7",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.6",
     "immer": "^6.0.1",
     "re-reselect": "^3.4.0",
     "react": "^16.14.0",

@@ -1,8 +1,14 @@
+import Enzyme from "enzyme";
+import Adapter from "enzyme-adapter-react-16";
 import fs from "fs";
 
 import { LocalStoreSchema } from "./models/localStoreSchema";
 import { Credentials } from "./models/setup";
 import { NugetPackageReducerState, SolutionReducerState } from "./store/reducers";
+
+Enzyme.configure({
+  adapter: new Adapter(),
+});
 
 global.window = {
   electron: {
@@ -28,14 +34,12 @@ global.window = {
     getRelativePath: (sourcePath: string, targetPath: string) => "test",
     getPathSeparator: () => "test",
     joinPaths: (...paths: string[]) => "test",
-    getProfiles: () => {
-      return {
-        rest: {
-          aws_access_key_id: "xxx",
-          aws_secret_access_key: "xxxx"
-        }
-      };
-    },
+    getProfiles: jest.fn().mockReturnValue(Promise.resolve({configFile: {}, credentialsFile: {}})),
+    getCredentials: jest.fn().mockReturnValue(Promise.resolve({
+      accessKeyId: "accessKeyID_selectedProfileTest",
+      secretAccessKey: "secretAccessKey_selectedProfileTest",
+      sessionToken: "sessionToken_selectedProfileTest"
+    })),
     writeProfile: (profileName: string, credentials: Credentials) => null,
     writeZipFile: () => {
       throw new Error("not implement");
