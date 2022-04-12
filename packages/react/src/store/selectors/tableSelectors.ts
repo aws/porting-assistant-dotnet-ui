@@ -207,6 +207,15 @@ export const selectDashboardTableData = createSelector(
   }
 );
 
+export const selectSolutionToApiAnalysis = createSelector(
+  selectApiAnalysis,
+  (
+    solutionToApiAnalysis,
+  ) : SolutionToApiAnalysis => {
+    return solutionToApiAnalysis
+  }
+);
+
 export const selectProjectTableData = createCachedSelector(
   selectApiAnalysis,
   selectNugetPackages,

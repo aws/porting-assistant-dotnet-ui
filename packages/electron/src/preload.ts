@@ -115,8 +115,9 @@ contextBridge.exposeInMainWorld("backend", {
       continiousEnabled: boolean;
       actionsOnly: boolean;
       compatibleOnly: boolean;
-    }
-  ) => invokeBackend("analyzeSolution", solutionFilePath, runId, triggerType, settings),
+    },
+    preTriggerData: string[]
+  ) => invokeBackend("analyzeSolution", solutionFilePath, runId, triggerType, settings, preTriggerData),
   openSolutionInIDE: (solutionFilePath: string) =>
     invokeBackend("openSolutionInIDE", solutionFilePath),
   getFileContents: (sourceFilePath: string) =>

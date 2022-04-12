@@ -37,7 +37,7 @@ const PortProjectDashboardInternal: React.FC<Props> = ({ solution, project, port
           setError("targetFramework", { type: "required", message: "Target Framework is required." });
           return;
         }
-        handlePortProjectSubmission(data, solution, [project], targetFramework.id, portingLocation, dispatch);
+        handlePortProjectSubmission(data, solution, [project], targetFramework.id, portingLocation, [], dispatch);
         history.push("/solutions");
       })}
     >

@@ -54,6 +54,7 @@ const ImportSolutionInternal: React.FC = () => {
                   actionsOnly: false,
                   compatibleOnly: false
                 },
+                preTriggerData:[],
                 force: true
               })
             );

@@ -1,3 +1,4 @@
+using PortingAssistant.Client.Common.Utils;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Telemetry.Model;
@@ -18,9 +19,9 @@ namespace PortingAssistant.Common.Utils
             TelemetryCollector.Collect<SolutionMetrics>(solutionMetrics);
         }
 
-        public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework)
+        public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework, PreTriggerData preTriggerData = null)
         {
-            var projectMetrics = createProjectMetric(request.runId, request.triggerType, tgtFramework, projectAnalysisResult);
+            var projectMetrics = createProjectMetric(request.runId, request.triggerType, tgtFramework, projectAnalysisResult, preTriggerData);
             TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
         }
 
@@ -64,8 +65,11 @@ namespace PortingAssistant.Common.Utils
                 PortingAssistantVersion = MetricsBase.Version
             };
         }
-        public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult)
+        public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult, PreTriggerData preTriggerData = null)
         {
+            var preCompatibilityResult = (preTriggerData == null || preTriggerData?.sourceFileAnalysisResults == null || preTriggerData.sourceFileAnalysisResults.Length == 0)
+                ? null : AnalysisUtils.GenerateCompatibilityResults(preTriggerData?.sourceFileAnalysisResults?.ToList(),
+                    preTriggerData?.projectPath, preTriggerData?.ported ?? false);
             return new ProjectMetrics
             {
                 MetricsType = MetricsType.Project,
@@ -80,8 +84,35 @@ namespace PortingAssistant.Common.Utils
                 NumReferences = projectAnalysisResult.ProjectReferences.Count,
                 IsBuildFailed = projectAnalysisResult.IsBuildFailed,
                 CompatibilityResult = projectAnalysisResult.ProjectCompatibilityResult,
-                PortingAssistantVersion = MetricsBase.Version
+                PreCompatibilityResult = preCompatibilityResult,
+                PortingAssistantVersion = MetricsBase.Version,
+                PreApiInCompatibilityCount = preTriggerData?.incompatibleApis,
+                PostApiInCompatibilityCount = GetIncompatibleApiCount(projectAnalysisResult),
+                PreFramework = preTriggerData?.targetFramework,
+                PreBuildErrorCount = preTriggerData?.buildErrors,
+                PostBuildErrorCount = projectAnalysisResult.Errors.Count
             };
+        }
+
+        public static int GetIncompatibleApiCount(ProjectAnalysisResult projectAnalysisResult) {
+            var dictionary = new Dictionary<string, bool>();
+            var sourceFileAnalysisResults = projectAnalysisResult.SourceFileAnalysisResults;
+            sourceFileAnalysisResults.ForEach(SourceFileAnalysisResult =>
+            {
+                SourceFileAnalysisResult.ApiAnalysisResults.ForEach(apiAnalysisResult =>
+                {
+                    var compatibility = apiAnalysisResult.CompatibilityResults?.FirstOrDefault().Value?.Compatibility;
+                    bool isCompatible = (compatibility == Compatibility.UNKNOWN || compatibility == Compatibility.COMPATIBLE);
+                    var key = apiAnalysisResult.CodeEntityDetails?.OriginalDefinition + "-" +
+                        apiAnalysisResult.CodeEntityDetails?.Package?.PackageId?.ToLower() + "-" +
+                        apiAnalysisResult.CodeEntityDetails?.Package?.Version?.ToLower();
+                    if (!dictionary.ContainsKey(key))
+                    {
+                        dictionary.Add(key, isCompatible);
+                    }
+                });
+            });
+            return dictionary.Count - dictionary.Count(c => c.Value);
         }
 
         public static NugetMetrics createNugetMetric(string runId, string triggerType, string tgtFramework, Task<PackageAnalysisResult> result)
