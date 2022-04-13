@@ -7,6 +7,7 @@ import {
   Form,
   FormField,
   Header,
+  Icon,
   Link,
   Select,
   SelectProps,
@@ -18,8 +19,10 @@ import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
 
+import { profileSelection } from "../../constants/appConstants";
 import { externalUrls } from "../../constants/externalUrls";
 import { init, setProfileSet } from "../../store/actions/backend";
+import { openTools } from "../../store/actions/tools";
 import { getProfileName } from "../../utils/getProfileName";
 import { InfoLink } from "../InfoLink";
 import styles from "./ProfileSelection.module.scss";
@@ -61,7 +64,6 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
   const [profiles, setProfiles] = useState({ label: currentProfile, id: "" } as SelectProps.Option);
   const [defaultCredentialsAccessKeyID, setDefaultCredentialsAccessKeyID] = useState("");
   const [useDefaultCredentials, setUseDefaultCredentials] = useState(false || cachedUseDefaultCreds);
-  const enableDefaultCredentials = true;
   const [profileErrorText, setProfileErrorText] = useState("");
   const [selectedProfile, setSelectedProfile] = useState(currentProfile);
 
@@ -121,13 +123,13 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
   const onUseDefaultCredentialsChanged = (event: { detail: { value: string; }; }) => {
     const useDefault = event.detail.value === "default";
     setUseDefaultCredentials(useDefault);     
-    let selectedId = selectedProfile;     
+    // let selectedId = selectedProfile;     
     if (useDefault) {
-      selectedId = "";    
+      // selectedId = "";    
       setSelectedProfile("DEFAULT_SDK_CHAIN_PROVIDER_CREDENTIAL_PROFILE");
       window.electron.saveState("useDefaultCreds", true);
     } else {     
-      selectedId =  window.electron.getState("profile") || profileOptions[0]?.label || "";
+      // selectedId =  window.electron.getState("profile") || profileOptions[0]?.label || "";
       window.electron.saveState("useDefaultCreds", false);
     }
   }
@@ -169,6 +171,25 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
       setProfileErrorText("");
     }
     return isValid;
+  }
+
+  const getTextWithLink = (text: string, url: string) => {
+    return (
+    <div>
+      <span>{text}</span>
+    <Link
+      external
+      fontSize="body-s"
+      href="#/"
+      onFollow={event => {
+        event.preventDefault();
+        event.stopPropagation();
+        window.electron.openExternalUrl(url);
+      }}
+    >
+      Learn more
+    </Link>
+    </div>);
   }
 
   return (
@@ -274,20 +295,36 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                   Select an AWS Profile to allow Porting Assistant for .NET to access your application. You can also add an AWS named profile using the AWS CLI.
                 </Box>
                 <FormField id="profile-selection" errorText={profileErrorText || errors.useDefaultCreds?.message}>
-                {enableDefaultCredentials && <Tiles
+                {<Tiles
                 onChange={onUseDefaultCredentialsChanged}
                 value={useDefaultCredentials? "default" : "custom"}
                 items={[
-                  { label: "Select a custom named profile", value: "custom" },
-                  { label: "Use existing AWS SDK/CLI credentials", value: "default" }
+                  { 
+                    label: "Select a custom named profile", 
+                    value: "custom", 
+                    description: getTextWithLink(profileSelection.PROFILE_SELECTION.description.custom, profileSelection.PROFILE_SELECTION.url.custom)
+                  },
+                  { 
+                    label: "Use existing AWS SDK/CLI credentials", 
+                    value: "default",
+                    description: getTextWithLink(profileSelection.PROFILE_SELECTION.description.default, profileSelection.PROFILE_SELECTION.url.default)
+                  }
                 ]}
               />}
-              {enableDefaultCredentials && <p></p>}
+              {<p></p>}
               {
                 useDefaultCredentials && 
                 <div>
                   <div className="awsui-util-label">AWS access key ID</div>
-                  <div>{defaultCredentialsAccessKeyID}</div>
+                  <div>
+                    {
+                    defaultCredentialsAccessKeyID || 
+                    getTextWithLink(
+                      profileSelection.PROFILE_SELECTION.defaultNotFound, 
+                      profileSelection.PROFILE_SELECTION.url.default
+                      )
+                    }
+                  </div>
                 </div>
               }
               {
@@ -295,24 +332,6 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                 <div>
                 <div>
                 <Box fontSize="body-m">AWS named profile</Box>
-                <Box fontSize="body-s" margin={{ right: "xxs" }} color="text-body-secondary">
-                  Select an AWS profile to allow Porting Assistant for .NET to assess your solution for .NET Core
-                  compatibility. You can also add an AWS named profile using the AWS CLI.{" "}
-                  <Link
-                    href="#/"
-                    external
-                    fontSize="body-s"
-                    onFollow={event => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      window.electron.openExternalUrl(
-                        "https://docs.aws.amazon.com/portingassistant/latest/userguide/porting-assistant-prerequisites.html#porting-assistant-iam-profile"
-                      );
-                    }}
-                  >
-                    Learn more
-                  </Link>
-                </Box>
                 <div className={styles.select}>
                   <FormField
                     id="profile-selection"
