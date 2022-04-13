@@ -111,7 +111,7 @@ namespace PortingAssistant.Telemetry.Utils
                   }
                   
                   return telemetryResponse.HttpStatusCode == HttpStatusCode.OK;
-                            }
+             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
