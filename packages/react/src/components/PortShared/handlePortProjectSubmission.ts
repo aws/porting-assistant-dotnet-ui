@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { v4 as uuid } from "uuid";
 
 import { PortingLocation } from "../../models/porting";
-import { Project, VersionPair } from "../../models/project";
+import { PreTriggerData, Project, VersionPair } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution } from "../../store/actions/backend";
 import {
@@ -16,6 +16,7 @@ import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getPortingPath } from "../../utils/getPortingPath";
 import { getPortingSolutionPath } from "../../utils/getPortingSolutionPath";
 import { getTargetFramework } from "../../utils/getTargetFramework";
+import { TableData } from "../AssessSolution/ProjectsTable";
 
 export const handlePortProjectSubmission = async (
     data: Record<string, any>,
@@ -23,6 +24,7 @@ export const handlePortProjectSubmission = async (
     projects: Project[],
     targetFramework: string,
     portingLocation: PortingLocation,
+    preTriggerData: PreTriggerData[],
     dispatch: ReturnType<typeof useDispatch>
 ) => {
     dispatch(
@@ -35,6 +37,9 @@ export const handlePortProjectSubmission = async (
             dismissible: false
         })
     );
+
+    let preTriggerDataArray: string[] = [];
+    preTriggerData.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
 
     const portingSolutionPath = getPortingSolutionPath(solution, portingLocation);
     if (portingLocation.type === "copy" && !window.electron.pathExists(portingSolutionPath)) {
@@ -136,6 +141,7 @@ export const handlePortProjectSubmission = async (
                         actionsOnly: false,
                         compatibleOnly: false
                     },
+                    preTriggerData: preTriggerDataArray,
                     force: true
                 })
             );

@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web.Helpers;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
@@ -155,7 +154,8 @@ namespace PortingAssistant.Telemetry.Utils
                     }
                     else
                     {
-                        string typeOfLog = fName.Split('-')[1];
+
+                        string typeOfLog = (fName.Split('-').Length > 1) ? fName.Split('-')[1]: String.Empty;
                         if (typeOfLog == "assessment")
                         {
                             continue;
@@ -261,13 +261,18 @@ namespace PortingAssistant.Telemetry.Utils
             var wifiNetworkInterface = networkInterfaces.FirstOrDefault(wi => wi.NetworkInterfaceType == NetworkInterfaceType.Wireless80211);
             if (wifiNetworkInterface != null)
             {
-                _uniqueId = Crypto.SHA256(wifiNetworkInterface.GetPhysicalAddress().ToString());
+                _uniqueId = CryptoUtil.HashString(wifiNetworkInterface.GetPhysicalAddress().ToString());
             }
             else
             {
-                var ethernetInterface = networkInterfaces.LastOrDefault(ei => ei.NetworkInterfaceType == NetworkInterfaceType.Ethernet
-                                            && ei.OperationalStatus == OperationalStatus.Up && !ei.Name.Contains("Bluetooth", StringComparison.OrdinalIgnoreCase));
-                _uniqueId = ethernetInterface != null ? Crypto.SHA256(ethernetInterface.GetPhysicalAddress().ToString()) : DefaultIdentifier;
+                var ethernetInterface = networkInterfaces.LastOrDefault(ei => 
+                    ei.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+                    && ei.OperationalStatus == OperationalStatus.Up 
+                    && !ei.Name.Contains("Bluetooth", StringComparison.OrdinalIgnoreCase));
+
+                _uniqueId = ethernetInterface != null 
+                    ? CryptoUtil.HashString(ethernetInterface.GetPhysicalAddress().ToString()) 
+                    : DefaultIdentifier;
             }
             return _uniqueId;
         }

@@ -1,9 +1,5 @@
-using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Web.Helpers;
 using PortingAssistant.Telemetry.Utils;
 
 namespace PortingAssistant.Telemetry.Model

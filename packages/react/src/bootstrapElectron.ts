@@ -59,7 +59,8 @@ export interface Backend {
       continiousEnabled: boolean;
       actionsOnly: boolean;
       compatibleOnly: boolean;
-    }
+    },
+    preTriggerData: string[]
   ) => Promise<Response<SolutionDetails, string>>;
   openSolutionInIDE: (solutionFilePath: string) => Promise<Response<boolean, string>>;
   getFileContents: (sourceFilePath: string) => Promise<string>;

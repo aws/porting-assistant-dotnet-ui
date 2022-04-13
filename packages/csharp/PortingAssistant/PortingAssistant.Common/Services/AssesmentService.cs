@@ -6,16 +6,13 @@ using PortingAssistant.Common.Model;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Client;
 using PortingAssistant.Client.Model;
-using PortingAssistant.Telemetry.Model;
-using System.Web.Helpers;
-using PortingAssistantExtensionTelemetry;
 using PortingAssistant.Common.Utils;
+using Newtonsoft.Json;
 
 namespace PortingAssistant.Common.Services
 {
     public class AssessmentService : IAssessmentService
     {
-
         private readonly ILogger _logger;
         private readonly IPortingAssistantClient _client;
         private readonly List<OnApiAnalysisUpdate> _apiAnalysisListeners;
@@ -40,6 +37,18 @@ namespace PortingAssistant.Common.Services
                 var solutionAnalysisResult = _client.AnalyzeSolutionAsync(request.solutionFilePath, request.settings);
                 solutionAnalysisResult.Wait();
 
+                var preProjectTriggerDataDictionary = new Dictionary<string, PreTriggerData>();
+                if (request.preTriggerData != null && request.preTriggerData.Length > 0)
+                {
+                    Array.ForEach(request.preTriggerData, prop => {
+                        var proj = JsonConvert.DeserializeObject<PreTriggerData>(prop);
+                        if (!preProjectTriggerDataDictionary.ContainsKey(proj.projectName))
+                        {
+                            preProjectTriggerDataDictionary.Add(proj.projectName, proj);
+                        }
+                    });
+                }
+
                 if (solutionAnalysisResult.IsCompletedSuccessfully)
                 {
                     TelemetryCollectionUtils.CollectSolutionMetrics(solutionAnalysisResult.Result, request, startTime, tgtFramework);
@@ -49,7 +58,9 @@ namespace PortingAssistant.Common.Services
                         {
                             return;
                         }
-                        TelemetryCollectionUtils.CollectProjectMetrics(projectAnalysisResult, request, tgtFramework);
+                        var preTriggerProjectData = preProjectTriggerDataDictionary.ContainsKey(projectAnalysisResult.ProjectName) ?
+                            preProjectTriggerDataDictionary[projectAnalysisResult.ProjectName] : null;
+                        TelemetryCollectionUtils.CollectProjectMetrics(projectAnalysisResult, request, tgtFramework, preTriggerProjectData);
 
                         projectAnalysisResult.PackageAnalysisResults.ToList()
                         .ForEach(p =>

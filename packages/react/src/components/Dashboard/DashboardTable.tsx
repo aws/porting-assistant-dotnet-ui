@@ -17,13 +17,16 @@ import { useHistory } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
+import { PreTriggerData } from "../../models/project";
 import { analyzeSolution, exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import { removePortedSolution } from "../../store/actions/porting";
-import { selectSolutionToSolutionDetails } from "../../store/selectors/solutionSelectors";
-import { selectDashboardTableData } from "../../store/selectors/tableSelectors";
+import { selectSolutionToSolutionDetails} from "../../store/selectors/solutionSelectors";
+import { getErrorCounts, selectDashboardTableData, selectSolutionToApiAnalysis
+ } from "../../store/selectors/tableSelectors";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { filteringCountText } from "../../utils/FilteringCountText";
+import { getCompatibleApi } from "../../utils/getCompatibleApi";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isLoaded } from "../../utils/Loadable";
 import { useNugetFlashbarMessages } from "../AssessShared/useNugetFlashbarMessages";
@@ -53,12 +56,12 @@ const DashboardTableInternal: React.FC = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const solutionToSolutionDetails = useSelector(selectSolutionToSolutionDetails);
-
+  
   const tableData = useSelector(selectDashboardTableData);
   const targetFramework = getTargetFramework();
   useNugetFlashbarMessages();
   useSolutionFlashbarMessage(tableData);
-
+  const apiAnalysis = useSelector(selectSolutionToApiAnalysis); 
   const deleteSolution = useMemo(
     () => (solutionPath: string) => {
       dispatch(removeSolution(solutionPath));
@@ -75,8 +78,41 @@ const DashboardTableInternal: React.FC = () => {
           groupId: "assessSuccess"
         })
       );
+
+      let projectTableData: PreTriggerData[] = [];
+      const solutionDetails = solutionToSolutionDetails[solutionPath];
+      const projectToApiAnalysis = apiAnalysis[solutionPath];
+      if (isLoaded(solutionDetails)) {
+          projectTableData = solutionDetails.data.projects.map<PreTriggerData>(project => {
+            const apis = getCompatibleApi(
+              solutionDetails,
+              projectToApiAnalysis,
+              project.projectFilePath,
+              null,
+              targetFramework
+            );
+            var projectApiAnalysisResult = projectToApiAnalysis[project.projectFilePath];
+            var sourceFileAnalysisResults = (isLoaded(projectApiAnalysisResult))?
+                 projectApiAnalysisResult.data.sourceFileAnalysisResults: null;
+            return {
+              projectName: project.projectName || "-",
+              projectPath: project.projectFilePath || "-",
+              solutionPath: solutionPath || "-",
+              targetFramework: project.targetFrameworks?.join(", ") || "-",
+              incompatibleApis: apis.isApisLoading ? null : apis.values[1] - apis.values[0],
+              totalApis: apis.values[1],
+              buildErrors: getErrorCounts(projectToApiAnalysis, project.projectFilePath, null),
+              ported: false,
+              sourceFileAnalysisResults: sourceFileAnalysisResults
+            };
+          });
+      }
+      
       const haveInternet = await checkInternetAccess(solutionPath, dispatch);
       if (haveInternet) {
+        let preTriggerDataArray: string[] = [];
+        projectTableData.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
+
         dispatch(
           analyzeSolution.request({
             solutionPath: solutionPath,
@@ -89,6 +125,7 @@ const DashboardTableInternal: React.FC = () => {
               actionsOnly: false,
               compatibleOnly: false
             },
+            preTriggerData: preTriggerDataArray,
             force: true
           })
         );
@@ -176,7 +213,9 @@ const DashboardTableInternal: React.FC = () => {
               id="reassess-solution"
               key="reassess-solution"
               disabled={selectedItems.length === 0}
-              onClick={() => reassessSolution(selectedItems[0].path)}
+              onClick={() => {
+                reassessSolution(selectedItems[0].path);
+              }}
               iconName="refresh"
             >
               Reassess solution
@@ -375,5 +414,4 @@ const columnDefinitions: TableProps.ColumnDefinition<DashboardTableData>[] = [
 ];
 
 const inProgress = () => <StatusIndicator type="in-progress">In progress</StatusIndicator>;
-
 export const DashboardTable = React.memo(DashboardTableInternal);

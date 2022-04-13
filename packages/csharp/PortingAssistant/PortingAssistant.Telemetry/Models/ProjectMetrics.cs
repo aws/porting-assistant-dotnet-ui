@@ -22,5 +22,17 @@ namespace PortingAssistant.Telemetry.Model
         public List<String> SourceFrameworks { get; set; }
         [JsonProperty("compatibilityResult")]
         public ProjectCompatibilityResult CompatibilityResult { get; set; }
+        [JsonProperty("preCompatibilityResult")]
+        public ProjectCompatibilityResult PreCompatibilityResult { get; set; }
+        [JsonProperty("preApiInCompatibilityCount")]
+        public int? PreApiInCompatibilityCount  { get; set; }
+        [JsonProperty("postApiInCompatibilityCount")]
+        public int? PostApiInCompatibilityCount { get; set; }
+        [JsonProperty("preBuildErrorCount")]
+        public int? PreBuildErrorCount { get; set; }
+        [JsonProperty("postBuildErrorCount")]
+        public int? PostBuildErrorCount { get; set; }
+        [JsonProperty("preFramework")]
+        public string? PreFramework { get; set; }
     }
 }

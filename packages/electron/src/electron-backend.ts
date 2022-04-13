@@ -186,8 +186,8 @@ export const initConnection = (logger: any = console) => {
 
     ipcMain.handle(
       "analyzeSolution",
-      async (_event, solutionFilePath, runId, triggerType, settings) => {
-        const request = { solutionFilePath, runId, triggerType, settings };
+      async (_event, solutionFilePath, runId, triggerType, settings, preTriggerData) => {
+        const request = { solutionFilePath, runId, triggerType, settings, preTriggerData };
         const elapseTime = startTimer();
         logger.log(`REQUEST - analyzeSolution: ${JSON.stringify(request)}`);
         const response = await connection.send("analyzeSolution", request);

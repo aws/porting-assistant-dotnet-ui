@@ -13,6 +13,7 @@ import { Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution, exportSolution, openSolutionInIDE } from "../../store/actions/backend";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
+import { selectProjectTableData } from "../../store/selectors/tableSelectors";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isLoaded, Loadable } from "../../utils/Loadable";
@@ -46,7 +47,10 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
 
   useNugetFlashbarMessages(projects);
   useApiAnalysisFlashbarMessage(solution);
-
+  
+  const projectsTable = usePortingAssistantSelector(state => selectProjectTableData(state, location.pathname));
+  let preTriggerDataArray: string[] = [];
+  projectsTable.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
   const tabs = useMemo(
     () => [
       {
@@ -170,6 +174,7 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
                         actionsOnly: false,
                         compatibleOnly: false
                       },
+                      preTriggerData: preTriggerDataArray,
                       force: true
                     })
                   );

@@ -56,6 +56,6 @@ describe("stability check, assess a solution, reassess the solution, check all s
         last: "=MvcMusicStore\\ViewModels\\ShoppingCartViewModel.cs",
       },
     } as SortingCheckRequest);
-    await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "59 of 85", "0", "(21)"]);
+    await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "50 of 85", "0", "(21)"]);
   });
 });
