@@ -95,7 +95,7 @@ namespace PortingAssistant.Telemetry.Utils
 
                   var requestContent = new StringContent(body.ToString(Formatting.None), Encoding.UTF8, "application/json");
 
-                  var config = new TelemetryConfig
+                  var config = new TelemetryClientConfig
                   {
                       RegionEndpoint = RegionEndpoint.GetBySystemName(region),
                       MaxErrorRetry = 2,
