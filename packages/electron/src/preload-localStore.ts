@@ -119,7 +119,7 @@ const createReducerCacheStore = () =>
         "solution-reducer"
       )),
     },
-    name: "reducer-cache-1.6.5",
+    name: "reducer-cache-1.6.6",
     clearInvalidConfig: true,
     cwd:
       process.env["NODE_ENV"] === "test"
