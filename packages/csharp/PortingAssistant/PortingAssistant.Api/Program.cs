@@ -25,14 +25,15 @@ namespace PortingAssistant.Api
                 throw new ArgumentException("Must provide a config file, aws profile and path");
             }
             var config = args[0];
-            var isConsole = args.Length == 4 && args[3].Equals("--console");
+            var isConsole = args.Length == 5 && args[3].Equals("--console");
 
             var outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
-            if (args.Length == 4 && !args[3].Equals("--console"))
+            if (args.Length == 5 && !args[3].Equals("--console"))
             {
                 // Args[3] is version number if not --console
                 outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] (" + args[3] + ") {SourceContext}: {Message:lj}{NewLine}{Exception}";
                 Telemetry.Model.MetricsBase.Version = args[3];
+                Telemetry.Model.MetricsBase.UsingDefault = System.Convert.ToBoolean(args[4]);
             }
 
             Serilog.Formatting.Display.MessageTemplateTextFormatter tf =

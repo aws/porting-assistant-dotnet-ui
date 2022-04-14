@@ -62,7 +62,8 @@ namespace PortingAssistant.Common.Utils
                 SolutionGuid = solutionAnalysisResult.SolutionDetails.SolutionGuid,
                 RepositoryUrl = solutionAnalysisResult.SolutionDetails.RepositoryUrl,
                 AnalysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds,
-                PortingAssistantVersion = MetricsBase.Version
+                PortingAssistantVersion = MetricsBase.Version,
+                UsingDefaultCreds = MetricsBase.UsingDefault,
             };
         }
         public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult, PreTriggerData preTriggerData = null)

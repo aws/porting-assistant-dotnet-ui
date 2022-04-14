@@ -5,7 +5,6 @@ using PortingAssistantExtensionTelemetry.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
 
 namespace PortingAssistant.Telemetry
 {
@@ -13,7 +12,7 @@ namespace PortingAssistant.Telemetry
     {
         public static void Main(string[] args)
         {
-            if (args.Length < 4)
+            if (args.Length < 5)
             {
                 throw new ArgumentException
                     (
@@ -25,7 +24,7 @@ namespace PortingAssistant.Telemetry
             var config = args[0];
             var profile = args[1];
             var userData = args[2];
-
+            var useDefaultCreds = System.Convert.ToBoolean(args[4]);
             Connection _connection = new ConnectionBuilder().WithLogging().Build();
             var portingAssistantPortingConfiguration = System.Text.Json.JsonSerializer.Deserialize<PortingAssistantPortingConfiguration>(File.ReadAllText(config));
             string metricsFolder = Path.Combine(userData, "logs");
@@ -46,7 +45,7 @@ namespace PortingAssistant.Telemetry
             var logTimer = new System.Timers.Timer();
             logTimer.Interval = Convert.ToDouble(portingAssistantPortingConfiguration.PortingAssistantMetrics["LogTimerInterval"].ToString());
 
-            logTimer.Elapsed += (source, e) => LogUploadUtils.OnTimedEvent(source, e, teleConfig, lastReadTokenFile, profile, prefix);
+            logTimer.Elapsed += (source, e) => LogUploadUtils.OnTimedEvent(source, e, teleConfig, lastReadTokenFile, profile, useDefaultCreds, prefix);
 
             logTimer.AutoReset = true;
 

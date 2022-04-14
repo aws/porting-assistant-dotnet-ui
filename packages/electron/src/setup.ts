@@ -29,9 +29,11 @@ export async function writeProfile(
   await fsPromises.appendFile(getDefaultFilePath(), profile);
 }
 
+
 function getDefaultFilePath() {
   return path.join(getHomeDir(), ".aws", "credentials");
 }
+
 
 function getHomeDir() {
   var env = process.env;

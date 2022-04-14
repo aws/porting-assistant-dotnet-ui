@@ -7,5 +7,6 @@ namespace PortingAssistant.Telemetry.Model
         public string SolutionGuid { get; set; }
         public string RepositoryUrl { get; set; }
         public double AnalysisTime { get; set; }
+        public bool UsingDefaultCreds { get; set; }
     }
 }

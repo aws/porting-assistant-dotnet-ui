@@ -166,6 +166,7 @@ export const registerLogListeners = (connection: Connection) => {
         const logs = {
             portingAssistantVersion: app.getVersion(),
             targetFramework: targetFramework,
+            timeStamp:new Date(),
             content: str,
         };
         electronLogger.info(JSON.stringify(logs));

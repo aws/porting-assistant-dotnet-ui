@@ -5,7 +5,7 @@ import { useHistory } from "react-router";
 
 import { PortingAssistantAppLayout } from "../components/PortingAssistantAppLayout";
 import { PortingAssistantBreadcrumb } from "../components/PortingAssistantBreadcrumb";
-import { ProfileSelecion } from "../components/Setup/ProfileSelection";
+import { ProfileSelection } from "../components/Setup/ProfileSelection";
 import { usePortingAssistantSelector } from "../createReduxStore";
 import { openTools, setInfo } from "../store/actions/tools";
 
@@ -40,7 +40,7 @@ const SetupInternal: React.FC = () => {
   return (
     <PortingAssistantAppLayout
       content={
-        <ProfileSelecion
+        <ProfileSelection
           title="Set up Porting Assistant for .NET"
           buttonText="Next"
           next={() => history.push("/add-solution")}

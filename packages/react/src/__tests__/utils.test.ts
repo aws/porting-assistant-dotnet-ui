@@ -33,6 +33,7 @@ import { getCompatibleNugetsAgg, getIncompatibleNugets } from "../utils/getCompa
 import { getPercent, getPercentNumber } from "../utils/getPercent";
 import { getPortingPath } from "../utils/getPortingPath";
 import { getPortingSolutionPath } from "../utils/getPortingSolutionPath";
+import { getProfileName } from "../utils/getProfileName";
 import { isPortingCompleted } from "../utils/isPortingCompleted";
 import { Failed, Loaded, Loading } from "../utils/Loadable";
 import { logError, logErrorAction } from "../utils/LogError";
@@ -616,4 +617,26 @@ describe("vbProjectCheck", () => {
         const result = await checkIfSolutionContainsVBproject(solutionPath);
         expect(result).toEqual(false);
     });
+});
+
+describe("getProfileName", () => {
+  it("valid profile returns same profile name", () => {
+      const profileName = "TestProfile";
+      const result = getProfileName(profileName);
+      expect(result).toEqual(profileName);
+  });
+
+  it("undefined profile name return default", async () => {
+      const profileName = undefined;
+      const expected = "Default Credentials";
+      const result = getProfileName(profileName);
+      expect(result).toEqual(expected);
+  });
+
+  it("default skd profile name return default", async () => {
+    const profileName = "DEFAULT_SDK_CHAIN_PROVIDER_CREDENTIAL_PROFILE";
+    const expected = "Default Credentials";
+    const result = getProfileName(profileName);
+    expect(result).toEqual(expected);
+});
 });

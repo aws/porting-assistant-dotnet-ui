@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useDispatch } from "react-redux";
-import { MemoryRouter, Redirect, Route, RouteProps, Switch } from "react-router-dom";
+import { MemoryRouter, Redirect, Route, RouteProps, Switch, useHistory } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
 import { PortingAssistantAppLayout } from "./components/PortingAssistantAppLayout";
@@ -23,7 +23,7 @@ import { Settings } from "./containers/Settings";
 import { Setup } from "./containers/Setup";
 import { usePortingAssistantSelector } from "./createReduxStore";
 import { init } from "./store/actions/backend";
-import { setCurrentMessageUpdate, setErrorUpdate } from "./store/actions/error";
+import { pushCurrentMessageUpdate, setCurrentMessageUpdate, setErrorUpdate } from "./store/actions/error";
 
 interface RouteWithErrorProps extends RouteProps {
   requireProfile: boolean;
@@ -31,10 +31,34 @@ interface RouteWithErrorProps extends RouteProps {
 
 const RouteWithError: React.FC<RouteWithErrorProps> = ({ children, requireProfile, ...props }) => {
   const dispatch = useDispatch();
+  const history = useHistory();
+
   const profileSet = usePortingAssistantSelector(state => state.solution.profileSet);
   if (requireProfile && !profileSet) {
     return <Redirect to="/main" />;
   }
+
+  const watchDefaultCredentialsAreValid = () => {
+    setInterval(async () => {
+      const profile = window.electron.getState("profile");
+      const profileVerfied = (await window.electron.verifyUser(profile));
+      if (!profileVerfied) {
+        dispatch(
+          pushCurrentMessageUpdate({
+              messageId: uuid(),
+              groupId: "verify-defualt-creds",
+              type: "warning",
+              // loading: false,
+              content: `The current credentials have expired. Please review and update AWS credentials.`,
+              dismissible: false,
+              buttonText: "Update Credentials",
+              onButtonClick: () => {history.push('/settings')}
+          })
+      );
+    }
+  }, 900000)
+}
+  watchDefaultCredentialsAreValid();
 
   return (
     <Route {...props}>
