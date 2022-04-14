@@ -11,7 +11,8 @@ const profileSelection = {
       custom: "https://docs.aws.amazon.com/sdkref/latest/guide/file-location.html",
       default: "https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/creds-assign.html"
     },
-    defaultNotFound: "No credentials found. "
+    defaultNotFound: "No credentials found. ",
+    defaultProfileName: "DEFAULT_SDK_CHAIN_PROVIDER_CREDENTIAL_PROFILE"
   },
   USAGE_DATA: {
     heading: "Porting Assisstant for .NET usage data sharing",

@@ -123,13 +123,10 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
   const onUseDefaultCredentialsChanged = (event: { detail: { value: string; }; }) => {
     const useDefault = event.detail.value === "default";
     setUseDefaultCredentials(useDefault);     
-    // let selectedId = selectedProfile;     
     if (useDefault) {
-      // selectedId = "";    
       setSelectedProfile("DEFAULT_SDK_CHAIN_PROVIDER_CREDENTIAL_PROFILE");
       window.electron.saveState("useDefaultCreds", true);
     } else {     
-      // selectedId =  window.electron.getState("profile") || profileOptions[0]?.label || "";
       window.electron.saveState("useDefaultCreds", false);
     }
   }
@@ -356,7 +353,7 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                       as={Select}
                       options={profileOptions}
                       control={control}
-                      selectedOption={profiles}
+                      selectedOption={profiles.label === profileSelection.PROFILE_SELECTION.defaultProfileName? {label:""} :profiles}
                       onChange={onSelectProfile}
                       name="profileSelection"
                       rules={{ required: "Profile is required" }}

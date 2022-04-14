@@ -1,5 +1,7 @@
+import { profileSelection } from "../constants/appConstants"
+
 export const getProfileName = (profileName: string|undefined) => {
-  if (profileName === "DEFAULT_SDK_CHAIN_PROVIDER_CREDENTIAL_PROFILE" || !profileName){
+  if (profileName === profileSelection.PROFILE_SELECTION.defaultProfileName || !profileName){
     return "Default Credentials"} 
   else {
     return profileName
