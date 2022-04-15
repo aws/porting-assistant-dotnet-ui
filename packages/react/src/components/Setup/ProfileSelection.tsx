@@ -291,7 +291,7 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                 <Box fontSize="body-s" margin={{ right: "xxs" }} color="text-body-secondary">
                   Select an AWS Profile to allow Porting Assistant for .NET to access your application. You can also add an AWS named profile using the AWS CLI.
                 </Box>
-                <FormField id="profile-selection" errorText={profileErrorText || errors.useDefaultCreds?.message}>
+                <FormField id="profile-selection-main" errorText={profileErrorText || errors.useDefaultCreds?.message}>
                 {<Tiles
                 onChange={onUseDefaultCredentialsChanged}
                 value={useDefaultCredentials? "default" : "custom"}

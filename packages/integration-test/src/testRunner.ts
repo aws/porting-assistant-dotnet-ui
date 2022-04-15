@@ -29,12 +29,13 @@ export class TestRunner {
   selectProfile = async (targetFramework: string = "") => {
     await this.app.client.pause(3000);
     await (await this.app.client.$("#start-btn")).click();
-    await this.addNamedProfileCheck();
     if (targetFramework !== "") {
       await this.selectTargetFramework(targetFramework);
     }
+    await this.selectDefaultCredentials();
+    await this.selectCustomCredentials();
     await (await this.app.client.$("#profile-selection")).click();
-    await (await this.app.client.$('[title="default"]')).click();
+    await (await this.app.client.$("[title=\"default\"]")).click();
     await (await this.app.client.$("#next-btn")).click();
     await (
       await this.app.client.$("=Assess a new solution")
@@ -44,6 +45,8 @@ export class TestRunner {
   };
 
   addNamedProfile = async (profileName: string, accessKeyId: string, secretAccessKey: string) => {
+    await this.selectDefaultCredentials();
+    await this.selectCustomCredentials();
     await (
       await this.app.client.$("#add-named-profile")
     ).click({
@@ -58,16 +61,24 @@ export class TestRunner {
     await (await this.app.client.$("#add-profile-button")).click();
     };
 
-    selectDefaultCredentials = async () => {
+  selectDefaultCredentials = async () => {
         await (
             await this.app.client.$("[data-value=\"default\"]")
         ).click();
     };
 
+  selectCustomCredentials = async () => {
+      await (
+          await this.app.client.$("[data-value=\"custom\"]")
+      ).click();
+  };
+
   selectNamedProfile = async (profileName: string, targetFramework: string = "") => {
     if (targetFramework !== "") {
       await this.selectTargetFramework(targetFramework);
      }
+    await this.selectDefaultCredentials();
+    await this.selectCustomCredentials();
     await (await this.app.client.$("#profile-selection")).click();
     await (await this.app.client.$(`[title="${profileName}"]`)).click();
     await (await this.app.client.$("#next-btn")).click();
@@ -83,6 +94,8 @@ export class TestRunner {
       x: 0,
       y: 3,
     });
+    await this.selectDefaultCredentials();
+    await this.selectCustomCredentials();
     await (await this.app.client.$("#add-profile-button")).click();
     await (
       await this.app.client.$("span=Profile is required")
@@ -90,6 +103,8 @@ export class TestRunner {
       timeout: 1000,
     });
     await this.app.client.keys(["Escape"]);
+    await this.selectDefaultCredentials();
+    await this.selectCustomCredentials();
     await (
       await this.app.client.$("#profile-selection")
     ).waitForExist({
