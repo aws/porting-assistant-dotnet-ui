@@ -97,6 +97,8 @@ export class TestRunner {
       x: 0,
       y: 3,
     });
+    await this.selectDefaultCredentials();
+    await this.selectCustomCredentials();
     await (await this.app.client.$("#add-profile-button")).click();
     await (
       await this.app.client.$("span=Profile is required")
