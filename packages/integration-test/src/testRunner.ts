@@ -29,6 +29,7 @@ export class TestRunner {
   selectProfile = async (targetFramework: string = "") => {
     await this.app.client.pause(3000);
     await (await this.app.client.$("#start-btn")).click();
+    await this.addNamedProfileCheck();
     if (targetFramework !== "") {
       await this.selectTargetFramework(targetFramework);
     }
