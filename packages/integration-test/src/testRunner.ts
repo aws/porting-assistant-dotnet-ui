@@ -88,6 +88,8 @@ export class TestRunner {
   addNamedProfileCheck = async () => {
     // profile selection model element is on top of add named profile link
     // and will intercept the click so we offset by 3 pixels down
+    await this.selectDefaultCredentials();
+    await this.selectCustomCredentials();
     await (
       await this.app.client.$("#add-named-profile")
     ).click({
@@ -95,8 +97,6 @@ export class TestRunner {
       x: 0,
       y: 3,
     });
-    await this.selectDefaultCredentials();
-    await this.selectCustomCredentials();
     await (await this.app.client.$("#add-profile-button")).click();
     await (
       await this.app.client.$("span=Profile is required")
