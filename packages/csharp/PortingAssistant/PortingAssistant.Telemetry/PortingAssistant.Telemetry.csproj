@@ -9,7 +9,7 @@
     <PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.3" />
     <PackageReference Include="PortingAssistant.Client.Client" Version="2.1.5-alpha-gde733194e2" />
-    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.1.5-alpha-gde733194e2" />
+    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.1.8" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
     <PackageReference Include="AWSSDK.Core" Version="3.7.9" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
