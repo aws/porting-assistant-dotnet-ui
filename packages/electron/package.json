@@ -22,6 +22,7 @@
     "generate-attribution": "npx generate-attribution",
     "build:react": "build-scripts\\install-react-deps.bat",
     "build:csharp": "build-scripts\\install-csharp.bat",
+    "build:csharplinux": "./build-scripts/install-react-deps.sh",
     "build:schema": "npx ts-node --project tsconfig.build.json build-scripts/generate-schema.ts",
     "create-dev-exe": "npx ts-node --transpile-only --project tsconfig.build.json build-scripts/publish.ts --config publish-dev.json --local",
     "build-dev-exe": "npx ts-node --transpile-only --project tsconfig.build.json build-scripts/publish.ts --config build-dev.json --local",
