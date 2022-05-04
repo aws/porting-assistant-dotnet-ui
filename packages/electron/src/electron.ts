@@ -199,6 +199,8 @@ function createWindow() {
       .then((resp) => {
         if (resp.response === 0) {
           autoUpdater.downloadUpdate();
+        } else {
+          log.error("Update deferred")
         }
       });
 
