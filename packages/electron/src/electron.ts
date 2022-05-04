@@ -124,7 +124,7 @@ Object.assign(console, log.functions);
 
 autoUpdater.logger = log;
 
-autoUpdater.autoDownload = true;
+autoUpdater.autoDownload = false;
 autoUpdater.allowDowngrade = true;
 autoUpdater.autoInstallOnAppQuit = false;
 
@@ -188,6 +188,20 @@ function createWindow() {
   autoUpdater.on('update-available', (info) => {
     latestVersion = info.version;
     outdatedVersionFlag = true;
+    dialog
+      .showMessageBox(mainWindow!, {
+        type: "info",
+        buttons: ["Download Now", "Later"],
+        title: "Application Update",
+        message:
+          "A new version is available. Click the \"Download Now\" button to update. You may also choose to do this later.",
+      })
+      .then((resp) => {
+        if (resp.response === 0) {
+          autoUpdater.downloadUpdate();
+        }
+      });
+
   })
 
   autoUpdater.on("update-downloaded", () => {
