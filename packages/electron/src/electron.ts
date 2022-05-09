@@ -126,7 +126,7 @@ autoUpdater.logger = log;
 
 autoUpdater.autoDownload = false;
 autoUpdater.allowDowngrade = true;
-autoUpdater.autoInstallOnAppQuit = false;
+autoUpdater.autoInstallOnAppQuit = true;
 
 const connection = initConnection(log.functions);
 const telemetryConnection = initTelemetryConnection(log.functions);
@@ -194,35 +194,18 @@ function createWindow() {
         buttons: ["Download Now", "Later"],
         title: "Application Update",
         message:
-          "A new version is available. Click the \"Download Now\" button to update. You may also choose to do this later.",
+          "A new version is available. Click the \"Download Now\" button to update. You may also choose to do this later. The updates will be installed once you close the app. You may need to re-assess your solutions after the upgrade.",
       })
       .then((resp) => {
         if (resp.response === 0) {
           autoUpdater.downloadUpdate();
         } else {
-          log.error("Update deferred")
+          log.error("Update deferred");
         }
       });
 
   })
 
-  autoUpdater.on("update-downloaded", () => {
-    dialog
-      .showMessageBox(mainWindow!, {
-        type: "info",
-        buttons: ["Restart", "Later"],
-        title: "Application Update",
-        message:
-          "A new version has been downloaded. Restart the application to apply the updates. You may need to re-assess your solutions after the upgrade.",
-      })
-      .then((resp) => {
-        if (resp.response === 0) {
-          connection.closeConnection();
-          telemetryConnection.closeConnection();
-          autoUpdater.quitAndInstall();
-        }
-      });
-  });
 
   autoUpdater.checkForUpdates();
 }
