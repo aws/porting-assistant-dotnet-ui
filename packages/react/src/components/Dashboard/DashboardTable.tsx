@@ -336,15 +336,7 @@ const columnDefinitions: TableProps.ColumnDefinition<DashboardTableData>[] = [
     id: "name",
     header: "Name",
     cell: item =>
-      item.portedProjects == null ||
-      item.incompatiblePackages == null ||
-      item.incompatibleApis == null ||
-      item.portingActions == null ||
-      item.buildErrors == null ? (
-        <div id={`solution-link-${escapeNonAlphaNumeric(item.path)}`} className={styles.inProgress}>
-          {item.name}
-        </div>
-      ) : (
+      (
         <LinkComponent
           id={`solution-link-${escapeNonAlphaNumeric(item.path)}`}
           className="solution-link"
