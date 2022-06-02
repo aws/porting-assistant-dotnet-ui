@@ -15,8 +15,13 @@
     <Folder Include="Listener\" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <PackageReference Include="PortingAssistant.Client.Client" Version="2.1.8" />
     <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.1.8" />
+=======
+    <PackageReference Include="PortingAssistant.Client.Client" Version="2.2.2" />
+    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.2.2" />
+>>>>>>> develop
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.3" />
   </ItemGroup>
