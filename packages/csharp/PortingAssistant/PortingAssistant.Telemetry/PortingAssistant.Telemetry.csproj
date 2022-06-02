@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.5" />
     <PackageReference Include="PortingAssistant.Client.Client" Version="2.2.2" />
     <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.2.2" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
