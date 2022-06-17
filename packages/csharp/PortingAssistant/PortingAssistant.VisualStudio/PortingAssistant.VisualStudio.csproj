@@ -11,8 +11,8 @@
 			<!-- This package is mostly COM definitions which can be loaded in .NET 5 runtime just fine -->
 			<NoWarn>NU1701</NoWarn>
 		</PackageReference>
-		<PackageReference Include="PortingAssistant.Client.Client" Version="2.2.2" />
-		<PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.2.2" />
+		<PackageReference Include="PortingAssistant.Client.Client" Version="2.3.3-alpha-g75320b34fc" />
+		<PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.3.3-alpha-g75320b34fc" />
 	</ItemGroup>
 
 </Project>
