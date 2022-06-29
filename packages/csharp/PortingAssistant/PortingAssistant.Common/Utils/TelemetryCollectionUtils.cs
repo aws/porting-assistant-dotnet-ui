@@ -71,6 +71,8 @@ namespace PortingAssistant.Common.Utils
             var preCompatibilityResult = (preTriggerData == null || preTriggerData?.sourceFileAnalysisResults == null || preTriggerData.sourceFileAnalysisResults.Length == 0)
                 ? null : AnalysisUtils.GenerateCompatibilityResults(preTriggerData?.sourceFileAnalysisResults?.ToList(),
                     preTriggerData?.projectPath, preTriggerData?.ported ?? false);
+            var compatabilityResult = projectAnalysisResult.ProjectCompatibilityResult;
+            compatabilityResult.ProjectPath = CryptoUtil.HashString(compatabilityResult.ProjectPath);
             return new ProjectMetrics
             {
                 MetricsType = MetricsType.Project,
@@ -84,7 +86,7 @@ namespace PortingAssistant.Common.Utils
                 NumNugets = projectAnalysisResult.PackageReferences.Count,
                 NumReferences = projectAnalysisResult.ProjectReferences.Count,
                 IsBuildFailed = projectAnalysisResult.IsBuildFailed,
-                CompatibilityResult = projectAnalysisResult.ProjectCompatibilityResult,
+                CompatibilityResult = compatabilityResult,
                 PreCompatibilityResult = preCompatibilityResult,
                 PortingAssistantVersion = MetricsBase.Version,
                 PreApiInCompatibilityCount = preTriggerData?.incompatibleApis,
