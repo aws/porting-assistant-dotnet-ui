@@ -380,6 +380,19 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                 </div>
               }
                 </FormField>
+               <Box fontSize="body-s">If you don't have an AWS Profile, you can use the Porting Assistant for .NET CLI tool without AWS credentials. Access the CLI tool <Link
+                    external
+                    href="#/"
+                    fontSize="body-s"
+                    onFollow={event => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      window.electron.openExternalUrl(externalUrls.clientRelease);
+                    }}
+                  >
+                    here
+                  </Link>
+                  </Box>
               </div>
               <div>
                 <Box fontSize="body-m">Porting Assistant for .NET data usage sharing</Box>
