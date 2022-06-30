@@ -93,7 +93,8 @@ namespace PortingAssistant.Common.Utils
                 PostApiInCompatibilityCount = GetIncompatibleApiCount(projectAnalysisResult),
                 PreFramework = preTriggerData?.targetFramework,
                 PreBuildErrorCount = preTriggerData?.buildErrors,
-                PostBuildErrorCount = projectAnalysisResult.Errors.Count
+                PostBuildErrorCount = projectAnalysisResult.Errors.Count,
+                ProjectLanguage = GetProjectLanguage(projectAnalysisResult.ProjectFilePath)
             };
         }
 
@@ -154,6 +155,19 @@ namespace PortingAssistant.Common.Utils
                 ApiCounts = count,
                 PortingAssistantVersion = MetricsBase.Version
             };
+        }
+
+        private static string GetProjectLanguage(string projectFilePath)
+        {
+            if (projectFilePath.EndsWith(".csproj"))
+            {
+                return "csharp";
+            }
+            if (projectFilePath.EndsWith(".vbproj"))
+            {
+                return "visualbasic";
+            }
+            return "invalid";
         }
     }
 }

@@ -148,7 +148,7 @@ const createPortingStore = () =>
           ".sln$": {
             type: "object",
             patternProperties: {
-              ".csproj$": {
+              ".((cs)|(vb))proj$": {
                 type: "object",
                 required: ["projectPath"],
                 properties: {

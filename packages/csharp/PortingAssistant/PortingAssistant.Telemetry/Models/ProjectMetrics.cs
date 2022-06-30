@@ -34,5 +34,7 @@ namespace PortingAssistant.Telemetry.Model
         public int? PostBuildErrorCount { get; set; }
         [JsonProperty("preFramework")]
         public string? PreFramework { get; set; }
+        [JsonProperty("projectLanguage")]
+        public string? ProjectLanguage { get; set;}
     }
 }
