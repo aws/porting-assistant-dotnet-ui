@@ -14,8 +14,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
-    <PackageReference Include="PortingAssistant.Client.Client" Version="2.3.2-alpha-g3baf07641a" />
-    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.3.2-alpha-g3baf07641a" />
+    <PackageReference Include="PortingAssistant.Client.Client" Version="2.3.3-alpha-gc19771ce32" />
+    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.3.3-alpha-gc19771ce32" />
   </ItemGroup>
 
   <ItemGroup>
