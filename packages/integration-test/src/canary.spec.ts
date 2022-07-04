@@ -65,4 +65,19 @@ describe("canary test suite", () => {
     expect((await getAccountController).indexOf("Microsoft.AspNetCore.Mvc")).not.toBe(-1);
     expect((await getStoreManagerController).indexOf("Microsoft.EntityFrameworkCore")).not.toBe(-1);
   });
+
+  test("run through mixed c#/vb solution", async () => {
+    const solutionFolderPath: string = path.join(
+      testSolutionPath(),
+      "canary",
+      "MixedClassLibrary"
+    );
+    const solutionPath: string = path.join(solutionFolderPath, "MixedClassLibrary.sln");
+    await addSolution(app, solutionPath);
+    await app.client.refresh();
+    const results = await runner.runThroughSolution(solutionPath, "inplace", "net6.0", false, false);
+    await runner.validateHighLevelResults(results, ["0 of 2", "6 of 7", "14 of 46", "0", "(9)"]);
+    const projectFile: string = path.join(solutionFolderPath, "MixedClassLibrary", "VbClassLibrary.vbproj");
+    expect((await fs.readFile(projectFile)).indexOf("BouncyCastle.NetCore")).not.toBe(-1);
+  });
 });
