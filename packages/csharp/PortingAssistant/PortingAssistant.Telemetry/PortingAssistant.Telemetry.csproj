@@ -8,8 +8,8 @@
   <ItemGroup>
     <PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.3" />
-    <PackageReference Include="PortingAssistant.Client.Client" Version="2.3.3-alpha-gc19771ce32" />
-    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.3.3-alpha-gc19771ce32" />
+    <PackageReference Include="PortingAssistant.Client.Client" Version="2.3.4-alpha-gaa5f33e49d" />
+    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.3.4-alpha-gaa5f33e49d" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
     <PackageReference Include="AWSSDK.Core" Version="3.7.9" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
