@@ -8,10 +8,12 @@ import { testProfile } from "./telemetry/electron-metrics";
 import {
   startTimer,
   logSolutionMetrics,
+  logReactError,
   logReactMetrics,
   registerLogListeners,
 } from "./telemetry/electron-telemetry";
 import { localStore } from "./preload-localStore";
+import { latestVersion, outdatedVersionFlag } from "./electron";
 
 ipcMain.handle("verifyProfile", (_event, profile: string) => {
   return testProfile(profile);
@@ -19,6 +21,86 @@ ipcMain.handle("verifyProfile", (_event, profile: string) => {
 ipcMain.handle("getConfigPath", (_event) => {
   return app.getPath("userData");
 });
+ipcMain.handle("getLatestVersion", (_event) => {
+  return latestVersion;
+});
+ipcMain.handle("getOutdatedVersionFlag", (_event) => {
+  return outdatedVersionFlag;
+});
+
+export const initTelemetryConnection = (logger: any = console) => {
+  let instance: Connection | undefined = undefined;
+
+  const createConnection = (browserWindow: Electron.BrowserWindow) => {
+      const connection = new ConnectionBuilder()
+          .connectTo(
+              "dotnet",
+              isDev
+                  ? path.join(
+                      __dirname,
+                      "..",
+                      "netcore_build",
+                      "PortingAssistant.Telemetry.dll"
+                  )
+                  : path.join(
+                      path.dirname(app.getPath("exe")),
+                      "resources",
+                      "netcore_build",
+                      "PortingAssistant.Telemetry.dll"
+                  ),
+              isDev
+                  ? path.join(
+                      __dirname,
+                      "..",
+                      "build-scripts",
+                      "porting-assistant-config.dev.json"
+                  )
+                  : path.join(
+                      path.dirname(app.getPath("exe")),
+                      "resources",
+                      "config",
+                      "porting-assistant-config.json"
+                  ),
+              localStore.get("profile"),
+              app.getPath("userData"),
+              app.getVersion(),
+              localStore.get("useDefaultCreds")
+          )
+          .build();
+    console.log("Telemetry Connection Start.");
+    connection.onDisconnect = () => {
+      // Recreate connection on disconnect
+      logger.log("telemetry disconnected");
+      instance = undefined;
+    };
+
+    return connection;
+  };
+
+  return {
+    getConnectionInstance: () => instance,
+    closeConnection: () => {
+      if (instance != null) {
+        instance.close();
+      }
+    },
+    registerListeners: (browserWindow: Electron.BrowserWindow) => {
+      if (localStore.get("profile")) {
+        console.log("profileFound: " + localStore.get("profile"));
+        instance = createConnection(browserWindow);
+      }
+
+      localStore.onDidChange("profile", () => {
+        console.log("Profile changed, recreating telemetry connection");
+        if (instance != null) {
+          instance.close();
+          instance = undefined;
+        }
+        instance = createConnection(browserWindow);
+      });
+    },
+  };
+};
 
 export const initConnection = (logger: any = console) => {
   ipcMain.handle("ping", async (_event) => {
@@ -44,6 +126,12 @@ export const initConnection = (logger: any = console) => {
   ipcMain.handle("telemetry", async (_event, message) => {
     logReactMetrics(message);
   });
+  ipcMain.handle(
+    "writeReactErrLog",
+    async (_event, source, message, response) => {
+      logReactError(source, message, response);
+    }
+  );
   ipcMain.handle("dialogShowOpenDialog", (_event, options: any) =>
     dialog.showOpenDialog(options)
   );
@@ -85,7 +173,8 @@ export const initConnection = (logger: any = console) => {
             ),
         localStore.get("profile"),
         app.getPath("userData"),
-        app.getVersion()
+        app.getVersion(),
+        localStore.get("useDefaultCreds")
       )
       .build();
 
@@ -97,8 +186,8 @@ export const initConnection = (logger: any = console) => {
 
     ipcMain.handle(
       "analyzeSolution",
-      async (_event, solutionFilePath, settings) => {
-        const request = { solutionFilePath, settings };
+      async (_event, solutionFilePath, runId, triggerType, settings, preTriggerData) => {
+        const request = { solutionFilePath, runId, triggerType, settings, preTriggerData };
         const elapseTime = startTimer();
         logger.log(`REQUEST - analyzeSolution: ${JSON.stringify(request)}`);
         const response = await connection.send("analyzeSolution", request);
@@ -156,6 +245,33 @@ export const initConnection = (logger: any = console) => {
       return response;
     });
 
+    ipcMain.handle("checkInternetAccess", async (_event) => {
+      const response = await connection.send("checkInternetAccess", "");
+      return response;
+    });
+
+    ipcMain.handle("sendCustomerFeedback", async (_event, upload) => {
+      const response = await connection.send("sendCustomerFeedback", upload);
+      return response;
+    });
+
+    ipcMain.handle(
+      "copyDirectory",
+      async (_event, solutionPath, destinationPath) => {
+        const request = {
+          solutionPath,
+          destinationPath,
+        };
+        const response = await connection.send("copyDirectory", request);
+        return response;
+      }
+    );
+
+    ipcMain.handle("uploadRuleContribution", async (_event, upload) => {
+      const response = await connection.send("uploadRuleContribution", upload);
+      return response;
+    });
+
     connection.on("onNugetPackageUpdate", (response) => {
       browserWindow.webContents.send("onNugetPackageUpdate", response);
     });
@@ -175,22 +291,8 @@ export const initConnection = (logger: any = console) => {
       }
     },
     registerListeners: (browserWindow: Electron.BrowserWindow) => {
-      if (!localStore.get("profile")) {
-        console.log("Did not find profile, setting onDidChange");
-        localStore.onDidChange("profile", () => {
-          console.log("Profile changed, recreating connection");
-          if (instance != null) {
-            instance.close();
-            instance = undefined;
-          }
-          instance = createConnection(browserWindow);
-          registerLogListeners(instance);
-        });
-      } else {
-        console.log("profileFound: " + localStore.get("profile"));
-        instance = createConnection(browserWindow);
-        registerLogListeners(instance);
-      }
+      instance = createConnection(browserWindow);
+      registerLogListeners(instance);
     },
   };
 };

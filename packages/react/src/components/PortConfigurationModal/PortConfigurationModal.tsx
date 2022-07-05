@@ -31,7 +31,7 @@ const PortConfigurationModalInternal: React.FC<Props> = ({ solution, visible, on
       switch (portingLocation.type) {
         case "copy":
           try {
-            await window.porting.copyDirectory(solution.solutionFilePath, portingLocation.workingDirectory);
+              await window.porting.copyDirectory(solution.solutionFilePath, portingLocation.workingDirectory);
           } catch (err) {
             setError("path", "error", `Unable to copy solution to directory. Error: ${err}`);
             return false;

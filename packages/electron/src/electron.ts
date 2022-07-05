@@ -15,7 +15,7 @@ import path from "path";
 import log from "electron-log";
 import url from "url";
 import electronIsDev from "electron-is-dev";
-import { initConnection } from "./electron-backend";
+import { initConnection, initTelemetryConnection } from "./electron-backend";
 import { localStore } from "./preload-localStore";
 
 const upgradeConfig = require(electronIsDev
@@ -29,6 +29,8 @@ const upgradeConfig = require(electronIsDev
 const LocalProvider = require("./LocalProvider").LocalProvider;
 
 let mainWindow: Electron.BrowserWindow | undefined;
+export let latestVersion = app.getVersion();
+export let outdatedVersionFlag = false;
 
 const template: Array<MenuItemConstructorOptions | MenuItem> = [
   ...(os.platform() !== "win32"
@@ -43,7 +45,7 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
         label: "View license",
         click: async () => {
           await shell.openExternal(
-            "https://raw.githubusercontent.com/aws/porting-assistant-dotnet-ui/github/LICENSE"
+            "https://raw.githubusercontent.com/aws/porting-assistant-dotnet-ui/develop/LICENSE"
           );
         },
       },
@@ -51,8 +53,28 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
         label: "View 3rd party licenses",
         click: async () => {
           await shell.openExternal(
-            "https://raw.githubusercontent.com/aws/porting-assistant-dotnet-ui/github/LICENSE-THIRD-PARTY"
+            "https://raw.githubusercontent.com/aws/porting-assistant-dotnet-ui/develop/LICENSE-THIRD-PARTY"
           );
+        },
+      },
+      {
+        label: "View Electron license",
+        click: async () => {
+          await shell.openPath(
+            path.join(
+              path.dirname(app.getPath("exe")),
+              "LICENSE.electron.txt"
+          ));
+        },
+      },
+      {
+        label: "View Chrome license",
+        click: async () => {
+          await shell.openPath(
+            path.join(
+              path.dirname(app.getPath("exe")),
+              "LICENSES.chromium.html"
+          ));
         },
       },
       { type: "separator" },
@@ -62,6 +84,12 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
           await shell.openExternal(
             "mailto:aws-porting-assistant-support@amazon.com"
           );
+        },
+      },
+      {
+        label: "View logs",
+        click: async () => {
+          await shell.openPath(path.dirname(localStore.path)+ "/logs/");
         },
       },
       {
@@ -96,11 +124,12 @@ Object.assign(console, log.functions);
 
 autoUpdater.logger = log;
 
-autoUpdater.autoDownload = true;
+autoUpdater.autoDownload = false;
 autoUpdater.allowDowngrade = true;
-autoUpdater.autoInstallOnAppQuit = false;
+autoUpdater.autoInstallOnAppQuit = true;
 
 const connection = initConnection(log.functions);
+const telemetryConnection = initTelemetryConnection(log.functions);
 
 const isDev =
   electronIsDev &&
@@ -138,6 +167,7 @@ function createWindow() {
   });
 
   connection.registerListeners(mainWindow);
+  telemetryConnection.registerListeners(mainWindow);
 
   // Create updater yml
   // @ts-ignore
@@ -155,22 +185,27 @@ function createWindow() {
     log.error(err);
   });
 
-  autoUpdater.on("update-downloaded", () => {
+  autoUpdater.on('update-available', (info) => {
+    latestVersion = info.version;
+    outdatedVersionFlag = true;
     dialog
       .showMessageBox(mainWindow!, {
         type: "info",
-        buttons: ["Restart", "Later"],
+        buttons: ["Download Now", "Later"],
         title: "Application Update",
         message:
-          "A new version has been downloaded. Restart the application to apply the updates. You may need to re-assess your solutions after the upgrade.",
+          "A new version is available. Click the \"Download Now\" button to update. You may also choose to do this later. The updates will be installed once you close the app. You may need to re-assess your solutions after the upgrade.",
       })
       .then((resp) => {
         if (resp.response === 0) {
-          connection.closeConnection();
-          autoUpdater.quitAndInstall();
+          autoUpdater.downloadUpdate();
+        } else {
+          log.error("Update deferred");
         }
       });
-  });
+
+  })
+
 
   autoUpdater.checkForUpdates();
 }
@@ -184,6 +219,7 @@ app.on("ready", () => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin" || isTest) {
     connection.closeConnection();
+    telemetryConnection.closeConnection();
     app.quit();
   }
 });

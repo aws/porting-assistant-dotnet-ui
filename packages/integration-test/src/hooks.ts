@@ -13,6 +13,10 @@ export const testSolutionPath = () => {
   }
 };
 
+export const awsCredPath = () => {
+  return path.join(os.homedir(), ".aws", "credentials");
+};
+
 export const startApp = async () => {
   try {
     const app = await new Application({

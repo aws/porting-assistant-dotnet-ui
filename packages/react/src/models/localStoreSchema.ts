@@ -8,6 +8,9 @@ export interface LocalStoreSchema {
   share: boolean;
   lastConfirmVersion: string;
   notification: boolean;
+  newVersionNotification: boolean;
+  email: string;
+  useDefaultCreds: boolean;
 }
 
 export interface SolutionLocalStoreSchema {

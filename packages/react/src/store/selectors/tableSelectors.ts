@@ -207,6 +207,15 @@ export const selectDashboardTableData = createSelector(
   }
 );
 
+export const selectSolutionToApiAnalysis = createSelector(
+  selectApiAnalysis,
+  (
+    solutionToApiAnalysis,
+  ) : SolutionToApiAnalysis => {
+    return solutionToApiAnalysis
+  }
+);
+
 export const selectProjectTableData = createCachedSelector(
   selectApiAnalysis,
   selectNugetPackages,
@@ -303,7 +312,7 @@ export const selectApiTableData = createCachedSelector(
           const apiItem = apiNameToApiItem[apiName];
           if (apiItem != null) {
             apiItem.calls += 1;
-            apiItem.sourceFiles.add(sourceFileAnalysisResult.sourceFileName);
+            apiItem.sourceFiles.add(sourceFileAnalysisResult.sourceFilePath);
             apiItem.locations.push({
               sourcefilePath: sourceFileAnalysisResult.sourceFilePath,
               location: apiResult.codeEntityDetails.textSpan?.startLinePosition || 0
@@ -314,7 +323,7 @@ export const selectApiTableData = createCachedSelector(
               packageName: apiResult.codeEntityDetails.package.packageId || "-",
               packageVersion: apiResult.codeEntityDetails.package.version,
               calls: 1,
-              sourceFiles: new Set<string>([sourceFileAnalysisResult.sourceFileName]),
+              sourceFiles: new Set<string>([sourceFileAnalysisResult.sourceFilePath]),
               locations: new Array<{ sourcefilePath: string; location: number }>({
                 sourcefilePath: sourceFileAnalysisResult.sourceFilePath,
                 location: apiResult.codeEntityDetails.textSpan?.startLinePosition || 0
@@ -412,10 +421,9 @@ export const selectNugetTableData = createCachedSelector(
       return [];
     }
     const selectedProjects = project != null ? [project.data] : projects.data;
-
     const fileApiFrequency = selectedProjects
       .flatMap(project => (project.projectFilePath == null ? [] : apiAnalysis[project.projectFilePath]))
-      .reduce<{ [packageVersion: string]: { file: number; api: number } }>((agg, current) => {
+      .reduce<{ [packageVersion: string]: { file: number; api: number; sourceFilesList: string[]; apiSet: Set<string> } }>((agg, current) => {
         if (!isLoaded(current) || current.data.sourceFileAnalysisResults == null) {
           return agg;
         }
@@ -439,13 +447,16 @@ export const selectNugetTableData = createCachedSelector(
             const key = nugetPackageKey(apiResult?.codeEntityDetails?.package?.packageId, version);
             if (agg[key] !== undefined) {
               agg[key].api += 1;
+              if (apiResult.codeEntityDetails.originalDefinition) agg[key].apiSet.add(apiResult.codeEntityDetails.originalDefinition);
             } else {
-              agg[key] = { api: 1, file: 0 };
+              agg[key] = { api: 1, file: 0 , sourceFilesList: [], apiSet: new Set()};
+              if (apiResult?.codeEntityDetails?.originalDefinition) agg[key].apiSet.add(apiResult?.codeEntityDetails?.originalDefinition);
             }
             packageVersionsInFile.add(key);
           });
           packageVersionsInFile.forEach(packageVersion => {
             agg[packageVersion].file += 1;
+            agg[packageVersion].sourceFilesList.push(sourceFileAnalysisResult.sourceFilePath);
           });
         });
         return agg;
@@ -481,7 +492,9 @@ export const selectNugetTableData = createCachedSelector(
                 ...current,
                 frequency: 1,
                 apis: fileApiFrequency[key]?.api || 0,
+                apiSet: fileApiFrequency[key]?.apiSet || new Set(),
                 sourceFiles: fileApiFrequency[key]?.file || 0,
+                sourceFilesList: fileApiFrequency[key]?.sourceFilesList || [],
                 replacement: replacement,
                 compatible: compatibility,
                 failed: isFailed(packageAnalysisResult),
@@ -492,7 +505,9 @@ export const selectNugetTableData = createCachedSelector(
                 ...current,
                 frequency: 1,
                 apis: fileApiFrequency[key]?.api || 0,
+                apiSet: fileApiFrequency[key]?.apiSet || new Set(),
                 sourceFiles: fileApiFrequency[key]?.file || 0,
+                sourceFilesList: fileApiFrequency[key]?.sourceFilesList || [],
                 replacement: replacement,
                 compatible: "UNKNOWN",
                 failed: isFailed(packageAnalysisResult),

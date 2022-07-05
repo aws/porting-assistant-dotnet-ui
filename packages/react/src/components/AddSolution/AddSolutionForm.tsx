@@ -3,9 +3,12 @@ import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
+import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
 import { analyzeSolution } from "../../store/actions/backend";
+import { pushCurrentMessageUpdate } from "../../store/actions/error";
+import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { InfoLink } from "../InfoLink";
 import { UploadSolutionField } from "./UploadSolutionField";
@@ -21,22 +24,28 @@ const ImportSolutionInternal: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit(async data => {
-        await addSolution(data);
-        const targetFramework = getTargetFramework();
-        dispatch(
-          analyzeSolution.request({
-            solutionPath: data.solutionFilename,
-            settings: {
-              ignoredProjects: [],
-              targetFramework: targetFramework,
-              continiousEnabled: false,
-              actionsOnly: false,
-              compatibleOnly: false
-            },
-            force: true
-          })
-        );
-        history.push("/solutions");
+          await addSolution(data);
+          const targetFramework = getTargetFramework();
+          const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
+          if (haveInternet) {
+            dispatch(
+              analyzeSolution.request({
+                solutionPath: data.solutionFilename,
+                runId: uuid(),
+                triggerType: "InitialRequest",
+                settings: {
+                  ignoredProjects: [],
+                  targetFramework: targetFramework,
+                  continiousEnabled: false,
+                  actionsOnly: false,
+                  compatibleOnly: false
+                },
+                preTriggerData:[],
+                force: true
+              })
+            );
+            history.push("/solutions");
+          }
       })}
     >
       <Form

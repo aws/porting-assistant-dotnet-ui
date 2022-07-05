@@ -2,13 +2,15 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
+		<PackageReference Include="PortingAssistant.Client.Client" Version="2.3.3-alpha-gc19771ce32" />
+		<PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.3.3-alpha-gc19771ce32" />
 		<PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
-		<PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\PortingAssistant.Common\PortingAssistant.Common.csproj" />

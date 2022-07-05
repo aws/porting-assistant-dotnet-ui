@@ -1,3 +1,5 @@
+import fs from "fs";
+
 import { LocalStoreSchema } from "./models/localStoreSchema";
 import { Credentials } from "./models/setup";
 import { NugetPackageReducerState, SolutionReducerState } from "./store/reducers";
@@ -39,5 +41,12 @@ global.window = {
       throw new Error("not implement");
     },
     dialog: {} as any
+  },
+  backend: {
+      checkInternetAccess: () => false,
+      getFileContents: (solutionFilePath: string) => {
+        const fileContents = fs.readFileSync(solutionFilePath).toString();
+        return fileContents;
+      }
   }
 } as any;

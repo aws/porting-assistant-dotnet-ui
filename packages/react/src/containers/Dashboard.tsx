@@ -14,6 +14,9 @@ const DashboardInternal: React.FC = () => {
   const location = useLocation();
   const notification = window.electron.getState("notification");
   const [visible, setVisible] = React.useState(notification);
+  const newVersionNotification = window.electron.getState("newVersionNotification");
+  const [visibleNewVersion, setVisibleNewVersion] = React.useState(false);
+  const [latestAppVersion, setlatestAppVersion] = React.useState<string | undefined>(undefined);
   useEffect(() => {
     dispatch(
       setInfo({
@@ -40,12 +43,47 @@ const DashboardInternal: React.FC = () => {
     );
   }, [dispatch, location]);
 
+  useEffect(() => {
+    (async () => {
+      setlatestAppVersion(await window.electron.getLatestVersion());
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      setVisibleNewVersion((await window.electron.getOutdatedVersionFlag()) && newVersionNotification);
+    })();
+  }, []);
+
   return (
     <PortingAssistantAppLayout
       contentType="table"
       content={
         <>
           <SpaceBetween direction="vertical" size="xs">
+            <Alert
+              type="info"
+              header="New version of Porting Assistant for .NET is available."
+              dismissible={true}
+              visible={visibleNewVersion}
+              onDismiss={() => {
+                setVisibleNewVersion(false);
+                window.electron.saveState("newVersionNotification", false);
+              }}
+              buttonText={
+                <SpaceBetween direction="horizontal" size="xxs">
+                  <div>Get the Release Note</div>
+                  <div>
+                    <Icon name="external" size="normal" variant="normal" />
+                  </div>
+                </SpaceBetween>
+              }
+              onButtonClick={() => {
+                window.electron.openExternalUrl(externalUrls.releaseNotes);
+              }}
+            >
+              Check new features of Porting Assistant for .NET - Version {latestAppVersion}.
+            </Alert>
             <Alert
               type="info"
               header="Porting Assistant for .NET is now available as an extension for Microsoft Visual Studio"
@@ -67,7 +105,7 @@ const DashboardInternal: React.FC = () => {
                 window.electron.openExternalUrl(externalUrls.visualstudioExtension);
               }}
             >
-              Assess your soluton for .NET Core compatibility and start porting them in Visual Studio.
+              Assess your solution for .NET Core compatibility and start porting them in Visual Studio.
             </Alert>
             <DashboardTable />
           </SpaceBetween>

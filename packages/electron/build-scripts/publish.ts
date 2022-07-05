@@ -146,6 +146,13 @@ if (config.config !== undefined) {
         MaxBufferCapacity: process.env["MAX_BUFFER_CAPACITY"],
         MaxBufferCache: process.env["MAX_BUFFER_CACHE"],
         FlushInterval: process.env["FLUSH_INTERVAL"],
+        LogTimerInterval: process.env["LOG_TIMER_INTERVAL"],
+        Prefix: process.env["PREFIX"],
+        Description: process.env["DESCRIPTION"]
+      },
+      CustomerContributionConfiguration: {
+        CustomerFeedbackEndpoint: process.env["CF_URL"],
+        RuleContributionEndpoint: process.env["RC_URL"]
       },
     })
   );

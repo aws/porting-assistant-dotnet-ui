@@ -1,14 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using ElectronCgi.DotNet;
-using PortingAssistant.Common.Model;
-using PortingAssistant.Common.Services;
+﻿using ElectronCgi.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
-using System.Diagnostics;
+using PortingAssistant.Client.NuGet.Interfaces;
+using PortingAssistant.Common.Model;
+using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
+using PortingAssistant.Telemetry.Utils;
 using PortingAssistant.VisualStudio;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using Newtonsoft.Json;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace PortingAssistant.Api
 {
@@ -17,18 +22,16 @@ namespace PortingAssistant.Api
         private IServiceProvider _services { get; set; }
         private Connection _connection;
         private ILogger _logger;
+        private CustomerContributionConfiguration _ccconfig;
 
-        public Application(IServiceCollection serviceCollection, PortingAssistantSink portingAssistantSink)
+        public Application(IServiceCollection serviceCollection,
+            CustomerContributionConfiguration contributionConfiguration)
         {
             _services = serviceCollection.BuildServiceProvider();
             _logger = _services.GetRequiredService<ILogger<Application>>();
             _connection = BuildConnection();
-            portingAssistantSink.registerOnData((response) =>
-            {
-                _connection.Send("onDataUpdate", response);
-            });
-
-
+            _ccconfig = contributionConfiguration;
+            
         }
 
         private Connection BuildConnection()
@@ -69,6 +72,21 @@ namespace PortingAssistant.Api
                 return assessmentService.AnalyzeSolution(request);
             });
 
+
+            _connection.On<CopyDirectoryRequest>("copyDirectory", request =>
+             {
+                 try
+                 {
+                     PortingAssistantUtils.CopyDirectory(request.solutionPath, request.destinationPath);
+                 }
+                 catch (Exception ex)
+                 {
+                     _logger.LogError(ex, "Failed to copy the solution to new location");
+                     throw;
+                 }
+
+             });
+
             _connection.On<ProjectFilePortingRequest, Response<List<PortingResult>, List<PortingResult>>>("applyPortingProjectFileChanges", request =>
             {
                 var portingService = _services.GetRequiredService<IPortingService>();
@@ -99,6 +117,57 @@ namespace PortingAssistant.Api
                     {
                         Status = Response<bool, string>.Success()
                     };
+                }
+                catch (Exception ex)
+                {
+                    return new Response<bool, string>
+                    {
+                        Status = Response<bool, string>.Failed(ex),
+                        ErrorValue = ex.Message
+                    };
+                }
+            });
+
+            _connection.On<string, bool>("checkInternetAccess",
+                request =>
+                {
+                    var httpService = _services.GetRequiredService<IHttpService>();
+                    string[] files =
+                    {
+                        "newtonsoft.json.json.gz",
+                        "github.json.gz",
+                        "giger.json.gz",
+                    };
+                    return HttpServiceUtils.CheckInternetAccess(httpService, files);
+                });
+
+            _connection.On<CustomerFeedbackRequest, Response<bool, string>>("sendCustomerFeedback", request =>
+            {
+                try
+                {
+                    string endPoint = _ccconfig.CustomerFeedbackEndpoint;
+                    string uniqueMachineID = LogUploadUtils.getUniqueIdentifier();
+                    string key = $"{uniqueMachineID}/{request.Date}";
+                    request.MachineID = uniqueMachineID;
+                    string serializedContent = JsonConvert.SerializeObject(request);
+                    return CustomerContributionUtils.FeedbackUpload(key, serializedContent, endPoint);
+                }
+                catch (Exception ex)
+                {
+                    return new Response<bool, string>
+                    {
+                        Status = Response<bool, string>.Failed(ex),
+                        ErrorValue = ex.Message
+                    };
+                }
+            });
+
+            _connection.On<RuleContributionRequest, Response<bool, string>>("uploadRuleContribution", request =>
+            {
+                try
+                {
+                    string endPoint = _ccconfig.RuleContributionEndpoint;
+                    return CustomerContributionUtils.RuleContributionUpload(request.KeyName, request.Contents, endPoint);
                 }
                 catch (Exception ex)
                 {

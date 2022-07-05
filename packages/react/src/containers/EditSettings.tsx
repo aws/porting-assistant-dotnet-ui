@@ -6,7 +6,7 @@ import { v4 as uuid } from "uuid";
 
 import { PortingAssistantAppLayout } from "../components/PortingAssistantAppLayout";
 import { PortingAssistantBreadcrumb } from "../components/PortingAssistantBreadcrumb";
-import { ProfileSelecion } from "../components/Setup/ProfileSelection";
+import { ProfileSelection } from "../components/Setup/ProfileSelection";
 import { pushPendingMessageUpdate } from "../store/actions/error";
 import { openTools, setInfo } from "../store/actions/tools";
 
@@ -29,7 +29,7 @@ const EditSettingsInternal: React.FC = () => {
           {
             text: "Configuring the AWS CLI",
             externalUrl:
-              "https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration"
+              "https://docs.aws.amazon.com/portingassistant/latest/userguide/porting-assistant-prerequisites.html#porting-assistant-iam-profile"
           }
         ]
       })
@@ -52,7 +52,7 @@ const EditSettingsInternal: React.FC = () => {
     <PortingAssistantAppLayout
       contentType="form"
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumb} />}
-      content={<ProfileSelecion title="Edit settings" buttonText="Save" next={setPendingMessage} />}
+      content={<ProfileSelection title="Edit settings" buttonText="Save" next={setPendingMessage} />}
       onToolsChange={event => dispatch(openTools({ isOpen: event.detail.open }))}
     />
   );

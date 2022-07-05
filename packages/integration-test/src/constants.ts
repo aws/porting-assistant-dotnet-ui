@@ -1,0 +1,133 @@
+export const expectedWCFProgram: string = `
+using CoreWCF.Configuration;
+using System.Net;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+
+
+namespace WCFTCPSelfHost
+{
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+      //All Ports set are default.
+			IWebHost host = CreateWebHostBuilder(args).Build();
+      host.Run();
+		}
+
+    public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+      WebHost.CreateDefaultBuilder(args)
+				 .UseKestrel(options => { })
+.UseNetTcp(8000)				 .UseStartup<Startup>();
+	}
+}
+`;
+export const expectedWCFStartup = (testdir: string): string => {
+  return `
+using CoreWCF.Configuration;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace WCFTCPSelfHost
+{
+   public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            string pathToXml = @"C:\\testsolutions\\${testdir}\\wcftcpselfhost\\WCFTCPSelfHost\\corewcf_ported.config";
+            services.AddServiceModelServices();
+            services.AddServiceModelConfigurationManagerFile(pathToXml);
+        }
+
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            app.UseServiceModel();
+        }
+    }
+}
+`;
+};
+export const expectedWCFConfig: string = `<?xml version="1.0" encoding="utf-16" standalone="yes"?>
+<configuration>
+  <system.serviceModel>
+    <bindings>
+      <netTcpBinding>
+        <binding name="EndPointConfiguration">
+          <security mode="None" />
+        </binding>
+      </netTcpBinding>
+    </bindings>
+    <behaviors>
+      <serviceBehaviors>
+        <behavior name="mexBehavior">
+          <serviceMetadata httpGetEnabled="true" policyVersion="Policy15" />
+        </behavior>
+      </serviceBehaviors>
+    </behaviors>
+    <services>
+      <service name="WcfServiceLibrary1.Service1" behaviorConfiguration="mexBehavior">
+        <endpoint address="/Service1" binding="netTcpBinding" bindingConfiguration="EndPointConfiguration" contract="WcfServiceLibrary1.IService1" />
+      </service>
+    </services>
+  </system.serviceModel>
+</configuration>`;
+
+
+export const expectedWebFormsProgramcs: string = `
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+
+namespace eShopLegacyWebForms
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            CreateHostBuilder(args).Build().Run();
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
+    }
+}`
+
+
+export const expectedMVCAppWithIISConfigProgramcs: string = `
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace MVCAppWithIISConfig
+{
+
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            CreateHostBuilder(args).Build().Run();
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+webBuilder.UseKestrel(options =>{options.Limits.MaxRequestBodySize = 52428800;});                });
+    }
+
+
+}`

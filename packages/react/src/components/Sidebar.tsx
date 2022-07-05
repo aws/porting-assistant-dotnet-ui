@@ -48,6 +48,12 @@ const items: SideNavigationProps.Item[] = [
     text: "Documentation",
     href: externalUrls.defaultDocumentation,
     external: true
+  },
+  {
+    type: "link",
+    text: "Send Feedback",
+    href: `mailto:${externalUrls.email}?subject=Feedback - Porting Assistant for .NET`,
+    external: true
   }
 ];
 

@@ -1,0 +1,16 @@
+  
+# When someone opens a pull request that only
+# modifies the files specified below, notification will
+# be sent to owner(s) for a review.
+
+
+/packages/csharp/PortingAssistant/PortingAssistant.Common/Services/AssesmentService.cs @saikiranakula-amzn @cslong @aniruddhadave
+/packages/csharp/PortingAssistant/PortingAssistant.Common/Services/PortingService.cs @saikiranakula-amzn @cslong @aniruddhadave
+/packages/csharp/PortingAssistant/PortingAssistant.Common/Model/AnalyzeSolutionRequest.cs @saikiranakula-amzn @cslong @aniruddhadave
+/packages/csharp/PortingAssistant/PortingAssistant.Common/Model/ProjectFilePortingRequest.cs @saikiranakula-amzn @cslong @aniruddhadave
+/packages/csharp/PortingAssistant/PortingAssistant.Common/Model/Response.cs @saikiranakula-amzn @cslong @aniruddhadave
+/packages/electron/schema/ @saikiranakula-amzn @cslong @aniruddhadave
+/packages/react/src/models/porting.ts @saikiranakula-amzn @cslong @aniruddhadave
+/packages/react/src/models/project.ts @saikiranakula-amzn @cslong @aniruddhadave
+/packages/react/src/models/response.ts @saikiranakula-amzn @cslong @aniruddhadave
+/packages/react/src/models/solution.ts @saikiranakula-amzn @cslong @aniruddhadave

@@ -17,7 +17,7 @@ export const selectSolutionToSolutionDetails = (state: RootState) => state.solut
 export const selectNugetPackages = (state: RootState) => state.nugetPackage.nugets;
 export const selectApiAnalysis = (state: RootState) => state.solution.apiAnalysis;
 export const selectSourceFileContents = (state: RootState) => state.file.sourceFileToContents;
-export const selectTargetFramework = () => window.electron.getState("targetFramework")?.id || "netcoreapp3.1";
+export const selectTargetFramework = () => window.electron.getState("targetFramework")?.id || "net6.0";
 
 export const selectCurrentSolutionPath = createCachedSelector(
   (_state: RootState, locationPath: string) => locationPath,

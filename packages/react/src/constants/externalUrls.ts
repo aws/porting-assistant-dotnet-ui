@@ -9,5 +9,7 @@ export const externalUrls = {
   concepts:
     "https://docs.aws.amazon.com/portingassistant/latest/userguide/what-is-porting-assistant.html#porting-assistant-concepts",
   forums: "https://forums.aws.amazon.com/forum.jspa?forumID=61",
-  email: "aws-porting-assistant-support@amazon.com"
+  email: "aws-porting-assistant-support@amazon.com",
+  releaseNotes: "https://docs.aws.amazon.com/portingassistant/latest/userguide/porting-assistant-versions.html",
+  clientRelease: "https://github.com/aws/porting-assistant-dotnet-client/releases"
 };

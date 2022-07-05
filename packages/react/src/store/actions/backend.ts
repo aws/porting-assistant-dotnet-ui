@@ -5,6 +5,8 @@ import { SolutionDetails } from "../../models/solution";
 
 export interface analyzeSolutionRequestPayload {
   solutionPath: string;
+  runId: string;
+  triggerType: string;
   settings: {
     ignoredProjects: string[];
     targetFramework: string;
@@ -12,6 +14,7 @@ export interface analyzeSolutionRequestPayload {
     compatibleOnly: boolean;
     actionsOnly: boolean;
   };
+  preTriggerData:string[];
   force?: boolean;
 }
 export interface analyzeSolutionSuccessPayload {

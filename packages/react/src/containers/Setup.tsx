@@ -1,11 +1,12 @@
-import { Box } from "@awsui/components-react";
+import { Alert, Box, Icon, SpaceBetween } from "@awsui/components-react";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
 
 import { PortingAssistantAppLayout } from "../components/PortingAssistantAppLayout";
 import { PortingAssistantBreadcrumb } from "../components/PortingAssistantBreadcrumb";
-import { ProfileSelecion } from "../components/Setup/ProfileSelection";
+import { ProfileSelection } from "../components/Setup/ProfileSelection";
+import { externalUrls } from "../constants/externalUrls";
 import { usePortingAssistantSelector } from "../createReduxStore";
 import { openTools, setInfo } from "../store/actions/tools";
 
@@ -40,11 +41,12 @@ const SetupInternal: React.FC = () => {
   return (
     <PortingAssistantAppLayout
       content={
-        <ProfileSelecion
+          <ProfileSelection
           title="Set up Porting Assistant for .NET"
           buttonText="Next"
           next={() => history.push("/add-solution")}
         />
+
       }
       navigationHide={!profileSet}
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumb} />}

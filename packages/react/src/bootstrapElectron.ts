@@ -11,8 +11,7 @@ import {
   VersionPair
 } from "./models/project";
 import { Response } from "./models/response";
-import { Credentials } from "./models/setup";
-import { Profiles } from "./models/setup";
+import { Credentials, Profiles } from "./models/setup";
 import { SolutionDetails } from "./models/solution";
 import { NugetPackageReducerState, SolutionReducerState } from "./store/reducers";
 import { SolutionToPortingProjects } from "./store/reducers/porting";
@@ -34,25 +33,34 @@ export interface Electron {
   getPathSeparator: () => string;
   joinPaths: (...paths: string[]) => string;
   pathExists: (path: string) => boolean;
-  getProfiles: () => Profiles;
+  getProfiles: () => Promise<Profiles>;
+  getCredentials: (profile?: string) => Promise<{ [key: string]: string | undefined }>;
   writeProfile: (profileName: string, credentials: Credentials) => void;
   writeZipFile: (zipFilename: string, contents: { filename: string; contents: string }[]) => Promise<void>;
   verifyUser: (profile: string) => Promise<boolean>;
   getVersion: () => Promise<string>;
+  getLatestVersion: () => Promise<string>;
+  getOutdatedVersionFlag: () => Promise<boolean>;
   telemetry: (message: any) => void;
+  writeReactErrLog: (source: any, message: any, response: any) => void;
+  getAssessmentLog: () => string;
+  checkInternetAccess: () => Promise<boolean>;
 }
 
 export interface Backend {
   ping: () => Promise<string>;
   analyzeSolution: (
     solutionPath: string,
+    runId: string,
+    triggerType: string,
     settings: {
       ignoredProjects: string[];
       targetFramework: string;
       continiousEnabled: boolean;
       actionsOnly: boolean;
       compatibleOnly: boolean;
-    }
+    },
+    preTriggerData: string[]
   ) => Promise<Response<SolutionDetails, string>>;
   openSolutionInIDE: (solutionFilePath: string) => Promise<Response<boolean, string>>;
   getFileContents: (sourceFilePath: string) => Promise<string>;
@@ -61,10 +69,13 @@ export interface Backend {
   listenApiAnalysisUpdate: (
     callback: (projectAnalysis: Response<ProjectApiAnalysisResult, SolutionProject>) => void
   ) => void;
+  checkInternetAccess: () => Promise<boolean>;
+  sendCustomerFeedback: (upload: any) => Promise<Response<boolean, string>>;
+  uploadRuleContribution: (upload: any) => Promise<Response<boolean, string>>;
 }
 
 export interface Porting {
-  copyDirectory: (solutionPath: string, destinationPath: string) => Promise<void>;
+  copyDirectory: (solutionPath: string, destinationPath: string) => void;
   getConfig: () => SolutionToPortingProjects;
   setConfig: (data: SolutionToPortingProjects) => void;
   applyPortingProjectFileChanges: (

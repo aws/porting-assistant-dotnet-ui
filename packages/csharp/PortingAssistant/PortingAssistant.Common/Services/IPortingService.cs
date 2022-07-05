@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using PortingAssistant.Client.Model;
 using PortingAssistant.Common.Model;
-using PortingAssistant.Client.Model;
+using System.Collections.Generic;
 
 namespace PortingAssistant.Common.Services
 {

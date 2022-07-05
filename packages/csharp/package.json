@@ -1,6 +1,6 @@
 {
   "name": "@porting-assistant/csharp",
-  "version": "1.5.1",
+  "version": "1.6.7",
   "productName": "Porting Assistant for .NET",
   "description": "Porting Assistant for .NET",
   "author": {
@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git@github.com:aws/porting-assistant-dotnet-ui.git"
   },
-  "license": "https://github.com/aws/porting-assistant-dotnet-ui/blob/github/LICENSE",
+  "license": "https://github.com/aws/porting-assistant-dotnet-ui/blob/develop/LICENSE",
   "main": "lib/csharp.js",
   "directories": {
     "lib": "lib",

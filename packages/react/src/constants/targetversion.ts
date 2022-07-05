@@ -1,1 +1,1 @@
-export const DEFAULT_TARGET_VERSION = "netcoreapp3.1";
+export const DEFAULT_TARGET_VERSION = "net6.0";

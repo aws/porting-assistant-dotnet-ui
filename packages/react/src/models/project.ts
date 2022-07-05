@@ -11,6 +11,7 @@ export interface Project {
   projectFilePath: string;
   projectGuid?: string | null;
   projectType?: string | null;
+  featureType?: string | null;
   targetFrameworks?: string[] | null;
   packageReferences?: NugetPackage[] | null;
   projectReferences?: ProjectReference[] | null;
@@ -79,6 +80,7 @@ export interface ApiRecommendation extends RecommendedAction {
 
 export interface PackageRecommendation extends RecommendedAction {
   PackageId?: string;
+  Version?: string;
   TargetVersions?: string[];
 }
 
@@ -104,6 +106,19 @@ export interface VersionPair {
   upgradeVersion: string;
 }
 
+export interface PreTriggerData {
+  projectName: string;
+  projectPath: string;
+  solutionPath: string;
+  targetFramework: string;
+  incompatibleApis: number | null;
+  totalApis: number | null;
+  buildErrors: number | null;
+  ported: boolean;
+  sourceFileAnalysisResults: SourceFileAnalysisResult[] | null;
+
+}
+
 export type CompatibleTargets = string;
 export type Compatibility = "UNKNOWN" | "COMPATIBLE" | "INCOMPATIBLE" | "DEPRACATED";
 export type RecommendedActionType =
@@ -112,7 +127,17 @@ export type RecommendedActionType =
   | "ReplaceNamespace"
   | "ReplacePackage"
   | "NoRecommendation";
-export type CodeEntityType = "Namespace" | "Class" | "Method" | "InstanceAttribute" | "ClassAttribute";
+export type CodeEntityType =
+  | "Namespace"
+  | "Class"
+  | "Method"
+  | "InstanceAttribute"
+  | "ClassAttribute"
+  | "Annotation"
+  | "Declaration"
+  | "Using"
+  | "Enum"
+  | "Struct";
 export type PackageSourceType = "SDK" | "NUGET" | "PORTABILITY_ANALYZER" | "RECOMMENDATION" | "PRIVATE";
 export type SolutionToSolutionDetails = { [solutionPath: string]: Loadable<SolutionDetails> };
 export type ProjectToApiAnalysis = { [project: string]: Loadable<ProjectApiAnalysisResult> };
