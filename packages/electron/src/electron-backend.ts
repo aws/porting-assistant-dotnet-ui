@@ -64,7 +64,8 @@ export const initTelemetryConnection = (logger: any = console) => {
               localStore.get("profile"),
               app.getPath("userData"),
               app.getVersion(),
-              localStore.get("useDefaultCreds")
+              localStore.get("useDefaultCreds"),
+              localStore.get("share")
           )
           .build();
     console.log("Telemetry Connection Start.");
