@@ -126,10 +126,12 @@ namespace PortingAssistant.Telemetry.Utils
             string lastReadTokenFile, 
             string profile, 
             bool enabledDefaultCredentials,
-            string prefix)
+            string prefix,
+            bool shareMetric)
         {
             try
             {
+                if (!shareMetric) return;
                 // Get files in directory and filter based on Suffix
                 string[] fileEntries = Directory.GetFiles(teleConfig.LogsPath).Where(f => (
                   teleConfig.Suffix.ToArray().Any(x => f.EndsWith(x))

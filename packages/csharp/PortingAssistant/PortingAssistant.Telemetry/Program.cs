@@ -25,6 +25,7 @@ namespace PortingAssistant.Telemetry
             var profile = args[1];
             var userData = args[2];
             var useDefaultCreds = System.Convert.ToBoolean(args[4]);
+            var shareMetric = System.Convert.ToBoolean(args[5]);
             Connection _connection = new ConnectionBuilder().WithLogging().Build();
             var portingAssistantPortingConfiguration = System.Text.Json.JsonSerializer.Deserialize<PortingAssistantPortingConfiguration>(File.ReadAllText(config));
             string metricsFolder = Path.Combine(userData, "logs");
@@ -45,7 +46,7 @@ namespace PortingAssistant.Telemetry
             var logTimer = new System.Timers.Timer();
             logTimer.Interval = Convert.ToDouble(portingAssistantPortingConfiguration.PortingAssistantMetrics["LogTimerInterval"].ToString());
 
-            logTimer.Elapsed += (source, e) => LogUploadUtils.OnTimedEvent(source, e, teleConfig, lastReadTokenFile, profile, useDefaultCreds, prefix);
+            logTimer.Elapsed += (source, e) => LogUploadUtils.OnTimedEvent(source, e, teleConfig, lastReadTokenFile, profile, useDefaultCreds, prefix, shareMetric);
 
             logTimer.AutoReset = true;
 
