@@ -112,7 +112,7 @@ namespace PortingAssistant.Api
                         };
                     }
 
-                    Process.Start(vsexe, request);
+                    Process.Start(vsexe, $"\"{request}\"");
                     return new Response<bool, string>
                     {
                         Status = Response<bool, string>.Success()
