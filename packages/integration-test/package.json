@@ -1,6 +1,6 @@
 {
   "name": "@porting-assistant/integration-test",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "productName": "Porting Assistant for .NET",
   "description": "Porting Assistant for .NET",
   "author": {
@@ -18,13 +18,19 @@
     "build:download:win32": "tsc && build-scripts\\build.bat",
     "build:download:default": "build-scripts/build.sh",
     "test": "npx jest --runInBand",
+    "test:canary": "npx jest --runInBand --testPathPattern='canary.spec.ts'",
+    "test:netcore31": "npx jest --runInBand --testPathPattern='netcore31.spec.ts'",
+    "test:stability": "npx jest --runInBand --testPathPattern='stability.spec.ts'",
+    "test:profileCheck": "npx jest --runInBand --testPathPattern='profileCheck.spec.ts'",
+    "test:defaultCredsInvalidCheck": "npx jest --runInBand --testPathPattern='defaultCredsInvalidCheck.spec.ts'",
+    "test:defaultCredsInvalidDisplayCheck": "npx jest --runInBand --testPathPattern='defaultCredsInvalidDisplayCheck.spec.ts'",
     "license-checker": "npx license-checker --production --exclude MIT,Apache-2.0,Unlicense,BSD-2-Clause,BSD-3-Clause",
     "generate-attribution": "npx generate-attribution"
   },
   "dependencies": {
     "@types/jest": "^25.1.2",
-    "aws-sdk": "^2.570.0",
-    "electron": "10.1.5",
+    "aws-sdk": "^2.814.0",
+    "electron": "10.4.7",
     "jest": "^25.1.0",
     "run-script-os": "^1.1.1",
     "spectron": "^12.0.0",

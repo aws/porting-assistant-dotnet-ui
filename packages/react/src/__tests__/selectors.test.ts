@@ -499,13 +499,13 @@ describe("toolselctors", () => {
 
 describe("tableSelectors utils apis", () => {
   window.electron.getState = jest.fn();
-  jest.spyOn(window.electron, "getState").mockReturnValue("netcoreapp3.1");
+  jest.spyOn(window.electron, "getState").mockReturnValue("net6.0");
 
   it("poretedProjects with one ported projects", () => {
     const result = portedProjects(
       solutionDetails,
       { "/test/testsolution": Loaded(solutionDetails) },
-      { "/test/testsolution": { projectPath: "", steps: { projectFileStep: "complete" } } }
+      { "/test/testsolution": { projectPath: "/test/testproject", steps: { projectFileStep: "complete" } } }
     );
     expect(result).toEqual(1);
   });
@@ -525,7 +525,7 @@ describe("tableSelectors utils apis", () => {
       "/test/solution",
       { "/test/solution": { "/test/testproject": Loaded(projectAnalysisResult) } },
       Loaded(solutionDetails),
-      "netcoreapp3.1"
+      "net6.0"
     );
     expect(result).toStrictEqual([1, 2]);
   });
@@ -540,18 +540,18 @@ describe("tableSelectors utils apis", () => {
         failedProjects: [""],
         projects: []
       }),
-      "netcoreapp3.1"
+      "net6.0"
     );
     expect(result).toStrictEqual([0, 0]);
   });
 
   it("getApiCounts with no avalible api analysis", () => {
-    const result = getApiCounts("/test/solution", solutionToApiAnalysis, Loaded(solutionDetails), "netcoreapp3.1");
+    const result = getApiCounts("/test/solution", solutionToApiAnalysis, Loaded(solutionDetails), "net6.0");
     expect(result).toBeNull();
   });
 
   it("getApiCounts with wrong solution path", () => {
-    const result = getApiCounts("/test/wrongpath", solutionToApiAnalysis, Loaded(solutionDetails), "netcoreapp3.1");
+    const result = getApiCounts("/test/wrongpath", solutionToApiAnalysis, Loaded(solutionDetails), "net6.0");
     expect(result).toBeNull();
   });
 
@@ -608,7 +608,7 @@ describe("tableSelectors utils apis", () => {
 
 describe("selectDashboardTableData", () => {
   window.electron.getState = jest.fn();
-  jest.spyOn(window.electron, "getState").mockReturnValue("netcoreapp3.1");
+  jest.spyOn(window.electron, "getState").mockReturnValue("net6.0");
 
   const fakeStoreData: Partial<RootState> = {
     solution: {
@@ -631,7 +631,7 @@ describe("selectDashboardTableData", () => {
             version: "3.0.0"
           },
           compatibilityResults: {
-            "netcoreapp3.1": {
+            "net6.0": {
               compatibility: "COMPATIBLE",
               compatibleVersions: ["3.1.0", "3.0.0"]
             }
@@ -717,7 +717,7 @@ describe("selectDashboardTableData", () => {
         projectName: "testProject",
         projectPath: "/test/testproject",
         solutionPath: "/test/solution",
-        targetFramework: "netcoreapp3.1",
+        targetFramework: "net6.0",
         referencedProjects: 2,
         incompatibleApis: 1,
         incompatiblePackages: 0,
@@ -768,7 +768,7 @@ describe("selectDashboardTableData", () => {
         locations: [{ sourcefilePath: "/test/testproject/get.ts", location: 13 }],
         replacement: "",
         isCompatible: "COMPATIBLE",
-        sourceFiles: new Set<string>(["get.ts"])
+        sourceFiles: new Set<string>(["/test/testproject/get.ts"])
       },
       {
         apiName: "abcd",
@@ -779,7 +779,7 @@ describe("selectDashboardTableData", () => {
         locations: [{ sourcefilePath: "/test/testproject/test.ts", location: 13 }],
         replacement: "test",
         isCompatible: "INCOMPATIBLE",
-        sourceFiles: new Set<string>(["test.ts"])
+        sourceFiles: new Set<string>(["/test/testproject/test.ts"])
       }
     ];
     expect(result).toEqual(expectResult);
@@ -942,7 +942,9 @@ describe("selectDashboardTableData", () => {
         sourceFiles: 1,
         replacement: "test upgrade",
         compatible: "COMPATIBLE",
-        deprecated: false
+        deprecated: false,
+        sourceFilesList: ["/test/testproject/get.ts"],
+        apiSet: new Set(["abcd"])
       }
     ];
     expect(result).toEqual(expectResult);

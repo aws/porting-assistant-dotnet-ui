@@ -65,7 +65,7 @@ var reactLogger = winston.createLogger({
 
 export const logReactMetrics = (response: any) => {
   const targetFramework =
-    localStore.get("targetFramework").id || "netcoreapp3.1";
+    localStore.get("targetFramework").id || "net6.0";
   // Error with MetaData
   const errorMetric = {
       Metrics: {
@@ -95,6 +95,16 @@ export const logReactMetrics = (response: any) => {
   reactLogger.info(JSON.stringify(errorMetric));
 };
 
+export const logReactError = (source: any, message: any ,response: any) => {
+  const cur = new Date();
+  let curTimeArr = cur.toISOString().split('T');
+  let curDate = curTimeArr[0];
+  let curTime = curTimeArr[1].split('.')[0];
+  let appVersion = app.getVersion();
+  let errorMessage = `[${curDate} ${curTime} ERR] (${appVersion}) ${source}: ${message}\n${response}`
+  reactLogger.info(errorMessage);
+};
+
 export const logSolutionMetrics = (response: any, time: number) => {
   try {
     if (response.status.status === "Failure") {
@@ -102,7 +112,7 @@ export const logSolutionMetrics = (response: any, time: number) => {
     } else if (response.status.status === "Success") {
       const solutionDetails: SolutionDetails = response.value;
       const targetFramework =
-        localStore.get("targetFramework").id || "netcoreapp3.1";
+        localStore.get("targetFramework").id || "net6.0";
 
       let allpackages = new Set(
         solutionDetails.projects
@@ -122,7 +132,7 @@ export const logApiMetrics = (response: any) => {
     }
     const projectAnalysis: ProjectApiAnalysisResult = response.value;
     const targetFramework =
-      localStore.get("targetFramework").id || "netcoreapp3.1";
+      localStore.get("targetFramework").id || "net6.0";
     if (
       projectAnalysis.sourceFileAnalysisResults != null &&
       projectAnalysis.projectFile != null
@@ -147,7 +157,7 @@ export const logApiMetrics = (response: any) => {
 
 export const registerLogListeners = (connection: Connection) => {
   const targetFramework =
-    localStore.get("targetFramework").id || "netcoreapp3.1";
+    localStore.get("targetFramework").id || "net6.0";
   // Electron Logs
   const transport = (message: LogMessage) => {
     try {
@@ -156,6 +166,7 @@ export const registerLogListeners = (connection: Connection) => {
         const logs = {
             portingAssistantVersion: app.getVersion(),
             targetFramework: targetFramework,
+            timeStamp:new Date(),
             content: str,
         };
         electronLogger.info(JSON.stringify(logs));
@@ -188,7 +199,7 @@ export const errorHandler = (response: any, metricsType: string) => {
   const errorValue = response.errorValue;
   const error = response.status.error;
   const targetFramework =
-    localStore.get("targetFramework").id || "netcoreapp3.1";
+    localStore.get("targetFramework").id || "net6.0";
   // Error Metric
   putMetricData("portingAssistant-backend-errors", "Error", "Count", 1, [
     {

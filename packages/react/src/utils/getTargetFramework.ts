@@ -1,1 +1,1 @@
-export const getTargetFramework = () => window.electron.getState("targetFramework")?.id || "netcoreapp3.1";
+export const getTargetFramework = () => window.electron.getState("targetFramework")?.id || "net6.0";

@@ -12,6 +12,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { externalUrls } from "../../constants/externalUrls";
+import { getProfileName } from "../../utils/getProfileName";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { InfoLink } from "../InfoLink";
 
@@ -91,7 +92,7 @@ const SettingsDashboardInternal: React.FC = () => {
               <Box margin={{ bottom: "xxxs" }} color="text-label">
                 AWS named profile
               </Box>
-              <div id="current-profile-name">{profileName.current}</div>
+              <div id="current-profile-name">{getProfileName(profileName.current)}</div>
               {profileValid === false && (
                 <Box margin={{ top: "xxs" }} id="current-profile-status">
                   <Box variant="small">

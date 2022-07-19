@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+	<TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,11 +15,10 @@
     <Folder Include="Listener\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="PortingAssistant.Client.Client" Version="1.11.15-alpha-g86dca5076b" />
-    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="1.11.15-alpha-g86dca5076b" />
+    <PackageReference Include="PortingAssistant.Client.Client" Version="2.3.9" />
+    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.3.9" />
     <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.8" />
-    <PackageReference Include="System.Web.Helpers.Crypto" Version="3.2.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PortingAssistant.Telemetry\PortingAssistant.Telemetry.csproj" />

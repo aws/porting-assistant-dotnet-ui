@@ -6,19 +6,16 @@ using PortingAssistant.Common.Model;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Client;
 using PortingAssistant.Client.Model;
-using PortingAssistant.Telemetry.Model;
-using System.Web.Helpers;
-using PortingAssistantExtensionTelemetry;
 using PortingAssistant.Common.Utils;
 using System.Threading.Tasks;
 using System.IO;
 using System.Runtime;
+using Newtonsoft.Json;
 
 namespace PortingAssistant.Common.Services
 {
     public class AssessmentService : IAssessmentService
     {
-
         private readonly ILogger _logger;
         private readonly IPortingAssistantClient _client;
         private readonly List<OnApiAnalysisUpdate> _apiAnalysisListeners;
@@ -40,6 +37,21 @@ namespace PortingAssistant.Common.Services
                 var startTime = DateTime.Now;
                 string tgtFramework = request.settings.TargetFramework;
 
+                // var solutionAnalysisResult = _client.AnalyzeSolutionAsync(request.solutionFilePath, request.settings);
+                // solutionAnalysisResult.Wait();
+
+                var preProjectTriggerDataDictionary = new Dictionary<string, PreTriggerData>();
+                if (request.preTriggerData != null && request.preTriggerData.Length > 0)
+                {
+                    Array.ForEach(request.preTriggerData, prop => {
+                        var proj = JsonConvert.DeserializeObject<PreTriggerData>(prop);
+                        if (!preProjectTriggerDataDictionary.ContainsKey(proj.projectName))
+                        {
+                            preProjectTriggerDataDictionary.Add(proj.projectName, proj);
+                        }
+                    });
+                }
+
                 if (request.settings.UseGenerator)
                 {
                     List<ProjectDetails> projectDetails = new List<ProjectDetails>();
@@ -51,6 +63,9 @@ namespace PortingAssistant.Common.Services
                         while (await projectAnalysisResultEnumerator.MoveNextAsync().ConfigureAwait(false))
                         {
                             ProjectAnalysisResult result = projectAnalysisResultEnumerator.Current;
+                            var preTriggerProjectData = preProjectTriggerDataDictionary.ContainsKey(result.ProjectName) ?
+                                preProjectTriggerDataDictionary[result.ProjectName] : null;
+                                TelemetryCollectionUtils.CollectProjectMetrics(result, request, tgtFramework, preTriggerProjectData);
 
                             projectDetails.Add(new ProjectDetails
                             {
@@ -112,6 +127,10 @@ namespace PortingAssistant.Common.Services
                         TelemetryCollectionUtils.CollectSolutionMetrics(solutionAnalysisResult.Result, request, startTime, tgtFramework);
                         solutionAnalysisResult.Result.ProjectAnalysisResults.ForEach(projectAnalysisResult =>
                         {
+                            var preTriggerProjectData = preProjectTriggerDataDictionary.ContainsKey(projectAnalysisResult.ProjectName) ?
+    preProjectTriggerDataDictionary[projectAnalysisResult.ProjectName] : null;
+                            TelemetryCollectionUtils.CollectProjectMetrics(projectAnalysisResult, request, tgtFramework, preTriggerProjectData);
+
                             ProjectAnalysisResultHandler(projectAnalysisResult, request, tgtFramework);
                         });
 

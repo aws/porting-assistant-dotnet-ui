@@ -5,6 +5,7 @@ import fs, { promises as fsPromises } from "fs";
 interface Credentials {
   aws_access_key_id: string;
   aws_secret_access_key: string;
+  aws_session_token: string;
 }
 
 export async function writeProfile(
@@ -17,14 +18,22 @@ export async function writeProfile(
   if (!fs.existsSync(getDefaultFilePath())) {
     await fsPromises.writeFile(getDefaultFilePath(), "");
   }
-  const { aws_access_key_id, aws_secret_access_key } = credentials;
-  const profile = `${os.EOL}[${profileName}]${os.EOL}aws_access_key_id = ${aws_access_key_id}${os.EOL}aws_secret_access_key = ${aws_secret_access_key}${os.EOL}`;
+  const { aws_access_key_id, aws_secret_access_key, aws_session_token } =
+    credentials;
+  var profile = `${os.EOL}[${profileName}]${os.EOL}aws_access_key_id = ${aws_access_key_id}${os.EOL}aws_secret_access_key = ${aws_secret_access_key}${os.EOL}`;
+  if (aws_session_token) {
+    profile = profile.concat(
+      `aws_session_token = ${aws_session_token}${os.EOL}`
+    );
+  }
   await fsPromises.appendFile(getDefaultFilePath(), profile);
 }
+
 
 function getDefaultFilePath() {
   return path.join(getHomeDir(), ".aws", "credentials");
 }
+
 
 function getHomeDir() {
   var env = process.env;

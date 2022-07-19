@@ -57,6 +57,26 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
           );
         },
       },
+      {
+        label: "View Electron license",
+        click: async () => {
+          await shell.openPath(
+            path.join(
+              path.dirname(app.getPath("exe")),
+              "LICENSE.electron.txt"
+          ));
+        },
+      },
+      {
+        label: "View Chrome license",
+        click: async () => {
+          await shell.openPath(
+            path.join(
+              path.dirname(app.getPath("exe")),
+              "LICENSES.chromium.html"
+          ));
+        },
+      },
       { type: "separator" },
       {
         label: "Report an issue",
@@ -64,6 +84,12 @@ const template: Array<MenuItemConstructorOptions | MenuItem> = [
           await shell.openExternal(
             "mailto:aws-porting-assistant-support@amazon.com"
           );
+        },
+      },
+      {
+        label: "View logs",
+        click: async () => {
+          await shell.openPath(path.dirname(localStore.path)+ "/logs/");
         },
       },
       {
@@ -98,9 +124,9 @@ Object.assign(console, log.functions);
 
 autoUpdater.logger = log;
 
-autoUpdater.autoDownload = true;
+autoUpdater.autoDownload = false;
 autoUpdater.allowDowngrade = true;
-autoUpdater.autoInstallOnAppQuit = false;
+autoUpdater.autoInstallOnAppQuit = true;
 
 const connection = initConnection(log.functions);
 const telemetryConnection = initTelemetryConnection(log.functions);
@@ -162,25 +188,24 @@ function createWindow() {
   autoUpdater.on('update-available', (info) => {
     latestVersion = info.version;
     outdatedVersionFlag = true;
-  })
-
-  autoUpdater.on("update-downloaded", () => {
     dialog
       .showMessageBox(mainWindow!, {
         type: "info",
-        buttons: ["Restart", "Later"],
+        buttons: ["Download Now", "Later"],
         title: "Application Update",
         message:
-          "A new version has been downloaded. Restart the application to apply the updates. You may need to re-assess your solutions after the upgrade.",
+          "A new version is available. Click the \"Download Now\" button to update. You may also choose to do this later. The updates will be installed once you close the app. You may need to re-assess your solutions after the upgrade.",
       })
       .then((resp) => {
         if (resp.response === 0) {
-          connection.closeConnection();
-          telemetryConnection.closeConnection();
-          autoUpdater.quitAndInstall();
+          autoUpdater.downloadUpdate();
+        } else {
+          log.error("Update deferred");
         }
       });
-  });
+
+  })
+
 
   autoUpdater.checkForUpdates();
 }

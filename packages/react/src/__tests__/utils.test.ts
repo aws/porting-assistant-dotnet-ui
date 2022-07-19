@@ -1,7 +1,9 @@
+import path from "path";
 import { createStore } from "redux";
 
 import { createRootReducer } from "../../src/store/reducers";
 import { Backend, Electron, Porting } from "../bootstrapElectron";
+import { PackageContribution } from "../components/CustomerContribution/PackageRuleContribution";
 import {
   copyPorting,
   inplacePorting,
@@ -30,10 +32,12 @@ import { getCompatibleNugetsAgg, getIncompatibleNugets } from "../utils/getCompa
 import { getPercent, getPercentNumber } from "../utils/getPercent";
 import { getPortingPath } from "../utils/getPortingPath";
 import { getPortingSolutionPath } from "../utils/getPortingSolutionPath";
+import { getProfileName } from "../utils/getProfileName";
 import { isPortingCompleted } from "../utils/isPortingCompleted";
 import { Failed, Loaded, Loading } from "../utils/Loadable";
 import { logError, logErrorAction } from "../utils/LogError";
 import { nugetPackageKey } from "../utils/NugetPackageKey";
+import { checkPackageExists, validatePackageInput, validateVersion } from "../utils/validateRuleContrib";
 
 afterEach(() => jest.clearAllMocks());
 declare global {
@@ -126,7 +130,7 @@ describe("getCompatibleApi", () => {
       projectFilePath: "/test/test",
       projectGuid: "xxxx",
       projectReferences: [{ referencePath: "/test/a" }, { referencePath: "/test/b" }],
-      targetFrameworks: ["netcoreapp3.1"],
+      targetFrameworks: ["net6.0"],
       packageReferences: [{ packageId: "testpackage", version: "3.0.0" }],
       isBuildFailed: false
     };
@@ -171,7 +175,7 @@ describe("getCompatibleApi", () => {
                   }
                 },
                 compatibilityResults: {
-                  "netcoreapp3.1": {
+                  "net6.0": {
                     compatibility: "INCOMPATIBLE",
                     compatibleVersions: ["3.0.0"]
                   }
@@ -237,7 +241,7 @@ describe("getCompatibleNuget.ts", () => {
     "testpackage-3.0.0": Loaded(packageAnalysisResultWithDate),
     "test-1.1.0": Loaded(packageAnalysisResult)
   };
-  jest.spyOn(window.electron, "getState").mockReturnValue("netcoreapp3.1");
+  jest.spyOn(window.electron, "getState").mockReturnValue("net6.0");
 
   it("should return 1 compatible and 1 incompatiible", () => {
     const result = getCompatibleNugetsAgg(nugetPackages, packageToNugetPackage);
@@ -356,13 +360,13 @@ describe("isPortingCompleted", () => {
     const result = isPortingCompleted("/test/soluton.sln", project, portingProjects);
     expect(result).toEqual(true);
   });
-  it("should return complete when targetFramework is netcoreapp3.1", () => {
+  it("should return complete when targetFramework is net6.0", () => {
     var project: Project = {
       projectName: "testProject",
       projectFilePath: "/test/testproject",
       projectGuid: "xxxx",
       projectReferences: [{ referencePath: "/test/a" }, { referencePath: "/test/b" }],
-      targetFrameworks: ["netcoreapp3.1"],
+      targetFrameworks: ["net6.0"],
       packageReferences: [{ packageId: "testpackage", version: "3.0.0" }],
       isBuildFailed: false
     };
@@ -434,4 +438,190 @@ describe("CompareSemver", () => {
   it("test target version is invalid", () => {
     expect(compareSemver("3.0.0", "b")).toEqual(1);
   });
+});
+
+describe("checkPackageExists", () => {
+  it("Azure.ImageOptimizer, version 1.1.0.39, does exist", async () => {
+    const result = await checkPackageExists("Azure.ImageOptimizer", "1.1.0.39");
+    expect(result).toBeTruthy();
+  });
+
+  it("Foo.Bar.Foo, version 0.0.0, does not exist", async () => {
+    const result = await checkPackageExists("Foo.Bar.Foo", "0.0.0");
+    expect(result).toBeFalsy();
+  });
+
+  it("Azure.ImageOptimizer, latest version, does exist", async () => {
+    const result = await checkPackageExists("Azure.ImageOptimizer");
+    expect(result).toBeTruthy();
+  });
+
+  it("Foo.Bar.Foo, latest version, does not exist", async () => {
+    const result = await checkPackageExists("Foo.Bar.Foo");
+    expect(result).toBeFalsy();
+  });
+});
+
+describe("validateVersion", () => {
+  it("1.0.0, valid SemVer", () => {
+    expect(validateVersion("1.0.0")).toBeTruthy();
+  });
+
+  it("ajsdbnjasdajsn, invalid SemVer", () => {
+    expect(validateVersion("ajsdbnjasdajsn")).toBeFalsy();
+  });
+
+  it("1.2.3-prerelease+build, valid SemVer", () => {
+    expect(validateVersion("1.2.3-prerelease+build")).toBeTruthy();
+  });
+
+  it("vsdfs1.2.3, invalid SemVer", () => {
+    expect(validateVersion("vsdfs1.2.3")).toBeFalsy();
+  });
+});
+
+describe("validatePackageInput", () => {
+  it("Azure.ImageOptimizer, version 1.1.0.39, does exist", async () => {
+    const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
+      packageName: "Azure.ImageOptimizer",
+      packageVersion: "1.1.0.39",
+      packageVersionLatest: false,
+      targetFramework: [{ label: "", value: "" }],
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: true
+    });
+  });
+
+  it("Foo.Bar.Foo, version 0.0.0, does not exist", async () => {
+    const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
+      packageName: "Foo.Bar.Foo",
+      packageVersion: "0.0.0",
+      packageVersionLatest: false,
+      targetFramework: [{ label: "", value: "" }],
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: false,
+      field: "packageName/packageVersion",
+      message: "Package/version combination not found"
+    });
+  });
+
+  it("Azure.ImageOptimizer, latest version, does exist", async () => {
+    const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
+      packageName: "Azure.ImageOptimizer",
+      packageVersion: "",
+      packageVersionLatest: true,
+      targetFramework: [{ label: "", value: "" }],
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: true
+    });
+  });
+
+  it("Foo.Bar.Foo, latest version, does not exist", async () => {
+    const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
+      packageName: "Foo.Bar.Foo",
+      packageVersion: "",
+      packageVersionLatest: true,
+      targetFramework: [{ label: "", value: "" }],
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: false,
+      field: "packageName",
+      message: "Package not found"
+    });
+  });
+
+  it("Azure.ImageOptimizer, version asndjas332, invalid SemVer", async () => {
+    const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
+      packageName: "Azure.ImageOptimizer",
+      packageVersion: "asndjas332",
+      packageVersionLatest: false,
+      targetFramework: [{ label: "", value: "" }],
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: false,
+      field: "packageVersion",
+      message: "Invalid version format (SemVer)"
+    });
+  });
+
+  it("Azure.ImageOptimizer, empty version, version required", async () => {
+    const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
+      packageName: "Azure.ImageOptimizer",
+      packageVersion: "",
+      packageVersionLatest: false,
+      targetFramework: [{ label: "", value: "" }],
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: false,
+      field: "packageVersion",
+      message: "Required"
+    });
+  });
+
+  it("Azure.ImageOptimizer, version 9.9.9, does not exist", async () => {
+    const submission: PackageContribution = {
+      packageNameSource: "",
+      packageVersionSource: "",
+      packageName: "Azure.ImageOptimizer",
+      packageVersion: "9.9.9",
+      packageVersionLatest: false,
+      targetFramework: [{ label: "", value: "" }],
+      comments: ""
+    };
+    const result = await validatePackageInput(submission);
+    expect(result).toEqual({
+      valid: false,
+      field: "packageName/packageVersion",
+      message: "Package/version combination not found"
+    });
+  });
+});
+
+describe("getProfileName", () => {
+  it("valid profile returns same profile name", () => {
+      const profileName = "TestProfile";
+      const result = getProfileName(profileName);
+      expect(result).toEqual(profileName);
+  });
+
+  it("undefined profile name return default", async () => {
+      const profileName = undefined;
+      const expected = "Default Credentials";
+      const result = getProfileName(profileName);
+      expect(result).toEqual(expected);
+  });
+
+  it("default skd profile name return default", async () => {
+    const profileName = "DEFAULT_SDK_CHAIN_PROVIDER_CREDENTIAL_PROFILE";
+    const expected = "Default Credentials";
+    const result = getProfileName(profileName);
+    expect(result).toEqual(expected);
+});
 });

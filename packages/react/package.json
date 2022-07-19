@@ -1,6 +1,6 @@
 {
   "name": "@porting-assistant/react",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "productName": "Porting Assistant for .NET",
   "description": "Porting Assistant for .NET",
   "author": {
@@ -31,7 +31,7 @@
     "@types/classnames": "^2.2.10",
     "@types/jest": "^25.2.3",
     "@types/node": "^13.9.0",
-    "@types/react": "^16.9.53",
+    "@types/react": "^17.0.36",
     "@types/react-dom": "^16.9.8",
     "@types/react-redux": "^7.1.9",
     "@types/react-router-dom": "^5.1.6",
@@ -63,7 +63,7 @@
     "classnames": "^2.2.6",
     "compare-versions": "^3.6.0",
     "csv-stringify": "^5.5.0",
-    "electron": "^10.1.5",
+    "electron": "^10.4.7",
     "immer": "^6.0.1",
     "re-reselect": "^3.4.0",
     "react": "^16.14.0",

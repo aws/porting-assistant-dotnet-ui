@@ -29,7 +29,7 @@ const columnDefinitions: TableProps.ColumnDefinition<Project>[] = [
   },
   {
     id: "target-framework",
-    header: "Target framework",
+    header: "Project framework",
     cell: item => item.targetFrameworks?.join(", ") || ""
   }
 ];

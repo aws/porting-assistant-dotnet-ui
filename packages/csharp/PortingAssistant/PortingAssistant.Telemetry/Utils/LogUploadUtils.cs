@@ -1,6 +1,5 @@
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
-using Aws4RequestSigner;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PortingAssistantExtensionTelemetry.Model;
@@ -9,9 +8,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using PortingAssistant.Client.Telemetry;
+using Amazon;
 
 namespace PortingAssistant.Telemetry.Utils
 {
@@ -44,68 +47,71 @@ namespace PortingAssistant.Telemetry.Utils
 
         private static async Task<bool> PutLogData
             (
-            HttpClient client,
             string logName,
             string logData,
             string profile,
+            bool enabledDefaultCredentials,
             TelemetryConfiguration telemetryConfiguration
             )
         {
             const string PathTemplate = "/put-log-data";
             try
             {
-
-
                 var chain = new CredentialProfileStoreChain();
                 AWSCredentials awsCredentials;
-                var profileName = profile;
-                var region = telemetryConfiguration.Region;
-                if (chain.TryGetAWSCredentials(profileName, out awsCredentials))
+                if (enabledDefaultCredentials)
                 {
-                    var signer = new AWS4RequestSigner
-                        (
-                        awsCredentials.GetCredentials().AccessKey,
-                        awsCredentials.GetCredentials().SecretKey
-                        );
-
-                    dynamic requestMetadata = new JObject();
-                    requestMetadata.version = "1.0";
-                    requestMetadata.service = telemetryConfiguration.ServiceName;
-                    requestMetadata.token = "12345678";
-                    requestMetadata.description = telemetryConfiguration.Description;
-
-                    dynamic log = new JObject();
-                    log.timestamp = DateTime.Now.ToString();
-                    log.logName = logName;
-                    var logDataInBytes = System.Text.Encoding.UTF8.GetBytes(logData);
-                    log.logData = System.Convert.ToBase64String(logDataInBytes);
-
-                    dynamic body = new JObject();
-                    body.requestMetadata = requestMetadata;
-                    body.log = log;
-
-                    var requestContent = new StringContent(body.ToString(Formatting.None), Encoding.UTF8, "application/json");
-
-                    var requestUri = new Uri(String.Join("", telemetryConfiguration.InvokeUrl, PathTemplate));
-
-                    var request = new HttpRequestMessage
+                    awsCredentials = FallbackCredentialsFactory.GetCredentials();
+                    if (awsCredentials == null)
                     {
-                        Method = HttpMethod.Post,
-                        RequestUri = requestUri,
-                        Content = requestContent
-                    };
-
-                    request = await signer.Sign(request, "execute-api", region);
-
-                    var response = await client.SendAsync(request);
-
-                    await response.Content.ReadAsStringAsync();
-
-                    return response.IsSuccessStatusCode;
+                        Console.WriteLine("Invalid Credentials.");
+                        return false;
+                    }
                 }
-                Console.WriteLine("Invalid Credentials.");
-                return false;
-            }
+                else {
+                    var profileName = profile;
+                    if (!chain.TryGetAWSCredentials(profileName, out awsCredentials))
+                    {
+                        Console.WriteLine("Invalid Credentials.");
+                        return false;
+                    }
+                }
+                var region = telemetryConfiguration.Region;
+                  dynamic requestMetadata = new JObject();
+                  requestMetadata.version = "1.0";
+                  requestMetadata.service = telemetryConfiguration.ServiceName;
+                  requestMetadata.token = "12345678";
+                  requestMetadata.description = telemetryConfiguration.Description;
+
+                  dynamic log = new JObject();
+                  log.timestamp = DateTime.Now.ToString();
+                  log.logName = logName;
+                  var logDataInBytes = System.Text.Encoding.UTF8.GetBytes(logData);
+                  log.logData = System.Convert.ToBase64String(logDataInBytes);
+
+                  dynamic body = new JObject();
+                  body.requestMetadata = requestMetadata;
+                  body.log = log;
+
+                  var requestContent = new StringContent(body.ToString(Formatting.None), Encoding.UTF8, "application/json");
+
+                  var config = new TelemetryClientConfig
+                  {
+                      RegionEndpoint = RegionEndpoint.GetBySystemName(region),
+                      MaxErrorRetry = 2,
+                      ServiceURL = telemetryConfiguration.InvokeUrl,
+                  };
+                  var client = new TelemetryClient(awsCredentials, config);
+                  var contentString = await requestContent.ReadAsStringAsync();
+                  var telemetryRequest = new TelemetryRequest(telemetryConfiguration.ServiceName, contentString);
+                  var telemetryResponse = await client.SendAsync(telemetryRequest);
+                  if (telemetryResponse.HttpStatusCode != HttpStatusCode.OK)
+                  {
+                      Console.WriteLine("Http response failed with status code: " + telemetryResponse.HttpStatusCode.ToString());
+                  }
+                  
+                  return telemetryResponse.HttpStatusCode == HttpStatusCode.OK;
+             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
@@ -113,10 +119,19 @@ namespace PortingAssistant.Telemetry.Utils
             }
         }
 
-        public static void OnTimedEvent(Object source, System.Timers.ElapsedEventArgs e, TelemetryConfiguration teleConfig, string lastReadTokenFile, HttpClient client, string profile, string prefix)
+        public static void OnTimedEvent(
+            Object source, 
+            System.Timers.ElapsedEventArgs e, 
+            TelemetryConfiguration teleConfig, 
+            string lastReadTokenFile, 
+            string profile, 
+            bool enabledDefaultCredentials,
+            string prefix,
+            bool shareMetric)
         {
             try
             {
+                if (!shareMetric) return;
                 // Get files in directory and filter based on Suffix
                 string[] fileEntries = Directory.GetFiles(teleConfig.LogsPath).Where(f => (
                   teleConfig.Suffix.ToArray().Any(x => f.EndsWith(x))
@@ -141,7 +156,8 @@ namespace PortingAssistant.Telemetry.Utils
                     }
                     else
                     {
-                        string typeOfLog = fName.Split('-')[1];
+
+                        string typeOfLog = (fName.Split('-').Length > 1) ? fName.Split('-')[1]: String.Empty;
                         if (typeOfLog == "assessment")
                         {
                             continue;
@@ -209,14 +225,14 @@ namespace PortingAssistant.Telemetry.Utils
                                     if (logs.Count >= 1000)
                                     {
                                         // logs.TrimToSize();
-                                        success = PutLogData(client, logName, JsonConvert.SerializeObject(logs), profile, teleConfig).Result;
+                                        success = PutLogData(logName, JsonConvert.SerializeObject(logs), profile, enabledDefaultCredentials, teleConfig).Result;
                                         if (success) { logs = new ArrayList(); };
                                     }
                                 }
 
                                 if (logs.Count != 0)
                                 {
-                                    success = PutLogData(client, logName, JsonConvert.SerializeObject(logs), profile, teleConfig).Result;
+                                    success = PutLogData(logName, JsonConvert.SerializeObject(logs), profile, enabledDefaultCredentials, teleConfig).Result;
                                 }
                                 if (success)
                                 {
@@ -233,6 +249,34 @@ namespace PortingAssistant.Telemetry.Utils
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        public static string getUniqueIdentifier()
+        {
+            string _uniqueId;
+            string DefaultIdentifier = "591E6A97031144D5BADCE980EE3E51B7";
+            var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(nic => nic.NetworkInterfaceType != NetworkInterfaceType.Loopback
+                                && (nic.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                                && nic.Speed > 0).ToList();
+            // wifi network interface will always take higher precedence for retrieving physical address
+            var wifiNetworkInterface = networkInterfaces.FirstOrDefault(wi => wi.NetworkInterfaceType == NetworkInterfaceType.Wireless80211);
+            if (wifiNetworkInterface != null)
+            {
+                _uniqueId = CryptoUtil.HashString(wifiNetworkInterface.GetPhysicalAddress().ToString());
+            }
+            else
+            {
+                var ethernetInterface = networkInterfaces.LastOrDefault(ei => 
+                    ei.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+                    && ei.OperationalStatus == OperationalStatus.Up 
+                    && !ei.Name.Contains("Bluetooth", StringComparison.OrdinalIgnoreCase));
+
+                _uniqueId = ethernetInterface != null 
+                    ? CryptoUtil.HashString(ethernetInterface.GetPhysicalAddress().ToString()) 
+                    : DefaultIdentifier;
+            }
+            return _uniqueId;
         }
     }
 }

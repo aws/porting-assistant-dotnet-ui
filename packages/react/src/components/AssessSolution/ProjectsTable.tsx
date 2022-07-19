@@ -101,7 +101,7 @@ const ProjectsTableInternal: React.FC<Props> = ({ solution }) => {
                     <Box variant="strong">Name</Box> - Name of the project.
                   </Box>
                   <Box variant="p">
-                    <Box variant="strong">Target framework</Box> - Target framework of the project.
+                    <Box variant="strong">Project framework</Box> - Target framework of the project.
                   </Box>
                   <Box variant="p">
                     <Box variant="strong">Referenced projects</Box> - Number of other projects that are referenced by
@@ -224,9 +224,9 @@ const columnDefinitions: TableProps.ColumnDefinition<TableData>[] = [
   },
   {
     id: "target-framework",
-    header: "Target framework",
+    header: "Project framework",
     cell: item => <div id={`target-framework-${escapeNonAlphaNumeric(item.projectPath)}`}>{item.targetFramework}</div>,
-    sortingField: "targetFramework"
+    sortingField: "projectFramework"
     //minWidth: "200px"
   },
   {

@@ -1,11 +1,15 @@
 import path from "path";
 import { app } from "electron";
 import electronIsDev from "electron-is-dev";
-import apigClientFactory from "aws-api-gateway-client";
 import { getProfileCredentials } from "./electron-get-profile-credentials";
 import { PutLogDataRequest } from "../models/putLogDataRequest";
 import { PutMetricDataRequest } from "../models/putMetricDataRequest";
 import { localStore } from "../preload-localStore";
+import { Credentials } from "@aws-sdk/types";
+import { SignatureV4 } from "@aws-sdk/signature-v4";
+import { HttpRequest, HttpResponse } from "@aws-sdk/protocol-http";
+import { Sha256 } from "@aws-crypto/sha256-browser";
+import { NodeHttpHandler } from "@aws-sdk/node-http-handler";
 
 // Configuraion
 export const config = require(electronIsDev
@@ -22,59 +26,60 @@ export const config = require(electronIsDev
       "porting-assistant-config.json"
     ));
 
-// Create client
-const createClient = (
-  profileName: string,
-  region: string,
-  invokeUrl: string
-) => {
-  let credentials:
-    | AWS.SharedIniFileCredentials
-    | undefined = getProfileCredentials(profileName);
-  const awsAccessKeyId: string | undefined = credentials?.accessKeyId;
-  const awsSecretAccessKey: string | undefined = credentials?.secretAccessKey;
-  if (awsAccessKeyId === undefined || awsSecretAccessKey === undefined) {
-    console.error(`Credentials are undefined for profile: ${profileName}`);
-    return null;
-  }
-  const apigClient = apigClientFactory.newClient({
-    invokeUrl: invokeUrl,
-    region: region,
-    accessKey: awsAccessKeyId,
-    secretKey: awsSecretAccessKey,
-  });
-  return apigClient;
-};
-
-const createRequest = async (
+const sendRequest = async (
   pathParams: { [key: string]: string },
   pathTemplate: string,
   method: string,
   additionalParams: { [key: string]: string },
-  body: PutLogDataRequest | PutMetricDataRequest
+  body: PutLogDataRequest | PutMetricDataRequest,
+  newProfile?: string | undefined
 ): Promise<boolean> => {
-  var apigClient = createClient(
-    localStore.get("profile"),
-    config.PortingAssistantMetrics.Region,
-    config.PortingAssistantMetrics.InvokeUrl
-  );
-  var metricsEnabled = localStore.get("share");
-  if (metricsEnabled && apigClient != null) {
-    try {
-      await apigClient.invokeApi(
-        pathParams,
-        pathTemplate,
-        method,
-        additionalParams,
-        body
-      );
-      return true;
-    } catch (e) {
-      console.error(e);
-      return false;
-    }
-  } else {
+  const metricsEnabled = localStore.get("share");
+  const profileName = newProfile || localStore.get("profile");
+  const useDefaultCreds = localStore.get("useDefaultCreds");
+  const credentials: Credentials | undefined = await getProfileCredentials(profileName);
+  const awsAccessKeyId: string | undefined = credentials?.accessKeyId;
+  const awsSecretAccessKey: string | undefined = credentials?.secretAccessKey;
+  const awsSessionToken: string | undefined = credentials?.sessionToken;
+
+  if (!metricsEnabled && !newProfile && !useDefaultCreds) {
     return true;
+  }
+
+  if (awsAccessKeyId === undefined || awsSecretAccessKey === undefined) {
+    console.error(`Credentials are undefined for profile: ${profileName}`);
+    return false;
+  }
+
+  try {
+    var signedRequest = await createAndSignRequest(
+      body,
+      pathTemplate,
+      method,
+      credentials
+    );
+    var client = new NodeHttpHandler();
+    var { response } = await client.handle(signedRequest as HttpRequest);
+    logResponse(response);
+    return response.statusCode < 300;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+};
+
+const logResponse = async (response: HttpResponse) => {
+  var responseBody = "";
+  console.log(response.statusCode + " " + response.body.statusMessage);
+  try {
+    response.body.on("data", (chunk: string) => {
+      responseBody += chunk;
+    });
+    response.body.on("end", () => {
+      console.log("Response body: " + responseBody);
+    });
+  } catch (e) {
+    console.log(e);
   }
 };
 
@@ -97,7 +102,7 @@ export const putLogData = async (logName: string, logData: string) => {
       logData: logData,
     },
   };
-  return await createRequest(
+  return await sendRequest(
     pathParams,
     pathTemplate,
     method,
@@ -137,7 +142,7 @@ export const putMetricData = async (
       },
     ],
   };
-  return await createRequest(
+  return await sendRequest(
     pathParams,
     pathTemplate,
     method,
@@ -147,46 +152,54 @@ export const putMetricData = async (
 };
 
 export const testProfile = async (profile: string) => {
-  var apigClient = createClient(
-    profile,
-    config.PortingAssistantMetrics.Region,
-    config.PortingAssistantMetrics.InvokeUrl
-  );
-  if (apigClient == null) {
-    return false;
-  }
   try {
-    const response = await apigClient.invokeApi(
-      {},
-      "/put-log-data",
-      "POST",
-      {},
-      {
-        requestMetadata: {
-          version: "1.0",
-          service: config.PortingAssistantMetrics.ServiceName,
-          token: "12345678", // Hard-coded as client side  authentication not implemented yet
-          description: "PortingAssistant Log",
-        },
-        log: {
-          timeStamp: new Date().toLocaleString(),
-          logName: "verify-user",
-          logData: "",
-        },
-      }
-    );
-    if (response.status === 200) {
-      return true;
-    }
-    return false;
+    const body = {
+      requestMetadata: {
+        version: "1.0",
+        service: config.PortingAssistantMetrics.ServiceName,
+        token: "12345678", // Hard-coded as client side  authentication not implemented yet
+        description: "PortingAssistant Log",
+      },
+      log: {
+        timeStamp: new Date().toLocaleString(),
+        logName: "verify-user",
+        logData: "",
+      },
+    };
+    return await sendRequest({}, "/put-log-data", "POST", {}, body, profile);
   } catch (ex) {
     console.error(ex);
     return false;
   }
 };
+async function createAndSignRequest(
+  body: PutLogDataRequest | PutMetricDataRequest,
+  pathTemplate: string,
+  method: string,
+  credentials: Credentials
+) {
+  var invokeUrl = new URL(config.PortingAssistantMetrics.InvokeUrl);
+  if (invokeUrl.pathname !== "/") {
+    pathTemplate = invokeUrl.pathname + pathTemplate;
+  }
+  var request = new HttpRequest({
+    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+      host: invokeUrl.host,
+    },
+    hostname: invokeUrl.hostname,
+    method: method,
+    path: pathTemplate,
+  });
 
-// // Example Call
-// putLogData("test-log", "test");
-// putMetricData("portingAssistant-backend", "test-metric", "Count", 1, [
-//   { Value: "test", Name: "Test" },
-// ]);
+  // Sign the request
+  var signer = new SignatureV4({
+    credentials: credentials,
+    region: config.PortingAssistantMetrics.Region,
+    service: "execute-api",
+    sha256: Sha256,
+  });
+  var signedRequest = await signer.sign(request);
+  return signedRequest;
+}

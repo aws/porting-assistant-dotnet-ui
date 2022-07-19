@@ -51,12 +51,7 @@ const LocationSectionInternal: React.FC<Props> = ({ control, errors, watch, setV
             validate: {
               notInSolution: (path: string) =>
                 (isLoaded(solutionDetails)
-                  ? !path.startsWith(
-                      solutionDetails.data.solutionFilePath.substring(
-                        0,
-                        solutionDetails.data.solutionFilePath.length - solutionDetails.data.solutionName.length
-                      )
-                    )
+                  ? is_directory_outside_sln_path(path, solutionDetails.data.solutionFilePath, solutionDetails.data.solutionName)
                   : false) || "Directory has to be outside the solution's directory."
             }
           }}
@@ -130,5 +125,11 @@ const openDialog = (onChange: (value: string | undefined) => void) => () =>
     .catch(err => {
       logError("LocationSection.tsx", "Unable to open directory", err);
     });
+
+function is_directory_outside_sln_path(path: string, solutionFilePath: string, solutionName: string) {
+    // we need to consider the .sln extension while getting the substring for the solution path
+    const relDirPath = solutionFilePath.substring(0, solutionFilePath.length - solutionName.length - 5);
+    return !(path.startsWith(relDirPath) || path.trim() == relDirPath.trim());
+}
 
 export const LocationSection = React.memo(LocationSectionInternal);

@@ -5,7 +5,6 @@ using PortingAssistantExtensionTelemetry.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
 
 namespace PortingAssistant.Telemetry
 {
@@ -13,7 +12,7 @@ namespace PortingAssistant.Telemetry
     {
         public static void Main(string[] args)
         {
-            if (args.Length < 4)
+            if (args.Length < 5)
             {
                 throw new ArgumentException
                     (
@@ -25,8 +24,8 @@ namespace PortingAssistant.Telemetry
             var config = args[0];
             var profile = args[1];
             var userData = args[2];
-            PortingAssistantAppVersion.version = args[3];
-
+            var useDefaultCreds = System.Convert.ToBoolean(args[4]);
+            var shareMetric = System.Convert.ToBoolean(args[5]);
             Connection _connection = new ConnectionBuilder().WithLogging().Build();
             var portingAssistantPortingConfiguration = System.Text.Json.JsonSerializer.Deserialize<PortingAssistantPortingConfiguration>(File.ReadAllText(config));
             string metricsFolder = Path.Combine(userData, "logs");
@@ -43,12 +42,11 @@ namespace PortingAssistant.Telemetry
             };
             var lastReadTokenFile = Path.Combine(teleConfig.LogsPath, "lastToken.json");
             string prefix = portingAssistantPortingConfiguration.PortingAssistantMetrics["Prefix"].ToString();
-            var client = new HttpClient();
-
+            
             var logTimer = new System.Timers.Timer();
             logTimer.Interval = Convert.ToDouble(portingAssistantPortingConfiguration.PortingAssistantMetrics["LogTimerInterval"].ToString());
 
-            logTimer.Elapsed += (source, e) => LogUploadUtils.OnTimedEvent(source, e, teleConfig, lastReadTokenFile, client, profile, prefix);
+            logTimer.Elapsed += (source, e) => LogUploadUtils.OnTimedEvent(source, e, teleConfig, lastReadTokenFile, profile, useDefaultCreds, prefix, shareMetric);
 
             logTimer.AutoReset = true;
 
@@ -62,12 +60,6 @@ namespace PortingAssistant.Telemetry
             public PortingAssistantConfiguration PortingAssistantConfiguration { get; set; }
             public Dictionary<string, object> PortingAssistantMetrics { get; set; }
         }
-
-    }
-
-    public class PortingAssistantAppVersion
-    {
-        public static string version { get; set; }
 
     }
 

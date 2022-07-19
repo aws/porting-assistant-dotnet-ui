@@ -150,6 +150,10 @@ if (config.config !== undefined) {
         Prefix: process.env["PREFIX"],
         Description: process.env["DESCRIPTION"]
       },
+      CustomerContributionConfiguration: {
+        CustomerFeedbackEndpoint: process.env["CF_URL"],
+        RuleContributionEndpoint: process.env["RC_URL"]
+      },
     })
   );
 }

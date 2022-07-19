@@ -39,11 +39,12 @@ const createLocalStore = () =>
     defaults: {
       solutions: {},
       profile: "",
-      targetFramework: { label: ".NET Core 3.1.0", id: "netcoreapp3.1" },
+      targetFramework: { label: ".NET 6.0.0", id: "net6.0" },
       share: false,
       lastConfirmVersion: "",
       notification: true,
       newVersionNotification: true,
+      useDefaultCreds: false,
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -86,6 +87,9 @@ const createLocalStore = () =>
       newVersionNotification: {
         type: "boolean",
       },
+      useDefaultCreds: {
+        type: "boolean",
+      },
     },
     watch: true,
     cwd:
@@ -115,7 +119,7 @@ const createReducerCacheStore = () =>
         "solution-reducer"
       )),
     },
-    name: "reducer-cache-1.6.0",
+    name: "reducer-cache-1.7.0",
     clearInvalidConfig: true,
     cwd:
       process.env["NODE_ENV"] === "test"
@@ -144,7 +148,7 @@ const createPortingStore = () =>
           ".sln$": {
             type: "object",
             patternProperties: {
-              ".csproj$": {
+              ".((cs)|(vb))proj$": {
                 type: "object",
                 required: ["projectPath"],
                 properties: {

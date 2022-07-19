@@ -1,17 +1,21 @@
 import { Box, Button, Form, Header, SpaceBetween } from "@awsui/components-react";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Redirect, useHistory, useLocation } from "react-router";
 
 import { usePortingAssistantSelector } from "../../createReduxStore";
-import { Project } from "../../models/project";
+import { PreTriggerData, Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
+import { selectApiAnalysis } from "../../store/selectors/solutionSelectors";
+import { selectProjectTableData } from "../../store/selectors/tableSelectors";
+import { isLoaded } from "../../utils/Loadable";
 import { InfoLink } from "../InfoLink";
 import { handlePortProjectSubmission } from "../PortShared/handlePortProjectSubmission";
 import { NugetPackageUpgrades } from "../PortShared/NugetPackageUpgrades";
 import { PortSettings } from "../PortShared/PortSettings";
+import { useWebFormsFlashbarMessage } from "../PortShared/useWebFormsFlashbarMessage";
 import { PortSolutionSummary } from "./PortSolutionSummary";
 
 interface Props {
@@ -29,10 +33,42 @@ const PortSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) 
   const location = useLocation();
   const portingLocation = usePortingAssistantSelector(state => selectPortingLocation(state, location.pathname));
   const targetFramework = window.electron.getState("targetFramework");
+  const projectsTable= usePortingAssistantSelector(state => selectProjectTableData(state, location.pathname));
+  
+  let preTriggerData: PreTriggerData[] = [];
+  const apiAnalysis = useSelector(selectApiAnalysis); 
+  const projectToApiAnalysis = apiAnalysis[solution.solutionFilePath];
+  preTriggerData = projectsTable.map<PreTriggerData>(project => {
+      var projectApiAnalysisResult = projectToApiAnalysis[project.projectPath];
+      var sourceFileAnalysisResults = (isLoaded(projectApiAnalysisResult))?
+                 projectApiAnalysisResult.data.sourceFileAnalysisResults: null;
+      return {
+        projectName: project.projectName || "-",
+        projectPath: project.projectPath || "-",
+        solutionPath: solution.solutionFilePath || "-",
+        targetFramework: project.targetFramework || "-",
+        incompatibleApis: project.incompatibleApis,
+        totalApis: project.totalApis,
+        buildErrors: project.buildErrors,
+        ported: project.ported,
+        sourceFileAnalysisResults: sourceFileAnalysisResults
+      };
+  });
+  var hasWebForms = false;
+
+  for(var project of projects) {
+    if (project.featureType === "WebForms") {
+      hasWebForms = true;
+      break;
+    }
+  }
+
+  useWebFormsFlashbarMessage(hasWebForms);
 
   if (projects?.length === 0 || portingLocation == null) {
     return <Redirect to={`/solutions/${encodeURIComponent(solution.solutionFilePath)}`} />;
   }
+
   return (
     <form
       onSubmit={handleSubmit(async data => {
@@ -40,7 +76,7 @@ const PortSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) 
           setError("targetFramework", { type: "required", message: "Target Framework is required." });
           return;
         }
-        handlePortProjectSubmission(data, solution, projects, targetFramework.id, portingLocation, dispatch);
+        handlePortProjectSubmission(data, solution, projects, targetFramework.id, portingLocation, preTriggerData, dispatch);
         history.push("/solutions");
       })}
     >

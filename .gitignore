@@ -57,3 +57,4 @@ cli_build
 cli_output
 *.js.map
 ts-dist
+/.vs

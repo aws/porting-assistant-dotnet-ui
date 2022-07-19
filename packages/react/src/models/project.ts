@@ -11,6 +11,7 @@ export interface Project {
   projectFilePath: string;
   projectGuid?: string | null;
   projectType?: string | null;
+  featureType?: string | null;
   targetFrameworks?: string[] | null;
   packageReferences?: NugetPackage[] | null;
   projectReferences?: ProjectReference[] | null;
@@ -103,6 +104,19 @@ export interface TextSpan {
 export interface VersionPair {
   originalVersion: string;
   upgradeVersion: string;
+}
+
+export interface PreTriggerData {
+  projectName: string;
+  projectPath: string;
+  solutionPath: string;
+  targetFramework: string;
+  incompatibleApis: number | null;
+  totalApis: number | null;
+  buildErrors: number | null;
+  ported: boolean;
+  sourceFileAnalysisResults: SourceFileAnalysisResult[] | null;
+
 }
 
 export type CompatibleTargets = string;

@@ -1,0 +1,29 @@
+name: Build Test
+
+on:
+  push:
+    branches: 
+    - develop 
+    - release/*
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Check for secrets leak on the repo
+      run: |
+          git clone https://github.com/awslabs/git-secrets.git target
+          cd target
+          ./install.ps1
+          echo "Git-secrets installation completed"
+          git secrets --register-aws --global
+          echo "Added aws secret templates"
+          git secrets --scan -r ../
+          echo "Repository scan completed"
