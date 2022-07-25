@@ -1,5 +1,5 @@
 import { Box, Button, ColumnLayout, Container, Form, Header, SpaceBetween, Spinner } from "@awsui/components-react";
-import React from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
@@ -10,6 +10,7 @@ import { analyzeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
+import { AddCustomMsBuildForm } from "../AddCustomMSBuild/AddCustomMSBuild";
 import { InfoLink } from "../InfoLink";
 import { UploadSolutionField } from "./UploadSolutionField";
 
@@ -20,32 +21,42 @@ const ImportSolutionInternal: React.FC = () => {
   });
   const { isSubmitting } = formState;
   const dispatch = useDispatch();
+  const [selectedMSbuild, setselectedMSbuild] = useState<any>();
+  const [msBuildArguments, setmsBuildArguments] = useState<any[]>([]);
 
   return (
     <form
       onSubmit={handleSubmit(async data => {
-          await addSolution(data);
-          const targetFramework = getTargetFramework();
-          const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
-          if (haveInternet) {
-            dispatch(
-              analyzeSolution.request({
-                solutionPath: data.solutionFilename,
-                runId: uuid(),
-                triggerType: "InitialRequest",
-                settings: {
-                  ignoredProjects: [],
-                  targetFramework: targetFramework,
-                  continiousEnabled: false,
-                  actionsOnly: false,
-                  compatibleOnly: false
-                },
-                preTriggerData:[],
-                force: true
-              })
-            );
-            history.push("/solutions");
-          }
+        const msBuildArgumentsArray = [];
+        for (const msBuildArgument of msBuildArguments) {
+          msBuildArgumentsArray.push(msBuildArgument.value);
+        }
+
+        await addSolution(data, msBuildArgumentsArray, selectedMSbuild === undefined ? "" : selectedMSbuild.label);
+        const targetFramework = getTargetFramework();
+        const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
+
+        if (haveInternet) {
+          dispatch(
+            analyzeSolution.request({
+              solutionPath: data.solutionFilename,              
+              runId: uuid(),
+              triggerType: "InitialRequest",
+              settings: {
+                ignoredProjects: [],
+                targetFramework: targetFramework,
+                continiousEnabled: false,
+                actionsOnly: false,
+                compatibleOnly: false,
+                msbuildPath: selectedMSbuild === undefined ? "" : selectedMSbuild.label,
+                msBuildArguments: msBuildArgumentsArray,
+              },
+              preTriggerData: [],
+              force: true
+            })
+          );
+          history.push("/solutions");
+        }
       })}
     >
       <Form
@@ -140,14 +151,15 @@ const ImportSolutionInternal: React.FC = () => {
             />
           </ColumnLayout>
         </Container>
+        <AddCustomMsBuildForm solution={null} setselectedMSbuild={setselectedMSbuild} setMSBuildArgumentsLst={setmsBuildArguments}></AddCustomMsBuildForm>
       </Form>
     </form>
   );
 };
 
-const addSolution = async (data: Record<string, any>) => {
+const addSolution = async (data: Record<string, any>, msBuildArgumentsArray: string[], selectedMSbuild: string) => {
   const paths = await window.electron.getState("solutions", {});
-  paths[data.solutionFilename] = { solutionPath: data.solutionFilename };
+  paths[data.solutionFilename] = { solutionPath: data.solutionFilename, msBuildPath: selectedMSbuild, msBuildArguments: msBuildArgumentsArray };
   window.electron.saveState("solutions", paths);
 };
 

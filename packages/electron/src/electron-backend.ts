@@ -281,6 +281,18 @@ export const initConnection = (logger: any = console) => {
       browserWindow.webContents.send("onApiAnalysisUpdate", response);
     });
 
+    ipcMain.handle("getAllMsbuildPath", async (_event) => {
+      try {
+      const response = await connection.send("getAllMsbuildPath", "");
+      logger.log(`RESPONSE - getAllMsbuildPath: ${JSON.stringify(response)}`);
+      return response;
+      }
+      catch(ex) {
+        logger.log("Exception - getAllMsbuildPath : " + ex);
+        return "Error in execution";
+      }
+    });
+
     return connection;
   };
 

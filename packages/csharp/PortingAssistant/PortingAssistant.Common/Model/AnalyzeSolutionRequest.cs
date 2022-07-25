@@ -1,4 +1,5 @@
 ﻿using PortingAssistant.Client.Model;
+using System.Collections.Generic;
 
 namespace PortingAssistant.Common.Model
 {

@@ -17,6 +17,8 @@ export interface SolutionLocalStoreSchema {
   solutionPath: string;
   lastAssessedDate?: string;
   porting?: PortingState;
+  msBuildPath?: string;
+  msBuildArguments?: string[];
 }
 
 export interface PortingState {

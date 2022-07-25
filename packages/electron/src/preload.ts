@@ -126,8 +126,10 @@ contextBridge.exposeInMainWorld("backend", {
       continiousEnabled: boolean;
       actionsOnly: boolean;
       compatibleOnly: boolean;
+      msbuildPath: string;
+      msBuildArguments: string[];
     },
-    preTriggerData: string[]
+    preTriggerData: string[]   
   ) => invokeBackend("analyzeSolution", solutionFilePath, runId, triggerType, settings, preTriggerData),
   openSolutionInIDE: (solutionFilePath: string) =>
     invokeBackend("openSolutionInIDE", solutionFilePath),
@@ -142,6 +144,7 @@ contextBridge.exposeInMainWorld("backend", {
     invokeBackend("sendCustomerFeedback", upload),
   uploadRuleContribution: (upload: any) =>
     invokeBackend("uploadRuleContribution", upload),
+  getAllMsbuildPath: () => invokeBackend("getAllMsbuildPath", ""),
 });
 
 contextBridge.exposeInMainWorld("porting", {
