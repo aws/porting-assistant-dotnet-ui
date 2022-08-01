@@ -41,7 +41,7 @@ namespace PortingAssistant.Telemetry.Utils
             return logName;
         }
 
-        private static Uploader _uploader;
+        public static Uploader Uploader;
 
         public static void InitializeUploader(bool shareMetric,
             TelemetryConfiguration config,
@@ -50,7 +50,7 @@ namespace PortingAssistant.Telemetry.Utils
             ILogger logger)
         {
             TelemetryClientFactory.TryGetClient(profile, config, out ITelemetryClient client, enabledDefaultCredentials);
-            _uploader = new Uploader(config, client, logger, shareMetric)
+            Uploader = new Uploader(config, client, logger, shareMetric)
             {
                 GetLogName = GetLogName
             };
@@ -60,14 +60,14 @@ namespace PortingAssistant.Telemetry.Utils
             Object source, 
             System.Timers.ElapsedEventArgs e)
         {
-            _uploader.Run();
+            Uploader.Run();
         }
 
         public static void WriteLogUploadErrors(
             Object source,
             System.Timers.ElapsedEventArgs e)
         {
-            _uploader.WriteLogUploadErrors();
+            Uploader.WriteLogUploadErrors();
         }
 
         public static string getUniqueIdentifier()
