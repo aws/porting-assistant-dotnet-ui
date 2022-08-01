@@ -47,7 +47,8 @@ namespace PortingAssistant.Telemetry
                 .MinimumLevel.Debug()
                 .WriteTo.RollingFile(
                     Path.Combine(args[2], "logs", "portingAssistant-telemetry-{Date}.log"),
-                    outputTemplate: outputTemplate);
+                    outputTemplate: outputTemplate,
+                    fileSizeLimitBytes: 1000000);
 
             Log.Logger = logConfiguration.CreateLogger();
 
