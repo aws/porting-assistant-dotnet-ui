@@ -17,23 +17,23 @@ namespace PortingAssistant.Telemetry.Utils
 
             string typeOfLog = (fName.Split('-').Length > 1) ? fName.Split('-')[1] : String.Empty;
 
-            if (typeOfLog == "telemetry")
+            if (typeOfLog.Equals("telemetry", StringComparison.OrdinalIgnoreCase))
             {
                 logName = "portingAssistant-metrics";
             }
-            else if (typeOfLog == "backend")
+            else if (typeOfLog.Equals("backend", StringComparison.OrdinalIgnoreCase))
             {
                 logName = "portingAssistant-backend-logs";
             }
-            else if (typeOfLog == "electron")
+            else if (typeOfLog.Equals("electron", StringComparison.OrdinalIgnoreCase))
             {
                 logName = "electron-logs";
             }
-            else if (typeOfLog == "react")
+            else if (typeOfLog.Equals("react", StringComparison.OrdinalIgnoreCase))
             {
                 logName = "react-errors";
             }
-            else if (typeOfLog == "client")
+            else if (typeOfLog.Equals("client", StringComparison.OrdinalIgnoreCase))
             {
                 var suffix = Path.GetExtension(file);
                 logName = suffix == ".log" ? "portingAssistant-client-cli-logs" : "portingAssistant-client-cli-metrics";
