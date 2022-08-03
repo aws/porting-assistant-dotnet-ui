@@ -5,6 +5,7 @@ using PortingAssistantExtensionTelemetry.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Serilog;
 
 namespace PortingAssistant.Telemetry
 {
@@ -40,17 +41,37 @@ namespace PortingAssistant.Telemetry
                 MetricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics"),
                 Suffix = new List<string>() { ".log", ".metrics" }
             };
-            var lastReadTokenFile = Path.Combine(teleConfig.LogsPath, "lastToken.json");
-            string prefix = portingAssistantPortingConfiguration.PortingAssistantMetrics["Prefix"].ToString();
-            
+
+            var outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
+            var logConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
+                .MinimumLevel.Debug()
+                .WriteTo.RollingFile(
+                    Path.Combine(args[2], "logs", "portingAssistant-telemetry-{Date}.log"),
+                    outputTemplate: outputTemplate,
+                    fileSizeLimitBytes: 1000000);
+
+            Log.Logger = logConfiguration.CreateLogger();
+
             var logTimer = new System.Timers.Timer();
             logTimer.Interval = Convert.ToDouble(portingAssistantPortingConfiguration.PortingAssistantMetrics["LogTimerInterval"].ToString());
 
-            logTimer.Elapsed += (source, e) => LogUploadUtils.OnTimedEvent(source, e, teleConfig, lastReadTokenFile, profile, useDefaultCreds, prefix, shareMetric);
-
+            LogUploadUtils.InitializeUploader(
+                shareMetric,
+                teleConfig,
+                profile,
+                useDefaultCreds,
+                Log.Logger);
+            logTimer.Elapsed += LogUploadUtils.OnTimedEvent;
             logTimer.AutoReset = true;
-
             logTimer.Enabled = true;
+
+            var writeLogErrorsTimer = new System.Timers.Timer
+            {
+                Interval = 300000,
+                AutoReset = true,
+                Enabled = true
+            };
+            writeLogErrorsTimer.Elapsed += LogUploadUtils.WriteLogUploadErrors;
 
             _connection.Listen();
         }
