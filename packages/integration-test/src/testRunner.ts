@@ -346,7 +346,7 @@ export class TestRunner {
     expect(results).toBeTruthy();
     expect(results ? results[0] : "").toBe(expectedValues[0]);
     expect(results ? results[1] : "").toBe(expectedValues[1]);
-    expect(results ? results[2] : "").toBe(expectedValues[2]);
+    expect(results ? results[2]: "").not.toBe("0 of 0");
     expect(results ? results[3] : "").toBe(expectedValues[3]);
     expect(results ? results[4] : "").toBe(expectedValues[4]);
   };
