@@ -220,6 +220,7 @@ export class TestRunner {
       ).waitForExist({
         reverse: true,
         timeout: 1000000,
+        timeoutMsg: "porting and reassessment timeout"
       });
       await (await this.app.client.$(solutionNameTagId)).click();
     }
@@ -256,6 +257,7 @@ export class TestRunner {
     ).waitForExist({
       reverse: true,
       timeout: 1000000,
+      timeoutMsg: "reassessment timeout"
     });
     const results = await this.checkAssessmentResults(solutionPath);
     await (await this.app.client.$(solutionNameTagId)).click();
