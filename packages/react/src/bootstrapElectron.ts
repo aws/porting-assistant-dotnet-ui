@@ -45,6 +45,7 @@ export interface Electron {
   writeReactErrLog: (source: any, message: any, response: any) => void;
   getAssessmentLog: () => string;
   checkInternetAccess: () => Promise<boolean>;
+  getAllMsbuildPath: () => Promise<string>;
 }
 
 export interface Backend {
@@ -59,8 +60,10 @@ export interface Backend {
       continiousEnabled: boolean;
       actionsOnly: boolean;
       compatibleOnly: boolean;
+      msbuildPath?: string;
+      msBuildArguments?: string[];
     },
-    preTriggerData: string[]
+    preTriggerData: string[]    
   ) => Promise<Response<SolutionDetails, string>>;
   openSolutionInIDE: (solutionFilePath: string) => Promise<Response<boolean, string>>;
   getFileContents: (sourceFilePath: string) => Promise<string>;
@@ -72,6 +75,7 @@ export interface Backend {
   checkInternetAccess: () => Promise<boolean>;
   sendCustomerFeedback: (upload: any) => Promise<Response<boolean, string>>;
   uploadRuleContribution: (upload: any) => Promise<Response<boolean, string>>;
+  getAllMsbuildPath: () => Promise<string>;
 }
 
 export interface Porting {

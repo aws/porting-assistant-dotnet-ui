@@ -13,9 +13,11 @@ export interface analyzeSolutionRequestPayload {
     continiousEnabled: boolean;
     compatibleOnly: boolean;
     actionsOnly: boolean;
+    msbuildPath?: string;
+    msBuildArguments?: string[];
   };
   preTriggerData:string[];
-  force?: boolean;
+  force?: boolean; 
 }
 export interface analyzeSolutionSuccessPayload {
   solutionDetails: SolutionDetails;

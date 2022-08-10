@@ -17,6 +17,7 @@ import { selectProjectTableData } from "../../store/selectors/tableSelectors";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isLoaded, Loadable } from "../../utils/Loadable";
+import { AddCustomMsBuildForm } from "../AddCustomMSBuild/AddCustomMSBuild";
 import { ApiTable } from "../AssessShared/ApiTable";
 import { EnterEmailModal, isEmailSet } from "../AssessShared/EnterEmailModal";
 import { FileTable } from "../AssessShared/FileTable";
@@ -44,13 +45,15 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
   const targetFramework = getTargetFramework();
   const [feedbackModal, setFeedbackModalVisible] = React.useState(false);
   const [emailModal, setEmailModalVisible] = React.useState(false);
+  const [selectedMSbuild, setselectedMSbuild] = useState<any>();
+  const [msBuildArguments, setmsBuildArguments] = useState<any[]>([]);
 
   useNugetFlashbarMessages(projects);
   useApiAnalysisFlashbarMessage(solution);
-  
+
   const projectsTable = usePortingAssistantSelector(state => selectProjectTableData(state, location.pathname));
   let preTriggerDataArray: string[] = [];
-  projectsTable.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
+  projectsTable.forEach(element => { preTriggerDataArray.push(JSON.stringify(element)); });
   const tabs = useMemo(
     () => [
       {
@@ -92,6 +95,12 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
   if (solution == null) {
     return <Redirect to="/solutions" />;
   }
+
+  const addSolution = async (solutionPath: any, msBuildArgumentsArray: string[], selectedMSbuild: string) => {
+    const paths = await window.electron.getState("solutions", {});
+    paths[solutionPath] = { solutionPath: solutionPath, msBuildPath: selectedMSbuild, msBuildArguments: msBuildArgumentsArray };
+    window.electron.saveState("solutions", paths);
+  };
 
   return (
     <SpaceBetween size="m">
@@ -162,9 +171,16 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               onClick={async () => {
                 const haveInternet = await checkInternetAccess(solution.solutionFilePath, dispatch);
                 if (haveInternet) {
+                  const msBuildArgumentsArray = [];
+
+                  for (const msBuildArgument of msBuildArguments) {
+                    msBuildArgumentsArray.push(msBuildArgument.value);
+                  }
+
+                  await addSolution(solution.solutionFilePath, msBuildArgumentsArray, selectedMSbuild.label);
                   dispatch(
                     analyzeSolution.request({
-                      solutionPath: solution.solutionFilePath,
+                      solutionPath: solution.solutionFilePath,                      
                       runId: uuid(),
                       triggerType: "UserRequest",
                       settings: {
@@ -172,7 +188,9 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
                         targetFramework: targetFramework,
                         continiousEnabled: false,
                         actionsOnly: false,
-                        compatibleOnly: false
+                        compatibleOnly: false,
+                        msbuildPath: selectedMSbuild.label,
+                        msBuildArguments: msBuildArgumentsArray,
                       },
                       preTriggerData: preTriggerDataArray,
                       force: true
@@ -186,7 +204,7 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             </Button>
 
             <Button
-              id = "feedback-btn"
+              id="feedback-btn"
               onClick={() => {
                 if (!isEmailSet()) {
                   console.log("No Email; Entering Email Modal");
@@ -242,6 +260,7 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
       </Header>
 
       <SolutionSummary solution={solution} projects={projects} />
+      <AddCustomMsBuildForm solution={solution} setselectedMSbuild={setselectedMSbuild} setMSBuildArgumentsLst={setmsBuildArguments}></AddCustomMsBuildForm>
       <Tabs tabs={tabs} activeTabId={location.state?.activeTabId || "projects"} onChange={onChangeTab} />
     </SpaceBetween>
   );

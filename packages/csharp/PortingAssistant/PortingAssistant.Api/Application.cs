@@ -14,11 +14,25 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Linq;
+using Codelyzer.Analysis.Common;
+using Codelyzer.Analysis;
 
 namespace PortingAssistant.Api
 {
     public class Application
     {
+        public class MSBuildSettings
+        {
+            public List<MsBuildExe> MsbuildExes { get; set; }
+
+            public List<string> DefaultArguments { get; set; }
+        }
+        public class MsBuildExe
+        {
+            public string Name { get; set; }
+            public string Path { get; set; }
+        }
+
         private IServiceProvider _services { get; set; }
         private Connection _connection;
         private ILogger _logger;
@@ -178,6 +192,42 @@ namespace PortingAssistant.Api
                     };
                 }
             });
+
+            _connection.On<string, string>("getAllMsbuildPath",
+                 request =>
+                 {
+                     var buildSettings = new MSBuildSettings()
+                     {
+                         MsbuildExes = new List<MsBuildExe>(),
+                         DefaultArguments = new List<string>()
+                     };
+                     var msbuildDetector = new MSBuildDetector();
+                     var visualStudioData = msbuildDetector.GetVisualStudioInstanceData();
+
+                     if (visualStudioData.Count > 0)
+                     {
+                         visualStudioData.ForEach(instance =>
+                         {
+                             buildSettings.MsbuildExes.Add(new MsBuildExe() { Name = instance.Name, Path = instance.InstallationPath });
+                         });
+                     }
+                     else
+                     {
+                         var msBuilds = msbuildDetector.GetFileSystemMsBuildExePath();
+                         int count = 0;
+                         msBuilds.ForEach(msBuildPath =>
+                         {
+                             buildSettings.MsbuildExes.Add(new MsBuildExe() { Name = $"MSBuild({count++})", Path = msBuildPath });
+                         });
+                     }
+
+                     AnalyzerConfiguration.DefaultBuildArguments.ForEach(buildArugment =>
+                     {
+                         buildSettings.DefaultArguments.Add(buildArugment);
+                     });
+
+                     return JsonConvert.SerializeObject(buildSettings);
+                 });
         }
 
         public void Start()
