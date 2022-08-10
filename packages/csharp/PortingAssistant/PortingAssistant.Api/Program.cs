@@ -44,11 +44,12 @@ namespace PortingAssistant.Api
                 .MinimumLevel.Debug()
                 .WriteTo.RollingFile(
                     Path.Combine(args[2], "logs", "portingAssistant-assessment-{Date}.log"),
-                    outputTemplate: outputTemplate)
+                    outputTemplate: outputTemplate,
+                    fileSizeLimitBytes: 1000000)
                 .WriteTo.Logger(lc => lc.MinimumLevel.Error().WriteTo.RollingFile(
-                    Path.Combine(args[2], "logs", "portingAssistant-backend-{Date}.log"), 
-                    outputTemplate: outputTemplate)
-                    );
+                    Path.Combine(args[2], "logs", "portingAssistant-backend-{Date}.log"),
+                    outputTemplate: outputTemplate,
+                    fileSizeLimitBytes: 1000000));
 
             if (isConsole)
             {
