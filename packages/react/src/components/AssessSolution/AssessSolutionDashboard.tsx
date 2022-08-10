@@ -1,4 +1,4 @@
-import { Box, Button, Header, NonCancelableCustomEvent, SpaceBetween, Tabs, TabsProps } from "@awsui/components-react";
+import { Box, Button, Flashbar, Header, NonCancelableCustomEvent, ProgressBar,SpaceBetween, Tabs, TabsProps } from "@awsui/components-react";
 import { systemPreferences } from "electron";
 import { electron } from "process";
 import React, { useCallback, useMemo, useState } from "react";
@@ -240,7 +240,21 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
       >
         {solution.solutionName}
       </Header>
-
+      <Flashbar
+      items={[
+        {
+          content: (
+            <ProgressBar
+              value={36}
+              variant="flash"
+              additionalInfo="Additional information"
+              description="Progress bar description"
+              label="Progress bar label"
+            />
+          )
+        }
+      ]}
+    />
       <SolutionSummary solution={solution} projects={projects} />
       <Tabs tabs={tabs} activeTabId={location.state?.activeTabId || "projects"} onChange={onChangeTab} />
     </SpaceBetween>
