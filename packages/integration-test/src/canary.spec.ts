@@ -18,7 +18,7 @@ describe("canary test suite", () => {
   beforeAll(async () => {
     app = await startApp();
     runner = new TestRunner(app);
-    await runner.selectProfile();
+    await runner.setupTargetFramework();
     return app;
   });
 

@@ -26,90 +26,17 @@ export class TestRunner {
     await (await this.app.client.$(`[title="${targetFramework}"`)).click();
   };
 
-  selectProfile = async (targetFramework: string = "") => {
+  setupTargetFramework = async (targetFramework: string = "") => {
     await this.app.client.pause(3000);
     await (await this.app.client.$("#start-btn")).click();
-    await this.addNamedProfileCheck();
     if (targetFramework !== "") {
       await this.selectTargetFramework(targetFramework);
     }
-    await this.selectDefaultCredentials();
-    await this.selectCustomCredentials();
-    await (await this.app.client.$("#profile-selection")).click();
-    await (await this.app.client.$("[title=\"default\"]")).click();
     await (await this.app.client.$("#next-btn")).click();
     await (
       await this.app.client.$("=Assess a new solution")
     ).waitForDisplayed({
       timeout: 60000,
-    });
-  };
-
-  addNamedProfile = async (profileName: string, accessKeyId: string, secretAccessKey: string) => {
-    await this.selectDefaultCredentials();
-    await this.selectCustomCredentials();
-    await (
-      await this.app.client.$("#add-named-profile")
-    ).click({
-      button: "left",
-      x: 0,
-      y: 3,
-    });
-
-    await (await this.app.client.$('[name="profileName"]')).setValue(profileName);
-    await (await this.app.client.$('[name="accessKeyID"]')).setValue(accessKeyId);
-    await (await this.app.client.$('[name="secretAccessKey"]')).setValue(secretAccessKey);
-    await (await this.app.client.$("#add-profile-button")).click();
-    };
-
-  selectDefaultCredentials = async () => {
-        await (
-            await this.app.client.$("[data-value=\"default\"]")
-        ).click();
-    };
-
-  selectCustomCredentials = async () => {
-      await (
-          await this.app.client.$("[data-value=\"custom\"]")
-      ).click();
-  };
-
-  selectNamedProfile = async (profileName: string, targetFramework: string = "") => {
-    if (targetFramework !== "") {
-      await this.selectTargetFramework(targetFramework);
-     }
-    await this.selectDefaultCredentials();
-    await this.selectCustomCredentials();
-    await (await this.app.client.$("#profile-selection")).click();
-    await (await this.app.client.$(`[title="${profileName}"]`)).click();
-    await (await this.app.client.$("#next-btn")).click();
-  };
-
-  addNamedProfileCheck = async () => {
-    // profile selection model element is on top of add named profile link
-    // and will intercept the click so we offset by 3 pixels down
-    await this.selectDefaultCredentials();
-    await this.selectCustomCredentials();
-    await (
-      await this.app.client.$("#add-named-profile")
-    ).click({
-      button: "left",
-      x: 0,
-      y: 3,
-    });
-    await (await this.app.client.$("#add-profile-button")).click();
-    await (
-      await this.app.client.$("span=Profile is required")
-    ).waitForExist({
-      timeout: 1000,
-    });
-    await this.app.client.keys(["Escape"]);
-    await this.selectDefaultCredentials();
-    await this.selectCustomCredentials();
-    await (
-      await this.app.client.$("#profile-selection")
-    ).waitForExist({
-      timeout: 1000,
     });
   };
 

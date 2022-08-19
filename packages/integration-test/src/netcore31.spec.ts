@@ -19,7 +19,7 @@ describe("netcore 3.1 test suite", () => {
     beforeAll(async () => {
         app = await startApp();
         runner = new TestRunner(app);
-        await runner.selectProfile(TargetFrameworks.netcore31);
+        await runner.setupTargetFramework(TargetFrameworks.netcore31);
         return app;
     });
 
