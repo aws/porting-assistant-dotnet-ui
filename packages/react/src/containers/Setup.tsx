@@ -13,7 +13,6 @@ import { openTools, setInfo } from "../store/actions/tools";
 const SetupInternal: React.FC = () => {
   const dispatch = useDispatch();
   const history = useHistory();
-  const profileSet = usePortingAssistantSelector(state => state.solution.profileSet);
 
   useEffect(() => {
     dispatch(
@@ -41,14 +40,12 @@ const SetupInternal: React.FC = () => {
   return (
     <PortingAssistantAppLayout
       content={
-          <ProfileSelection
+        <ProfileSelection
           title="Set up Porting Assistant for .NET"
           buttonText="Next"
           next={() => history.push("/add-solution")}
         />
-
       }
-      navigationHide={!profileSet}
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumb} />}
       maxContentWidth={800}
       minContentWidth={600}

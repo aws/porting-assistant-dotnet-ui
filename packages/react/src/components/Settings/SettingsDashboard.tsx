@@ -80,31 +80,13 @@ const SettingsDashboardInternal: React.FC = () => {
         header={
           <Header
             variant="h2"
-            description="You can see the AWS named profile that Porting Assistant for .NET is using and also your usage data sharing settings below."
+            description="You can see your usage data sharing settings below."
           >
             Porting Assistant for .NET Settings
           </Header>
         }
       >
         <ColumnLayout columns={4} variant="text-grid">
-          <SpaceBetween size="l">
-            <div>
-              <Box margin={{ bottom: "xxxs" }} color="text-label">
-                AWS named profile
-              </Box>
-              <div id="current-profile-name">{getProfileName(profileName.current)}</div>
-              {profileValid === false && (
-                <Box margin={{ top: "xxs" }} id="current-profile-status">
-                  <Box variant="small">
-                    <StatusIndicator type="warning">
-                      We were unable to reach AWS using your named profile. Click edit to change your named profile to a
-                      valid one.
-                    </StatusIndicator>
-                  </Box>
-                </Box>
-              )}
-            </div>
-          </SpaceBetween>
           <SpaceBetween size="l">
             <div>
               <Box margin={{ bottom: "xxxs" }} color="text-label">
