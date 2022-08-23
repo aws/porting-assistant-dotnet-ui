@@ -11,10 +11,8 @@ import {
 } from "@awsui/components-react";
 import React from "react";
 import { useDispatch } from "react-redux";
-import { v4 as uuid } from "uuid";
 
-import { pushCurrentMessageUpdate } from "../../store/actions/error";
-import { sendCustomerFeedback } from "../../utils/sendCustomerFeedback";
+import { externalUrls } from "../../constants/externalUrls";
 
 interface Props {
   visible: boolean;
@@ -34,7 +32,6 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
   const [categoryType, setCategory] = React.useState("Feedback Category");
   const [isCategoryEmpty, setIsCategoryEmpty] = React.useState(false);
   const [isValueEmpty, setIsValueEmpty] = React.useState(false);
-  const dispatch = useDispatch();
 
   const emailValue = window.electron.getState("email");
 
@@ -61,39 +58,8 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
                   setIsValueEmpty(true);
                 }
                 if (!(categoryType === "Feedback Category" || categoryType == null) && !(inputValue === "" || inputValue == null)) {
-                  const cur_date = new Date();
-                  let date_str = cur_date.toISOString();
 
-                  const submission: CustomerFeedback = {
-                    feedback: inputValue,
-                    category: categoryType,
-                    email: emailValue,
-                    date: date_str.replace(/[^a-zA-Z0-9]/g, "-")
-                  };
-
-                  const response = await sendCustomerFeedback(submission);
-                  if (response.status.status === "Success") {
-                    dispatch(
-                      pushCurrentMessageUpdate({
-                        messageId: uuid(),
-                        groupId: "customerFeedback",
-                        content: `Successfully sent your feedback.`,
-                        type: "success",
-                        dismissible: true
-                      })
-                    );
-                  } else {
-                    window.electron.writeReactErrLog("CustomerFeedbackModal", "Failed to send customer feedback - PA UI", response.errorValue)
-                    dispatch(
-                      pushCurrentMessageUpdate({
-                        messageId: uuid(),
-                        groupId: "customerFeedbackFailed",
-                        type: "error",
-                        content: `Failed to send your feedback. If this error persists, contact support in the Porting Assistant help menu.`,
-                        dismissible: true
-                      })
-                    );
-                  }
+                  window.location.href = `mailto:${externalUrls.email}?subject=${categoryType} - Porting Assistant for .NET&body=${inputValue}`;    
 
                   setModalVisible(false);
                   setInputValue("");

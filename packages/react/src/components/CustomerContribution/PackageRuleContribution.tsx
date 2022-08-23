@@ -21,10 +21,10 @@ import { useHistory } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
 import { EnterEmailModal, isEmailSet } from "../../components/AssessShared/EnterEmailModal";
+import { externalUrls } from "../../constants/externalUrls";
 import { RuleContribSource } from "../../containers/RuleContribution";
 import { HistoryState } from "../../models/locationState";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
-import { uploadRuleContribution } from "../../utils/sendRuleContribution";
 import { validatePackageInput } from "../../utils/validateRuleContrib";
 import { targetFrameworkOptions } from "../Setup/ProfileSelection";
 
@@ -105,25 +105,10 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
 
     if (await validateInput(submission)) {
       const formattedSubmission = formatPackageContribution(submission);
-      const result = await uploadRuleContribution(email, formattedSubmission, submission.packageNameSource);
-      if (result.status.status === "Success") {
-        setFlashbar({
-          messageId: uuid(),
-          type: "success",
-          content: "Successfully submitted replacement suggestion",
-          dismissible: true
-        });
-        history.push(nextPagePath);
-      } else {
-        window.electron.writeReactErrLog("PackageRuleContribution", "Failed to send rule contribution - PA UI", result.errorValue)
-        setFlashbar({
-          messageId: uuid(),
-          type: "error",
-          content: "Unable to reach the server to submit your suggestion. Please try again.",
-          dismissible: true
-        });
-        setSubmitLoading(false);
-      }
+      window.location.href = `mailto:${
+        externalUrls.email
+      }?subject=Rule Contribution - Porting Assistant for .NET&body=${JSON.stringify(formattedSubmission)}`;
+      history.push(nextPagePath);
     } else {
       setSubmitLoading(false);
     }
@@ -246,7 +231,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     >
       <ColumnLayout columns={4}>
         <FormField
-          id = "rc-package-name"
+          id="rc-package-name"
           label="Package name"
           description="Official name of the replacement package."
           stretch={true}
@@ -271,7 +256,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
             placeholder="1.0.0"
           />
           <Checkbox
-            id = "rc-version-check-box"
+            id="rc-version-check-box"
             onChange={({ detail }) => {
               setUseLatestPackageVersion(detail.checked);
               if (detail.checked) {
@@ -297,12 +282,8 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
           />
         </FormField>
         <FormField
-          id = "rc-comment"
-          label={
-            <span>
-              Comments
-            </span>
-          }
+          id="rc-comment"
+          label={<span>Comments</span>}
           description="Please provide a short description."
           stretch={true}
         >
@@ -324,14 +305,12 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
       />
       <Container
         header={
-          <Header 
-            variant="h2" 
+          <Header
+            variant="h2"
             description="Please confirm that your e-mail and NuGet package details are correct. 
             To update your e-mail, please click the setting icon on the right corner."
-            actions={
-            <Button iconName="settings" variant="icon" onClick={() => setShowEmailModal(true)} />
-            }
-            >
+            actions={<Button iconName="settings" variant="icon" onClick={() => setShowEmailModal(true)} />}
+          >
             User and NuGet package details
           </Header>
         }
