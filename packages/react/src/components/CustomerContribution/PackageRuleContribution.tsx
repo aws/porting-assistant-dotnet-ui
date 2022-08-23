@@ -105,9 +105,10 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
 
     if (await validateInput(submission)) {
       const formattedSubmission = formatPackageContribution(submission);
-      window.location.href = `mailto:${
-        externalUrls.email
-      }?subject=Rule Contribution - Porting Assistant for .NET&body=${JSON.stringify(formattedSubmission)}`;
+      var content = JSON.stringify(formattedSubmission, null, 4)
+        .split("\n")
+        .join("%0D%0A");
+      window.location.href = `mailto:${externalUrls.email}?subject=Rule Contribution - Porting Assistant for .NET&body=${content}`;
       history.push(nextPagePath);
     } else {
       setSubmitLoading(false);
@@ -224,7 +225,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
             Cancel
           </Button>
           <Button id="rc-send-btn" loading={submitLoading} variant="primary" onClick={onSubmit}>
-            Submit
+            Send Email
           </Button>
         </SpaceBetween>
       }
