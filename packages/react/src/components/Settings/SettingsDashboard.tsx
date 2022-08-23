@@ -7,28 +7,26 @@ import {
   Link as LinkComponent,
   SpaceBetween
 } from "@awsui/components-react";
-import StatusIndicator from "@awsui/components-react/status-indicator/internal";
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { externalUrls } from "../../constants/externalUrls";
-import { getProfileName } from "../../utils/getProfileName";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { InfoLink } from "../InfoLink";
 
 const SettingsDashboardInternal: React.FC = () => {
   const isShared = useRef<string>();
-  const [profileValid, setProfileValid] = useState<boolean | undefined>(undefined);
-  const profileName = useRef<string>();
+  const showShareMetrics = useRef<boolean>();
   const [applicationVersion, setApplicationVersion] = useState<string | undefined>(undefined);
   const [targetFramwork, setTargetFramework] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
-      profileName.current = await window.electron.getState("profile");
-      setProfileValid(await window.electron.verifyUser(profileName.current));
+      var profile = await window.electron.getState("profile");
+      var useDefaultCreds = await window.electron.getState("useDefaultCreds");
+      showShareMetrics.current =  profile !== "" || useDefaultCreds;
     })();
-  }, [profileName]);
+  }, [showShareMetrics]);
 
   useEffect(() => {
     (async () => {
@@ -80,14 +78,14 @@ const SettingsDashboardInternal: React.FC = () => {
         header={
           <Header
             variant="h2"
-            description="You can see your usage data sharing settings below."
+            description="You can see your settings below."
           >
             Porting Assistant for .NET Settings
           </Header>
         }
       >
         <ColumnLayout columns={4} variant="text-grid">
-          <SpaceBetween size="l">
+          {(showShareMetrics.current) ? (<SpaceBetween size="l">
             <div>
               <Box margin={{ bottom: "xxxs" }} color="text-label">
                 <SpaceBetween direction="horizontal" size="xxs">
@@ -114,7 +112,8 @@ const SettingsDashboardInternal: React.FC = () => {
               </Box>
               <div>{isShared.current || ""}</div>
             </div>
-          </SpaceBetween>
+          </SpaceBetween>) : null
+          }
           <SpaceBetween size="l">
             <div>
               <Box margin={{ bottom: "xxxs" }} color="text-label">

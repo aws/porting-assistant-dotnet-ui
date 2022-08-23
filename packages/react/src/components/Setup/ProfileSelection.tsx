@@ -19,11 +19,8 @@ import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
 
-import { profileSelection } from "../../constants/appConstants";
 import { externalUrls } from "../../constants/externalUrls";
 import { init, setProfileSet } from "../../store/actions/backend";
-import { openTools } from "../../store/actions/tools";
-import { getProfileName } from "../../utils/getProfileName";
 import { InfoLink } from "../InfoLink";
 import styles from "./ProfileSelection.module.scss";
 
@@ -43,8 +40,6 @@ type FormData = {
 
 const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) => {
   const { control, errors, handleSubmit, setError, formState } = useForm<FormData>();
-  const [profileOptions, setProfileOptions] = useState(new Array<SelectProps.Option>());
-  const [showModal, setShowModal] = useState(false);
   const history = useHistory();
   const { isSubmitting } = formState;
   const dispatch = useDispatch();
@@ -60,7 +55,7 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
         };
 
   const [targetFramework, setTargetFramework] = useState(currentTargetFramework);
-  
+
   const actionButton = useMemo(
     () => (
       <div>
@@ -88,26 +83,22 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
   return (
     <div>
       <form
-        onSubmit={
-          handleSubmit(async data => {
-            if (data.targetFrameworkSelection.value == null || data.targetFrameworkSelection.label == null) {
-              setError("targetFrameworkSelection", "required", "Target Framework is required.");
-              return;
-            }
-            window.electron.saveState("lastConfirmVersion", "1.3.0");
-            window.electron.saveState("share", data.share);
-            window.electron.saveState("targetFramework", {
-              id: data.targetFrameworkSelection.value,
-              label: data.targetFrameworkSelection.label
-            });
-            // Wait for C# backend to restart
-            await new Promise(resolve => setTimeout(resolve, 10000));
-            dispatch(init(true));
-            dispatch(setProfileSet(true));
-            // set pending message and go back to settings dashboard
-            next && next();
-          })
-        }
+        onSubmit={handleSubmit(async data => {
+          if (data.targetFrameworkSelection.value == null || data.targetFrameworkSelection.label == null) {
+            setError("targetFrameworkSelection", "required", "Target Framework is required.");
+            return;
+          }
+          window.electron.saveState("lastConfirmVersion", "1.3.0");
+          window.electron.saveState("share", data.share ?? false);
+          window.electron.saveState("targetFramework", {
+            id: data.targetFrameworkSelection.value,
+            label: data.targetFrameworkSelection.label
+          });
+          dispatch(init(true));
+          dispatch(setProfileSet(true));
+          // set pending message and go back to settings dashboard
+          next && next();
+        })}
       >
         <Form
           header={
@@ -143,7 +134,13 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
             <ColumnLayout>
               <div>
                 <Box fontSize="body-m">Target framework</Box>
-                <Box fontSize="body-s" margin={{ right: "xxs" }} color="text-body-secondary">
+                <Box
+                  fontSize="body-s"
+                  margin={{
+                    right: "xxs"
+                  }}
+                  color="text-body-secondary"
+                >
                   Select a target framework to allow Porting Assistant for .NET to assess your solution for .NET Core
                   compatibility.
                 </Box>
@@ -156,43 +153,47 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                       control={control}
                       onChange={onSelectTargetFramework}
                       name="targetFrameworkSelection"
-                      rules={{ required: "Target Framework is required" }}
+                      rules={{
+                        required: "Target Framework is required"
+                      }}
                       defaultValue={currentTargetFramework}
                     />
                   </FormField>
                 </div>
               </div>
-              <div>
-                <Box fontSize="body-m">Porting Assistant for .NET data usage sharing</Box>
-                {/* #7f7f7f */}
-                <Box fontSize="body-s" color="text-body-secondary">
-                  When you share your usage data, Porting Assistant for .NET will collect information only about the
-                  public NuGet packages, APIs, build errors and stack traces. This information is used to make the
-                  Porting Assistant for .NET product better, for example, to improve the package and API replacement
-                  recommendations. Porting Assistant for .NET does not collect any identifying information about you.{" "}
-                  <Link
-                    external
-                    href="#/"
-                    fontSize="body-s"
-                    onFollow={event => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      window.electron.openExternalUrl(externalUrls.howItWorks);
-                    }}
-                  >
-                    Learn more
-                  </Link>
-                </Box>
-              </div>
-              <FormField>
-                <Controller
-                  as={shareCheckbox}
-                  name="share"
-                  control={control}
-                  onChange={onCheckbox}
-                  defaultValue={true}
-                />
-              </FormField>
+              {cachedUseDefaultCreds || currentProfile ? (
+                <div>
+                  <div>
+                    <Box fontSize="body-m">Porting Assistant for .NET data usage sharing</Box>
+                    {/* #7f7f7f */}
+                    <Box fontSize="body-s" color="text-body-secondary">
+                      When you share your usage data, Porting Assistant for .NET will collect information only about the
+                      public NuGet packages, APIs, build errors and stack traces. This information is used to make the
+                      Porting Assistant for .NET product better, for example, to improve the package and API replacement
+                      recommendations. Porting Assistant for .NET does not collect any identifying information about you.{" "}
+                      <Link
+                        external
+                        href="#/"
+                        fontSize="body-s"
+                        onFollow={event => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          window.electron.openExternalUrl(externalUrls.howItWorks);
+                        } }
+                      >
+                        Learn more
+                      </Link>
+                    </Box>
+                  </div>
+                  <FormField>
+                    <Controller
+                      as={shareCheckbox}
+                      name="share"
+                      control={control}
+                      onChange={onCheckbox}
+                      defaultValue={true} />
+                  </FormField>
+                </div>) : null}
             </ColumnLayout>
           </Container>
         </Form>
