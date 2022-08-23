@@ -90,6 +90,10 @@ export const initTelemetryConnection = (logger: any = console) => {
         console.log("profileFound: " + localStore.get("profile"));
         instance = createConnection(browserWindow);
       }
+      else if (localStore.get("useDefaultCreds")) {
+        console.log("usingDefaultCreds enabled");
+        instance = createConnection(browserWindow);
+      }
 
       localStore.onDidChange("profile", () => {
         console.log("Profile changed, recreating telemetry connection");
