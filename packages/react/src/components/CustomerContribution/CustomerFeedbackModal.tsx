@@ -10,7 +10,6 @@ import {
   TextContent
 } from "@awsui/components-react";
 import React from "react";
-import { useDispatch } from "react-redux";
 
 import { externalUrls } from "../../constants/externalUrls";
 
