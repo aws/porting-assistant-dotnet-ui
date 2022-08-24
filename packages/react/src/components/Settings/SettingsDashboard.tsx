@@ -76,44 +76,42 @@ const SettingsDashboardInternal: React.FC = () => {
       </Header>
       <Container
         header={
-          <Header
-            variant="h2"
-            description="You can see your settings below."
-          >
+          <Header variant="h2" description="You can see your settings below.">
             Porting Assistant for .NET Settings
           </Header>
         }
       >
         <ColumnLayout columns={4} variant="text-grid">
-          {(showShareMetrics.current) ? (<SpaceBetween size="l">
-            <div>
-              <Box margin={{ bottom: "xxxs" }} color="text-label">
-                <SpaceBetween direction="horizontal" size="xxs">
-                  Usage data sharing
-                  <InfoLink
-                    heading="Data collected by porting assistant for .Net tool"
-                    mainContent={
-                      <Box variant="p">
-                        When you share your usage data, Porting Assistant for .NET will collect information only about
-                        the public NuGet packages, APIs, and stack traces. This information is used to make the Porting
-                        Assistant for .NET product better, for example, to improve the package and API replacement
-                        recommendations. Porting Assistant for .NET does not collect any identifying information about
-                        you.
-                      </Box>
-                    }
-                    learnMoreLinks={[
-                      {
-                        text: "Learn More",
-                        externalUrl: externalUrls.howItWorks
+          {showShareMetrics.current ? (
+            <SpaceBetween size="l">
+              <div>
+                <Box margin={{ bottom: "xxxs" }} color="text-label">
+                  <SpaceBetween direction="horizontal" size="xxs">
+                    Usage data sharing
+                    <InfoLink
+                      heading="Data collected by porting assistant for .Net tool"
+                      mainContent={
+                        <Box variant="p">
+                          When you share your usage data, Porting Assistant for .NET will collect information only about
+                          the public NuGet packages, APIs, and stack traces. This information is used to make the
+                          Porting Assistant for .NET product better, for example, to improve the package and API
+                          replacement recommendations. Porting Assistant for .NET does not collect any identifying
+                          information about you.
+                        </Box>
                       }
-                    ]}
-                  />
-                </SpaceBetween>
-              </Box>
-              <div>{isShared.current || ""}</div>
-            </div>
-          </SpaceBetween>) : null
-          }
+                      learnMoreLinks={[
+                        {
+                          text: "Learn More",
+                          externalUrl: externalUrls.howItWorks
+                        }
+                      ]}
+                    />
+                  </SpaceBetween>
+                </Box>
+                <div>{isShared.current || ""}</div>
+              </div>
+            </SpaceBetween>
+          ) : null}
           <SpaceBetween size="l">
             <div>
               <Box margin={{ bottom: "xxxs" }} color="text-label">
@@ -128,42 +126,6 @@ const SettingsDashboardInternal: React.FC = () => {
                 Target framework
               </Box>
               <div>{targetFramwork}</div>
-            </div>
-          </SpaceBetween>
-        </ColumnLayout>
-      </Container>
-      <Container header={<Header variant="h2">End-user license agreement</Header>}>
-        <ColumnLayout columns={1} variant="text-grid">
-          <SpaceBetween size="l">
-            <div>
-              <Box variant="p">
-                The Porting Assistant for .NET tool is licensed as "AWS Content" under the terms and conditions of the
-                AWS Customer Agreement located at{" "}
-                <LinkComponent
-                  href="#/"
-                  onFollow={event => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    window.electron.openExternalUrl(externalUrls.agreement);
-                  }}
-                >
-                  Agreement
-                </LinkComponent>{" "}
-                and the Service Terms located at{" "}
-                <LinkComponent
-                  href="#/"
-                  onFollow={event => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    window.electron.openExternalUrl(externalUrls.serviceTerms);
-                  }}
-                >
-                  Service-Terms
-                </LinkComponent>
-                . By installing, using or accessing The Porting Assistant for .NET tool, you agree to such terms and
-                conditions. The term "AWS Content" does not include software and assets distributed under separate
-                license terms (such as code licensed under an open source license).
-              </Box>
             </div>
           </SpaceBetween>
         </ColumnLayout>
