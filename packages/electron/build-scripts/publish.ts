@@ -148,11 +148,7 @@ if (config.config !== undefined) {
         FlushInterval: process.env["FLUSH_INTERVAL"],
         LogTimerInterval: process.env["LOG_TIMER_INTERVAL"],
         Prefix: process.env["PREFIX"],
-        Description: process.env["DESCRIPTION"]
-      },
-      CustomerContributionConfiguration: {
-        CustomerFeedbackEndpoint: process.env["CF_URL"],
-        RuleContributionEndpoint: process.env["RC_URL"]
+        Description: process.env["DESCRIPTION"],
       },
     })
   );
