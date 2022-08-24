@@ -16,23 +16,13 @@ import { externalUrls } from "../../constants/externalUrls";
 interface Props {
   visible: boolean;
   setModalVisible: any;
-  showEmailModal: any;
 }
 
-export interface CustomerFeedback {
-  feedback: string;
-  category: string;
-  email: string;
-  date: string;
-}
-
-export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, setModalVisible, showEmailModal }) => {
+export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, setModalVisible }) => {
   const [inputValue, setInputValue] = React.useState("");
   const [categoryType, setCategory] = React.useState("Feedback Category");
   const [isCategoryEmpty, setIsCategoryEmpty] = React.useState(false);
   const [isValueEmpty, setIsValueEmpty] = React.useState(false);
-
-  const emailValue = window.electron.getState("email");
 
   return (
     <Modal
@@ -47,7 +37,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
               Cancel
             </Button>
             <Button
-              id = "send-feedback-btn"
+              id="send-feedback-btn"
               variant="primary"
               onClick={async () => {
                 if (categoryType === "Feedback Category" || categoryType == null) {
@@ -56,9 +46,11 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
                 if (inputValue === "" || inputValue == null) {
                   setIsValueEmpty(true);
                 }
-                if (!(categoryType === "Feedback Category" || categoryType == null) && !(inputValue === "" || inputValue == null)) {
-
-                  window.location.href = `mailto:${externalUrls.email}?subject=${categoryType} - Porting Assistant for .NET&body=${inputValue}`;    
+                if (
+                  !(categoryType === "Feedback Category" || categoryType == null) &&
+                  !(inputValue === "" || inputValue == null)
+                ) {
+                  window.location.href = `mailto:${externalUrls.email}?subject=${categoryType} - Porting Assistant for .NET&body=${inputValue}`;
 
                   setModalVisible(false);
                   setInputValue("");
@@ -96,11 +88,20 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
         <TextContent>All feedback will be sent to the .NET Porting Assistant team.</TextContent>
 
         <ButtonDropdown
-          id = "fb-category-selection"
+          id="fb-category-selection"
           items={[
-            { text: "General", id: "general" },
-            { text: "Question", id: "question" },
-            { text: "Error", id: "error" }
+            {
+              text: "General",
+              id: "general"
+            },
+            {
+              text: "Question",
+              id: "question"
+            },
+            {
+              text: "Error",
+              id: "error"
+            }
           ]}
           onItemClick={e => {
             setIsCategoryEmpty(false);
@@ -114,10 +115,10 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
             }
           }}
         >
-        {categoryType}
+          {categoryType}
         </ButtonDropdown>
 
-        <FormField id = "fb-text">
+        <FormField id="fb-text">
           <Input
             value={inputValue}
             onChange={event => {
@@ -128,10 +129,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
           />
         </FormField>
       </SpaceBetween>
-      E-mail linked with this feedback is: {emailValue}
-      <Button iconName="settings" variant="icon" onClick={() => showEmailModal()} />
-      <br/>
-      By clicking send you consent to sending your e-mail to the .NET Porting Assistant team. 
+      <br />
     </Modal>
   );
 });

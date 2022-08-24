@@ -20,7 +20,6 @@ import { useLocation } from "react-router";
 import { useHistory } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
-import { EnterEmailModal, isEmailSet } from "../../components/AssessShared/EnterEmailModal";
 import { externalUrls } from "../../constants/externalUrls";
 import { RuleContribSource } from "../../containers/RuleContribution";
 import { HistoryState } from "../../models/locationState";
@@ -55,8 +54,6 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const nextPagePath = path.dirname(location.pathname);
   const dispatch = useDispatch();
 
-  const [email, setEmail] = useState(window.electron.getState("email"));
-  const [showEmailModal, setShowEmailModal] = useState(!isEmailSet());
   const [packageName, setPackageName] = useState("");
   const [packageVersion, setPackageVersion] = useState("");
   const [packageError, setPackageError] = useState("");
@@ -82,11 +79,6 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     },
     [dispatch]
   );
-
-  const declineProvideEmail = () => {
-    setShowEmailModal(false);
-    history.goBack();
-  };
 
   const onSubmit = async () => {
     setSubmitLoading(true);
@@ -296,28 +288,14 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
 
   return (
     <SpaceBetween size="l">
-      <EnterEmailModal
-        visible={showEmailModal}
-        onSaveExit={() => {
-          setEmail(window.electron.getState("email"));
-          setShowEmailModal(false);
-        }}
-        onCancel={() => declineProvideEmail()}
-      />
       <Container
         header={
-          <Header
-            variant="h2"
-            description="Please confirm that your e-mail and NuGet package details are correct. 
-            To update your e-mail, please click the setting icon on the right corner."
-            actions={<Button iconName="settings" variant="icon" onClick={() => setShowEmailModal(true)} />}
-          >
-            User and NuGet package details
+          <Header variant="h2" description="Please confirm that your NuGet package details are correct. ">
+            NuGet package details
           </Header>
         }
       >
         <ColumnLayout columns={3} variant="text-grid">
-          <ValueWithLabel label="E-mail">{email}</ValueWithLabel>
           <ValueWithLabel label="Selected package name">{source?.packageName}</ValueWithLabel>
           <ValueWithLabel label="Selected package version">{source?.packageVersion}</ValueWithLabel>
         </ColumnLayout>
