@@ -45,6 +45,7 @@ export interface Electron {
   writeReactErrLog: (source: any, message: any, response: any) => void;
   getAssessmentLog: () => string;
   checkInternetAccess: () => Promise<boolean>;
+  getLogFolder: () => string;
 }
 
 export interface Backend {
@@ -70,8 +71,6 @@ export interface Backend {
     callback: (projectAnalysis: Response<ProjectApiAnalysisResult, SolutionProject>) => void
   ) => void;
   checkInternetAccess: () => Promise<boolean>;
-  sendCustomerFeedback: (upload: any) => Promise<Response<boolean, string>>;
-  uploadRuleContribution: (upload: any) => Promise<Response<boolean, string>>;
 }
 
 export interface Porting {

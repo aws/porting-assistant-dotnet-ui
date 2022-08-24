@@ -251,25 +251,12 @@ export const initConnection = (logger: any = console) => {
       return response;
     });
 
-    ipcMain.handle("sendCustomerFeedback", async (_event, upload) => {
-      const response = await connection.send("sendCustomerFeedback", upload);
-      return response;
-    });
-
-    ipcMain.handle(
-      "copyDirectory",
-      async (_event, solutionPath, destinationPath) => {
-        const request = {
-          solutionPath,
-          destinationPath,
-        };
-        const response = await connection.send("copyDirectory", request);
-        return response;
-      }
-    );
-
-    ipcMain.handle("uploadRuleContribution", async (_event, upload) => {
-      const response = await connection.send("uploadRuleContribution", upload);
+    ipcMain.handle("copyDirectory", async (_event, solutionPath, destinationPath) => {
+      const request = {
+        solutionPath,
+        destinationPath,
+      };
+      const response = await connection.send("copyDirectory", request);
       return response;
     });
 

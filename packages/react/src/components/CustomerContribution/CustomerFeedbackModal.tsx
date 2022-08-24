@@ -10,33 +10,19 @@ import {
   TextContent
 } from "@awsui/components-react";
 import React from "react";
-import { useDispatch } from "react-redux";
-import { v4 as uuid } from "uuid";
 
-import { pushCurrentMessageUpdate } from "../../store/actions/error";
-import { sendCustomerFeedback } from "../../utils/sendCustomerFeedback";
+import { externalUrls } from "../../constants/externalUrls";
 
 interface Props {
   visible: boolean;
   setModalVisible: any;
-  showEmailModal: any;
 }
 
-export interface CustomerFeedback {
-  feedback: string;
-  category: string;
-  email: string;
-  date: string;
-}
-
-export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, setModalVisible, showEmailModal }) => {
+export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, setModalVisible }) => {
   const [inputValue, setInputValue] = React.useState("");
   const [categoryType, setCategory] = React.useState("Feedback Category");
   const [isCategoryEmpty, setIsCategoryEmpty] = React.useState(false);
   const [isValueEmpty, setIsValueEmpty] = React.useState(false);
-  const dispatch = useDispatch();
-
-  const emailValue = window.electron.getState("email");
 
   return (
     <Modal
@@ -51,7 +37,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
               Cancel
             </Button>
             <Button
-              id = "send-feedback-btn"
+              id="send-feedback-btn"
               variant="primary"
               onClick={async () => {
                 if (categoryType === "Feedback Category" || categoryType == null) {
@@ -60,40 +46,11 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
                 if (inputValue === "" || inputValue == null) {
                   setIsValueEmpty(true);
                 }
-                if (!(categoryType === "Feedback Category" || categoryType == null) && !(inputValue === "" || inputValue == null)) {
-                  const cur_date = new Date();
-                  let date_str = cur_date.toISOString();
-
-                  const submission: CustomerFeedback = {
-                    feedback: inputValue,
-                    category: categoryType,
-                    email: emailValue,
-                    date: date_str.replace(/[^a-zA-Z0-9]/g, "-")
-                  };
-
-                  const response = await sendCustomerFeedback(submission);
-                  if (response.status.status === "Success") {
-                    dispatch(
-                      pushCurrentMessageUpdate({
-                        messageId: uuid(),
-                        groupId: "customerFeedback",
-                        content: `Successfully sent your feedback.`,
-                        type: "success",
-                        dismissible: true
-                      })
-                    );
-                  } else {
-                    window.electron.writeReactErrLog("CustomerFeedbackModal", "Failed to send customer feedback - PA UI", response.errorValue)
-                    dispatch(
-                      pushCurrentMessageUpdate({
-                        messageId: uuid(),
-                        groupId: "customerFeedbackFailed",
-                        type: "error",
-                        content: `Failed to send your feedback. If this error persists, contact support in the Porting Assistant help menu.`,
-                        dismissible: true
-                      })
-                    );
-                  }
+                if (
+                  !(categoryType === "Feedback Category" || categoryType == null) &&
+                  !(inputValue === "" || inputValue == null)
+                ) {
+                  window.location.href = `mailto:${externalUrls.email}?subject=${categoryType} - Porting Assistant for .NET&body=${inputValue}`;
 
                   setModalVisible(false);
                   setInputValue("");
@@ -103,7 +60,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
                 }
               }}
             >
-              Send
+              Send Email
             </Button>
           </SpaceBetween>
         </Box>
@@ -128,14 +85,23 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
           Please select a category for your feedback.
         </Alert>
 
-        <TextContent>All feedback will be sent to the .NET Porting Assistant team.</TextContent>
+        <TextContent>All feedback will be sent to the .NET Porting Assistant team via email.</TextContent>
 
         <ButtonDropdown
-          id = "fb-category-selection"
+          id="fb-category-selection"
           items={[
-            { text: "General", id: "general" },
-            { text: "Question", id: "question" },
-            { text: "Error", id: "error" }
+            {
+              text: "General",
+              id: "general"
+            },
+            {
+              text: "Question",
+              id: "question"
+            },
+            {
+              text: "Error",
+              id: "error"
+            }
           ]}
           onItemClick={e => {
             setIsCategoryEmpty(false);
@@ -149,10 +115,10 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
             }
           }}
         >
-        {categoryType}
+          {categoryType}
         </ButtonDropdown>
 
-        <FormField id = "fb-text">
+        <FormField id="fb-text">
           <Input
             value={inputValue}
             onChange={event => {
@@ -162,11 +128,13 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
             placeholder="Enter feedback"
           />
         </FormField>
+        {categoryType === "Error" ? (
+          <TextContent>
+            To help us investigate the issue, please include the logs located here: {window.electron.getLogFolder()}
+          </TextContent>
+        ) : null}
       </SpaceBetween>
-      E-mail linked with this feedback is: {emailValue}
-      <Button iconName="settings" variant="icon" onClick={() => showEmailModal()} />
-      <br/>
-      By clicking send you consent to sending your e-mail to the .NET Porting Assistant team. 
+      <br />
     </Modal>
   );
 });

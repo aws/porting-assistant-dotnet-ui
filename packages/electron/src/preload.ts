@@ -39,7 +39,13 @@ contextBridge.exposeInMainWorld("electron", {
     value: any
   ) => localStore.set(key, value),
   getState: (
-    key: "solutions" | "profile" | "targetFramework" | "share" | "email" | "useDefaultCreds",
+    key:
+      | "solutions"
+      | "profile"
+      | "targetFramework"
+      | "share"
+      | "email"
+      | "useDefaultCreds",
     defaultValue: any
   ) => localStore.get(key, defaultValue),
   saveCache: (value: any) => reducerCacheStore.set("reducerCache", value),
@@ -112,6 +118,9 @@ contextBridge.exposeInMainWorld("electron", {
       `portingAssistant-assessment-${dateString}.log`
     );
   },
+  getLogFolder: () => {
+    return path.join(remote.app.getPath("userData"), "logs");
+  },
 });
 
 contextBridge.exposeInMainWorld("backend", {
@@ -129,19 +138,11 @@ contextBridge.exposeInMainWorld("backend", {
     },
     preTriggerData: string[]
   ) => invokeBackend("analyzeSolution", solutionFilePath, runId, triggerType, settings, preTriggerData),
-  openSolutionInIDE: (solutionFilePath: string) =>
-    invokeBackend("openSolutionInIDE", solutionFilePath),
-  getFileContents: (sourceFilePath: string) =>
-    invokeBackend("getFileContents", sourceFilePath),
-  listenNugetPackageUpdate: (callback: (message: string) => void) =>
-    listenBackend("onNugetPackageUpdate", callback),
-  listenApiAnalysisUpdate: (callback: (message: string) => void) =>
-    listenBackend("onApiAnalysisUpdate", callback),
+  openSolutionInIDE: (solutionFilePath: string) => invokeBackend("openSolutionInIDE", solutionFilePath),
+  getFileContents: (sourceFilePath: string) => invokeBackend("getFileContents", sourceFilePath),
+  listenNugetPackageUpdate: (callback: (message: string) => void) => listenBackend("onNugetPackageUpdate", callback),
+  listenApiAnalysisUpdate: (callback: (message: string) => void) => listenBackend("onApiAnalysisUpdate", callback),
   checkInternetAccess: () => invokeBackend("checkInternetAccess"),
-  sendCustomerFeedback: (upload: any) =>
-    invokeBackend("sendCustomerFeedback", upload),
-  uploadRuleContribution: (upload: any) =>
-    invokeBackend("uploadRuleContribution", upload),
 });
 
 contextBridge.exposeInMainWorld("porting", {
