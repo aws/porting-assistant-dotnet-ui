@@ -60,7 +60,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
                 }
               }}
             >
-              Send
+              Send Email
             </Button>
           </SpaceBetween>
         </Box>
@@ -85,7 +85,7 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
           Please select a category for your feedback.
         </Alert>
 
-        <TextContent>All feedback will be sent to the .NET Porting Assistant team.</TextContent>
+        <TextContent>All feedback will be sent to the .NET Porting Assistant team via email.</TextContent>
 
         <ButtonDropdown
           id="fb-category-selection"
@@ -128,6 +128,11 @@ export const CustomerFeedbackModal: React.FC<Props> = React.memo(({ visible, set
             placeholder="Enter feedback"
           />
         </FormField>
+        {categoryType === "Error" ? (
+          <TextContent>
+            To help us investigate the issue, please include the logs located here: {window.electron.getLogFolder()}
+          </TextContent>
+        ) : null}
       </SpaceBetween>
       <br />
     </Modal>

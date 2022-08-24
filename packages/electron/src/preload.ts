@@ -39,7 +39,13 @@ contextBridge.exposeInMainWorld("electron", {
     value: any
   ) => localStore.set(key, value),
   getState: (
-    key: "solutions" | "profile" | "targetFramework" | "share" | "email" | "useDefaultCreds",
+    key:
+      | "solutions"
+      | "profile"
+      | "targetFramework"
+      | "share"
+      | "email"
+      | "useDefaultCreds",
     defaultValue: any
   ) => localStore.get(key, defaultValue),
   saveCache: (value: any) => reducerCacheStore.set("reducerCache", value),
@@ -111,6 +117,9 @@ contextBridge.exposeInMainWorld("electron", {
       "logs",
       `portingAssistant-assessment-${dateString}.log`
     );
+  },
+  getLogFolder: () => {
+    return path.join(remote.app.getPath("userData"), "logs");
   },
 });
 
