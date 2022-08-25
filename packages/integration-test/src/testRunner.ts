@@ -40,40 +40,13 @@ export class TestRunner {
     });
   };
 
-  emptyEmailCheck = async () => {
-    await (await this.app.client.$("#feedback-btn")).click();
-    await (await this.app.client.$("#email-btn")).click();
-    await (
-      await this.app.client.$("span=Invalid e-mail format.")
-    ).waitForExist({
-      timeout: 1000,
-    });
-    await this.app.client.keys(["Escape"]);
-  };
-
-  invalidEmailCheck = async () => {
-    await (await this.app.client.$("#feedback-btn")).click();
-    await (await this.app.client.$("#email-input input")).setValue("integration.test.com");
-    await (await this.app.client.$("#email-btn")).click();
-    await (
-      await this.app.client.$("span=Invalid e-mail format.")
-    ).waitForExist({
-      timeout: 1000,
-    });
-    await this.app.client.keys(["Escape"]);
-  };
-
-  setupEmail = async () => {
-    await (await this.app.client.$("#email-input input")).setValue("integration@test.com");
-    await (await this.app.client.$("#email-btn")).click();
-  };
-
   sendFeedbackCheck = async () => {
     await (await this.app.client.$("#feedback-btn")).click();
-    await this.setupEmail();
     await (await this.app.client.$("#fb-category-selection")).click();
     await (await this.app.client.$('[data-testid="general"]')).click();
-    await (await this.app.client.$("#fb-text input")).setValue("integration-test-feedback");
+    await (
+      await this.app.client.$("#fb-text input")
+    ).setValue("integration-test-feedback");
     await (await this.app.client.$("#send-feedback-btn")).click();
     console.log("Sent customer feedback success");
   };
@@ -86,13 +59,19 @@ export class TestRunner {
 
   sendRuleContributionCheck = async () => {
     await this.nugetPackageTabCheck();
-    await (await this.app.client.$(".awsui_input_2rhyz_fxf4s_7")).setValue("jQuery.vsdoc");
+    await (
+      await this.app.client.$(".awsui_input_2rhyz_fxf4s_7")
+    ).setValue("jQuery.vsdoc");
     await (await this.app.client.$(".awsui_input_1mabk_1s4v0_34")).click();
     await (await this.app.client.$("#rule-contribution-btn")).click();
     await (await this.app.client.$("span=Suggestion form")).waitForDisplayed();
-    await (await this.app.client.$("#rc-package-name input")).setValue("Azure.ImageOptimizer");
+    await (
+      await this.app.client.$("#rc-package-name input")
+    ).setValue("Azure.ImageOptimizer");
     await (await this.app.client.$("#rc-version-check-box")).click();
-    await (await this.app.client.$("#rc-comment input")).setValue("integration-test-rule-contribution");
+    await (
+      await this.app.client.$("#rc-comment input")
+    ).setValue("integration-test-rule-contribution");
     await (await this.app.client.$("#rc-send-btn")).click();
     console.log("Sent rule contribution success");
   };
@@ -105,13 +84,13 @@ export class TestRunner {
     sendRuleContribution: boolean,
     sortingCheckRequest?: SortingCheckRequest
   ) => {
-    const solutionNameTagId = `#solution-link-${this.escapeNonAlphaNumeric(solutionPath)}`;
+    const solutionNameTagId = `#solution-link-${this.escapeNonAlphaNumeric(
+      solutionPath
+    )}`;
     console.log(`assessing solution ${solutionNameTagId}....`);
     await this.assessSolutionCheck(solutionNameTagId, solutionPath);
     console.log(`assess solution ${solutionNameTagId} success`);
     if (sendFeedback) {
-      await this.invalidEmailCheck();
-      await this.emptyEmailCheck();
       await this.sendFeedbackCheck();
       await this.emptyFeedbackCheck();
     }
@@ -119,7 +98,10 @@ export class TestRunner {
       await this.sendRuleContributionCheck();
     }
     console.log(`reassessing solution ${solutionNameTagId}....`);
-    const assessmentResults = await this.reassessSolutionCheck(solutionNameTagId, solutionPath);
+    const assessmentResults = await this.reassessSolutionCheck(
+      solutionNameTagId,
+      solutionPath
+    );
     console.log(`reassess solution ${solutionNameTagId} success`);
     console.log(`checking tabs in solution ${solutionNameTagId}`);
     const numSourceFiles = await this.solutionTabCheck(sortingCheckRequest);
@@ -147,11 +129,15 @@ export class TestRunner {
       ).waitForExist({
         reverse: true,
         timeout: 1000000,
-        timeoutMsg: "porting and reassessment timeout"
+        timeoutMsg: "porting and reassessment timeout",
       });
       await (await this.app.client.$(solutionNameTagId)).click();
     }
-    await this.checkPortingProjectResults(solutionNameTagId, projects[0], targetFramework);
+    await this.checkPortingProjectResults(
+      solutionNameTagId,
+      projects[0],
+      targetFramework
+    );
     return assessmentResults;
   };
 
