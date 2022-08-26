@@ -1,6 +1,6 @@
-import { useCollection } from "@awsui/collection-hooks";
-import { Box, Pagination, Table, TableProps, TextFilter } from "@awsui/components-react";
-import StatusIndicator from "@awsui/components-react/status-indicator/internal";
+import { useCollection } from "@cloudscape-design/collection-hooks";
+import { Box, Pagination, Table, TableProps, TextFilter } from "@cloudscape-design/components";
+import StatusIndicator from "@cloudscape-design/components/status-indicator";
 import React, { useMemo, useState } from "react";
 import { useLocation } from "react-router";
 
@@ -186,7 +186,6 @@ const ApiTableInternal: React.FC = () => {
 };
 
 const PAGE_SIZE = 10;
-
 
 const empty = (
   <Box textAlign="center">

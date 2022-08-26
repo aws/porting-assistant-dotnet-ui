@@ -1,4 +1,4 @@
-import { Alert, Box, Icon, SpaceBetween } from "@awsui/components-react";
+import { Alert, Box, Icon, SpaceBetween } from "@cloudscape-design/components";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router";

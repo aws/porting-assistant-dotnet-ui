@@ -1,4 +1,4 @@
-import { BreadcrumbGroup, BreadcrumbGroupProps } from "@awsui/components-react";
+import { BreadcrumbGroup, BreadcrumbGroupProps } from "@cloudscape-design/components";
 import React from "react";
 import { useHistory } from "react-router";
 

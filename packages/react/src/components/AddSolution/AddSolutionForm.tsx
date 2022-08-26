@@ -1,4 +1,13 @@
-import { Box, Button, ColumnLayout, Container, Form, Header, SpaceBetween, Spinner } from "@awsui/components-react";
+import {
+  Box,
+  Button,
+  ColumnLayout,
+  Container,
+  Form,
+  Header,
+  SpaceBetween,
+  Spinner
+} from "@cloudscape-design/components";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -24,28 +33,28 @@ const ImportSolutionInternal: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit(async data => {
-          await addSolution(data);
-          const targetFramework = getTargetFramework();
-          const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
-          if (haveInternet) {
-            dispatch(
-              analyzeSolution.request({
-                solutionPath: data.solutionFilename,
-                runId: uuid(),
-                triggerType: "InitialRequest",
-                settings: {
-                  ignoredProjects: [],
-                  targetFramework: targetFramework,
-                  continiousEnabled: false,
-                  actionsOnly: false,
-                  compatibleOnly: false
-                },
-                preTriggerData:[],
-                force: true
-              })
-            );
-            history.push("/solutions");
-          }
+        await addSolution(data);
+        const targetFramework = getTargetFramework();
+        const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
+        if (haveInternet) {
+          dispatch(
+            analyzeSolution.request({
+              solutionPath: data.solutionFilename,
+              runId: uuid(),
+              triggerType: "InitialRequest",
+              settings: {
+                ignoredProjects: [],
+                targetFramework: targetFramework,
+                continiousEnabled: false,
+                actionsOnly: false,
+                compatibleOnly: false
+              },
+              preTriggerData: [],
+              force: true
+            })
+          );
+          history.push("/solutions");
+        }
       })}
     >
       <Form

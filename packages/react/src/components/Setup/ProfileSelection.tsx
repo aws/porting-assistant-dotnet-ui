@@ -13,7 +13,7 @@ import {
   SelectProps,
   Spinner,
   Tiles
-} from "@awsui/components-react";
+} from "@cloudscape-design/components";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";

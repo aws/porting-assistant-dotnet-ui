@@ -1,4 +1,4 @@
-import { Box, Button, Container, Header, SpaceBetween } from "@awsui/components-react";
+import { Box, Button, Container, Header, SpaceBetween } from "@cloudscape-design/components";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useHistory, useLocation } from "react-router";
 import { Network } from "vis-network/standalone";

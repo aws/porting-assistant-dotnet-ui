@@ -1,4 +1,4 @@
-import { Alert, Box } from "@awsui/components-react";
+import { Alert, Box } from "@cloudscape-design/components";
 import React from "react";
 
 import { RecommendedAction } from "../../models/project";

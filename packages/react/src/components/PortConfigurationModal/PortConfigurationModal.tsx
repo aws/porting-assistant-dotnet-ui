@@ -1,4 +1,4 @@
-import { Box, Button, Modal, Spinner } from "@awsui/components-react";
+import { Box, Button, Modal, Spinner } from "@cloudscape-design/components";
 import React, { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -31,7 +31,7 @@ const PortConfigurationModalInternal: React.FC<Props> = ({ solution, visible, on
       switch (portingLocation.type) {
         case "copy":
           try {
-              await window.porting.copyDirectory(solution.solutionFilePath, portingLocation.workingDirectory);
+            await window.porting.copyDirectory(solution.solutionFilePath, portingLocation.workingDirectory);
           } catch (err) {
             setError("path", "error", `Unable to copy solution to directory. Error: ${err}`);
             return false;

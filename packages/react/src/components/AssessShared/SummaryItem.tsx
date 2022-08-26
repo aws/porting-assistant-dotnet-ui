@@ -1,4 +1,4 @@
-import { Box } from "@awsui/components-react";
+import { Box } from "@cloudscape-design/components";
 import React, { ReactNode } from "react";
 
 interface Props {

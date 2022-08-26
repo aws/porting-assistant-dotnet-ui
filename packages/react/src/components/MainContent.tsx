@@ -8,7 +8,7 @@ import {
   Icon,
   Link as LinkComponent,
   SpaceBetween
-} from "@awsui/components-react";
+} from "@cloudscape-design/components";
 import React from "react";
 import { Link } from "react-router-dom";
 

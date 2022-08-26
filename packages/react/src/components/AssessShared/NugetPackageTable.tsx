@@ -1,6 +1,6 @@
-import { useCollection } from "@awsui/collection-hooks";
-import { Box, Button, Pagination, Table, TableProps, TextFilter } from "@awsui/components-react";
-import StatusIndicator from "@awsui/components-react/status-indicator/internal";
+import { useCollection } from "@cloudscape-design/collection-hooks";
+import { Box, Button, Pagination, Table, TableProps, TextFilter } from "@cloudscape-design/components";
+import StatusIndicator from "@cloudscape-design/components/status-indicator";
 import { MemoryHistory } from "history";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
@@ -118,35 +118,37 @@ const NugetPackageTableInternal: React.FC = () => {
     {
       id: "source-files",
       header: "Source Files",
-      cell: item => 
-      <LinkComponent 
-      location = {{
-        pathName: location.pathname ,
-        state: {
-          activeFilter: "\"" + item.sourceFilesList.join("\";\"") + "\"",
-          activeTabId: "source-files",
-      }
-    }}>
-    <div id={`apis-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.sourceFiles}
-    </div>
-    </LinkComponent>,
-    sortingField: "sourceFiles"
+      cell: item => (
+        <LinkComponent
+          location={{
+            pathName: location.pathname,
+            state: {
+              activeFilter: '"' + item.sourceFilesList.join('";"') + '"',
+              activeTabId: "source-files"
+            }
+          }}
+        >
+          <div id={`apis-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.sourceFiles}</div>
+        </LinkComponent>
+      ),
+      sortingField: "sourceFiles"
     },
     {
       id: "apis",
       header: "APIs",
-      cell: item => 
-      <LinkComponent 
-      location = {{
-        pathName: location.pathname ,
-        state: {
-          activeFilter: "\"" + Array.from(item.apiSet).join("\";\"") + "\"",
-          activeTabId: "apis",
-      }
-    }}>
-    <div id={`apis-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.apis}
-    </div>
-    </LinkComponent>,
+      cell: item => (
+        <LinkComponent
+          location={{
+            pathName: location.pathname,
+            state: {
+              activeFilter: '"' + Array.from(item.apiSet).join('";"') + '"',
+              activeTabId: "apis"
+            }
+          }}
+        >
+          <div id={`apis-${escapeNonAlphaNumeric(item.packageId || "")}`}>{item.apis}</div>
+        </LinkComponent>
+      ),
       sortingField: "apis"
     },
     {
@@ -179,7 +181,7 @@ const NugetPackageTableInternal: React.FC = () => {
       sortingField: "replacement"
     }
   ];
-  
+
   const columnDefinitionWithProject = columnDefinitions.filter(
     definition => definition.id !== "projects" || !isSingleProject
   );
@@ -197,7 +199,7 @@ const NugetPackageTableInternal: React.FC = () => {
 
   const ruleContributeButton = (
     <Button
-      id='rule-contribution-btn'
+      id="rule-contribution-btn"
       disabled={!canSuggestRule()}
       //disabled={false}
       variant="normal"
@@ -288,7 +290,6 @@ const NugetPackageTableInternal: React.FC = () => {
     ></Table>
   );
 };
-
 
 const empty = (
   <Box textAlign="center">

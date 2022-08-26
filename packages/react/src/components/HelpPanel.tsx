@@ -1,4 +1,4 @@
-import { Box, HelpPanel as HelpPanelComponent, Icon, Link } from "@awsui/components-react";
+import { Box, HelpPanel as HelpPanelComponent, Icon, Link } from "@cloudscape-design/components";
 import React from "react";
 import { useSelector } from "react-redux";
 

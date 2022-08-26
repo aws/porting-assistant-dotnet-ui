@@ -1,4 +1,4 @@
-import { Box } from "@awsui/components-react";
+import { Box } from "@cloudscape-design/components";
 import React, { useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";

@@ -1,4 +1,4 @@
-import { Flashbar } from "@awsui/components-react";
+import { Flashbar } from "@cloudscape-design/components";
 import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useLocation } from "react-router";

@@ -1,4 +1,4 @@
-import { useCollection } from "@awsui/collection-hooks";
+import { useCollection } from "@cloudscape-design/collection-hooks";
 import {
   Box,
   Container,
@@ -12,7 +12,7 @@ import {
   Table,
   TableProps,
   TextFilter
-} from "@awsui/components-react";
+} from "@cloudscape-design/components";
 import React, { useEffect, useMemo, useState } from "react";
 import { FormContextValues } from "react-hook-form";
 import { useLocation } from "react-router";

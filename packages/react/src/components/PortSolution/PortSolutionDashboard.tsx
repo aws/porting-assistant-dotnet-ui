@@ -1,4 +1,4 @@
-import { Box, Button, Form, Header, SpaceBetween } from "@awsui/components-react";
+import { Box, Button, Form, Header, SpaceBetween } from "@cloudscape-design/components";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -33,30 +33,31 @@ const PortSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) 
   const location = useLocation();
   const portingLocation = usePortingAssistantSelector(state => selectPortingLocation(state, location.pathname));
   const targetFramework = window.electron.getState("targetFramework");
-  const projectsTable= usePortingAssistantSelector(state => selectProjectTableData(state, location.pathname));
-  
+  const projectsTable = usePortingAssistantSelector(state => selectProjectTableData(state, location.pathname));
+
   let preTriggerData: PreTriggerData[] = [];
-  const apiAnalysis = useSelector(selectApiAnalysis); 
+  const apiAnalysis = useSelector(selectApiAnalysis);
   const projectToApiAnalysis = apiAnalysis[solution.solutionFilePath];
   preTriggerData = projectsTable.map<PreTriggerData>(project => {
-      var projectApiAnalysisResult = projectToApiAnalysis[project.projectPath];
-      var sourceFileAnalysisResults = (isLoaded(projectApiAnalysisResult))?
-                 projectApiAnalysisResult.data.sourceFileAnalysisResults: null;
-      return {
-        projectName: project.projectName || "-",
-        projectPath: project.projectPath || "-",
-        solutionPath: solution.solutionFilePath || "-",
-        targetFramework: project.targetFramework || "-",
-        incompatibleApis: project.incompatibleApis,
-        totalApis: project.totalApis,
-        buildErrors: project.buildErrors,
-        ported: project.ported,
-        sourceFileAnalysisResults: sourceFileAnalysisResults
-      };
+    var projectApiAnalysisResult = projectToApiAnalysis[project.projectPath];
+    var sourceFileAnalysisResults = isLoaded(projectApiAnalysisResult)
+      ? projectApiAnalysisResult.data.sourceFileAnalysisResults
+      : null;
+    return {
+      projectName: project.projectName || "-",
+      projectPath: project.projectPath || "-",
+      solutionPath: solution.solutionFilePath || "-",
+      targetFramework: project.targetFramework || "-",
+      incompatibleApis: project.incompatibleApis,
+      totalApis: project.totalApis,
+      buildErrors: project.buildErrors,
+      ported: project.ported,
+      sourceFileAnalysisResults: sourceFileAnalysisResults
+    };
   });
   var hasWebForms = false;
 
-  for(var project of projects) {
+  for (var project of projects) {
     if (project.featureType === "WebForms") {
       hasWebForms = true;
       break;
@@ -76,7 +77,15 @@ const PortSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) 
           setError("targetFramework", { type: "required", message: "Target Framework is required." });
           return;
         }
-        handlePortProjectSubmission(data, solution, projects, targetFramework.id, portingLocation, preTriggerData, dispatch);
+        handlePortProjectSubmission(
+          data,
+          solution,
+          projects,
+          targetFramework.id,
+          portingLocation,
+          preTriggerData,
+          dispatch
+        );
         history.push("/solutions");
       })}
     >

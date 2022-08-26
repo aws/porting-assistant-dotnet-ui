@@ -1,4 +1,4 @@
-import { Box, Button, Form, Header, SpaceBetween } from "@awsui/components-react";
+import { Box, Button, Form, Header, SpaceBetween } from "@cloudscape-design/components";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -26,7 +26,7 @@ const PortProjectDashboardInternal: React.FC<Props> = ({ solution, project, port
   const dispatch = useDispatch();
   const targetFramework = window.electron.getState("targetFramework");
 
-  const hasWebForms = (project.featureType == "WebForms");
+  const hasWebForms = project.featureType == "WebForms";
 
   useWebFormsFlashbarMessage(hasWebForms);
 

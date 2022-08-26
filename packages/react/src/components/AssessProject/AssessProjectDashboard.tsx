@@ -1,5 +1,5 @@
-import { Box, Button, Header, SpaceBetween, Tabs, TabsProps } from "@awsui/components-react";
-import { NonCancelableCustomEvent } from "@awsui/components-react/internal/events";
+import { Box, Button, Header, SpaceBetween, Tabs, TabsProps } from "@cloudscape-design/components";
+import { NonCancelableCustomEvent } from "@cloudscape-design/components/internal/events";
 import React, { useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Redirect, useHistory, useLocation } from "react-router";

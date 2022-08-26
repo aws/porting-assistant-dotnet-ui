@@ -1,4 +1,4 @@
-import { Container, Header, Table, TableProps } from "@awsui/components-react";
+import { Container, Header, Table, TableProps } from "@cloudscape-design/components";
 import React from "react";
 
 import { Project } from "../../models/project";

@@ -1,4 +1,4 @@
-import { Box, Button, FormField, Input, Modal, SpaceBetween } from "@awsui/components-react";
+import { Box, Button, FormField, Input, Modal, SpaceBetween } from "@cloudscape-design/components";
 import React from "react";
 
 interface Props {
@@ -70,21 +70,19 @@ export const EnterEmailModal: React.FC<Props> = React.memo(({ visible, onCancel,
       <SpaceBetween direction="vertical" size="m">
         <Box>We require your e-mail to use this feature. Please enter your e-mail below.</Box>
         <FormField
-          id = "email-form"
+          id="email-form"
           label="E-mail"
           description="We use this to contact you regarding any feedback or contributions to Porting Assistant."
           errorText={emailError}
         >
           <Input
-            id = "email-input"
+            id="email-input"
             onChange={({ detail }) => setEmailValue(detail.value)}
             value={emailValue}
             placeholder="example@amazon.com"
           />
         </FormField>
-        <Box>
-          This action saves your e-mail locally on your machine.
-        </Box>
+        <Box>This action saves your e-mail locally on your machine.</Box>
       </SpaceBetween>
     </Modal>
   );

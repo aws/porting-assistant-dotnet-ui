@@ -1,4 +1,4 @@
-import { Button } from "@awsui/components-react";
+import { Button } from "@cloudscape-design/components";
 import classNames from "classnames";
 import { MemoryHistory } from "history";
 import React, { useEffect, useState } from "react";

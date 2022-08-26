@@ -1,4 +1,4 @@
-import { AppLayout, AppLayoutProps } from "@awsui/components-react";
+import { AppLayout, AppLayoutProps } from "@cloudscape-design/components";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 

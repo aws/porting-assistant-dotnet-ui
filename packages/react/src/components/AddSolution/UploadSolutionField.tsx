@@ -1,4 +1,4 @@
-import { Button, FormField } from "@awsui/components-react";
+import { Button, FormField } from "@cloudscape-design/components";
 import React, { useCallback } from "react";
 
 import { logError } from "../../utils/LogError";

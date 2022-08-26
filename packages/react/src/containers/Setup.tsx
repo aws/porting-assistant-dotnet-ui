@@ -1,4 +1,4 @@
-import { Alert, Box, Icon, SpaceBetween } from "@awsui/components-react";
+import { Alert, Box, Icon, SpaceBetween } from "@cloudscape-design/components";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
@@ -41,12 +41,11 @@ const SetupInternal: React.FC = () => {
   return (
     <PortingAssistantAppLayout
       content={
-          <ProfileSelection
+        <ProfileSelection
           title="Set up Porting Assistant for .NET"
           buttonText="Next"
           next={() => history.push("/add-solution")}
         />
-
       }
       navigationHide={!profileSet}
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumb} />}

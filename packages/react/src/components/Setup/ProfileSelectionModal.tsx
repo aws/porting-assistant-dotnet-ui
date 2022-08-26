@@ -1,4 +1,4 @@
-import { Box, Button, ColumnLayout, FormField, Input, Link, Modal, Textarea } from "@awsui/components-react";
+import { Box, Button, ColumnLayout, FormField, Input, Link, Modal, Textarea } from "@cloudscape-design/components";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
 
