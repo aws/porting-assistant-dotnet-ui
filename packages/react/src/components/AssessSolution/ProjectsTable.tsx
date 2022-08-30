@@ -9,7 +9,7 @@ import {
   TableProps,
   TextFilter
 } from "@cloudscape-design/components";
-import StatusIndicator from "@cloudscape-design/components/status-indicator/internal";
+import StatusIndicator from "@cloudscape-design/components/status-indicator";
 import React, { useMemo, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 
