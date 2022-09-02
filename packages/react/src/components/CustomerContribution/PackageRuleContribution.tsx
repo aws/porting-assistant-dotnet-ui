@@ -10,8 +10,8 @@ import {
   Input,
   Multiselect,
   SpaceBetween
-} from "@cloudscape-design/components";
-import { OptionDefinition } from "@cloudscape-design/components/internal/components/option/interfaces";
+} from "@awsui/components-react";
+import { OptionDefinition } from "@awsui/components-react/internal/components/option/interfaces";
 import { MemoryHistory } from "history";
 import path from "path";
 import React, { useCallback, useState } from "react";

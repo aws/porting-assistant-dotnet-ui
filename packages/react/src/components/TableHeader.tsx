@@ -1,4 +1,4 @@
-import { Header } from "@cloudscape-design/components";
+import { Header } from "@awsui/components-react";
 import React, { ReactNode } from "react";
 
 interface Props {

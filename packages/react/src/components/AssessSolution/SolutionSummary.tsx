@@ -1,4 +1,4 @@
-import { Box, ColumnLayout, Container, Header, SpaceBetween, Spinner } from "@cloudscape-design/components";
+import { Box, ColumnLayout, Container, Header, SpaceBetween, Spinner } from "@awsui/components-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router";

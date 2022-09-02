@@ -1,4 +1,4 @@
-import { Box, ColumnLayout, Container, Header, SpaceBetween, StatusIndicator } from "@cloudscape-design/components";
+import { Box, ColumnLayout, Container, Header, SpaceBetween, StatusIndicator } from "@awsui/components-react";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router";

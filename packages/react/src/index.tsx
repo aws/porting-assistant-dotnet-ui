@@ -1,7 +1,7 @@
 import "./bootstrapElectron";
 import "ace-builds";
 import "ace-builds/webpack-resolver";
-import "@cloudscape-design/global-styles/index.css";
+import "@awsui/global-styles/index.css";
 
 import React from "react";
 import ReactDOM from "react-dom";

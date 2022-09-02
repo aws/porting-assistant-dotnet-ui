@@ -1,4 +1,4 @@
-import { Box, Spinner } from "@cloudscape-design/components";
+import { Box, Spinner } from "@awsui/components-react";
 import classnames from "classnames";
 import React, { ReactNode } from "react";
 

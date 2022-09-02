@@ -6,8 +6,8 @@ import {
   Header,
   Link as LinkComponent,
   SpaceBetween
-} from "@cloudscape-design/components";
-import StatusIndicator from "@cloudscape-design/components/status-indicator";
+} from "@awsui/components-react";
+import StatusIndicator from "@awsui/components-react/status-indicator/internal";
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 

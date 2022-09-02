@@ -1,4 +1,4 @@
-import { FlashbarProps } from "@cloudscape-design/components";
+import { FlashbarProps } from "@awsui/components-react";
 
 export interface Message extends FlashbarProps.MessageDefinition {
   messageId: string;

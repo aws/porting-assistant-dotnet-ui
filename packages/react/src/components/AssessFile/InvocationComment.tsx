@@ -1,4 +1,4 @@
-import { Alert, Box, SpaceBetween } from "@cloudscape-design/components";
+import { Alert, Box, SpaceBetween } from "@awsui/components-react";
 import React from "react";
 
 import { CodeEntityDetails, Recommendations } from "../../models/project";

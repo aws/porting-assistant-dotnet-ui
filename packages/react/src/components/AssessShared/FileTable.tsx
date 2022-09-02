@@ -1,5 +1,5 @@
-import { useCollection } from "@cloudscape-design/collection-hooks";
-import { Box, Button, Pagination, SpaceBetween, Table, TableProps, TextFilter } from "@cloudscape-design/components";
+import { useCollection } from "@awsui/collection-hooks";
+import { Box, Button, Pagination, SpaceBetween, Table, TableProps, TextFilter } from "@awsui/components-react";
 import React, { useMemo, useState } from "react";
 import { useHistory, useLocation } from "react-router";
 

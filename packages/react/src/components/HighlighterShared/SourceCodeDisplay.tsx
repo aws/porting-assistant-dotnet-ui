@@ -1,6 +1,6 @@
 import "./CodeTheme.scss";
 
-import { Box, ColumnLayout, Container, Header, Spinner } from "@cloudscape-design/components";
+import { Box, ColumnLayout, Container, Header, Spinner } from "@awsui/components-react";
 import classNames from "classnames";
 import React, { ReactNode, useMemo, useState } from "react";
 

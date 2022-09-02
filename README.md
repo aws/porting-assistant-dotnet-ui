@@ -89,7 +89,7 @@ AWS UI’s source code and documentation has not been opensourced or released ye
 npm install
 ```
 
-1. Go into `packages/react/node_modules/@cloudscape-design/components-react/` to check the list of components.
+1. Go into `packages/react/node_modules/@awsui/components-react/` to check the list of components.
 2. The typescript typing files will also allow typescript intellisense / plugins to perform auto completion within IDEs.
 
 # Additional Resources

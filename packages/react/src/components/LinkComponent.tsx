@@ -1,4 +1,4 @@
-import { Link, LinkProps } from "@cloudscape-design/components";
+import { Link, LinkProps } from "@awsui/components-react";
 import React from "react";
 import { useHistory } from "react-router-dom";
 

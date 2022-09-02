@@ -1,4 +1,4 @@
-import { SideNavigation, SideNavigationProps } from "@cloudscape-design/components";
+import { SideNavigation, SideNavigationProps } from "@awsui/components-react";
 import React from "react";
 import { useHistory, useLocation } from "react-router";
 

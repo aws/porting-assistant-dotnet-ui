@@ -8,7 +8,7 @@ import {
   Modal,
   SpaceBetween,
   TextContent
-} from "@cloudscape-design/components";
+} from "@awsui/components-react";
 import React from "react";
 
 import { externalUrls } from "../../constants/externalUrls";

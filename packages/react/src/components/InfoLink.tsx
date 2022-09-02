@@ -1,4 +1,4 @@
-import { Link } from "@cloudscape-design/components";
+import { Link } from "@awsui/components-react";
 import React, { ReactNode } from "react";
 import { useDispatch } from "react-redux";
 

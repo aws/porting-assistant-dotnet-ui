@@ -1,4 +1,4 @@
-import { Box, ColumnLayout, Container, FormField, Header } from "@cloudscape-design/components";
+import { Box, ColumnLayout, Container, FormField, Header } from "@awsui/components-react";
 import React from "react";
 
 import { PortingLocation } from "../../models/porting";

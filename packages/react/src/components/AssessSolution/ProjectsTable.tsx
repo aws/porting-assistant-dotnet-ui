@@ -1,15 +1,6 @@
-import { useCollection } from "@cloudscape-design/collection-hooks";
-import {
-  Box,
-  Button,
-  Pagination,
-  SpaceBetween,
-  Spinner,
-  Table,
-  TableProps,
-  TextFilter
-} from "@cloudscape-design/components";
-import StatusIndicator from "@cloudscape-design/components/status-indicator";
+import { useCollection } from "@awsui/collection-hooks";
+import { Box, Button, Pagination, SpaceBetween, Spinner, Table, TableProps, TextFilter } from "@awsui/components-react";
+import StatusIndicator from "@awsui/components-react/status-indicator/internal";
 import React, { useMemo, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 
