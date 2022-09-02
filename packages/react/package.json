@@ -25,7 +25,8 @@
     "test:debug": "react-scripts --inspect-brk test --runInBand --no-cache",
     "license-checker": "npx license-checker --production --exclude MIT,Apache-2.0,Unlicense,BSD-2-Clause,BSD-3-Clause",
     "generate-attribution": "npx generate-attribution",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "preinstall": "npm install --package-lock-only --ignore-scripts && npx npm-force-resolutions"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.10",
@@ -62,10 +63,10 @@
     "axios-retry": "^3.1.2",
     "classnames": "^2.2.6",
     "compare-versions": "^3.6.0",
-    "csv-stringify": "^5.5.0",
+    "csv-stringify": "^6.0.0",
     "electron": "^20.0.0",
     "immer": "^9.0.1",
-    "path": "^0.12.7",
+    "path-browserify": "^1.0.1",
     "re-reselect": "^3.4.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
@@ -113,5 +114,9 @@
       "npm run test:staged",
       "prettier --write"
     ]
+  },
+  "resolutions": {
+    "@types/react": "17.0.14",
+    "@types/react-dom": "17.0.14"
   }
 }
