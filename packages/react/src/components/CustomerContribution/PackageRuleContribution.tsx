@@ -13,7 +13,6 @@ import {
 } from "@awsui/components-react";
 import { OptionDefinition } from "@awsui/components-react/internal/components/option/interfaces";
 import { MemoryHistory } from "history";
-import path from "path";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router";
@@ -51,7 +50,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const cachedTargetFramework = window.electron.getState("targetFramework");
   const history = useHistory() as MemoryHistory;
   const location = useLocation<HistoryState>();
-  const nextPagePath = path.dirname(location.pathname);
+  const nextPagePath = window.electron.getDirectory(location.pathname);
   const dispatch = useDispatch();
 
   const [packageName, setPackageName] = useState("");
