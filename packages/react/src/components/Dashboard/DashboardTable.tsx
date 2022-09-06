@@ -10,7 +10,7 @@ import {
   TableProps,
   TextFilter
 } from "@awsui/components-react";
-import StatusIndicator from "@awsui/components-react/status-indicator/internal";
+import StatusIndicator from "@awsui/components-react/status-indicator";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
