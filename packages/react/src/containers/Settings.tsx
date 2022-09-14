@@ -11,19 +11,21 @@ const SettingsInternal: React.FC = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(
-      setInfo({
-        heading: "Settings for Porting Assistant for .NET",
-        mainContent: (
-          <Box variant="p">
-            You can change your AWS CLI profile information or your permission to send metrics. Porting Assistant for
-            .NET collects metrics to improve your experience. These metrics also help flag issues with the software for
-            AWS to quickly address.
-          </Box>
-        ),
-        learnMoreLinks: []
-      })
-    );
+    if (window.electron.getState("profile")) {
+      dispatch(
+        setInfo({
+          heading: "Settings for Porting Assistant for .NET",
+          mainContent: (
+            <Box variant="p">
+              You can change your AWS CLI profile information or your permission to send metrics. Porting Assistant for
+              .NET collects metrics to improve your experience. These metrics also help flag issues with the software
+              for AWS to quickly address.
+            </Box>
+          ),
+          learnMoreLinks: []
+        })
+      );
+    }
   }, [dispatch]);
 
   return (

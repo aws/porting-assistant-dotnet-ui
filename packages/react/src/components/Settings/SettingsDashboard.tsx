@@ -1,13 +1,4 @@
-import {
-  Box,
-  Button,
-  ColumnLayout,
-  Container,
-  Header,
-  Link as LinkComponent,
-  SpaceBetween
-} from "@awsui/components-react";
-import StatusIndicator from "@awsui/components-react/status-indicator";
+import { Box, Button, ColumnLayout, Container, Header, SpaceBetween } from "@awsui/components-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -52,19 +43,27 @@ const SettingsDashboardInternal: React.FC = () => {
           <InfoLink
             heading="Set up Porting Assistant for .NET"
             mainContent={
-              <p>
-                You can change your AWS CLI profile information so that Porting Assistant for .NET can collect metrics
-                to improve your experience. These metrics also help flag issues with the software for AWS to quickly
-                address. If you have not set up your AWS profile, see Learn More below.
-              </p>
+              window.electron.getState("profile") ? (
+                <p>
+                  You can change your AWS CLI profile information so that Porting Assistant for .NET can collect metrics
+                  to improve your experience. These metrics also help flag issues with the software for AWS to quickly
+                  address. If you have not set up your AWS profile, see Learn More below.
+                </p>
+              ) : (
+                ""
+              )
             }
-            learnMoreLinks={[
-              {
-                text: "Configuring the AWS CLI",
-                externalUrl:
-                  "https://docs.aws.amazon.com/portingassistant/latest/userguide/porting-assistant-prerequisites.html#porting-assistant-iam-profile"
-              }
-            ]}
+            learnMoreLinks={
+              window.electron.getState("profile")
+                ? [
+                    {
+                      text: "Configuring the AWS CLI",
+                      externalUrl:
+                        "https://docs.aws.amazon.com/portingassistant/latest/userguide/porting-assistant-prerequisites.html#porting-assistant-iam-profile"
+                    }
+                  ]
+                : []
+            }
           />
         }
         actions={

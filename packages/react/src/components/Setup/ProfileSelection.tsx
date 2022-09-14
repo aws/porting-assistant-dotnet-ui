@@ -7,14 +7,12 @@ import {
   Form,
   FormField,
   Header,
-  Icon,
   Link,
   Select,
   SelectProps,
-  Spinner,
-  Tiles
+  Spinner
 } from "@awsui/components-react";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
@@ -36,6 +34,7 @@ type FormData = {
   share: boolean;
   email: string;
   useDefaultCreds: boolean;
+  removeProfile: boolean;
 };
 
 const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) => {
@@ -80,6 +79,10 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
     return e.detail.checked;
   }, []);
 
+  const onRemoveProfile = useCallback(([e]) => {
+    return e.detail.checked;
+  }, []);
+
   return (
     <div>
       <form
@@ -89,7 +92,12 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
             return;
           }
           window.electron.saveState("lastConfirmVersion", "1.3.0");
-          window.electron.saveState("share", data.share ?? false);
+          if (data.removeProfile) {
+            window.electron.saveState("profile", "");
+            window.electron.saveState("share", false);
+          } else {
+            window.electron.saveState("share", data.share ?? false);
+          }
           window.electron.saveState("targetFramework", {
             id: data.targetFrameworkSelection.value,
             label: data.targetFrameworkSelection.label
@@ -108,20 +116,28 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                 <InfoLink
                   heading={title}
                   mainContent={
-                    <p>
-                      When you start the assessment tool for the first time, you are prompted to enter your AWS CLI
-                      profile information so that Porting Assistant for .NET can collect metrics to improve your
-                      experience. These metrics also help flag issues with the software for AWS to quickly address. If
-                      you have not set up your AWS CLI profile, see Configuring the AWS CLI below.
-                    </p>
+                    currentProfile ? (
+                      <p>
+                        When you start the assessment tool for the first time, you are prompted to enter your AWS CLI
+                        profile information so that Porting Assistant for .NET can collect metrics to improve your
+                        experience. These metrics also help flag issues with the software for AWS to quickly address. If
+                        you have not set up your AWS CLI profile, see Configuring the AWS CLI below.
+                      </p>
+                    ) : (
+                      ""
+                    )
                   }
-                  learnMoreLinks={[
-                    {
-                      text: "Configuring the AWS CLI",
-                      externalUrl:
-                        "https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration"
-                    }
-                  ]}
+                  learnMoreLinks={
+                    currentProfile
+                      ? [
+                          {
+                            text: "Configuring the AWS CLI",
+                            externalUrl:
+                              "https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html#cli-quick-configuration"
+                          }
+                        ]
+                      : []
+                  }
                 />
               }
             >
@@ -170,7 +186,8 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                       When you share your usage data, Porting Assistant for .NET will collect information only about the
                       public NuGet packages, APIs, build errors and stack traces. This information is used to make the
                       Porting Assistant for .NET product better, for example, to improve the package and API replacement
-                      recommendations. Porting Assistant for .NET does not collect any identifying information about you.{" "}
+                      recommendations. Porting Assistant for .NET does not collect any identifying information about
+                      you.{" "}
                       <Link
                         external
                         href="#/"
@@ -179,7 +196,7 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                           event.preventDefault();
                           event.stopPropagation();
                           window.electron.openExternalUrl(externalUrls.howItWorks);
-                        } }
+                        }}
                       >
                         Learn more
                       </Link>
@@ -191,9 +208,22 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                       name="share"
                       control={control}
                       onChange={onCheckbox}
-                      defaultValue={true} />
+                      defaultValue={true}
+                    />
                   </FormField>
-                </div>) : null}
+                  <br></br>
+                  <Box>Current Profile: {currentProfile}</Box>
+                  <FormField>
+                    <Controller
+                      as={removeProfileCheckbox}
+                      name="removeProfile"
+                      control={control}
+                      onChange={onRemoveProfile}
+                      defaultValue={false}
+                    />
+                  </FormField>
+                </div>
+              ) : null}
             </ColumnLayout>
           </Container>
         </Form>
@@ -210,6 +240,12 @@ const shareCheckbox = (
         You can change this setting at any time on the Porting Assistant for .NET Settings page.
       </Box>
     </Box>
+  </Checkbox>
+);
+
+const removeProfileCheckbox = (
+  <Checkbox checked={false}>
+    <Box variant="div">Remove my profile information from Porting Assistant for .NET</Box>
   </Checkbox>
 );
 
