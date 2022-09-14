@@ -7,6 +7,7 @@ import {
   Link as LinkComponent,
   SpaceBetween
 } from "@awsui/components-react";
+import StatusIndicator from "@awsui/components-react/status-indicator";
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -24,7 +25,7 @@ const SettingsDashboardInternal: React.FC = () => {
     (async () => {
       var profile = await window.electron.getState("profile");
       var useDefaultCreds = await window.electron.getState("useDefaultCreds");
-      showShareMetrics.current =  profile !== "" || useDefaultCreds;
+      showShareMetrics.current = profile !== "" || useDefaultCreds;
     })();
   }, [showShareMetrics]);
 

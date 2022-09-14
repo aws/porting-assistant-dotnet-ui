@@ -1,4 +1,4 @@
-import csvStringify from "csv-stringify";
+import { stringify } from "csv-stringify/browser/esm";
 import { buffers, eventChannel } from "redux-saga";
 import { all, call, put, SagaReturnType, select, take, takeEvery } from "redux-saga/effects";
 import { getType } from "typesafe-actions";
@@ -113,7 +113,7 @@ function* handleInit(action: ReturnType<typeof init>) {
             actionsOnly: false,
             compatibleOnly: false
           },
-          preTriggerData:[], // ignore the preTriggerData at initialzation stage
+          preTriggerData: [], // ignore the preTriggerData at initialzation stage
           force: action.payload
         })
       );
@@ -289,7 +289,7 @@ function* handleExportSolution(action: ReturnType<typeof exportSolution>) {
   const exportCsv = async (data: any[]) => {
     if (data.length === 0 || data == null) return Promise.resolve("");
     return new Promise<string>((resolve, reject) =>
-      csvStringify([Object.keys(data[0]), ...data.map(d => Object.values(d))], (err, output) => {
+      stringify([Object.keys(data[0]), ...data.map(d => Object.values(d))], (err, output) => {
         if (err || output == null) {
           reject(err);
         }
@@ -390,4 +390,3 @@ export default function* backendSaga() {
     watchPing()
   ]);
 }
-
