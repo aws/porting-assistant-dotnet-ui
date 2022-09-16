@@ -46,6 +46,7 @@ export interface Electron {
   getAssessmentLog: () => string;
   checkInternetAccess: () => Promise<boolean>;
   cancelAssessment: () => void
+  getLogFolder: () => string;
 }
 
 export interface Backend {
@@ -72,8 +73,6 @@ export interface Backend {
   ) => void;
   checkInternetAccess: () => Promise<boolean>;
   cancelAssessment: () => void;
-  sendCustomerFeedback: (upload: any) => Promise<Response<boolean, string>>;
-  uploadRuleContribution: (upload: any) => Promise<Response<boolean, string>>;
 }
 
 export interface Porting {

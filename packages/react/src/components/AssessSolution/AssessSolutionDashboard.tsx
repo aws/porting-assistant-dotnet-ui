@@ -18,7 +18,6 @@ import { getTargetFramework } from "../../utils/getTargetFramework";
 import { getTotalProjects } from "../../utils/getTotalProjects";
 import { hasNewData, isLoaded, isLoadingWithData, Loadable } from "../../utils/Loadable";
 import { ApiTable } from "../AssessShared/ApiTable";
-import { EnterEmailModal, isEmailSet } from "../AssessShared/EnterEmailModal";
 import { FileTable } from "../AssessShared/FileTable";
 import { NugetPackageTable } from "../AssessShared/NugetPackageTable";
 import { ProjectReferences } from "../AssessShared/ProjectReferences";
@@ -102,22 +101,9 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
 
   return (
     <SpaceBetween size="m">
-      <EnterEmailModal
-        visible={emailModal}
-        onCancel={() => setEmailModalVisible(false)}
-        onSaveExit={() => {
-          setEmailModalVisible(false);
-          setFeedbackModalVisible(true);
-        }}
-      ></EnterEmailModal>
-
       <CustomerFeedbackModal
         visible={feedbackModal}
         setModalVisible={setFeedbackModalVisible}
-        showEmailModal={() => {
-          setFeedbackModalVisible(false);
-          setEmailModalVisible(true);
-        }}
       ></CustomerFeedbackModal>
 
       <Header
@@ -199,15 +185,11 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             </Button>
 
             <Button
-              id = "feedback-btn"
+              id="feedback-btn"
               onClick={() => {
-                if (!isEmailSet()) {
-                  console.log("No Email; Entering Email Modal");
-                  setEmailModalVisible(true);
-                } else {
-                  console.log("Email exists; Entering ");
-                  setFeedbackModalVisible(true);
-                }
+                setFeedbackModalVisible(
+                  true
+                );
               }}
             >
               Send Feedback

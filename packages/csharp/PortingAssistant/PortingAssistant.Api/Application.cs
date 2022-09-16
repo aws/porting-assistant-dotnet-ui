@@ -146,44 +146,6 @@ namespace PortingAssistant.Api
             reuqest => {
               PortingAssistantUtils.CancelAssessment.cancel = true;
             });
-
-            _connection.On<CustomerFeedbackRequest, Response<bool, string>>("sendCustomerFeedback", request =>
-            {
-                try
-                {
-                    string endPoint = _ccconfig.CustomerFeedbackEndpoint;
-                    string uniqueMachineID = LogUploadUtils.getUniqueIdentifier();
-                    string key = $"{uniqueMachineID}/{request.Date}";
-                    request.MachineID = uniqueMachineID;
-                    string serializedContent = JsonConvert.SerializeObject(request);
-                    return CustomerContributionUtils.FeedbackUpload(key, serializedContent, endPoint);
-                }
-                catch (Exception ex)
-                {
-                    return new Response<bool, string>
-                    {
-                        Status = Response<bool, string>.Failed(ex),
-                        ErrorValue = ex.Message
-                    };
-                }
-            });
-
-            _connection.On<RuleContributionRequest, Response<bool, string>>("uploadRuleContribution", request =>
-            {
-                try
-                {
-                    string endPoint = _ccconfig.RuleContributionEndpoint;
-                    return CustomerContributionUtils.RuleContributionUpload(request.KeyName, request.Contents, endPoint);
-                }
-                catch (Exception ex)
-                {
-                    return new Response<bool, string>
-                    {
-                        Status = Response<bool, string>.Failed(ex),
-                        ErrorValue = ex.Message
-                    };
-                }
-            });
         }
 
         public void Start()

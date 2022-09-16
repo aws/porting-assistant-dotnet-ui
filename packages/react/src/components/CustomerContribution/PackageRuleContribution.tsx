@@ -13,18 +13,16 @@ import {
 } from "@awsui/components-react";
 import { OptionDefinition } from "@awsui/components-react/internal/components/option/interfaces";
 import { MemoryHistory } from "history";
-import path from "path";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router";
 import { useHistory } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
-import { EnterEmailModal, isEmailSet } from "../../components/AssessShared/EnterEmailModal";
+import { externalUrls } from "../../constants/externalUrls";
 import { RuleContribSource } from "../../containers/RuleContribution";
 import { HistoryState } from "../../models/locationState";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
-import { uploadRuleContribution } from "../../utils/sendRuleContribution";
 import { validatePackageInput } from "../../utils/validateRuleContrib";
 import { targetFrameworkOptions } from "../Setup/ProfileSelection";
 
@@ -52,11 +50,9 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
   const cachedTargetFramework = window.electron.getState("targetFramework");
   const history = useHistory() as MemoryHistory;
   const location = useLocation<HistoryState>();
-  const nextPagePath = path.dirname(location.pathname);
+  const nextPagePath = window.electron.getDirectory(location.pathname);
   const dispatch = useDispatch();
 
-  const [email, setEmail] = useState(window.electron.getState("email"));
-  const [showEmailModal, setShowEmailModal] = useState(!isEmailSet());
   const [packageName, setPackageName] = useState("");
   const [packageVersion, setPackageVersion] = useState("");
   const [packageError, setPackageError] = useState("");
@@ -83,11 +79,6 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     [dispatch]
   );
 
-  const declineProvideEmail = () => {
-    setShowEmailModal(false);
-    history.goBack();
-  };
-
   const onSubmit = async () => {
     setSubmitLoading(true);
     setPackageError("");
@@ -105,25 +96,11 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
 
     if (await validateInput(submission)) {
       const formattedSubmission = formatPackageContribution(submission);
-      const result = await uploadRuleContribution(email, formattedSubmission, submission.packageNameSource);
-      if (result.status.status === "Success") {
-        setFlashbar({
-          messageId: uuid(),
-          type: "success",
-          content: "Successfully submitted replacement suggestion",
-          dismissible: true
-        });
-        history.push(nextPagePath);
-      } else {
-        window.electron.writeReactErrLog("PackageRuleContribution", "Failed to send rule contribution - PA UI", result.errorValue)
-        setFlashbar({
-          messageId: uuid(),
-          type: "error",
-          content: "Unable to reach the server to submit your suggestion. Please try again.",
-          dismissible: true
-        });
-        setSubmitLoading(false);
-      }
+      var content = JSON.stringify(formattedSubmission, null, 4)
+        .split("\n")
+        .join("%0D%0A");
+      window.location.href = `mailto:${externalUrls.email}?subject=Rule Contribution - Porting Assistant for .NET&body=${content}`;
+      history.push(nextPagePath);
     } else {
       setSubmitLoading(false);
     }
@@ -239,14 +216,14 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
             Cancel
           </Button>
           <Button id="rc-send-btn" loading={submitLoading} variant="primary" onClick={onSubmit}>
-            Submit
+            Send Email
           </Button>
         </SpaceBetween>
       }
     >
       <ColumnLayout columns={4}>
         <FormField
-          id = "rc-package-name"
+          id="rc-package-name"
           label="Package name"
           description="Official name of the replacement package."
           stretch={true}
@@ -271,7 +248,7 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
             placeholder="1.0.0"
           />
           <Checkbox
-            id = "rc-version-check-box"
+            id="rc-version-check-box"
             onChange={({ detail }) => {
               setUseLatestPackageVersion(detail.checked);
               if (detail.checked) {
@@ -297,12 +274,8 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
           />
         </FormField>
         <FormField
-          id = "rc-comment"
-          label={
-            <span>
-              Comments
-            </span>
-          }
+          id="rc-comment"
+          label={<span>Comments</span>}
           description="Please provide a short description."
           stretch={true}
         >
@@ -314,30 +287,14 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
 
   return (
     <SpaceBetween size="l">
-      <EnterEmailModal
-        visible={showEmailModal}
-        onSaveExit={() => {
-          setEmail(window.electron.getState("email"));
-          setShowEmailModal(false);
-        }}
-        onCancel={() => declineProvideEmail()}
-      />
       <Container
         header={
-          <Header 
-            variant="h2" 
-            description="Please confirm that your e-mail and NuGet package details are correct. 
-            To update your e-mail, please click the setting icon on the right corner."
-            actions={
-            <Button iconName="settings" variant="icon" onClick={() => setShowEmailModal(true)} />
-            }
-            >
-            User and NuGet package details
+          <Header variant="h2" description="Please confirm that your NuGet package details are correct. ">
+            NuGet package details
           </Header>
         }
       >
         <ColumnLayout columns={3} variant="text-grid">
-          <ValueWithLabel label="E-mail">{email}</ValueWithLabel>
           <ValueWithLabel label="Selected package name">{source?.packageName}</ValueWithLabel>
           <ValueWithLabel label="Selected package version">{source?.packageVersion}</ValueWithLabel>
         </ColumnLayout>
