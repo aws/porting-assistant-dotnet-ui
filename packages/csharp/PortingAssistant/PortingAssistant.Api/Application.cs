@@ -69,7 +69,7 @@ namespace PortingAssistant.Api
                     _connection.Send("onNugetPackageUpdate", response);
                 });
                 // Set UseGenerator to true once for reduced memory consumption
-                //request.settings.UseGenerator = true;
+                request.settings.UseGenerator = true;
                 return assessmentService.AnalyzeSolution(request).Result;
             });
 
@@ -141,6 +141,11 @@ namespace PortingAssistant.Api
                     };
                     return HttpServiceUtils.CheckInternetAccess(httpService, files);
                 });
+
+            _connection.On<string>("cancelAssessment", 
+            reuqest => {
+              PortingAssistantUtils.CancelAssessment.cancel = true;
+            });
 
             _connection.On<CustomerFeedbackRequest, Response<bool, string>>("sendCustomerFeedback", request =>
             {

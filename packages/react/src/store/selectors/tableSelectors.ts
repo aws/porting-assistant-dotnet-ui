@@ -21,7 +21,7 @@ import { getCompatibleApi, getSelectedInvocations } from "../../utils/getCompati
 import { getCompatibleNugetsAgg, getIncompatibleNugets } from "../../utils/getCompatibleNugets";
 import { getPercent, getPercentNumber } from "../../utils/getPercent";
 import { isPortingCompleted } from "../../utils/isPortingCompleted";
-import { isFailed, isLoaded, isLoading, isReloading, Loadable } from "../../utils/Loadable";
+import { hasNewData, isFailed, isLoaded, isLoading, isReloading, Loadable } from "../../utils/Loadable";
 import { nugetPackageKey } from "../../utils/NugetPackageKey";
 import { RootState } from "../reducers";
 import { selectPortingProjects, selectPortingProjectsInSolution } from "./portingSelectors";
@@ -46,7 +46,7 @@ export const portedProjects = (
     return 0;
   }
   const solutionDetails = solutionToSolutionDetails[item.solutionFilePath];
-  if (!isLoaded(solutionDetails)) {
+  if (!hasNewData(solutionDetails)) {
     return 0;
   }
   return Object.values(solutionDetails.data.projects).filter(p =>
@@ -60,7 +60,7 @@ export const getApiCounts = (
   solutionDetails: Loadable<SolutionDetails>,
   targetFramework: string
 ) => {
-  if (isLoaded(solutionDetails) && solutionDetails.data.projects.length === 0) {
+  if (hasNewData(solutionDetails) && solutionDetails.data.projects.length === 0) {
     return [0, 0];
   }
   const projectToApiAnalysis = solutionToApiAnalysis[solutionPath];
@@ -80,7 +80,7 @@ export const getNugetCounts = (
   packageToPackageAnalysisResult: PackageToPackageAnalysisResult
 ) => {
   const solutionDetails = solutionToSolutionDetails[solutionPath];
-  if (!isLoaded(solutionDetails)) {
+  if (!hasNewData(solutionDetails)) {
     return null;
   }
   const result = getCompatibleNugetsAgg(
@@ -107,7 +107,7 @@ export const getErrorCounts = (
 
   const selectedInvocations = getSelectedInvocations(projectToApiAnalysis, projectPath, sourceFile);
   return Object.values(selectedInvocations).reduce((agg, cur) => {
-    if (!isLoaded(cur)) {
+    if (!hasNewData(cur)) {
       return agg;
     }
     return agg + cur.data.errors.length;
@@ -125,7 +125,7 @@ export const getActionCounts = (
 
   const selectedInvocations = getSelectedInvocations(projectToApiAnalysis, projectPath, sourceFile);
   return Object.values(selectedInvocations).reduce((agg, cur) => {
-    if (!isLoaded(cur)) {
+    if (!hasNewData(cur)) {
       return agg;
     }
     const actions = cur.data.sourceFileAnalysisResults.reduce((agg, cur) => {
@@ -153,7 +153,7 @@ export const selectDashboardTableData = createSelector(
         if (solutionPath == null) {
           return null;
         }
-        if (!isLoaded(solutionDetails) && !isReloading(solutionDetails)) {
+        if (!hasNewData(solutionDetails) && !isReloading(solutionDetails)) {
           if (isFailed(solutionDetails)) {
             return {
               name: path.basename(solutionPath),
@@ -200,7 +200,7 @@ export const selectDashboardTableData = createSelector(
           totalApis: nugetCompatibility == null || apiCompatibility == null ? undefined : apiCompatibility[1],
           buildErrors: buildErrors,
           portingActions: portingActions,
-          failed: false
+          failed: false,
         } as DashboardTableData;
       })
       .filter((r): r is DashboardTableData => r != null);
@@ -224,7 +224,7 @@ export const selectProjectTableData = createCachedSelector(
   selectPortingProjectsInSolution,
   selectTargetFramework,
   (apiAnalysis, nugetPackages, solutionDetails, solutionFilePath, portingProjects, targetFramework) => {
-    if (!isLoaded(solutionDetails)) {
+    if (!hasNewData(solutionDetails)) {
       return [];
     }
     return solutionDetails.data.projects.map<TableData>(project => {
@@ -244,7 +244,7 @@ export const selectProjectTableData = createCachedSelector(
         referencedProjects: project.projectReferences?.length || 0,
         incompatiblePackages: getIncompatibleNugets(nugetPackages, project.packageReferences || []),
         totalPackages: project.packageReferences?.length || 0,
-        incompatibleApis: apis.isApisLoading ? null : apis.values[1] - apis.values[0],
+        incompatibleApis: apis.values[1] - apis.values[0] || null,
         totalApis: apis.values[1],
         buildErrors: getErrorCounts(projectToApiAnalysis, project.projectFilePath, null),
         portingActions: getActionCounts(projectToApiAnalysis, project.projectFilePath, null),
@@ -275,7 +275,7 @@ export const selectApiTableData = createCachedSelector(
   getProjectIfExists,
   selectTargetFramework,
   (currentSolutionApiAnalysis, project, targetFramework) => {
-    if ((project != null && !isLoaded(project)) || currentSolutionApiAnalysis == null) {
+    if ((project != null && !hasNewData(project)) || currentSolutionApiAnalysis == null) {
       return Array<ApiTableData>();
     }
     const apiNameToApiItem: { [api: string]: ApiTableData } = {};
@@ -289,7 +289,7 @@ export const selectApiTableData = createCachedSelector(
       if (isLoading(projectApiAnalysisResult) || isReloading(projectApiAnalysisResult)) {
         isApisLoading = true;
       }
-      if (!isLoaded(projectApiAnalysisResult) || projectApiAnalysisResult.data.sourceFileAnalysisResults == null) {
+      if (!hasNewData(projectApiAnalysisResult) || projectApiAnalysisResult.data.sourceFileAnalysisResults == null) {
         return;
       }
       projectApiAnalysisResult.data.sourceFileAnalysisResults.forEach(sourceFileAnalysisResult => {
@@ -355,8 +355,8 @@ export const selectFileTableData = createCachedSelector(
   selectTargetFramework,
   (nugetPackages, project, solutionDetails, solutionApiAnalysis, solutionProjects, targetFramework) => {
     if (
-      (solutionDetails != null && !isLoaded(solutionDetails)) ||
-      (project != null && !isLoaded(project)) ||
+      (solutionDetails != null && !hasNewData(solutionDetails)) ||
+      (project != null && !hasNewData(project)) ||
       solutionApiAnalysis == null
     ) {
       return Array<SourceFile>();
@@ -368,7 +368,7 @@ export const selectFileTableData = createCachedSelector(
       if (isLoading(cur)) {
         isFilesLoading = true;
       }
-      if (!isLoaded(cur)) {
+      if (!hasNewData(cur)) {
         return agg;
       }
       if (cur.data.sourceFileAnalysisResults == null) {
@@ -385,7 +385,7 @@ export const selectFileTableData = createCachedSelector(
     if (isFilesLoading) {
       return null;
     }
-    if (!isLoaded(solutionProjects)) {
+    if (!hasNewData(solutionProjects)) {
       return null;
     }
     return Object.entries(allSourceFileToInvocations).map(([sourceFile, projectPath]) => {
@@ -417,14 +417,14 @@ export const selectNugetTableData = createCachedSelector(
   getProjectIfExists,
   selectTargetFramework,
   (apiAnalysis, packageToPackageAnalysisResult, projects, project, targetFramework) => {
-    if (!isLoaded(projects) || (project != null && !isLoaded(project))) {
+    if (!hasNewData(projects) || (project != null && !hasNewData(project))) {
       return [];
     }
     const selectedProjects = project != null ? [project.data] : projects.data;
     const fileApiFrequency = selectedProjects
       .flatMap(project => (project.projectFilePath == null ? [] : apiAnalysis[project.projectFilePath]))
       .reduce<{ [packageVersion: string]: { file: number; api: number; sourceFilesList: string[]; apiSet: Set<string> } }>((agg, current) => {
-        if (!isLoaded(current) || current.data.sourceFileAnalysisResults == null) {
+        if (!hasNewData(current) || current.data.sourceFileAnalysisResults == null) {
           return agg;
         }
         current.data.sourceFileAnalysisResults.forEach(sourceFileAnalysisResult => {
@@ -475,7 +475,7 @@ export const selectNugetTableData = createCachedSelector(
           } else {
             const packageAnalysisResult = packageToPackageAnalysisResult[key];
             let replacement = "-";
-            if (isLoaded(packageAnalysisResult)) {
+            if (hasNewData(packageAnalysisResult)) {
               const compatibility = packageAnalysisResult.data.compatibilityResults[targetFramework]?.compatibility;
               const recommends = packageAnalysisResult.data.recommendations.recommendedActions
                 .filter(

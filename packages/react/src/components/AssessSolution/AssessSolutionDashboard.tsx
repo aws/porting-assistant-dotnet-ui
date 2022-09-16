@@ -1,7 +1,5 @@
 import { Box, Button, Flashbar, Header, NonCancelableCustomEvent, ProgressBar,SpaceBetween, Tabs, TabsProps } from "@awsui/components-react";
-import { systemPreferences } from "electron";
-import { electron } from "process";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Redirect, useHistory, useLocation } from "react-router";
 import { v4 as uuid } from "uuid";
@@ -13,10 +11,12 @@ import { Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution, exportSolution, openSolutionInIDE } from "../../store/actions/backend";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
+import { selectCurrentSolutionPath } from "../../store/selectors/solutionSelectors";
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
-import { isLoaded, Loadable } from "../../utils/Loadable";
+import { getTotalProjects } from "../../utils/getTotalProjects";
+import { hasNewData, isLoaded, isLoadingWithData, Loadable } from "../../utils/Loadable";
 import { ApiTable } from "../AssessShared/ApiTable";
 import { EnterEmailModal, isEmailSet } from "../AssessShared/EnterEmailModal";
 import { FileTable } from "../AssessShared/FileTable";
@@ -27,11 +27,11 @@ import { useNugetFlashbarMessages } from "../AssessShared/useNugetFlashbarMessag
 import { CustomerFeedbackModal } from "../CustomerContribution/CustomerFeedbackModal";
 import { InfoLink } from "../InfoLink";
 import { PortConfigurationModal } from "../PortConfigurationModal/PortConfigurationModal";
+import { getPercent } from "./../../utils/getPercent"
 import { ProjectsTable } from "./ProjectsTable";
 import { SolutionSummary } from "./SolutionSummary";
-
 interface Props {
-  solution: SolutionDetails;
+  solution: Loadable<SolutionDetails>;
   projects: Loadable<Project[]>;
 }
 
@@ -44,10 +44,17 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
   const targetFramework = getTargetFramework();
   const [feedbackModal, setFeedbackModalVisible] = React.useState(false);
   const [emailModal, setEmailModalVisible] = React.useState(false);
-
+  const solutionPath = usePortingAssistantSelector(state => selectCurrentSolutionPath(state, location.pathname));
+  const [totalProjects, setTotalProjects] = useState<number>(0);
   useNugetFlashbarMessages(projects);
   useApiAnalysisFlashbarMessage(solution);
   
+  useEffect(()=> { 
+    (async () => {
+      setTotalProjects(await getTotalProjects(solutionPath));   
+    })();
+  }, [solutionPath]); 
+
   const projectsTable = usePortingAssistantSelector(state => selectProjectTableData(state, location.pathname));
   let preTriggerDataArray: string[] = [];
   projectsTable.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
@@ -145,41 +152,47 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
           <SpaceBetween direction="horizontal" size="xs">
             <Button
               iconName="download"
-              onClick={() => dispatch(exportSolution({ solutionPath: solution.solutionFilePath }))}
+              disabled={!isLoaded(solution)}
+              onClick={() => isLoaded(solution) && dispatch(exportSolution({ solutionPath: solution.data.solutionFilePath }))}
             >
               Export assessment report
             </Button>
             <Button
               iconName="external"
               iconAlign="right"
-              onClick={() => dispatch(openSolutionInIDE(solution.solutionFilePath))}
+              disabled={!isLoaded(solution)}
+              onClick={() => isLoaded(solution) && dispatch(openSolutionInIDE(solution.data.solutionFilePath))}
             >
               View in Visual Studio
             </Button>
             <Button
               iconName="refresh"
               id="reassess-solution"
+              disabled={!isLoaded(solution)}
               onClick={async () => {
-                const haveInternet = await checkInternetAccess(solution.solutionFilePath, dispatch);
-                if (haveInternet) {
-                  dispatch(
-                    analyzeSolution.request({
-                      solutionPath: solution.solutionFilePath,
-                      runId: uuid(),
-                      triggerType: "UserRequest",
-                      settings: {
-                        ignoredProjects: [],
-                        targetFramework: targetFramework,
-                        continiousEnabled: false,
-                        actionsOnly: false,
-                        compatibleOnly: false
-                      },
-                      preTriggerData: preTriggerDataArray,
-                      force: true
-                    })
-                  );
-                  history.push(paths.dashboard);
+                if (isLoaded(solution)) {
+                  const haveInternet = await checkInternetAccess(solution.data.solutionFilePath, dispatch);
+                  if (haveInternet) {
+                    dispatch(
+                      analyzeSolution.request({
+                        solutionPath: solution.data.solutionFilePath,
+                        runId: uuid(),
+                        triggerType: "UserRequest",
+                        settings: {
+                          ignoredProjects: [],
+                          targetFramework: targetFramework,
+                          continiousEnabled: false,
+                          actionsOnly: false,
+                          compatibleOnly: false
+                        },
+                        preTriggerData: preTriggerDataArray,
+                        force: true
+                      })
+                    );
+                    history.push(paths.dashboard);
+                  }
                 }
+
               }}
             >
               Reassess solution
@@ -204,14 +217,14 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               id="port-solution-button"
               key="port-solution"
               variant="primary"
-              disabled={!isLoaded(projects)}
+              disabled={!isLoaded(projects) || !isLoaded(solution)}
               onClick={() => {
                 if (portingLocation == null) {
                   setShowPortingModal(true);
                 } else {
-                  if (isLoaded(projects)) {
+                  if (isLoaded(projects) && isLoaded(solution)) {
                     history.push({
-                      pathname: `/port-solution/${encodeURIComponent(solution.solutionFilePath)}`,
+                      pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
                       state: {
                         projects: projects.data
                       }
@@ -224,28 +237,31 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             </Button>
             <PortConfigurationModal
               solution={solution}
-              visible={showPortingModal}
+              visible={showPortingModal && isLoaded(solution)}
               onDismiss={() => setShowPortingModal(false)}
               onSubmit={() => {
-                history.push({
-                  pathname: `/port-solution/${encodeURIComponent(solution.solutionFilePath)}`,
-                  state: {
-                    projects: isLoaded(projects) ? projects.data : []
-                  }
-                });
+                if (isLoaded(solution)) {
+                  history.push({
+                    pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
+                    state: {
+                      projects: hasNewData(projects) ? projects.data : []
+                    }
+                  });
+                }
+
               }}
             />
           </SpaceBetween>
         }
       >
-        {solution.solutionName}
+        {hasNewData(solution)? solution.data.solutionName : ""}
       </Header>
       <Flashbar
       items={[
         {
           content: (
             <ProgressBar
-              value={36}
+              value={ isLoaded(solution)? 100: isLoadingWithData(solution)? 100*solution.data.projects.length/totalProjects :0}
               variant="flash"
               additionalInfo="Additional information"
               description="Progress bar description"

@@ -11,6 +11,7 @@ import {
   TextFilter
 } from "@awsui/components-react";
 import StatusIndicator from "@awsui/components-react/status-indicator/internal";
+import { stat } from "fs";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -21,14 +22,15 @@ import { PreTriggerData } from "../../models/project";
 import { analyzeSolution, exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import { removePortedSolution } from "../../store/actions/porting";
-import { selectSolutionToSolutionDetails} from "../../store/selectors/solutionSelectors";
+import { RootState } from "../../store/reducers";
+import { selectAssesmentStatus, selectCancelStatus, selectCurrentSolutionDetails, selectSolutionToSolutionDetails} from "../../store/selectors/solutionSelectors";
 import { getErrorCounts, selectDashboardTableData, selectSolutionToApiAnalysis
  } from "../../store/selectors/tableSelectors";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { filteringCountText } from "../../utils/FilteringCountText";
 import { getCompatibleApi } from "../../utils/getCompatibleApi";
 import { getTargetFramework } from "../../utils/getTargetFramework";
-import { isLoaded } from "../../utils/Loadable";
+import { hasNewData, isLoaded } from "../../utils/Loadable";
 import { useNugetFlashbarMessages } from "../AssessShared/useNugetFlashbarMessages";
 import { InfoLink } from "../InfoLink";
 import { LinkComponent } from "../LinkComponent";
@@ -56,7 +58,9 @@ const DashboardTableInternal: React.FC = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const solutionToSolutionDetails = useSelector(selectSolutionToSolutionDetails);
-  
+  const isAssesmentRunning = useSelector(selectAssesmentStatus);
+  const cancel = useSelector(selectCancelStatus);
+
   const tableData = useSelector(selectDashboardTableData);
   const targetFramework = getTargetFramework();
   useNugetFlashbarMessages();
@@ -70,6 +74,18 @@ const DashboardTableInternal: React.FC = () => {
     },
     [dispatch]
   );
+
+  const cancelAssessment = useMemo(
+    () => () => {
+        window.electron.saveState("cancel", true);
+        window.backend.cancelAssessment();
+        dispatch(
+          removeCurrentMessageUpdate({
+            groupId: "assess"
+          })
+        );
+    },[dispatch]
+  )
 
   const reassessSolution = useMemo(
     () => async (solutionPath: string) => {
@@ -228,6 +244,26 @@ const DashboardTableInternal: React.FC = () => {
             >
               Assess a new solution
             </Button>
+            <Button
+              id="cancel-assessment-button"
+              disabled= {!isAssesmentRunning && !cancel}
+              variant="primary"
+              key="cancel-assessment"
+              onClick={() => {
+                cancelAssessment();
+                dispatch(
+                  pushCurrentMessageUpdate({
+                    type: "info",
+                    messageId: uuid(),
+                    groupId: "cancel-assessment",
+                    content: `Cancelling assessment for ${selectedItems[0].name}.`,
+                    dismissible: true
+                  })
+                );
+              }}
+            >
+              Cancel Assessment
+            </Button>
             <Modal
               visible={showDeleteModal}
               header={`Remove ${selectedItems[0]?.name}?`}
@@ -271,7 +307,7 @@ const DashboardTableInternal: React.FC = () => {
         }
       />
     ),
-    [deleteSolution, dispatch, history, reassessSolution, selectedItems, showDeleteModal, solutionToSolutionDetails]
+    [deleteSolution, dispatch, history, reassessSolution, selectedItems, showDeleteModal, solutionToSolutionDetails, cancel, isAssesmentRunning]
   );
 
   const empty = useMemo(
@@ -336,7 +372,13 @@ const columnDefinitions: TableProps.ColumnDefinition<DashboardTableData>[] = [
     id: "name",
     header: "Name",
     cell: item =>
-      (
+    item.incompatiblePackages == null &&
+    item.incompatibleApis == null ? (
+      <div id={`solution-link-${escapeNonAlphaNumeric(item.path)}`} className={styles.inProgress}>
+        {item.name}
+      </div>
+    ):  
+    (
         <LinkComponent
           id={`solution-link-${escapeNonAlphaNumeric(item.path)}`}
           className="solution-link"

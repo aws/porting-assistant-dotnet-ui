@@ -1,10 +1,13 @@
 import { produce } from "immer";
+import Path from 'path'
 import { createReducer } from "typesafe-actions";
+import { Z_ASCII } from "zlib";
 
 import { SolutionToApiAnalysis, SolutionToSolutionDetails } from "../../models/project";
-import { Failed, isLoaded, isReloading, Loaded, Loading, Reloading } from "../../utils/Loadable";
-import { analyzeSolution, getApiAnalysis, removeSolution, setProfileSet } from "../actions/backend";
-
+import { SolutionDetails } from "../../models/solution";
+import { getTotalProjects } from "../../utils/getTotalProjects";
+import { Failed, isLoaded, isLoading, isLoadingWithData, isReloading, Loaded, Loading, Reloading } from "../../utils/Loadable";
+import { analyzeSolution, cancelAssessment, getApiAnalysis, partialSolutionUpdate, removeSolution, setProfileSet } from "../actions/backend";
 export const backendReducer = createReducer({
   apiAnalysis: {} as SolutionToApiAnalysis,
   solutionToSolutionDetails: {} as SolutionToSolutionDetails,
@@ -31,6 +34,56 @@ export const backendReducer = createReducer({
   .handleAction(analyzeSolution.failure, (state, action) =>
     produce(state, draftState => {
       draftState.solutionToSolutionDetails[action.payload.solutionPath] = Failed(action.payload.error);
+    })
+  )
+  .handleAction(partialSolutionUpdate, (state, action) =>
+    produce(state, draftState => {
+      var existingSolution = state.solutionToSolutionDetails[action.payload.solutionPath];
+      const project = action.payload.projectPath;
+      const projectFailed = action.payload.data === null || action.payload.data === undefined;
+      var modifiedSolutionDetails = null;
+      if (isReloading(existingSolution) || (isLoading(existingSolution) && !isLoadingWithData(existingSolution))) {
+        var partialSolutionDetails: SolutionDetails = {
+          solutionName: action.payload.solutionPath.split("\\").reverse()[0].split('.')[0],
+          solutionFilePath: action.payload.solutionPath,
+          failedProjects: projectFailed ? [project] : [],
+          projects: projectFailed ? [] : [{
+            projectFilePath: project,
+            isBuildFailed: false,
+            projectName: action.payload.data?.projectName,
+            targetFrameworks: action.payload.data?.targetFrameworks,
+            projectType: action.payload.data?.projectType,
+            packageReferences: action.payload.data?.pacakgeReferences,
+            projectReferences: action.payload.data?.projectReferences
+          }]
+        }
+        draftState.solutionToSolutionDetails[action.payload.solutionPath] = Loading(partialSolutionDetails)
+      } else if (isLoadingWithData(existingSolution)) {
+        if (projectFailed) {
+          var existingFailedProjects = existingSolution.data.failedProjects;
+          modifiedSolutionDetails = {
+            ...existingSolution.data,
+            failedprojects: [...existingFailedProjects, project]
+        }
+          draftState.solutionToSolutionDetails[action.payload.solutionPath] = Loading(modifiedSolutionDetails)          
+        } else {
+          var existingProjects = existingSolution.data.projects;
+          
+          modifiedSolutionDetails = {
+            ...existingSolution.data,
+            projects: [...existingProjects, { 
+              projectFilePath: project,
+              isBuildFailed: false,
+              projectName: action.payload.data?.projectName,
+              targetFrameworks: action.payload.data?.targetFrameworks,
+              projectType: action.payload.data?.projectType,
+              packageReferences: action.payload.data?.pacakgeReferences,
+              projectReferences: action.payload.data?.projectReferences
+            }]
+        }
+          draftState.solutionToSolutionDetails[action.payload.solutionPath] = Loading(modifiedSolutionDetails)
+        }
+      }
     })
   )
   .handleAction(getApiAnalysis.request, (state, action) =>

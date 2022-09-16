@@ -6,10 +6,11 @@ import { useDispatch } from "react-redux";
 import { PortingLocation } from "../../models/porting";
 import { SolutionDetails } from "../../models/solution";
 import { setPortingLocation } from "../../store/actions/porting";
+import { isLoaded, Loadable } from "../../utils/Loadable";
 import { LocationSection } from "./LocationSection";
 
 interface Props {
-  solution: SolutionDetails;
+  solution: Loadable<SolutionDetails>;
   visible: boolean;
   onDismiss: () => void;
   onSubmit: () => void;
@@ -28,17 +29,19 @@ const PortConfigurationModalInternal: React.FC<Props> = ({ solution, visible, on
         type: data.portingLocation.value,
         workingDirectory: data.path
       };
-      switch (portingLocation.type) {
-        case "copy":
-          try {
-              await window.porting.copyDirectory(solution.solutionFilePath, portingLocation.workingDirectory);
-          } catch (err) {
-            setError("path", "error", `Unable to copy solution to directory. Error: ${err}`);
-            return false;
-          }
-          break;
+      if (isLoaded(solution)) {
+        switch (portingLocation.type) {
+          case "copy":
+            try {
+                await window.porting.copyDirectory(solution.data.solutionFilePath, portingLocation.workingDirectory);
+            } catch (err) {
+              setError("path", "error", `Unable to copy solution to directory. Error: ${err}`);
+              return false;
+            }
+            break;
+        }
+        dispatch(setPortingLocation({ solutionPath: solution.data.solutionFilePath, portingLocation }));
       }
-      dispatch(setPortingLocation({ solutionPath: solution.solutionFilePath, portingLocation }));
     },
     [dispatch, setError, solution]
   );

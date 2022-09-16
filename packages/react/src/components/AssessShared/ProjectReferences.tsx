@@ -6,7 +6,7 @@ import { Network } from "vis-network/standalone";
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { Project } from "../../models/project";
 import { selectCurrentSolutionPath } from "../../store/selectors/solutionSelectors";
-import { isLoaded, Loadable } from "../../utils/Loadable";
+import { hasNewData, isLoaded, Loadable } from "../../utils/Loadable";
 import { InfoLink } from "../InfoLink";
 import styles from "./ProjectReferences.module.scss";
 
@@ -20,7 +20,7 @@ const ProjectReferencesInternal: React.FC<Props> = ({ projects }) => {
   const solutionPath = usePortingAssistantSelector(state => selectCurrentSolutionPath(state, location.pathname));
   const [selectedNode, setSelectedNode] = useState<string | undefined>(undefined);
   const data = useMemo(() => {
-    if (!isLoaded(projects)) {
+    if (!hasNewData(projects)) {
       return null;
     }
     return {
@@ -113,7 +113,7 @@ const ProjectReferencesInternal: React.FC<Props> = ({ projects }) => {
     return () => network && network.destroy();
   }, [divRef, data]);
 
-  if (!isLoaded(projects)) {
+  if (!hasNewData(projects)) {
     return <div>Loading</div>;
   }
 

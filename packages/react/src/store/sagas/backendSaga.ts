@@ -6,6 +6,7 @@ import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
 import { internetAccessFailed } from "../../constants/messages";
+import { usePortingAssistantSelector } from "../../createReduxStore";
 import { Message } from "../../models/error";
 import { NugetPackage, PackageAnalysisResult, ProjectApiAnalysisResult, SolutionProject } from "../../models/project";
 import { Response } from "../../models/response";
@@ -18,14 +19,17 @@ import {
   getApiAnalysis,
   init,
   openSolutionInIDE,
+  partialSolutionUpdate,
   ping,
-  removeSolution
+  removeSolution,
+  SolutionPartialCompletionPayload
 } from "../actions/backend";
 import { pushCurrentMessageUpdate, setCurrentMessageUpdate } from "../actions/error";
 import { getFileContents } from "../actions/file";
 import { getNugetPackageWithData } from "../actions/nugetPackage";
 import {
   selectApiAnalysis,
+  selectCurrentSolutionApiAnalysis,
   selectNugetPackages,
   selectSolutionToSolutionDetails
 } from "../selectors/solutionSelectors";
@@ -79,6 +83,12 @@ export function* watchApiAnalysisUpdate() {
     let projectApiAnalysis: Response<ProjectApiAnalysisResult, SolutionProject> = yield take(channel);
     if (projectApiAnalysis.status.status === "Success") {
       yield put(getApiAnalysis.success(projectApiAnalysis.value));
+      const solutionPartialCompletePayload: SolutionPartialCompletionPayload = {
+        solutionPath: projectApiAnalysis.value.solutionFile,
+        projectPath: projectApiAnalysis.value.projectFile,
+        data: projectApiAnalysis.value
+      };
+      yield put(partialSolutionUpdate(solutionPartialCompletePayload));
     } else {
       yield put(
         getApiAnalysis.failure({
@@ -87,6 +97,11 @@ export function* watchApiAnalysisUpdate() {
           error: projectApiAnalysis.status.error
         })
       );
+      const solutionPartialCompletePayload: SolutionPartialCompletionPayload = {
+        solutionPath: projectApiAnalysis.errorValue.solutionPath,
+        projectPath: projectApiAnalysis.errorValue.projectPath
+      }
+      yield put(partialSolutionUpdate(solutionPartialCompletePayload));
     }
   }
 }

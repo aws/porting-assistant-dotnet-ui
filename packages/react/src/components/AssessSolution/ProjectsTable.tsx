@@ -11,14 +11,14 @@ import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { selectProjects } from "../../store/selectors/solutionSelectors";
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
 import { filteringCountText } from "../../utils/FilteringCountText";
-import { isLoaded, isLoading, isReloading } from "../../utils/Loadable";
+import { hasNewData, isLoaded, isLoading, isReloading, Loadable } from "../../utils/Loadable";
 import { InfoLink } from "../InfoLink";
 import { LinkComponent } from "../LinkComponent";
 import { PortConfigurationModal } from "../PortConfigurationModal/PortConfigurationModal";
 import { TableHeader } from "../TableHeader";
 
 interface Props {
-  solution: SolutionDetails;
+  solution: Loadable<SolutionDetails>;
 }
 
 export interface TableData {
@@ -69,7 +69,7 @@ const ProjectsTableInternal: React.FC<Props> = ({ solution }) => {
       {...collectionProps}
       loadingText="Loading packages"
       columnDefinitions={columnDefinitions}
-      loading={isLoading(projects) || isReloading(projects)}
+      loading={(isLoading(projects) && !hasNewData(projects)) || isReloading(projects)}
       items={items}
       selectionType="multi"
       trackBy="projectPath"

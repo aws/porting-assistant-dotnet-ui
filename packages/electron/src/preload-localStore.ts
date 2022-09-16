@@ -45,6 +45,8 @@ const createLocalStore = () =>
       notification: true,
       newVersionNotification: true,
       useDefaultCreds: false,
+      cancel: false,
+      isAssesmentRunning: false
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -88,6 +90,12 @@ const createLocalStore = () =>
         type: "boolean",
       },
       useDefaultCreds: {
+        type: "boolean",
+      },
+      cancel: {
+        type: "boolean",
+      },
+      isAssesmentRunning: {
         type: "boolean",
       },
     },

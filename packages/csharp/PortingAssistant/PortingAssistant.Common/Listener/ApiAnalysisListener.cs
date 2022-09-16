@@ -3,5 +3,5 @@ using PortingAssistant.Common.Model;
 
 namespace PortingAssistant.Common.Listener
 {
-    public delegate void OnApiAnalysisUpdate(Response<ProjectApiAnalysisResult, SolutionProject> response);
+    public delegate void OnApiAnalysisUpdate(Response<ProjectApiAnalysisResultExtended, SolutionProject> response);
 }

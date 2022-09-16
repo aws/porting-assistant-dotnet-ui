@@ -45,6 +45,8 @@ export const init = createAction("init")<boolean>();
 
 export const removeSolution = createAction("removeSolution")<string>();
 
+export const cancelAssessment = createAction("cancelAssessment")<string>();
+
 export const setLastNugetRequestTime = createAction("setLastNugetRequestTime")<Date>();
 
 export interface exportSolutionPayload {
@@ -52,6 +54,13 @@ export interface exportSolutionPayload {
 }
 export const exportSolution = createAction("exportSolution")<exportSolutionPayload>();
 export const openSolutionInIDE = createAction("openSolutionInIDE")<string>();
+
+export interface SolutionPartialCompletionPayload {
+  solutionPath: string;
+  projectPath: string;
+  data?: ProjectApiAnalysisResult;
+}
+export const partialSolutionUpdate = createAction("partialSolutionUpdate")<SolutionPartialCompletionPayload>();
 
 export const setProfileSet = createAction("setProfileSet")<boolean>();
 

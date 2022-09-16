@@ -10,7 +10,7 @@ import { PortingAssistantBreadcrumb } from "../components/PortingAssistantBreadc
 import { setInfo } from "../store/actions/tools";
 import { RootState } from "../store/reducers";
 import { selectCurrentSolutionDetails, selectProjects } from "../store/selectors/solutionSelectors";
-import { isLoaded } from "../utils/Loadable";
+import { isLoaded, isLoadingWithData } from "../utils/Loadable";
 
 const AssessSolutionInternal: React.FC = () => {
   const dispatch = useDispatch();
@@ -57,7 +57,15 @@ const AssessSolutionInternal: React.FC = () => {
     ];
   }, [currentSolutionDetails]);
 
-  if (currentSolutionDetails == null || !isLoaded(currentSolutionDetails)) {
+  if (currentSolutionDetails == null || !isLoaded(currentSolutionDetails)){
+    if (isLoadingWithData(currentSolutionDetails)){
+      return (
+        <PortingAssistantAppLayout
+          content={<AssessSolutionDashboard solution={currentSolutionDetails} projects={projects} />}
+          breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumbWithCurrent} />}
+        />
+      );
+    }
     if (routeMatch === null) {
       return <Redirect to={location} />;
     } else {
@@ -67,7 +75,7 @@ const AssessSolutionInternal: React.FC = () => {
 
   return (
     <PortingAssistantAppLayout
-      content={<AssessSolutionDashboard solution={currentSolutionDetails.data} projects={projects} />}
+      content={<AssessSolutionDashboard solution={currentSolutionDetails} projects={projects} />}
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumbWithCurrent} />}
     />
   );

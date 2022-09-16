@@ -60,7 +60,7 @@ namespace PortingAssistant.Common.Services
                     var projectAnalysisResultEnumerator = _client.AnalyzeSolutionGeneratorAsync(request.solutionFilePath, request.settings).GetAsyncEnumerator();
                     try
                     {
-                        while (await projectAnalysisResultEnumerator.MoveNextAsync().ConfigureAwait(false))
+                        while (await projectAnalysisResultEnumerator.MoveNextAsync().ConfigureAwait(false) && !PortingAssistantUtils.CancelAssessment.cancel)
                         {
                             ProjectAnalysisResult result = projectAnalysisResultEnumerator.Current;
                             var preTriggerProjectData = preProjectTriggerDataDictionary.ContainsKey(result.ProjectName) ?
@@ -110,6 +110,7 @@ namespace PortingAssistant.Common.Services
                         SolutionDetails = solutionDetails
                     };
                     TelemetryCollectionUtils.CollectSolutionMetrics(SolutionAnalysisResult, request, startTime, tgtFramework);
+                    PortingAssistantUtils.CancelAssessment.cancel = false;
                     return new Response<SolutionDetails, string>
                     {
                         Value = solutionDetails,
@@ -226,17 +227,24 @@ namespace PortingAssistant.Common.Services
         {
             _apiAnalysisListeners.ForEach(listener =>
             {
-                listener.Invoke(new Response<ProjectApiAnalysisResult, SolutionProject>
+                listener.Invoke(new Response<ProjectApiAnalysisResultExtended, SolutionProject>
                 {
-                    Value = new ProjectApiAnalysisResult
+                    Value = new ProjectApiAnalysisResultExtended
                     {
                         Errors = projectAnalysisResult.Errors,
                         SolutionFile = solutionFilePath,
+                        ProjectName = projectAnalysisResult.ProjectName,
                         ProjectFile = projectAnalysisResult.ProjectFilePath,
                         ProjectGuid = projectAnalysisResult.ProjectGuid,
-                        SourceFileAnalysisResults = projectAnalysisResult.SourceFileAnalysisResults
+                        ProjectType = projectAnalysisResult.ProjectType,
+                        FeatureType = projectAnalysisResult.FeatureType,
+                        TargetFrameworks = projectAnalysisResult.TargetFrameworks,
+                        PacakgeReferences = projectAnalysisResult.PackageReferences.ToArray(),
+                        ProjectReferences = projectAnalysisResult.ProjectReferences.ToArray(),
+                        IsBuildFailed = projectAnalysisResult.IsBuildFailed,
+                        SourceFileAnalysisResults = projectAnalysisResult.SourceFileAnalysisResults,
                     },
-                    Status = Response<ProjectApiAnalysisResult, SolutionProject>.Success()
+                    Status = Response<ProjectApiAnalysisResultExtended, SolutionProject>.Success()
                 });
             });
         }
@@ -244,14 +252,14 @@ namespace PortingAssistant.Common.Services
         public void InvokeApiAnalysisListenerOnFailure(string ProjectFilePath, string ProjectName, string solutionFilePath)
         {
             _apiAnalysisListeners.ForEach(listener =>
-                   listener.Invoke(new Response<ProjectApiAnalysisResult, SolutionProject>
+                   listener.Invoke(new Response<ProjectApiAnalysisResultExtended, SolutionProject>
                    {
                        ErrorValue = new SolutionProject
                        {
                            ProjectPath = ProjectFilePath,
                            SolutionPath = solutionFilePath
                        },
-                       Status = Response<ProjectApiAnalysisResult, SolutionProject>
+                       Status = Response<ProjectApiAnalysisResultExtended, SolutionProject>
                                      .Failed(new PortingAssistantClientException($"Errors during compilation in {ProjectName}.", null))
                    }));
 
