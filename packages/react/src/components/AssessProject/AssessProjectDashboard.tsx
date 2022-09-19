@@ -11,7 +11,7 @@ import { SolutionDetails } from "../../models/solution";
 import { RootState } from "../../store/reducers";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { selectProjects } from "../../store/selectors/solutionSelectors";
-import { isFailed, isLoading, Loadable } from "../../utils/Loadable";
+import { isFailed, isLoaded, isLoading, Loadable } from "../../utils/Loadable";
 import { ApiTable } from "../AssessShared/ApiTable";
 import { FileTable } from "../AssessShared/FileTable";
 import { NugetPackageTable } from "../AssessShared/NugetPackageTable";
@@ -22,7 +22,7 @@ import { PortConfigurationModal } from "../PortConfigurationModal/PortConfigurat
 import { ProjectSummary } from "./ProjectSummary";
 
 interface Props {
-  solution: SolutionDetails;
+  solution: Loadable<SolutionDetails>;
   project: Loadable<Project>;
 }
 
@@ -107,14 +107,16 @@ const AssessProjectDashboardInternal: React.FC<Props> = ({ solution, project }) 
               id="port-project-button"
               variant="primary"
               onClick={() => {
-                if (portingLocation == null) {
-                  setShowPortingModal(true);
-                } else {
-                  history.push({
-                    pathname: `/port-solution/${encodeURIComponent(solution.solutionFilePath)}/${encodeURIComponent(
-                      project.data.projectFilePath
-                    )}`
-                  });
+                if (isLoaded(solution)) {
+                  if (portingLocation == null) {
+                    setShowPortingModal(true);
+                  } else {
+                    history.push({
+                      pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}/${encodeURIComponent(
+                        project.data.projectFilePath
+                      )}`
+                    });
+                  }
                 }
               }}
             >
@@ -132,11 +134,13 @@ const AssessProjectDashboardInternal: React.FC<Props> = ({ solution, project }) 
         visible={showPortingModal}
         onDismiss={() => setShowPortingModal(false)}
         onSubmit={() => {
-          history.push({
-            pathname: `/port-solution/${encodeURIComponent(solution.solutionFilePath)}/${encodeURIComponent(
-              project.data.projectFilePath
-            )}`
-          });
+          if (isLoaded(solution)) {
+            history.push({
+              pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}/${encodeURIComponent(
+                project.data.projectFilePath
+              )}`
+            });
+          } 
         }}
       />
     </SpaceBetween>

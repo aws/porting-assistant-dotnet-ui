@@ -1,6 +1,8 @@
+import { has } from "immer/dist/internal";
+
 import { ProjectToApiAnalysis } from "../models/project";
 import { SolutionDetails } from "../models/solution";
-import { isFailed, isLoaded, isLoading, isReloading, Loadable, Loaded, Loading } from "./Loadable";
+import { hasNewData, isFailed, isLoaded, isLoading, isLoadingWithData, isReloading, Loadable, Loaded, Loading } from "./Loadable";
 
 export const getCompatibleApi = (
   solutionDetails: Loadable<SolutionDetails>,
@@ -16,38 +18,40 @@ export const getCompatibleApi = (
   let failureCount = 0;
   //todo add timeout?
   let isApisLoading = Object.values(selectedInvocations).some(analysis => isLoading(analysis) || isReloading(analysis));
-  if (isApisLoading) {
-    return { failureCount: 0, isApisLoading: true, values: [0, 0] };
-  }
   const allAnalysis = Object.values(selectedInvocations).reduce((agg, cur) => {
     if (isFailed(cur)) {
       failureCount += 1;
       return agg;
     }
-    if (isLoading(cur) || isReloading(cur) || !isLoaded(solutionDetails)) {
+    if (isLoading(cur) || isReloading(cur) || !hasNewData(solutionDetails)) {
       isApisLoading = true;
       return agg;
-    }
-    const project = solutionDetails.data.projects.find(p => p.projectFilePath === cur.data.projectFile);
-    if (project == null) {
-      failureCount += 1;
+    } else {
+      const project = solutionDetails.data.projects.find(p => p.projectFilePath === cur.data.projectFile);
+      if (project == null) {
+        failureCount += 1;
+        return agg;
+      }
+      cur.data.sourceFileAnalysisResults
+        .flatMap(arr => arr.apiAnalysisResults)
+        .forEach(inv => {
+          if (inv.codeEntityDetails == null || inv.codeEntityDetails.originalDefinition == null) {
+            return;
+          }
+          agg[
+            `${
+              inv.codeEntityDetails.originalDefinition
+            }-${inv.codeEntityDetails.package?.packageId?.toLowerCase()}-${inv.codeEntityDetails.package?.version?.toLowerCase()}`
+          ] =
+            inv.compatibilityResults[target]?.compatibility === "COMPATIBLE" ||
+            inv.compatibilityResults[target]?.compatibility === "UNKNOWN";
+        });
+        if (!isLoaded(solutionDetails)) {
+          isApisLoading = true;
+        }
       return agg;
     }
-    cur.data.sourceFileAnalysisResults
-      .flatMap(arr => arr.apiAnalysisResults)
-      .forEach(inv => {
-        if (inv.codeEntityDetails == null || inv.codeEntityDetails.originalDefinition == null) {
-          return;
-        }
-        agg[
-          `${
-            inv.codeEntityDetails.originalDefinition
-          }-${inv.codeEntityDetails.package?.packageId?.toLowerCase()}-${inv.codeEntityDetails.package?.version?.toLowerCase()}`
-        ] =
-          inv.compatibilityResults[target]?.compatibility === "COMPATIBLE" ||
-          inv.compatibilityResults[target]?.compatibility === "UNKNOWN";
-      });
-    return agg;
+
   }, {} as { [method: string]: boolean });
   return {
     failureCount: failureCount,
@@ -62,6 +66,12 @@ export const API_LOADING_AGGREGATE = {
   values: [0, 0]
 };
 
+export type API_COMPATABILITIES  = IAPI_COMPATABILITIES
+interface IAPI_COMPATABILITIES {
+  failureCount: number,
+  isApisLoading: boolean,
+  values: number[]
+}
 export const getSelectedInvocations = (
   projectToApiAnalysis: ProjectToApiAnalysis,
   projectPath?: string | null,
@@ -82,7 +92,14 @@ export const getSelectedInvocations = (
       errors: [""],
       sourceFileAnalysisResults: invocationProject.data.sourceFileAnalysisResults.filter(
         sourceFileAnalysis => sourceFileAnalysis.sourceFilePath === sourceFile
-      )
+      ),
+      targetFrameworks: invocationProject.data.targetFrameworks,
+      projectName: invocationProject.data.projectName,
+      projectType: invocationProject.data.projectType,
+      featureType: invocationProject.data.featureType,
+      isBuildFailed: false,
+      pacakgeReferences: invocationProject.data.pacakgeReferences,
+      projectReferences: invocationProject.data.projectReferences
     };
     return { [projectPath]: Loaded(sourceFileItem) };
   }

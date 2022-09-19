@@ -1,7 +1,5 @@
-import { Box, Button, Header, NonCancelableCustomEvent, SpaceBetween, Tabs, TabsProps } from "@awsui/components-react";
-import { systemPreferences } from "electron";
-import { electron } from "process";
-import React, { useCallback, useMemo, useState } from "react";
+import { Box, Button, Flashbar, Header, NonCancelableCustomEvent, ProgressBar,SpaceBetween, Tabs, TabsProps } from "@awsui/components-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Redirect, useHistory, useLocation } from "react-router";
 import { v4 as uuid } from "uuid";
@@ -13,10 +11,12 @@ import { Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution, exportSolution, openSolutionInIDE } from "../../store/actions/backend";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
+import { selectCurrentSolutionPath } from "../../store/selectors/solutionSelectors";
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
-import { isLoaded, Loadable } from "../../utils/Loadable";
+import { getTotalProjects } from "../../utils/getTotalProjects";
+import { hasNewData, isLoaded, isLoadingWithData, Loadable } from "../../utils/Loadable";
 import { ApiTable } from "../AssessShared/ApiTable";
 import { FileTable } from "../AssessShared/FileTable";
 import { NugetPackageTable } from "../AssessShared/NugetPackageTable";
@@ -26,374 +26,237 @@ import { useNugetFlashbarMessages } from "../AssessShared/useNugetFlashbarMessag
 import { CustomerFeedbackModal } from "../CustomerContribution/CustomerFeedbackModal";
 import { InfoLink } from "../InfoLink";
 import { PortConfigurationModal } from "../PortConfigurationModal/PortConfigurationModal";
+import { getPercent } from "./../../utils/getPercent"
 import { ProjectsTable } from "./ProjectsTable";
 import { SolutionSummary } from "./SolutionSummary";
-
 interface Props {
-  solution: SolutionDetails;
+  solution: Loadable<SolutionDetails>;
   projects: Loadable<Project[]>;
 }
 
 const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) => {
-                                                                                       const dispatch = useDispatch();
-                                                                                       const history = useHistory();
-                                                                                       const location = useLocation<
-                                                                                         HistoryState
-                                                                                       >();
-                                                                                       const portingLocation = usePortingAssistantSelector(
-                                                                                         state =>
-                                                                                           selectPortingLocation(
-                                                                                             state,
-                                                                                             location.pathname
-                                                                                           )
-                                                                                       );
-                                                                                       const [
-                                                                                         showPortingModal,
-                                                                                         setShowPortingModal
-                                                                                       ] = useState(false);
-                                                                                       const targetFramework = getTargetFramework();
-                                                                                       const [
-                                                                                         feedbackModal,
-                                                                                         setFeedbackModalVisible
-                                                                                       ] = React.useState(false);
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const location = useLocation<HistoryState>();
+  const portingLocation = usePortingAssistantSelector(state => selectPortingLocation(state, location.pathname));
+  const [showPortingModal, setShowPortingModal] = useState(false);
+  const targetFramework = getTargetFramework();
+  const [feedbackModal, setFeedbackModalVisible] = React.useState(false);
+  const [emailModal, setEmailModalVisible] = React.useState(false);
+  const solutionPath = usePortingAssistantSelector(state => selectCurrentSolutionPath(state, location.pathname));
+  const [totalProjects, setTotalProjects] = useState<number>(0);
+  useNugetFlashbarMessages(projects);
+  useApiAnalysisFlashbarMessage(solution);
+  
+  useEffect(()=> { 
+    (async () => {
+      setTotalProjects(await getTotalProjects(solutionPath));   
+    })();
+  }, [solutionPath]); 
 
-                                                                                       useNugetFlashbarMessages(
-                                                                                         projects
-                                                                                       );
-                                                                                       useApiAnalysisFlashbarMessage(
-                                                                                         solution
-                                                                                       );
+  const projectsTable = usePortingAssistantSelector(state => selectProjectTableData(state, location.pathname));
+  let preTriggerDataArray: string[] = [];
+  projectsTable.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
+  const tabs = useMemo(
+    () => [
+      {
+        label: "Projects",
+        id: "projects",
+        content: <ProjectsTable solution={solution} />
+      },
+      {
+        label: "Project references",
+        id: "project-references",
+        content: <ProjectReferences projects={projects} />
+      },
+      {
+        label: "NuGet packages",
+        id: "nuget-packages",
+        content: <NugetPackageTable />
+      },
+      {
+        label: "APIs",
+        id: "apis",
+        content: <ApiTable />
+      },
+      {
+        label: "Source files",
+        id: "source-files",
+        content: <FileTable />
+      }
+    ],
+    [solution, projects]
+  );
 
-                                                                                       const projectsTable = usePortingAssistantSelector(
-                                                                                         state =>
-                                                                                           selectProjectTableData(
-                                                                                             state,
-                                                                                             location.pathname
-                                                                                           )
-                                                                                       );
-                                                                                       let preTriggerDataArray: string[] = [];
-                                                                                       projectsTable.forEach(
-                                                                                         element => {
-                                                                                           preTriggerDataArray.push(
-                                                                                             JSON.stringify(element)
-                                                                                           );
-                                                                                         }
-                                                                                       );
-                                                                                       const tabs = useMemo(
-                                                                                         () => [
-                                                                                           {
-                                                                                             label: "Projects",
-                                                                                             id: "projects",
-                                                                                             content: (
-                                                                                               <ProjectsTable
-                                                                                                 solution={solution}
-                                                                                               />
-                                                                                             )
-                                                                                           },
-                                                                                           {
-                                                                                             label:
-                                                                                               "Project references",
-                                                                                             id: "project-references",
-                                                                                             content: (
-                                                                                               <ProjectReferences
-                                                                                                 projects={projects}
-                                                                                               />
-                                                                                             )
-                                                                                           },
-                                                                                           {
-                                                                                             label: "NuGet packages",
-                                                                                             id: "nuget-packages",
-                                                                                             content: (
-                                                                                               <NugetPackageTable />
-                                                                                             )
-                                                                                           },
-                                                                                           {
-                                                                                             label: "APIs",
-                                                                                             id: "apis",
-                                                                                             content: <ApiTable />
-                                                                                           },
-                                                                                           {
-                                                                                             label: "Source files",
-                                                                                             id: "source-files",
-                                                                                             content: <FileTable />
-                                                                                           }
-                                                                                         ],
-                                                                                         [solution, projects]
-                                                                                       );
+  const onChangeTab = useCallback(
+    (event: NonCancelableCustomEvent<TabsProps.ChangeDetail>) => {
+      history.push(location.pathname, { activeTabId: event.detail.activeTabId, activePageId: 1 });
+    },
+    [history, location.pathname]
+  );
 
-                                                                                       const onChangeTab = useCallback(
-                                                                                         (
-                                                                                           event: NonCancelableCustomEvent<
-                                                                                             TabsProps.ChangeDetail
-                                                                                           >
-                                                                                         ) => {
-                                                                                           history.push(
-                                                                                             location.pathname,
-                                                                                             {
-                                                                                               activeTabId:
-                                                                                                 event.detail
-                                                                                                   .activeTabId,
-                                                                                               activePageId: 1
-                                                                                             }
-                                                                                           );
-                                                                                         },
-                                                                                         [history, location.pathname]
-                                                                                       );
+  if (solution == null) {
+    return <Redirect to="/solutions" />;
+  }
 
-                                                                                       if (solution == null) {
-                                                                                         return (
-                                                                                           <Redirect to="/solutions" />
-                                                                                         );
-                                                                                       }
+  return (
+    <SpaceBetween size="m">
+      <CustomerFeedbackModal
+        visible={feedbackModal}
+        setModalVisible={setFeedbackModalVisible}
+      ></CustomerFeedbackModal>
 
-                                                                                       return (
-                                                                                         <SpaceBetween size="m">
-                                                                                           <CustomerFeedbackModal
-                                                                                             visible={feedbackModal}
-                                                                                             setModalVisible={
-                                                                                               setFeedbackModalVisible
-                                                                                             }
-                                                                                           ></CustomerFeedbackModal>
+      <Header
+        variant="h1"
+        info={
+          <InfoLink
+            heading="Solution assessment report"
+            mainContent={
+              <>
+                <p>
+                  Once you select an application for porting, Porting Assistant for .NET can speed up the process by
+                  setting up the project file with updated NuGet/Microsoft packages and formatted package references in
+                  a format that is compatible with .NET Core. You can use the updated project file to start refactoring
+                  your application. When you select an application for porting, Porting Assistant for .NET copies the
+                  .NET Framework source code and the associated project files to a .NET Core compatible format. If there
+                  are any known replacements, Porting Assistant for .NET applies them. When a project is ported, it may
+                  not be entirely .NET Core compatible because there may be other APIs, packages, and code blocks that
+                  must be substituted and refactored for compatibility.
+                </p>
+              </>
+            }
+            learnMoreLinks={[]}
+          />
+        }
+        description={
+          <Box variant="small">
+            Improve the compatibility of your solution by refactoring the source code for each project and reassessing
+            it.
+          </Box>
+        }
+        actions={
+          <SpaceBetween direction="horizontal" size="xs">
+            <Button
+              iconName="download"
+              disabled={!isLoaded(solution)}
+              onClick={() => isLoaded(solution) && dispatch(exportSolution({ solutionPath: solution.data.solutionFilePath }))}
+            >
+              Export assessment report
+            </Button>
+            <Button
+              iconName="external"
+              iconAlign="right"
+              disabled={!isLoaded(solution)}
+              onClick={() => isLoaded(solution) && dispatch(openSolutionInIDE(solution.data.solutionFilePath))}
+            >
+              View in Visual Studio
+            </Button>
+            <Button
+              iconName="refresh"
+              id="reassess-solution"
+              disabled={!isLoaded(solution)}
+              onClick={async () => {
+                if (isLoaded(solution)) {
+                  const haveInternet = await checkInternetAccess(solution.data.solutionFilePath, dispatch);
+                  if (haveInternet) {
+                    dispatch(
+                      analyzeSolution.request({
+                        solutionPath: solution.data.solutionFilePath,
+                        runId: uuid(),
+                        triggerType: "UserRequest",
+                        settings: {
+                          ignoredProjects: [],
+                          targetFramework: targetFramework,
+                          continiousEnabled: false,
+                          actionsOnly: false,
+                          compatibleOnly: false
+                        },
+                        preTriggerData: preTriggerDataArray,
+                        force: true
+                      })
+                    );
+                    history.push(paths.dashboard);
+                  }
+                }
 
-                                                                                           <Header
-                                                                                             variant="h1"
-                                                                                             info={
-                                                                                               <InfoLink
-                                                                                                 heading="Solution assessment report"
-                                                                                                 mainContent={
-                                                                                                   <>
-                                                                                                     <p>
-                                                                                                       Once you select
-                                                                                                       an application
-                                                                                                       for porting,
-                                                                                                       Porting Assistant
-                                                                                                       for .NET can
-                                                                                                       speed up the
-                                                                                                       process by
-                                                                                                       setting up the
-                                                                                                       project file with
-                                                                                                       updated
-                                                                                                       NuGet/Microsoft
-                                                                                                       packages and
-                                                                                                       formatted package
-                                                                                                       references in a
-                                                                                                       format that is
-                                                                                                       compatible with
-                                                                                                       .NET Core. You
-                                                                                                       can use the
-                                                                                                       updated project
-                                                                                                       file to start
-                                                                                                       refactoring your
-                                                                                                       application. When
-                                                                                                       you select an
-                                                                                                       application for
-                                                                                                       porting, Porting
-                                                                                                       Assistant for
-                                                                                                       .NET copies the
-                                                                                                       .NET Framework
-                                                                                                       source code and
-                                                                                                       the associated
-                                                                                                       project files to
-                                                                                                       a .NET Core
-                                                                                                       compatible
-                                                                                                       format. If there
-                                                                                                       are any known
-                                                                                                       replacements,
-                                                                                                       Porting Assistant
-                                                                                                       for .NET applies
-                                                                                                       them. When a
-                                                                                                       project is
-                                                                                                       ported, it may
-                                                                                                       not be entirely
-                                                                                                       .NET Core
-                                                                                                       compatible
-                                                                                                       because there may
-                                                                                                       be other APIs,
-                                                                                                       packages, and
-                                                                                                       code blocks that
-                                                                                                       must be
-                                                                                                       substituted and
-                                                                                                       refactored for
-                                                                                                       compatibility.
-                                                                                                     </p>
-                                                                                                   </>
-                                                                                                 }
-                                                                                                 learnMoreLinks={[]}
-                                                                                               />
-                                                                                             }
-                                                                                             description={
-                                                                                               <Box variant="small">
-                                                                                                 Improve the
-                                                                                                 compatibility of your
-                                                                                                 solution by refactoring
-                                                                                                 the source code for
-                                                                                                 each project and
-                                                                                                 reassessing it.
-                                                                                               </Box>
-                                                                                             }
-                                                                                             actions={
-                                                                                               <SpaceBetween
-                                                                                                 direction="horizontal"
-                                                                                                 size="xs"
-                                                                                               >
-                                                                                                 <Button
-                                                                                                   iconName="download"
-                                                                                                   onClick={() =>
-                                                                                                     dispatch(
-                                                                                                       exportSolution({
-                                                                                                         solutionPath:
-                                                                                                           solution.solutionFilePath
-                                                                                                       })
-                                                                                                     )
-                                                                                                   }
-                                                                                                 >
-                                                                                                   Export assessment
-                                                                                                   report
-                                                                                                 </Button>
-                                                                                                 <Button
-                                                                                                   iconName="external"
-                                                                                                   iconAlign="right"
-                                                                                                   onClick={() =>
-                                                                                                     dispatch(
-                                                                                                       openSolutionInIDE(
-                                                                                                         solution.solutionFilePath
-                                                                                                       )
-                                                                                                     )
-                                                                                                   }
-                                                                                                 >
-                                                                                                   View in Visual Studio
-                                                                                                 </Button>
-                                                                                                 <Button
-                                                                                                   iconName="refresh"
-                                                                                                   id="reassess-solution"
-                                                                                                   onClick={async () => {
-                                                                                                     const haveInternet = await checkInternetAccess(
-                                                                                                       solution.solutionFilePath,
-                                                                                                       dispatch
-                                                                                                     );
-                                                                                                     if (haveInternet) {
-                                                                                                       dispatch(
-                                                                                                         analyzeSolution.request(
-                                                                                                           {
-                                                                                                             solutionPath:
-                                                                                                               solution.solutionFilePath,
-                                                                                                             runId: uuid(),
-                                                                                                             triggerType:
-                                                                                                               "UserRequest",
-                                                                                                             settings: {
-                                                                                                               ignoredProjects: [],
-                                                                                                               targetFramework: targetFramework,
-                                                                                                               continiousEnabled: false,
-                                                                                                               actionsOnly: false,
-                                                                                                               compatibleOnly: false
-                                                                                                             },
-                                                                                                             preTriggerData: preTriggerDataArray,
-                                                                                                             force: true
-                                                                                                           }
-                                                                                                         )
-                                                                                                       );
-                                                                                                       history.push(
-                                                                                                         paths.dashboard
-                                                                                                       );
-                                                                                                     }
-                                                                                                   }}
-                                                                                                 >
-                                                                                                   Reassess solution
-                                                                                                 </Button>
+              }}
+            >
+              Reassess solution
+            </Button>
 
-                                                                                                 <Button
-                                                                                                   id="feedback-btn"
-                                                                                                   onClick={() => {
-                                                                                                     setFeedbackModalVisible(
-                                                                                                       true
-                                                                                                     );
-                                                                                                   }}
-                                                                                                 >
-                                                                                                   Send Feedback
-                                                                                                 </Button>
+            <Button
+              id="feedback-btn"
+              onClick={() => {
+                setFeedbackModalVisible(
+                  true
+                );
+              }}
+            >
+              Send Feedback
+            </Button>
 
-                                                                                                 <Button
-                                                                                                   id="port-solution-button"
-                                                                                                   key="port-solution"
-                                                                                                   variant="primary"
-                                                                                                   disabled={
-                                                                                                     !isLoaded(projects)
-                                                                                                   }
-                                                                                                   onClick={() => {
-                                                                                                     if (
-                                                                                                       portingLocation ==
-                                                                                                       null
-                                                                                                     ) {
-                                                                                                       setShowPortingModal(
-                                                                                                         true
-                                                                                                       );
-                                                                                                     } else {
-                                                                                                       if (
-                                                                                                         isLoaded(
-                                                                                                           projects
-                                                                                                         )
-                                                                                                       ) {
-                                                                                                         history.push({
-                                                                                                           pathname: `/port-solution/${encodeURIComponent(
-                                                                                                             solution.solutionFilePath
-                                                                                                           )}`,
-                                                                                                           state: {
-                                                                                                             projects:
-                                                                                                               projects.data
-                                                                                                           }
-                                                                                                         });
-                                                                                                       }
-                                                                                                     }
-                                                                                                   }}
-                                                                                                 >
-                                                                                                   Port solution
-                                                                                                 </Button>
-                                                                                                 <PortConfigurationModal
-                                                                                                   solution={solution}
-                                                                                                   visible={
-                                                                                                     showPortingModal
-                                                                                                   }
-                                                                                                   onDismiss={() =>
-                                                                                                     setShowPortingModal(
-                                                                                                       false
-                                                                                                     )
-                                                                                                   }
-                                                                                                   onSubmit={() => {
-                                                                                                     history.push({
-                                                                                                       pathname: `/port-solution/${encodeURIComponent(
-                                                                                                         solution.solutionFilePath
-                                                                                                       )}`,
-                                                                                                       state: {
-                                                                                                         projects: isLoaded(
-                                                                                                           projects
-                                                                                                         )
-                                                                                                           ? projects.data
-                                                                                                           : []
-                                                                                                       }
-                                                                                                     });
-                                                                                                   }}
-                                                                                                 />
-                                                                                               </SpaceBetween>
-                                                                                             }
-                                                                                           >
-                                                                                             {solution.solutionName}
-                                                                                           </Header>
+            <Button
+              id="port-solution-button"
+              key="port-solution"
+              variant="primary"
+              disabled={!isLoaded(projects) || !isLoaded(solution)}
+              onClick={() => {
+                if (portingLocation == null) {
+                  setShowPortingModal(true);
+                } else {
+                  if (isLoaded(projects) && isLoaded(solution)) {
+                    history.push({
+                      pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
+                      state: {
+                        projects: projects.data
+                      }
+                    });
+                  }
+                }
+              }}
+            >
+              Port solution
+            </Button>
+            <PortConfigurationModal
+              solution={solution}
+              visible={showPortingModal && isLoaded(solution)}
+              onDismiss={() => setShowPortingModal(false)}
+              onSubmit={() => {
+                if (isLoaded(solution)) {
+                  history.push({
+                    pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
+                    state: {
+                      projects: hasNewData(projects) ? projects.data : []
+                    }
+                  });
+                }
 
-                                                                                           <SolutionSummary
-                                                                                             solution={solution}
-                                                                                             projects={projects}
-                                                                                           />
-                                                                                           <Tabs
-                                                                                             tabs={tabs}
-                                                                                             activeTabId={
-                                                                                               location.state
-                                                                                                 ?.activeTabId ||
-                                                                                               "projects"
-                                                                                             }
-                                                                                             onChange={onChangeTab}
-                                                                                           />
-                                                                                         </SpaceBetween>
-                                                                                       );
-                                                                                     };
+              }}
+            />
+          </SpaceBetween>
+        }
+      >
+        {hasNewData(solution)? solution.data.solutionName : ""}
+      </Header>
+      <Flashbar
+      items={[
+        {
+          content: (
+            <ProgressBar
+              value={ isLoaded(solution)? 100: isLoadingWithData(solution)? 100*solution.data.projects.length/totalProjects :0}
+              variant="flash"
+              additionalInfo="Additional information"
+              description="Progress bar description"
+              label="Progress bar label"
+            />
+          )
+        }
+      ]}
+    />
+      <SolutionSummary solution={solution} projects={projects} />
+      <Tabs tabs={tabs} activeTabId={location.state?.activeTabId || "projects"} onChange={onChangeTab} />
+    </SpaceBetween>
+  );
+};
 
 export const AssessSolutionDashboard = React.memo(AssessSolutionDashboardInternal);

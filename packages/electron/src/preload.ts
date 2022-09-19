@@ -35,17 +35,13 @@ contextBridge.exposeInMainWorld("electron", {
       | "notification"
       | "newVersionNotification"
       | "email"
-      | "useDefaultCreds",
+      | "useDefaultCreds"
+      | "cancel"
+      | "isAssesmentRunning",
     value: any
   ) => localStore.set(key, value),
   getState: (
-    key:
-      | "solutions"
-      | "profile"
-      | "targetFramework"
-      | "share"
-      | "email"
-      | "useDefaultCreds",
+    key: "solutions" | "profile" | "targetFramework" | "share" | "email" | "useDefaultCreds" | "cancel" | "isAssesmentRunning",
     defaultValue: any
   ) => localStore.get(key, defaultValue),
   saveCache: (value: any) => reducerCacheStore.set("reducerCache", value),
@@ -143,6 +139,7 @@ contextBridge.exposeInMainWorld("backend", {
   listenNugetPackageUpdate: (callback: (message: string) => void) => listenBackend("onNugetPackageUpdate", callback),
   listenApiAnalysisUpdate: (callback: (message: string) => void) => listenBackend("onApiAnalysisUpdate", callback),
   checkInternetAccess: () => invokeBackend("checkInternetAccess"),
+  cancelAssessment: () => invokeBackend("cancelAssessment"),
 });
 
 contextBridge.exposeInMainWorld("porting", {

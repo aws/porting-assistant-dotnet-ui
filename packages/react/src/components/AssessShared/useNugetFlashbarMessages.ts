@@ -7,7 +7,7 @@ import { pathValues } from "../../constants/paths";
 import { Project } from "../../models/project";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { selectNugetPackages, selectSolutionToSolutionDetails } from "../../store/selectors/solutionSelectors";
-import { isFailed, isLoaded, Loadable, Loaded } from "../../utils/Loadable";
+import { hasNewData, isFailed, isLoaded, Loadable, Loaded } from "../../utils/Loadable";
 import { nugetPackageKey } from "../../utils/NugetPackageKey";
 
 export const useNugetFlashbarMessages = (projects?: Loadable<Project[] | Project>) => {
@@ -26,10 +26,10 @@ export const useNugetFlashbarMessages = (projects?: Loadable<Project[] | Project
   useEffect(() => {
     let allProjects: Loadable<Project[] | Project> =
       projects == null
-        ? Loaded(Object.values(solutionToSolutionDetails).flatMap(s => (isLoaded(s) ? s.data.projects : [])))
+        ? Loaded(Object.values(solutionToSolutionDetails).flatMap(s => (hasNewData(s) ? s.data.projects : [])))
         : projects;
 
-    if (!isLoaded(allProjects)) {
+    if (!hasNewData(allProjects)) {
       return;
     }
     const invalidNugets = new Set<string>();

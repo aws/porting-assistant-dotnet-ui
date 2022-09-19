@@ -45,6 +45,7 @@ export interface Electron {
   writeReactErrLog: (source: any, message: any, response: any) => void;
   getAssessmentLog: () => string;
   checkInternetAccess: () => Promise<boolean>;
+  cancelAssessment: () => void
   getLogFolder: () => string;
 }
 
@@ -71,6 +72,7 @@ export interface Backend {
     callback: (projectAnalysis: Response<ProjectApiAnalysisResult, SolutionProject>) => void
   ) => void;
   checkInternetAccess: () => Promise<boolean>;
+  cancelAssessment: () => void;
 }
 
 export interface Porting {

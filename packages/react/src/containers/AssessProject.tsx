@@ -79,7 +79,7 @@ const AssessProjectInternal: React.FC = () => {
 
   return (
     <PortingAssistantAppLayout
-      content={<AssessProjectDashboard solution={currentSolutionDetails.data} project={currentProject} />}
+      content={<AssessProjectDashboard solution={currentSolutionDetails} project={currentProject} />}
       breadcrumbs={<PortingAssistantBreadcrumb items={breadcrumbWithCurrent} />}
     />
   );

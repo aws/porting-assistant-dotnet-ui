@@ -16,6 +16,7 @@ import { getCompatibleApi } from "../../utils/getCompatibleApi";
 import { getCompatibleNugetsAgg } from "../../utils/getCompatibleNugets";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isPortingCompleted } from "../../utils/isPortingCompleted";
+import { hasNewData } from "../../utils/Loadable";
 import { CompatiblePackage } from "../AssessShared/CompatiblePackage";
 import { SummaryItem } from "../AssessShared/SummaryItem";
 import { InfoLink } from "../InfoLink";
@@ -90,6 +91,7 @@ const ProjectSummaryInternal: React.FC<Props> = ({ project }) => {
               incompatible={nugetCompatibilities.nugetAggregates.incompatible}
               unknown={nugetCompatibilities.nugetAggregates.unknown}
               isLoading={!nugetCompatibilities.isAllNugetLoaded}
+              isInProgress={!nugetCompatibilities.isAllNugetLoaded}
             />
           </SpaceBetween>
         </div>
@@ -113,7 +115,8 @@ const ProjectSummaryInternal: React.FC<Props> = ({ project }) => {
               compatible={apiCompatibilities.values[0]}
               incompatible={apiCompatibilities.values[1] - apiCompatibilities.values[0]}
               unknown={0}
-              isLoading={apiCompatibilities.isApisLoading}
+              isLoading={!hasNewData(solutionProjects)}
+              isInProgress={apiCompatibilities.isApisLoading}
             />
           </SpaceBetween>
         </div>
