@@ -109,7 +109,7 @@ namespace PortingAssistant.Common.Services
                     {
                         SolutionDetails = solutionDetails
                     };
-                    TelemetryCollectionUtils.CollectSolutionMetrics(SolutionAnalysisResult, request, startTime, tgtFramework);
+                    TelemetryCollectionUtils.CollectSolutionMetrics(SolutionAnalysisResult, request, startTime, tgtFramework, PortingAssistantUtils.CancelAssessment.cancel);
                     PortingAssistantUtils.CancelAssessment.cancel = false;
                     return new Response<SolutionDetails, string>
                     {
