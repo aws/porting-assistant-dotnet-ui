@@ -245,7 +245,10 @@ const shareCheckbox = (
 
 const removeProfileCheckbox = (
   <Checkbox checked={false}>
-    <Box variant="div">Remove my profile information from Porting Assistant for .NET</Box>
+    <Box variant="div">
+      You no longer need to provide your named profile information to use Porting Assistant for .NET. Check the box to
+      remove your profile information from Porting Assistant
+    </Box>
   </Checkbox>
 );
 
