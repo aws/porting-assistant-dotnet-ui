@@ -4,6 +4,7 @@ using System;
 using PortingAssistant.Client.Model;
 using System.Collections.Generic;
 using PortingAssistant.Telemetry.Utils;
+using PortingAssistant.Client.Common.Model;
 
 namespace PortingAssistant.UnitTests
 {
@@ -53,9 +54,23 @@ namespace PortingAssistant.UnitTests
                 ProjectGuid = projectGuid,
                 ProjectType = "FormatA",
                 TargetFrameworks = new List<string> { "one", "two" },
-                PackageReferences = new List<PackageVersionPair> { new PackageVersionPair {PackageId = "System.Diagnostics.Tools", Version="4.1.2" }, new PackageVersionPair { PackageId = "", Version = "" } },
-                ProjectReferences = new List<ProjectReference> { new ProjectReference { ReferencePath = "a"}, new ProjectReference { ReferencePath = "b" }, new ProjectReference { ReferencePath = "c" } },
-                IsBuildFailed = false 
+                PackageReferences = new List<PackageVersionPair> { new PackageVersionPair { PackageId = "System.Diagnostics.Tools", Version = "4.1.2" }, new PackageVersionPair { PackageId = "", Version = "" } },
+                ProjectReferences = new List<ProjectReference> { new ProjectReference { ReferencePath = "a" }, new ProjectReference { ReferencePath = "b" }, new ProjectReference { ReferencePath = "c" } },
+                IsBuildFailed = false,
+                ProjectCompatibilityResult = new ProjectCompatibilityResult { ProjectPath = "test.csproj" },
+                SourceFileAnalysisResults = new List<SourceFileAnalysisResult> {
+                    new SourceFileAnalysisResult {
+                        ApiAnalysisResults = new List<ApiAnalysisResult> {
+                            new ApiAnalysisResult {
+                                CompatibilityResults = new Dictionary<string, CompatibilityResult> {
+                                    { "test", new CompatibilityResult {
+                                        Compatibility = Compatibility.COMPATIBLE
+                                    } }
+                                }
+                            }
+                        }
+                    } },
+                Errors = new List<string> { },
             };
             var projectMetric = TelemetryCollectionUtils.createProjectMetric(runId, triggerType, targetFramework, projectAnalysisResult);
             Assert.AreEqual(projectMetric.ProjectGuid, encryptedProjectGuid);

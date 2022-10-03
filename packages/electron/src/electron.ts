@@ -17,6 +17,7 @@ import url from "url";
 import electronIsDev from "electron-is-dev";
 import { initConnection, initTelemetryConnection } from "./electron-backend";
 import { localStore } from "./preload-localStore";
+import { v4 as uuid } from "uuid";
 
 const upgradeConfig = require(electronIsDev
   ? path.join("..", "build-scripts", "upgrade-config-dev.json")
@@ -127,6 +128,7 @@ autoUpdater.logger = log;
 autoUpdater.autoDownload = false;
 autoUpdater.allowDowngrade = true;
 autoUpdater.autoInstallOnAppQuit = true;
+localStore.set("sessionid", uuid());
 
 const connection = initConnection(log.functions);
 const telemetryConnection = initTelemetryConnection(log.functions);

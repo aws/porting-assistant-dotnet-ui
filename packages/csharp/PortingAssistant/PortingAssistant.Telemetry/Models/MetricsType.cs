@@ -12,5 +12,11 @@ namespace PortingAssistant.Telemetry.Model
         API,
         [EnumMember(Value = "nuget")]
         Nuget,
+        [EnumMember(Value = "start")]
+        Start,
+        [EnumMember(Value = "end")]
+        End,
+        [EnumMember(Value = "crash")]
+        Crash,
     }
 }

@@ -233,7 +233,7 @@ export const projectAnalysisResult: ProjectApiAnalysisResult = {
   featureType: "testfeature",
   isBuildFailed: false,
   projectReferences: [],
-  pacakgeReferences: []
+  packageReferences: []
 };
 
 export const projectToApiAnalysis: ProjectToApiAnalysis = {

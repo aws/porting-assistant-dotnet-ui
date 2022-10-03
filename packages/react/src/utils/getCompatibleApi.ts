@@ -98,7 +98,7 @@ export const getSelectedInvocations = (
       projectType: invocationProject.data.projectType,
       featureType: invocationProject.data.featureType,
       isBuildFailed: false,
-      pacakgeReferences: invocationProject.data.pacakgeReferences,
+      packageReferences: invocationProject.data.packageReferences,
       projectReferences: invocationProject.data.projectReferences
     };
     return { [projectPath]: Loaded(sourceFileItem) };

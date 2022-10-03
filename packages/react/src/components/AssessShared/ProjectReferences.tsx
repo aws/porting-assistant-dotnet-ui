@@ -6,7 +6,7 @@ import { Network } from "vis-network/standalone";
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { Project } from "../../models/project";
 import { selectCurrentSolutionPath } from "../../store/selectors/solutionSelectors";
-import { hasNewData, isLoaded, Loadable } from "../../utils/Loadable";
+import { hasNewData, Loadable } from "../../utils/Loadable";
 import { InfoLink } from "../InfoLink";
 import styles from "./ProjectReferences.module.scss";
 

@@ -10,7 +10,7 @@ import {
   TableProps,
   TextFilter
 } from "@awsui/components-react";
-import StatusIndicator from "@awsui/components-react/status-indicator/internal";
+import StatusIndicator from "@awsui/components-react/status-indicator";
 import { stat } from "fs";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -30,7 +30,7 @@ import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { filteringCountText } from "../../utils/FilteringCountText";
 import { getCompatibleApi } from "../../utils/getCompatibleApi";
 import { getTargetFramework } from "../../utils/getTargetFramework";
-import { hasNewData, isLoaded } from "../../utils/Loadable";
+import { isLoaded } from "../../utils/Loadable";
 import { useNugetFlashbarMessages } from "../AssessShared/useNugetFlashbarMessages";
 import { InfoLink } from "../InfoLink";
 import { LinkComponent } from "../LinkComponent";

@@ -1,13 +1,10 @@
 import { produce } from "immer";
-import Path from 'path'
 import { createReducer } from "typesafe-actions";
-import { Z_ASCII } from "zlib";
 
 import { SolutionToApiAnalysis, SolutionToSolutionDetails } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
-import { getTotalProjects } from "../../utils/getTotalProjects";
 import { Failed, isLoaded, isLoading, isLoadingWithData, isReloading, Loaded, Loading, Reloading } from "../../utils/Loadable";
-import { analyzeSolution, cancelAssessment, getApiAnalysis, partialSolutionUpdate, removeSolution, setProfileSet } from "../actions/backend";
+import { analyzeSolution, getApiAnalysis, partialSolutionUpdate, removeSolution, setProfileSet } from "../actions/backend";
 export const backendReducer = createReducer({
   apiAnalysis: {} as SolutionToApiAnalysis,
   solutionToSolutionDetails: {} as SolutionToSolutionDetails,
@@ -53,7 +50,7 @@ export const backendReducer = createReducer({
             projectName: action.payload.data?.projectName,
             targetFrameworks: action.payload.data?.targetFrameworks,
             projectType: action.payload.data?.projectType,
-            packageReferences: action.payload.data?.pacakgeReferences,
+            packageReferences: action.payload.data?.packageReferences,
             projectReferences: action.payload.data?.projectReferences
           }]
         }
@@ -77,7 +74,7 @@ export const backendReducer = createReducer({
               projectName: action.payload.data?.projectName,
               targetFrameworks: action.payload.data?.targetFrameworks,
               projectType: action.payload.data?.projectType,
-              packageReferences: action.payload.data?.pacakgeReferences,
+              packageReferences: action.payload.data?.packageReferences,
               projectReferences: action.payload.data?.projectReferences
             }]
         }

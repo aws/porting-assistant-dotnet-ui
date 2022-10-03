@@ -49,7 +49,7 @@ export interface ProjectApiAnalysisResult {
   projectType: string;
   featureType: string;
   isBuildFailed: boolean;
-  pacakgeReferences: NugetPackage[];
+  packageReferences: NugetPackage[];
   projectReferences: ProjectReference[];
 }
 

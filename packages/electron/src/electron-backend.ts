@@ -175,7 +175,8 @@ export const initConnection = (logger: any = console) => {
         localStore.get("profile"),
         app.getPath("userData"),
         app.getVersion(),
-        localStore.get("useDefaultCreds")
+        localStore.get("useDefaultCreds"),
+        localStore.get("sessionid")
       )
       .build();
 

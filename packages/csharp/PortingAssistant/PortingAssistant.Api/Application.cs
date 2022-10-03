@@ -68,7 +68,6 @@ namespace PortingAssistant.Api
                 {
                     _connection.Send("onNugetPackageUpdate", response);
                 });
-                // Set UseGenerator to true once for reduced memory consumption
                 request.settings.UseGenerator = true;
                 return assessmentService.AnalyzeSolution(request).Result;
             });
@@ -144,7 +143,7 @@ namespace PortingAssistant.Api
 
             _connection.On<string>("cancelAssessment", 
             reuqest => {
-              PortingAssistantUtils.CancelAssessment.cancel = true;
+              PortingAssistantUtils.cancel = true;
             });
         }
 

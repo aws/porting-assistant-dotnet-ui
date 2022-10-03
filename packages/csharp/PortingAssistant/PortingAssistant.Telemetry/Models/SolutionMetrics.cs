@@ -9,5 +9,7 @@ namespace PortingAssistant.Telemetry.Model
         public double AnalysisTime { get; set; }
         public bool UsingDefaultCreds { get; set; }
         public bool Canceled {get; set;}
+        new public string SessionId {get; set;}
+
     }
 }

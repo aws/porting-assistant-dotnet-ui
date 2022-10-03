@@ -5,6 +5,8 @@ using PortingAssistant.Common.Listener;
 using PortingAssistant.Common.Model;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Client;
+using PortingAssistant.Client.Client.FileParser;
+using PortingAssistant.Client.Client.Utils;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Common.Utils;
 using System.Threading.Tasks;
@@ -36,9 +38,7 @@ namespace PortingAssistant.Common.Services
             {
                 var startTime = DateTime.Now;
                 string tgtFramework = request.settings.TargetFramework;
-
-                // var solutionAnalysisResult = _client.AnalyzeSolutionAsync(request.solutionFilePath, request.settings);
-                // solutionAnalysisResult.Wait();
+                TelemetryCollectionUtils.CollectStartMetrics( request, startTime, tgtFramework);
 
                 var preProjectTriggerDataDictionary = new Dictionary<string, PreTriggerData>();
                 if (request.preTriggerData != null && request.preTriggerData.Length > 0)
@@ -52,106 +52,76 @@ namespace PortingAssistant.Common.Services
                     });
                 }
 
-                if (request.settings.UseGenerator)
-                {
-                    List<ProjectDetails> projectDetails = new List<ProjectDetails>();
-                    var failedProjects = new List<string>();
+                  List<ProjectDetails> projectDetails = new List<ProjectDetails>();
+                  var failedProjects = new List<string>();
+                  List<string> projectGuids = new List<string>();
+                  
+                  var projectAnalysisResultEnumerator = _client.AnalyzeSolutionGeneratorAsync(request.solutionFilePath, request.settings).GetAsyncEnumerator();
+                  try
+                  {
+                      while (await projectAnalysisResultEnumerator.MoveNextAsync().ConfigureAwait(false) && !PortingAssistantUtils.cancel)
+                      {
+                          ProjectAnalysisResult result = projectAnalysisResultEnumerator.Current;
+                          var preTriggerProjectData = preProjectTriggerDataDictionary.ContainsKey(result.ProjectName) ?
+                              preProjectTriggerDataDictionary[result.ProjectName] : null;
+                              TelemetryCollectionUtils.CollectProjectMetrics(result, request, tgtFramework, preTriggerProjectData);
 
-                    var projectAnalysisResultEnumerator = _client.AnalyzeSolutionGeneratorAsync(request.solutionFilePath, request.settings).GetAsyncEnumerator();
-                    try
-                    {
-                        while (await projectAnalysisResultEnumerator.MoveNextAsync().ConfigureAwait(false) && !PortingAssistantUtils.CancelAssessment.cancel)
-                        {
-                            ProjectAnalysisResult result = projectAnalysisResultEnumerator.Current;
-                            var preTriggerProjectData = preProjectTriggerDataDictionary.ContainsKey(result.ProjectName) ?
-                                preProjectTriggerDataDictionary[result.ProjectName] : null;
-                                TelemetryCollectionUtils.CollectProjectMetrics(result, request, tgtFramework, preTriggerProjectData);
+                          projectDetails.Add(new ProjectDetails
+                          {
+                              PackageReferences = result.PackageReferences,
+                              ProjectFilePath = result.ProjectFilePath,
+                              ProjectGuid = result.ProjectGuid,
+                              ProjectName = result.ProjectName,
+                              ProjectReferences = result.ProjectReferences,
+                              ProjectType = result.ProjectType,
+                              TargetFrameworks = result.TargetFrameworks,
+                              IsBuildFailed = result.IsBuildFailed
+                          });
 
-                            projectDetails.Add(new ProjectDetails
-                            {
-                                PackageReferences = result.PackageReferences,
-                                ProjectFilePath = result.ProjectFilePath,
-                                ProjectGuid = result.ProjectGuid,
-                                ProjectName = result.ProjectName,
-                                ProjectReferences = result.ProjectReferences,
-                                ProjectType = result.ProjectType,
-                                TargetFrameworks = result.TargetFrameworks,
-                                IsBuildFailed = result.IsBuildFailed
-                            });
+                          projectGuids.Add(result.ProjectGuid);
 
-                            if (result.IsBuildFailed)
-                            {
-                                failedProjects.Add(result.ProjectFilePath);
-                            }
-                            ProjectAnalysisResultHandler(result, request, tgtFramework);
+                          if (result.IsBuildFailed)
+                          {
+                              failedProjects.Add(result.ProjectFilePath);
+                          }
+                          ProjectAnalysisResultHandler(result, request, tgtFramework);
 
-                            if (result != null)
-                            {
-                                result.Dispose();
-                                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-                                GC.Collect();
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        await projectAnalysisResultEnumerator.DisposeAsync();
-                    }
+                          if (result != null)
+                          {
+                              result.Dispose();
+                              GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                              GC.Collect();
+                          }
+                      }
+                  }
+                  finally
+                  {
+                      await projectAnalysisResultEnumerator.DisposeAsync();
+                  }
+                  var solutionGuid = SolutionFileParser.getSolutionGuid(request.solutionFilePath);
+                  var solutionDetails = new SolutionDetails
+                  {
+                      SolutionName = Path.GetFileNameWithoutExtension(request.solutionFilePath),
+                      SolutionFilePath = request.solutionFilePath,
+                      Projects = projectDetails,
+                      FailedProjects = failedProjects,
+                      SolutionGuid = solutionGuid,
+                      RepositoryUrl = GitConfigFileParser.getGitRepositoryRootPath(request.solutionFilePath),
+                      ApplicationGuid = HashUtils.GenerateGuid(projectGuids)
+                  };
+                  var SolutionAnalysisResult = new SolutionAnalysisResult()
+                  {
+                      SolutionDetails = solutionDetails
+                  };
+                  TelemetryCollectionUtils.CollectSolutionMetrics(SolutionAnalysisResult, request, startTime, tgtFramework, PortingAssistantUtils.cancel);
+                  PortingAssistantUtils.cancel = false;
+                  TelemetryCollectionUtils.CollectEndMetrics(request, startTime, tgtFramework);
+                  return new Response<SolutionDetails, string>
+                  {
+                      Value = solutionDetails,
+                      Status = Response<SolutionDetails, string>.Success()
+                  };
 
-                    var solutionDetails = new SolutionDetails
-                    {
-                        SolutionName = Path.GetFileNameWithoutExtension(request.solutionFilePath),
-                        SolutionFilePath = request.solutionFilePath,
-                        Projects = projectDetails,
-                        FailedProjects = failedProjects
-                    };
-                    var SolutionAnalysisResult = new SolutionAnalysisResult()
-                    {
-                        SolutionDetails = solutionDetails
-                    };
-                    TelemetryCollectionUtils.CollectSolutionMetrics(SolutionAnalysisResult, request, startTime, tgtFramework, PortingAssistantUtils.CancelAssessment.cancel);
-                    PortingAssistantUtils.CancelAssessment.cancel = false;
-                    return new Response<SolutionDetails, string>
-                    {
-                        Value = solutionDetails,
-                        Status = Response<SolutionDetails, string>.Success()
-                    };
-
-                }
-                else
-                {
-                    var solutionAnalysisResult = _client.AnalyzeSolutionAsync(request.solutionFilePath, request.settings);
-                    solutionAnalysisResult.Wait();
-
-                    if (solutionAnalysisResult.IsCompletedSuccessfully)
-                    {
-                        TelemetryCollectionUtils.CollectSolutionMetrics(solutionAnalysisResult.Result, request, startTime, tgtFramework);
-                        solutionAnalysisResult.Result.ProjectAnalysisResults.ForEach(projectAnalysisResult =>
-                        {
-                            var preTriggerProjectData = preProjectTriggerDataDictionary.ContainsKey(projectAnalysisResult.ProjectName) ?
-    preProjectTriggerDataDictionary[projectAnalysisResult.ProjectName] : null;
-                            TelemetryCollectionUtils.CollectProjectMetrics(projectAnalysisResult, request, tgtFramework, preTriggerProjectData);
-
-                            ProjectAnalysisResultHandler(projectAnalysisResult, request, tgtFramework);
-                        });
-
-                        solutionAnalysisResult.Result.FailedProjects.ForEach(projectFilePath =>
-                        {
-                            InvokeApiAnalysisListenerOnFailure(projectFilePath, projectFilePath, request.solutionFilePath);
-                        });
-
-                        return new Response<SolutionDetails, string>
-                        {
-                            Value = solutionAnalysisResult.Result.SolutionDetails,
-                            Status = Response<SolutionDetails, string>.Success()
-                        };
-                    }
-                    else
-                    {
-                        throw new PortingAssistantClientException($"analyze solution {request.solutionFilePath} failed", solutionAnalysisResult.Exception);
-                    }
-
-                }
             }
             catch (Exception ex)
             {

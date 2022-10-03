@@ -25,5 +25,7 @@ namespace PortingAssistant.Telemetry.Model
         public bool HasActions { get; set; }
         [JsonProperty("apiCounts")]
         public int ApiCounts { get; set; }
+        [JsonProperty("sessionId")]
+        new public string SessionId {get; set;}
     }
 }

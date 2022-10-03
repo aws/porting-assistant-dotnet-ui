@@ -46,7 +46,8 @@ const createLocalStore = () =>
       newVersionNotification: true,
       useDefaultCreds: false,
       cancel: false,
-      isAssesmentRunning: false
+      isAssesmentRunning: false,
+      sessionid: ""
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -98,6 +99,9 @@ const createLocalStore = () =>
       isAssesmentRunning: {
         type: "boolean",
       },
+      sessionid: {
+        type: "string"
+      }
     },
     watch: true,
     cwd:
