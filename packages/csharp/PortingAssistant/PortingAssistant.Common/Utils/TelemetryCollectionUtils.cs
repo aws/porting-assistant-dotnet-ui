@@ -13,9 +13,9 @@ namespace PortingAssistant.Common.Utils
 {
     public static class TelemetryCollectionUtils
     {
-        public static void CollectSolutionMetrics(SolutionAnalysisResult solutionAnalysisResult, AnalyzeSolutionRequest request, DateTime startTime, string tgtFramework, bool canceled=false)
+        public static void CollectSolutionMetrics(SolutionAnalysisResult solutionAnalysisResult, AnalyzeSolutionRequest request, DateTime startTime, string tgtFramework, double firstProjectAnalysisTime, int numProjects, bool canceled=false)
         {
-            var solutionMetrics = createSolutionMetric(solutionAnalysisResult, request.runId, request.triggerType, tgtFramework, startTime, canceled);
+            var solutionMetrics = createSolutionMetric(solutionAnalysisResult, request.runId, request.triggerType, tgtFramework, startTime, firstProjectAnalysisTime, numProjects, canceled);
             TelemetryCollector.Collect<SolutionMetrics>(solutionMetrics);
         }
 
@@ -66,7 +66,7 @@ namespace PortingAssistant.Common.Utils
             apiMetrics.ToList().ForEach(metric => TelemetryCollector.Collect(metric));
         }
 
-        public static SolutionMetrics createSolutionMetric(SolutionAnalysisResult solutionAnalysisResult, string runId, string triggerType, string tgtFramework, DateTime startTime, bool canceled)
+        public static SolutionMetrics createSolutionMetric(SolutionAnalysisResult solutionAnalysisResult, string runId, string triggerType, string tgtFramework, DateTime startTime, double firstProjectAnalysisTime, int numProjects, bool canceled)
         {
             return new SolutionMetrics
             {
@@ -84,6 +84,8 @@ namespace PortingAssistant.Common.Utils
                 UsingDefaultCreds = MetricsBase.UsingDefault,
                 Canceled = canceled,
                 SessionId = MetricsBase.SessionId,
+                FirstProjectAnalysisTime = firstProjectAnalysisTime,
+                NumProjects = numProjects
             };
         }
 

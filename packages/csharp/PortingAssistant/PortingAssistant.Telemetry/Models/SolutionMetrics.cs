@@ -10,6 +10,8 @@ namespace PortingAssistant.Telemetry.Model
         public bool UsingDefaultCreds { get; set; }
         public bool Canceled {get; set;}
         new public string SessionId {get; set;}
+        public double FirstProjectAnalysisTime {get; set;}
+        public double NumProjects {get; set;}
 
     }
 }

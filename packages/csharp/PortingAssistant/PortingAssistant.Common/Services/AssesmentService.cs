@@ -58,17 +58,23 @@ namespace PortingAssistant.Common.Services
                   
                   var projectAnalysisResultEnumerator = _client.AnalyzeSolutionGeneratorAsync(request.solutionFilePath, request.settings).GetAsyncEnumerator();
                   var projectStartTime = DateTime.Now;
+                  var projectCount = 0;
+                  var firstProjectTime = 0.0;
                   try
                   {
                       while (await projectAnalysisResultEnumerator.MoveNextAsync().ConfigureAwait(false) && !PortingAssistantUtils.cancel)
                       {
                           ProjectAnalysisResult result = projectAnalysisResultEnumerator.Current;
+                          projectCount += 1;
                           var preTriggerProjectData = preProjectTriggerDataDictionary.ContainsKey(result.ProjectName) ?
                               preProjectTriggerDataDictionary[result.ProjectName] : null;
                             var projectAnalysisTime = DateTime.Now.Subtract(projectStartTime).TotalMilliseconds;
                             var cumulativeAnalysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds;
                               TelemetryCollectionUtils.CollectProjectMetrics(result, request, tgtFramework, projectAnalysisTime, cumulativeAnalysisTime, preTriggerProjectData);
 
+                          if (projectCount == 1) {
+                              firstProjectTime = cumulativeAnalysisTime;
+                          }
                           projectDetails.Add(new ProjectDetails
                           {
                               PackageReferences = result.PackageReferences,
@@ -117,7 +123,7 @@ namespace PortingAssistant.Common.Services
                   {
                       SolutionDetails = solutionDetails
                   };
-                  TelemetryCollectionUtils.CollectSolutionMetrics(SolutionAnalysisResult, request, startTime, tgtFramework, PortingAssistantUtils.cancel);
+                  TelemetryCollectionUtils.CollectSolutionMetrics(SolutionAnalysisResult, request, startTime, tgtFramework, firstProjectTime, projectCount, PortingAssistantUtils.cancel);
                   PortingAssistantUtils.cancel = false;
                   TelemetryCollectionUtils.CollectEndMetrics(request, startTime, tgtFramework);
                   return new Response<SolutionDetails, string>
