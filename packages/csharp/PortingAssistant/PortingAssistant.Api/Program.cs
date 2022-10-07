@@ -85,7 +85,9 @@ namespace PortingAssistant.Api
               for (int i = 0; i < files.Length; i++)
               {
                 FileInfo file = new FileInfo(files[0]);
-                TelemetryCollectionUtils.CollectCrashMetrics(file.Name, file.CreationTimeUtc);
+                if ((file.CreationTime - DateTime.Now).TotalDays < 30) {
+                  TelemetryCollectionUtils.CollectCrashMetrics(file.Name, file.CreationTimeUtc);
+                }
               }
 
             var serviceCollection = new ServiceCollection();

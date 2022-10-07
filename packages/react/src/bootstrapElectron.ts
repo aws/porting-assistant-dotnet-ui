@@ -42,6 +42,7 @@ export interface Electron {
   getLatestVersion: () => Promise<string>;
   getOutdatedVersionFlag: () => Promise<boolean>;
   telemetry: (message: any) => void;
+  crashInLast30Days: (sourceFilePath: string) => Promise<boolean>;
   writeReactErrLog: (source: any, message: any, response: any) => void;
   getAssessmentLog: () => string;
   checkInternetAccess: () => Promise<boolean>;

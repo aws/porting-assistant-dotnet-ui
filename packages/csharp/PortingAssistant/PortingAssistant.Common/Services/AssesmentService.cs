@@ -57,6 +57,7 @@ namespace PortingAssistant.Common.Services
                   List<string> projectGuids = new List<string>();
                   
                   var projectAnalysisResultEnumerator = _client.AnalyzeSolutionGeneratorAsync(request.solutionFilePath, request.settings).GetAsyncEnumerator();
+                  var projectStartTime = DateTime.Now;
                   try
                   {
                       while (await projectAnalysisResultEnumerator.MoveNextAsync().ConfigureAwait(false) && !PortingAssistantUtils.cancel)
@@ -64,7 +65,9 @@ namespace PortingAssistant.Common.Services
                           ProjectAnalysisResult result = projectAnalysisResultEnumerator.Current;
                           var preTriggerProjectData = preProjectTriggerDataDictionary.ContainsKey(result.ProjectName) ?
                               preProjectTriggerDataDictionary[result.ProjectName] : null;
-                              TelemetryCollectionUtils.CollectProjectMetrics(result, request, tgtFramework, preTriggerProjectData);
+                            var projectAnalysisTime = DateTime.Now.Subtract(projectStartTime).TotalMilliseconds;
+                            var cumulativeAnalysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds;
+                              TelemetryCollectionUtils.CollectProjectMetrics(result, request, tgtFramework, projectAnalysisTime, cumulativeAnalysisTime, preTriggerProjectData);
 
                           projectDetails.Add(new ProjectDetails
                           {
@@ -92,6 +95,7 @@ namespace PortingAssistant.Common.Services
                               GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
                               GC.Collect();
                           }
+                        projectStartTime = DateTime.Now;
                       }
                   }
                   finally
@@ -140,7 +144,6 @@ namespace PortingAssistant.Common.Services
             {
                 return;
             }
-            TelemetryCollectionUtils.CollectProjectMetrics(projectAnalysisResult, request, tgtFramework);
 
             projectAnalysisResult.PackageAnalysisResults.ToList()
             .ForEach(p =>

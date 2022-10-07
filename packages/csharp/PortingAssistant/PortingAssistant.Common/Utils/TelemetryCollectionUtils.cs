@@ -37,9 +37,9 @@ namespace PortingAssistant.Common.Utils
             TelemetryCollector.Collect<CrashMetrics>(crashMetric);
         }
 
-        public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework, PreTriggerData preTriggerData = null)
+        public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework, double assessmentTime, double cumulativeAnalysisTime, PreTriggerData preTriggerData = null)
         {
-            var projectMetrics = createProjectMetric(request.runId, request.triggerType, tgtFramework, projectAnalysisResult, preTriggerData);
+            var projectMetrics = createProjectMetric(request.runId, request.triggerType, tgtFramework, projectAnalysisResult, assessmentTime, cumulativeAnalysisTime, preTriggerData);
             TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
         }
 
@@ -132,7 +132,7 @@ namespace PortingAssistant.Common.Utils
                 PortingAssistantVersion = MetricsBase.Version
             };
         }
-        public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult, PreTriggerData preTriggerData = null)
+        public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult, double assessmentTime, double cumulativeAnalysisTime, PreTriggerData preTriggerData = null)
         {
             var preCompatibilityResult = (preTriggerData == null || preTriggerData?.sourceFileAnalysisResults == null || preTriggerData.sourceFileAnalysisResults.Length == 0)
                 ? null : AnalysisUtils.GenerateCompatibilityResults(preTriggerData?.sourceFileAnalysisResults?.ToList(),
@@ -162,6 +162,8 @@ namespace PortingAssistant.Common.Utils
                 PostBuildErrorCount = projectAnalysisResult.Errors.Count,
                 ProjectLanguage = GetProjectLanguage(projectAnalysisResult.ProjectFilePath),
                 SessionId = MetricsBase.SessionId,
+                AnalysisTime = assessmentTime,
+                CumulativeAnalysisTime = cumulativeAnalysisTime,
             };
         }
 

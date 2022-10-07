@@ -72,7 +72,7 @@ namespace PortingAssistant.UnitTests
                     } },
                 Errors = new List<string> { },
             };
-            var projectMetric = TelemetryCollectionUtils.createProjectMetric(runId, triggerType, targetFramework, projectAnalysisResult);
+            var projectMetric = TelemetryCollectionUtils.createProjectMetric(runId, triggerType, targetFramework, projectAnalysisResult, 0, 0);
             Assert.AreEqual(projectMetric.ProjectGuid, encryptedProjectGuid);
         }
     }

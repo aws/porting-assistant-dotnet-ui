@@ -101,6 +101,7 @@ contextBridge.exposeInMainWorld("electron", {
   getLatestVersion: () => invokeBackend("getLatestVersion"),
   getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
+  crashInLast30Days: (filePath:string) => invokeBackend("crashInLast30Days", filePath),
   writeReactErrLog: (source: any, message: any, response: any) =>
     invokeBackend("writeReactErrLog", source, message, response),
   getAssessmentLog: () => {

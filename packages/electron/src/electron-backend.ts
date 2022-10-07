@@ -120,6 +120,21 @@ export const initConnection = (logger: any = console) => {
     }
   });
 
+  ipcMain.handle("crashInLast30Days", async (_event, sourceFilePath) => {
+    try {
+      const fileNames = await fs.promises.readdir(sourceFilePath);
+      for (let fileName of fileNames) {
+        var fileInfo = await fs.promises.stat(path.join(sourceFilePath, fileName));
+        if (((Date.now() - fileInfo.birthtimeMs)/(86400000)) < 30) {
+          return true;
+        }
+      }
+      return  false;
+    } catch (ex) {
+      throw new Error(`Unable to get file info: ${sourceFilePath}. ${ex}`);
+    }
+  });
+
   ipcMain.handle("getVersion", async (_event) => {
     return app.getVersion();
   });
