@@ -82,7 +82,7 @@
     "typesafe-actions": "^5.1.0",
     "uuid": "^8.2.0",
     "vis-network": "^7.5.2",
-    "@xmldom/xmldom": "^0.8.0"
+    "@xmldom/xmldom": "^0.8.3"
   },
   "prettier": {
     "printWidth": 120
