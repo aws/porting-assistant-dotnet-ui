@@ -47,7 +47,8 @@ const createLocalStore = () =>
       useDefaultCreds: false,
       cancel: false,
       isAssesmentRunning: false,
-      sessionid: ""
+      sessionid: "",
+      lastOpenDate: "",
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -101,6 +102,9 @@ const createLocalStore = () =>
       },
       sessionid: {
         type: "string"
+      },
+      lastOpenDate: {
+        type: "number"
       }
     },
     watch: true,

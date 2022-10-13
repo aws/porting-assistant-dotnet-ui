@@ -37,11 +37,12 @@ contextBridge.exposeInMainWorld("electron", {
       | "email"
       | "useDefaultCreds"
       | "cancel"
-      | "isAssesmentRunning",
+      | "isAssesmentRunning"
+      | "lastOpenDate",
     value: any
   ) => localStore.set(key, value),
   getState: (
-    key: "solutions" | "profile" | "targetFramework" | "share" | "email" | "useDefaultCreds" | "cancel" | "isAssesmentRunning",
+    key: "solutions" | "profile" | "targetFramework" | "share" | "email" | "useDefaultCreds" | "cancel" | "isAssesmentRunning"| "lastOpenDate",
     defaultValue: any
   ) => localStore.get(key, defaultValue),
   saveCache: (value: any) => reducerCacheStore.set("reducerCache", value),
@@ -101,7 +102,7 @@ contextBridge.exposeInMainWorld("electron", {
   getLatestVersion: () => invokeBackend("getLatestVersion"),
   getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
-  crashInLast30Days: (filePath:string) => invokeBackend("crashInLast30Days", filePath),
+  crashOnLastUse: (filePath:string) => invokeBackend("crashOnLastUse", filePath),
   writeReactErrLog: (source: any, message: any, response: any) =>
     invokeBackend("writeReactErrLog", source, message, response),
   getAssessmentLog: () => {

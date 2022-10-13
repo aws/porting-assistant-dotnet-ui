@@ -30,7 +30,7 @@ namespace PortingAssistant.UnitTests
                     RepositoryUrl = "https://github.com/test-project",
                 }
             };
-            var solutionMetric = TelemetryCollectionUtils.createSolutionMetric(solutionAnalysisResult, runId, triggerType, targetFramework, DateTime.Now, false);
+            var solutionMetric = TelemetryCollectionUtils.createSolutionMetric(solutionAnalysisResult, runId, triggerType, targetFramework, DateTime.Now, 0, 1, false);
             Assert.AreEqual(solutionMetric.SolutionPath, encryptedSolutionPath);
             Assert.AreEqual(solutionMetric.ApplicationGuid, "test-application-guid");
             Assert.AreEqual(solutionMetric.SolutionGuid, "test-solution-guid");

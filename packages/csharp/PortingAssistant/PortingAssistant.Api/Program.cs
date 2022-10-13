@@ -81,7 +81,12 @@ namespace PortingAssistant.Api
                     outputTemplate: outputTemplate);
             TelemetryCollector.Builder(telemetryLogConfiguration.CreateLogger(), metricsFilePath);
 
-            string[] files = Directory.GetFiles(Path.Combine(metricsFolder, "reports"));
+
+            var crashReportsDir = Path.Combine(metricsFolder, "reports");
+            try
+            {
+            if (Directory.Exists(crashReportsDir)) {
+              string[] files = Directory.GetFiles(crashReportsDir);
               for (int i = 0; i < files.Length; i++)
               {
                 FileInfo file = new FileInfo(files[0]);
@@ -89,6 +94,12 @@ namespace PortingAssistant.Api
                   TelemetryCollectionUtils.CollectCrashMetrics(file.Name, file.CreationTimeUtc);
                 }
               }
+            }
+            } catch (Exception ex) {
+              Log.Logger.Error("Error in reading crash reports: ", ex);
+            }
+
+
 
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection, configuration);

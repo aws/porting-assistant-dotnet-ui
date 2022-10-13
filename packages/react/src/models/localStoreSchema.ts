@@ -13,6 +13,7 @@ export interface LocalStoreSchema {
   useDefaultCreds: boolean;
   cancel: boolean;
   isAssesmentRunning: boolean;
+  lastOpenDate: number;
 }
 
 export interface SolutionLocalStoreSchema {

@@ -120,18 +120,27 @@ export const initConnection = (logger: any = console) => {
     }
   });
 
-  ipcMain.handle("crashInLast30Days", async (_event, sourceFilePath) => {
+  ipcMain.handle("crashOnLastUse", async (_event, sourceFilePath) => {
     try {
-      const fileNames = await fs.promises.readdir(sourceFilePath);
-      for (let fileName of fileNames) {
-        var fileInfo = await fs.promises.stat(path.join(sourceFilePath, fileName));
-        if (((Date.now() - fileInfo.birthtimeMs)/(86400000)) < 30) {
-          return true;
-        }
-      }
-      return  false;
+        const lastOpenDate = localStore.get("lastOpenDate");
+        if (lastOpenDate !== null)
+        {
+          const fileNames = await fs.promises.readdir(sourceFilePath);
+          for (let fileName of fileNames) {
+            var fileInfo = await fs.promises.stat(path.join(sourceFilePath, fileName));
+            if ((lastOpenDate - fileInfo.birthtimeMs)/(86400000) < 1) {
+              return true;
+            }
+            // if (((Date.now() - fileInfo.birthtimeMs)/(86400000)) < 30) {
+            //   return true;
+            // }
+          }
+        } 
+
+        return  false;
     } catch (ex) {
-      throw new Error(`Unable to get file info: ${sourceFilePath}. ${ex}`);
+      logger.log(`Unable to get file info: ${sourceFilePath}. ${ex}`);
+      return false;
     }
   });
 
