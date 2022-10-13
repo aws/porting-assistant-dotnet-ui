@@ -245,9 +245,8 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             <ProgressBar
               value={ isLoaded(solution)? 100: isLoadingWithData(solution)? 100*solution.data.projects.length/totalProjects :0}
               variant="flash"
-              additionalInfo="Additional information"
-              description="Progress bar description"
-              label="Progress bar label"
+              description="Percentage of Total Projects Assessed"
+              label="Progress Bar"
             />
           )
         }

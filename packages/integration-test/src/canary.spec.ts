@@ -37,13 +37,13 @@ describe("canary test suite", () => {
     await app.client.execute("window.test.clearState();");
     await stopApp(app);
   });
-  // passed
+
   test("run through Miniblog", async () => {
     const solutionPath: string = path.join(testSolutionPath(), "canary", "Miniblog.Core-master", "Miniblog.Core.sln");
     await addSolution(app, solutionPath);
     await app.client.refresh();
     const results = await runner.runThroughSolution(solutionPath, "inplace", "net6.0", false, false);
-    await runner.validateHighLevelResults(results, ["1 of 1",  "0 of 3", "6 of 310", "77", "(20)"]);
+    await runner.validateHighLevelResults(results, ["1 of 1", "2 of 13", "12 of 268", "0", "(21)"]);
   });
 
   test("run through mvcmusicstore", async () => {

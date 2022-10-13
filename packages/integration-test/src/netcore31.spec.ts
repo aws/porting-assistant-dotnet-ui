@@ -101,7 +101,6 @@ describe("netcore 3.1 test suite", () => {
       expect((await getCatalogController).indexOf('Include="Autofac" Version="4.0.0"')).not.toBe(-1);
     });
 
-    //passed
     test("run through eCommerceOnBlazor .netcore 3.1", async () => {
         const solutionFolderPath: string = path.join(
             testSolutionPath(),
@@ -124,7 +123,6 @@ describe("netcore 3.1 test suite", () => {
         expect((await getCsProj).indexOf("netcoreapp3.1")).not.toBe(-1);
     });
 
-    // passed
     test("run through test MVC proj with IIS config .netcore 3.1", async () => {
         const solutionFolderPath: string = path.join(
             testSolutionPath(),
