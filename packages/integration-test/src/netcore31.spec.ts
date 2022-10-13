@@ -85,7 +85,7 @@ describe("netcore 3.1 test suite", () => {
       expect(await getProgram).toBe(expectedWCFProgram);
       expect((await getConfig).replace(/(\r\n|\n|\r)/gm, "")).toBe(expectedWCFConfig.replace(/(\r\n|\n|\r)/gm, ""));
     });
-
+ 
     test("run through NopCommerce 3.1.0", async () => {
       const solutionFolderPath: string = path.join(testSolutionPath(), "netcore3.1", "nopCommerce-release-3.10", "src");
       const solutionPath: string = path.join(solutionFolderPath, "NopCommerce.sln");
@@ -101,6 +101,7 @@ describe("netcore 3.1 test suite", () => {
       expect((await getCatalogController).indexOf('Include="Autofac" Version="4.0.0"')).not.toBe(-1);
     });
 
+    //passed
     test("run through eCommerceOnBlazor .netcore 3.1", async () => {
         const solutionFolderPath: string = path.join(
             testSolutionPath(),
@@ -123,7 +124,7 @@ describe("netcore 3.1 test suite", () => {
         expect((await getCsProj).indexOf("netcoreapp3.1")).not.toBe(-1);
     });
 
-
+    // passed
     test("run through test MVC proj with IIS config .netcore 3.1", async () => {
         const solutionFolderPath: string = path.join(
             testSolutionPath(),
