@@ -48,7 +48,7 @@ const createLocalStore = () =>
       cancel: false,
       isAssesmentRunning: false,
       sessionid: "",
-      lastOpenDate: "",
+      lastOpenDate: 0,
     },
     accessPropertiesByDotNotation: false,
     schema: {

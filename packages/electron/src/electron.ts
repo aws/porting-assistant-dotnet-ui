@@ -18,6 +18,17 @@ import electronIsDev from "electron-is-dev";
 import { initConnection, initTelemetryConnection } from "./electron-backend";
 import { localStore } from "./preload-localStore";
 import { v4 as uuid } from "uuid";
+import { crashReporter } from "electron";
+
+const crashReportsPath = path.dirname(log.transports.file.getFile().path)
+app.setPath('crashDumps', crashReportsPath);
+
+crashReporter.start(
+  {
+    uploadToServer: false,
+    submitURL:""
+  }
+)
 
 const upgradeConfig = require(electronIsDev
   ? path.join("..", "build-scripts", "upgrade-config-dev.json")
@@ -138,7 +149,6 @@ const isDev =
   process.env["NODE_ENV"] !== "production" &&
   process.env["NODE_ENV"] !== "test";
 const isTest = process.env["NODE_ENV"] === "test";
-
 function createWindow() {
   mainWindow = new BrowserWindow({
     webPreferences: {

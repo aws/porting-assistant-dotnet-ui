@@ -123,7 +123,7 @@ export const initConnection = (logger: any = console) => {
   ipcMain.handle("crashOnLastUse", async (_event, sourceFilePath) => {
     try {
         const lastOpenDate = localStore.get("lastOpenDate");
-        if (lastOpenDate !== null)
+        if (lastOpenDate !== 0)
         {
           const fileNames = await fs.promises.readdir(sourceFilePath);
           for (let fileName of fileNames) {
@@ -131,9 +131,6 @@ export const initConnection = (logger: any = console) => {
             if ((lastOpenDate - fileInfo.birthtimeMs)/(86400000) < 1) {
               return true;
             }
-            // if (((Date.now() - fileInfo.birthtimeMs)/(86400000)) < 30) {
-            //   return true;
-            // }
           }
         } 
 
