@@ -226,7 +226,14 @@ export const projectAnalysisResult: ProjectApiAnalysisResult = {
   projectFile: "/test/testproject",
   projectGuid: "00000000",
   errors: [""],
-  sourceFileAnalysisResults: [sourceFileAnalysisResult1, sourceFileAnalysisResult2]
+  sourceFileAnalysisResults: [sourceFileAnalysisResult1, sourceFileAnalysisResult2],
+  targetFrameworks: [],
+  projectName: "testproject",
+  projectType: "testtype",
+  featureType: "testfeature",
+  isBuildFailed: false,
+  projectReferences: [],
+  packageReferences: []
 };
 
 export const projectToApiAnalysis: ProjectToApiAnalysis = {

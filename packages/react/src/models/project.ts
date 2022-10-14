@@ -44,6 +44,13 @@ export interface ProjectApiAnalysisResult {
   projectGuid?: string;
   errors: string[];
   sourceFileAnalysisResults: SourceFileAnalysisResult[];
+  targetFrameworks: string[];
+  projectName: string;
+  projectType: string;
+  featureType: string;
+  isBuildFailed: boolean;
+  packageReferences: NugetPackage[];
+  projectReferences: ProjectReference[];
 }
 
 export interface SourceFileAnalysisResult {

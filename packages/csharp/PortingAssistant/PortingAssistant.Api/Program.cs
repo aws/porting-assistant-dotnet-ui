@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.Json;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Common.Services;
+using PortingAssistant.Common.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Client;
@@ -28,12 +29,13 @@ namespace PortingAssistant.Api
             var isConsole = args.Length == 5 && args[3].Equals("--console");
 
             var outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}";
-            if (args.Length == 5 && !args[3].Equals("--console"))
+            if (args.Length == 6 && !args[3].Equals("--console"))
             {
                 // Args[3] is version number if not --console
                 outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] (" + args[3] + ") {SourceContext}: {Message:lj}{NewLine}{Exception}";
                 Telemetry.Model.MetricsBase.Version = args[3];
                 Telemetry.Model.MetricsBase.UsingDefault = System.Convert.ToBoolean(args[4]);
+                Telemetry.Model.MetricsBase.SessionId = args[5];
             }
 
             Serilog.Formatting.Display.MessageTemplateTextFormatter tf =
@@ -78,6 +80,26 @@ namespace PortingAssistant.Api
                     Path.Combine(args[2], "logs", "portingAssistantTelemetry.log"),
                     outputTemplate: outputTemplate);
             TelemetryCollector.Builder(telemetryLogConfiguration.CreateLogger(), metricsFilePath);
+
+
+            var crashReportsDir = Path.Combine(metricsFolder, "reports");
+            try
+            {
+            if (Directory.Exists(crashReportsDir)) {
+              string[] files = Directory.GetFiles(crashReportsDir);
+              for (int i = 0; i < files.Length; i++)
+              {
+                FileInfo file = new FileInfo(files[0]);
+                if ((file.CreationTime - DateTime.Now).TotalDays < 30) {
+                  TelemetryCollectionUtils.CollectCrashMetrics(file.Name, file.CreationTimeUtc);
+                }
+              }
+            }
+            } catch (Exception ex) {
+              Log.Logger.Error("Error in reading crash reports: ", ex);
+            }
+
+
 
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection, configuration);

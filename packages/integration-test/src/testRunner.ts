@@ -113,37 +113,9 @@ export class TestRunner {
     });
   };
 
-  emptyEmailCheck = async () => {
-    await (await this.app.client.$("#feedback-btn")).click();
-    await (await this.app.client.$("#email-btn")).click();
-    await (
-      await this.app.client.$("span=Invalid e-mail format.")
-    ).waitForExist({
-      timeout: 1000,
-    });
-    await this.app.client.keys(["Escape"]);
-  };
-
-  invalidEmailCheck = async () => {
-    await (await this.app.client.$("#feedback-btn")).click();
-    await (await this.app.client.$("#email-input input")).setValue("integration.test.com");
-    await (await this.app.client.$("#email-btn")).click();
-    await (
-      await this.app.client.$("span=Invalid e-mail format.")
-    ).waitForExist({
-      timeout: 1000,
-    });
-    await this.app.client.keys(["Escape"]);
-  };
-
-  setupEmail = async () => {
-    await (await this.app.client.$("#email-input input")).setValue("integration@test.com");
-    await (await this.app.client.$("#email-btn")).click();
-  };
 
   sendFeedbackCheck = async () => {
     await (await this.app.client.$("#feedback-btn")).click();
-    await this.setupEmail();
     await (await this.app.client.$("#fb-category-selection")).click();
     await (await this.app.client.$('[data-testid="general"]')).click();
     await (await this.app.client.$("#fb-text input")).setValue("integration-test-feedback");
@@ -159,12 +131,12 @@ export class TestRunner {
 
   sendRuleContributionCheck = async () => {
     await this.nugetPackageTabCheck();
-    await (await this.app.client.$(".awsui_input_2rhyz_fxf4s_7")).setValue("jQuery.vsdoc");
-    await (await this.app.client.$(".awsui_input_1mabk_1s4v0_34")).click();
+    await (await this.app.client.$(".awsui_input_2rhyz_fqjbg_97")).setValue("jQuery.vsdoc");
+    await (await this.app.client.$(".awsui_native-input_1wepg_15e8a_103")).click();
     await (await this.app.client.$("#rule-contribution-btn")).click();
     await (await this.app.client.$("span=Suggestion form")).waitForDisplayed();
     await (await this.app.client.$("#rc-package-name input")).setValue("Azure.ImageOptimizer");
-    await (await this.app.client.$("#rc-version-check-box")).click();
+    await (await this.app.client.$(".awsui_native-input_1wepg_15e8a_103")).click();
     await (await this.app.client.$("#rc-comment input")).setValue("integration-test-rule-contribution");
     await (await this.app.client.$("#rc-send-btn")).click();
     console.log("Sent rule contribution success");
@@ -183,8 +155,6 @@ export class TestRunner {
     await this.assessSolutionCheck(solutionNameTagId, solutionPath);
     console.log(`assess solution ${solutionNameTagId} success`);
     if (sendFeedback) {
-      await this.invalidEmailCheck();
-      await this.emptyEmailCheck();
       await this.sendFeedbackCheck();
       await this.emptyFeedbackCheck();
     }
@@ -240,9 +210,8 @@ export class TestRunner {
 
   assessSolutionCheck = async (solutionNameTagId: string, solutionPath: string) => {
     await (
-      await this.app.client.$(".awsui_circle_1612d_189wz_75")
+      await this.app.client.$("div*=Successfully assessed")
     ).waitForExist({
-      reverse: true,
       timeout: 800000,
     });
     await (await this.app.client.$(solutionNameTagId)).click();
@@ -253,10 +222,9 @@ export class TestRunner {
     await reassessSolution.waitForEnabled({ timeout: 600000 });
     await reassessSolution.click();
     await (
-      await this.app.client.$(".awsui_circle_1612d_189wz_75")
+      await this.app.client.$("div*=Successfully assessed")
     ).waitForExist({
-      reverse: true,
-      timeout: 1000000,
+      timeout: 800000,
       timeoutMsg: "reassessment timeout"
     });
     const results = await this.checkAssessmentResults(solutionPath);
@@ -281,7 +249,7 @@ export class TestRunner {
     await this.nugetPackageTabCheck();
     await this.apisTabCheck(sortingCheckRequest);
     await this.sourceFilesTabCheck(sortingCheckRequest);
-    const numSourceFiles = await (await this.app.client.$(".awsui_counter_2qdw9_bb1i6_175")).getText();
+    const numSourceFiles = await (await this.app.client.$(".awsui_counter_2qdw9_dk6jz_266")).getText();
     return numSourceFiles;
   };
 
@@ -302,7 +270,7 @@ export class TestRunner {
     await portProjectButton.click();
     if (selectLocation == "inplace") {
       await (await this.app.client.$("#select-location-button")).click();
-      await (await this.app.client.$(`div[data-value="inplace"]`)).click();
+      await (await this.app.client.$(`span[data-value="inplace"]`)).click();
       await (await this.app.client.$("#save-button")).click();
     } else if (selectLocation == "copy") {
       await (await this.app.client.$("#select-location-button")).click();
@@ -330,9 +298,8 @@ export class TestRunner {
     const solutionLink = await this.app.client.$(solutionNameTagId);
     if (await solutionLink.isExisting()) {
       await (
-        await this.app.client.$(".awsui_circle_1612d_189wz_75")
+        await this.app.client.$("div*=Successfully assessed")
       ).waitForExist({
-        reverse: true,
         timeout: 800000,
       });
       await solutionLink.click();

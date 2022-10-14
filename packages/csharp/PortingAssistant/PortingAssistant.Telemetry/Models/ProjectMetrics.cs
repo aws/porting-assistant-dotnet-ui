@@ -36,5 +36,12 @@ namespace PortingAssistant.Telemetry.Model
         public string? PreFramework { get; set; }
         [JsonProperty("projectLanguage")]
         public string? ProjectLanguage { get; set;}
+        [JsonProperty("sessionId")]
+        new public string SessionId {get; set;}
+        [JsonProperty("analysisTime")]
+        public double AnalysisTime { get; set; }
+        [JsonProperty("cumulativeAnalysisTime")]
+        public double CumulativeAnalysisTime { get; set; }
+
     }
 }

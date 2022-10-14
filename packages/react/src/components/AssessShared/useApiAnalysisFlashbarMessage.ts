@@ -7,9 +7,9 @@ import { Project, ProjectApiAnalysisResult } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { selectApiAnalysis, selectSolutionToSolutionDetails } from "../../store/selectors/solutionSelectors";
-import { isFailed, isLoaded, Loadable, Loaded } from "../../utils/Loadable";
+import { hasNewData, isFailed, isLoaded, Loadable, Loaded, Loading } from "../../utils/Loadable";
 
-export const useApiAnalysisFlashbarMessage = (solution?: SolutionDetails, project?: Loadable<Project>) => {
+export const useApiAnalysisFlashbarMessage = (solution?: Loadable<SolutionDetails>, project?: Loadable<Project>) => {
   const apiAnalysis = useSelector(selectApiAnalysis);
   const dispatch = useDispatch();
   const location = useLocation();
@@ -21,23 +21,23 @@ export const useApiAnalysisFlashbarMessage = (solution?: SolutionDetails, projec
     let allProjects: Loadable<Project[] | Project>;
     if (project != null && solution != null) {
       allProjects = project;
-    } else if (solution != null) {
-      const solutionDetails = solutionToSolutionDetails[solution.solutionFilePath];
-      if (!isLoaded(solutionDetails)) return;
-      allProjects = Loaded(solutionDetails.data.projects);
+    } else if (hasNewData(solution)) {
+      const solutionDetails = solutionToSolutionDetails[solution.data.solutionFilePath];
+      if (!hasNewData(solutionDetails)) return;
+      allProjects = isLoaded(solutionDetails) ? Loaded(solutionDetails.data.projects) : Loading(solutionDetails.data.projects);
     } else {
-      allProjects = Loaded(Object.values(solutionToSolutionDetails).flatMap(s => (isLoaded(s) ? s.data.projects : [])));
+      allProjects = Loaded(Object.values(solutionToSolutionDetails).flatMap(s => (hasNewData(s) ? s.data.projects : [])));
     }
-    if (!isLoaded(allProjects)) {
+    if (!hasNewData(allProjects)) {
       return;
     }
     const invalidProjects = new Set<string>();
     const loadedProjects = Array.isArray(allProjects.data) ? allProjects.data : [allProjects.data];
-    if (solution != null) {
+    if (hasNewData(solution)) {
       loadedProjects.forEach(loadedProject => {
         allApisAnalysis.push({
           project: loadedProject.projectFilePath,
-          result: apiAnalysis[solution.solutionFilePath][loadedProject.projectFilePath]
+          result: apiAnalysis[solution.data.solutionFilePath][loadedProject.projectFilePath]
         });
       });
     } else {
@@ -63,7 +63,7 @@ export const useApiAnalysisFlashbarMessage = (solution?: SolutionDetails, projec
           messageId: uuid(),
           groupId: "ApiFailed",
           content: `Failed to build ${invalidProjects.size} projects${
-            solution == null ? "" : " in " + solution.solutionName
+            !hasNewData(solution) ? "" : " in " + solution.data.solutionName
           }. 
             You must be able to build your project in Visual Studio. 
             If this error persists after installing the .NET Developer Pack for this Framework version, 

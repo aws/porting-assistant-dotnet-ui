@@ -66,6 +66,7 @@ describe("canary test suite", () => {
     expect((await getStoreManagerController).indexOf("Microsoft.EntityFrameworkCore")).not.toBe(-1);
   });
 
+  // passed
   test("run through mixed c#/vb solution", async () => {
     const solutionFolderPath: string = path.join(
       testSolutionPath(),

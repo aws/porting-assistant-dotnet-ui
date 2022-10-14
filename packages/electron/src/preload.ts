@@ -35,17 +35,14 @@ contextBridge.exposeInMainWorld("electron", {
       | "notification"
       | "newVersionNotification"
       | "email"
-      | "useDefaultCreds",
+      | "useDefaultCreds"
+      | "cancel"
+      | "isAssesmentRunning"
+      | "lastOpenDate",
     value: any
   ) => localStore.set(key, value),
   getState: (
-    key:
-      | "solutions"
-      | "profile"
-      | "targetFramework"
-      | "share"
-      | "email"
-      | "useDefaultCreds",
+    key: "solutions" | "profile" | "targetFramework" | "share" | "email" | "useDefaultCreds" | "cancel" | "isAssesmentRunning"| "lastOpenDate",
     defaultValue: any
   ) => localStore.get(key, defaultValue),
   saveCache: (value: any) => reducerCacheStore.set("reducerCache", value),
@@ -105,6 +102,7 @@ contextBridge.exposeInMainWorld("electron", {
   getLatestVersion: () => invokeBackend("getLatestVersion"),
   getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
+  crashOnLastUse: (filePath:string) => invokeBackend("crashOnLastUse", filePath),
   writeReactErrLog: (source: any, message: any, response: any) =>
     invokeBackend("writeReactErrLog", source, message, response),
   getAssessmentLog: () => {
@@ -143,6 +141,7 @@ contextBridge.exposeInMainWorld("backend", {
   listenNugetPackageUpdate: (callback: (message: string) => void) => listenBackend("onNugetPackageUpdate", callback),
   listenApiAnalysisUpdate: (callback: (message: string) => void) => listenBackend("onApiAnalysisUpdate", callback),
   checkInternetAccess: () => invokeBackend("checkInternetAccess"),
+  cancelAssessment: () => invokeBackend("cancelAssessment"),
 });
 
 contextBridge.exposeInMainWorld("porting", {

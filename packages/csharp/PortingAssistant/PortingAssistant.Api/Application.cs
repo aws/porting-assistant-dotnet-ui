@@ -68,8 +68,8 @@ namespace PortingAssistant.Api
                 {
                     _connection.Send("onNugetPackageUpdate", response);
                 });
-
-                return assessmentService.AnalyzeSolution(request);
+                request.settings.UseGenerator = true;
+                return assessmentService.AnalyzeSolution(request).Result;
             });
 
 
@@ -140,6 +140,11 @@ namespace PortingAssistant.Api
                     };
                     return HttpServiceUtils.CheckInternetAccess(httpService, files);
                 });
+
+            _connection.On<string>("cancelAssessment", 
+            reuqest => {
+              PortingAssistantUtils.cancel = true;
+            });
         }
 
         public void Start()

@@ -11,6 +11,9 @@ export interface LocalStoreSchema {
   newVersionNotification: boolean;
   email: string;
   useDefaultCreds: boolean;
+  cancel: boolean;
+  isAssesmentRunning: boolean;
+  lastOpenDate: number;
 }
 
 export interface SolutionLocalStoreSchema {

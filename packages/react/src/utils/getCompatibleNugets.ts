@@ -35,10 +35,6 @@ export const getCompatibleNugetsAgg = (
     return false;
   });
 
-  if (!isAllNugetLoaded) {
-    return LOADING_AGGREGATES;
-  }
-
   const nugetAggregates = Array.from(Object.values(allNugetDependencies)).reduce(
     (agg, cur) => {
       const loadedCur = packageToPackageAnalysisResult[nugetPackageKey(cur.packageId, cur?.version)];
@@ -79,3 +75,14 @@ export const LOADING_AGGREGATES = {
     unknown: 0
   }
 };
+
+export type NUGET_COMPATABILITIES = INUGET_COMPATABILITIES
+
+interface INUGET_COMPATABILITIES {
+  isAllNugetLoaded: boolean,
+  nugetAggregates: {
+    compatible: number,
+    incompatible: number,
+    unknown: number
+  }
+}

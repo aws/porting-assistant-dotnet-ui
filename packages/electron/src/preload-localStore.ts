@@ -45,6 +45,10 @@ const createLocalStore = () =>
       notification: true,
       newVersionNotification: true,
       useDefaultCreds: false,
+      cancel: false,
+      isAssesmentRunning: false,
+      sessionid: "",
+      lastOpenDate: 0,
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -90,6 +94,18 @@ const createLocalStore = () =>
       useDefaultCreds: {
         type: "boolean",
       },
+      cancel: {
+        type: "boolean",
+      },
+      isAssesmentRunning: {
+        type: "boolean",
+      },
+      sessionid: {
+        type: "string"
+      },
+      lastOpenDate: {
+        type: "number"
+      }
     },
     watch: true,
     cwd:
