@@ -114,9 +114,5 @@
       "npm run test:staged",
       "prettier --write"
     ]
-  },
-  "resolutions": {
-    "@types/react": "17.0.14",
-    "@types/react-dom": "17.0.14"
   }
 }
