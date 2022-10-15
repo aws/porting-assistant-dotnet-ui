@@ -48,7 +48,7 @@
     "lint-staged": "^10.5.0",
     "sass": "^1.0.0",
     "prettier": "^1.19.1",
-    "react-scripts": "^5.0.1",
+    "react-scripts": "^4.0.0",
     "ts-jest": "^23.0.0",
     "typescript": "^3.9.7",
     "vis-data": "^6.5.1"
@@ -63,9 +63,9 @@
     "axios-retry": "^3.1.2",
     "classnames": "^2.2.6",
     "compare-versions": "^3.6.0",
-    "csv-stringify": "^6.0.0",
-    "electron": "^20.0.0",
-    "immer": "^9.0.1",
+    "csv-stringify": "^5.5.0",
+    "electron": "^10.4.7",
+    "immer": "^6.0.1",
     "path-browserify": "^1.0.1",
     "re-reselect": "^3.4.0",
     "react": "^16.14.0",
@@ -114,9 +114,5 @@
       "npm run test:staged",
       "prettier --write"
     ]
-  },
-  "resolutions": {
-    "@types/react": "17.0.14",
-    "@types/react-dom": "17.0.14"
   }
 }

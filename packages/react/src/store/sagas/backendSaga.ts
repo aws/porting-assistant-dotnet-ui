@@ -1,4 +1,4 @@
-import { stringify } from "csv-stringify/browser/esm";
+import stringify from "csv-stringify";
 import { buffers, eventChannel } from "redux-saga";
 import { all, call, put, SagaReturnType, select, take, takeEvery } from "redux-saga/effects";
 import { getType } from "typesafe-actions";
