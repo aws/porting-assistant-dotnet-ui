@@ -46,7 +46,7 @@ export const portedProjects = (
     return 0;
   }
   const solutionDetails = solutionToSolutionDetails[item.solutionFilePath];
-  if (!hasNewData(solutionDetails)) {
+  if (solutionDetails == null || !hasNewData(solutionDetails)) {
     return 0;
   }
   return Object.values(solutionDetails.data.projects).filter(p =>
@@ -107,7 +107,7 @@ export const getErrorCounts = (
 
   const selectedInvocations = getSelectedInvocations(projectToApiAnalysis, projectPath, sourceFile);
   return Object.values(selectedInvocations).reduce((agg, cur) => {
-    if (!hasNewData(cur)) {
+    if (cur == null || !hasNewData(cur)) {
       return agg;
     }
     return agg + cur.data.errors.length;
@@ -125,7 +125,7 @@ export const getActionCounts = (
 
   const selectedInvocations = getSelectedInvocations(projectToApiAnalysis, projectPath, sourceFile);
   return Object.values(selectedInvocations).reduce((agg, cur) => {
-    if (!hasNewData(cur)) {
+    if (cur == null ||!hasNewData(cur)) {
       return agg;
     }
     const actions = cur.data.sourceFileAnalysisResults.reduce((agg, cur) => {
@@ -156,7 +156,7 @@ export const selectDashboardTableData = createSelector(
         if (!hasNewData(solutionDetails) && !isReloading(solutionDetails)) {
           if (isFailed(solutionDetails)) {
             return {
-              name: window.electron.getFilename(solutionPath),
+              name: path.basename(solutionPath),
               path: solutionPath,
               portedProjects: 0,
               totalProjects: 0,
@@ -170,7 +170,7 @@ export const selectDashboardTableData = createSelector(
             } as DashboardTableData;
           }
           return {
-            name: window.electron.getFilename(solutionPath),
+            name: path.basename(solutionPath),
             path: solutionPath
           } as DashboardTableData;
         }

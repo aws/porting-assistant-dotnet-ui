@@ -146,63 +146,72 @@ describe("getCompatibleApi", () => {
   });
 
   it("should return 0 value when there is no compatible Api", () => {
-    const projectToApiAnalysis: ProjectToApiAnalysis = {
-      "/test/testproject": Loaded({
-        solutionFile: "/test.sln",
-        projectFile: "/test/testproject",
-        errors: [],
-        sourceFileAnalysisResults: [
-          {
-            sourceFileName: "get.ts",
-            sourceFilePath: "/test/testproject/get.ts",
-            apiAnalysisResults: [
-              {
-                codeEntityDetails: {
-                  codeEntityType: "Namespace",
-                  namespace: "test",
-                  signature: "get",
-                  originalDefinition: "abc",
-                  textSpan: {
-                    startCharPosition: 1,
-                    endCharPosition: 10,
-                    startLinePosition: 13,
-                    endLinePosition: 24
-                  },
-                  name: "get_call",
-                  package: {
-                    packageId: "testpackage",
-                    version: "2.9.0"
-                  }
-                },
-                compatibilityResults: {
-                  "net6.0": {
-                    compatibility: "INCOMPATIBLE",
-                    compatibleVersions: ["3.0.0"]
-                  }
-                },
-                recommendations: {
-                  recommendedActions: [noRecommendations]
-                }
-              }
-            ],
-            recommendedActions: [
-              {
-                recommendedActionType: "UpgradePackage",
-                description: "test",
+    const prjectApiAnalysisResult: ProjectApiAnalysisResult = {
+      solutionFile: "/test.sln",
+      projectFile: "/test/testproject",
+      errors: [],
+      sourceFileAnalysisResults: [
+        {
+          sourceFileName: "get.ts",
+          sourceFilePath: "/test/testproject/get.ts",
+          apiAnalysisResults: [
+            {
+              codeEntityDetails: {
+                codeEntityType: "Namespace",
+                namespace: "test",
+                signature: "get",
+                originalDefinition: "abc",
                 textSpan: {
                   startCharPosition: 1,
                   endCharPosition: 10,
                   startLinePosition: 13,
                   endLinePosition: 24
                 },
-                targetCPU: ["x86", "64", "arm"]
+                name: "get_call",
+                package: {
+                  packageId: "testpackage",
+                  version: "2.9.0"
+                }
+              },
+              compatibilityResults: {
+                "net6.0": {
+                  compatibility: "INCOMPATIBLE",
+                  compatibleVersions: ["3.0.0"]
+                }
+              },
+              recommendations: {
+                recommendedActions: [noRecommendations]
               }
-            ]
-          }
-        ]
-      })
+            }
+          ],
+          recommendedActions: [
+            {
+              recommendedActionType: "UpgradePackage",
+              description: "test",
+              textSpan: {
+                startCharPosition: 1,
+                endCharPosition: 10,
+                startLinePosition: 13,
+                endLinePosition: 24
+              },
+              targetCPU: ["x86", "64", "arm"]
+            }
+          ]
+        }
+      ],
+      targetFrameworks: [],
+      projectName: "",
+      projectType: "",
+      featureType: "",
+      isBuildFailed: false,
+      packageReferences: [],
+      projectReferences: []
+    }
+    const projectToApiAnalysis: ProjectToApiAnalysis = {
+      "/test/testproject": Loaded(prjectApiAnalysisResult)
     };
     const result = getCompatibleApi(Loaded(solutionDetails), projectToApiAnalysis, projectPath, sourceFile);
+    console.log(result);
     const expectResult = { failureCount: 0, isApisLoading: false, values: [0, 1] };
     expect(result).toEqual(expectResult);
   });
@@ -268,7 +277,7 @@ describe("getCompatibleNuget.ts", () => {
         unknown: 0
       }
     };
-    expect(result).toEqual(expectResult);
+    expect(result.isAllNugetLoaded).toEqual(false);
     expect(getIncompatibleNugets(packageToNugetPackage, nugetPackages)).toBeNull();
   });
 
