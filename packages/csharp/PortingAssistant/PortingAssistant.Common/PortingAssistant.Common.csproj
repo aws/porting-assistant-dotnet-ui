@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="PortingAssistant.Client.Client" Version="2.4.2-alpha-g7b80e67d7c" />
-    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.4.2-alpha-g7b80e67d7c" />
+    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.4.7" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.3" />
   </ItemGroup>
