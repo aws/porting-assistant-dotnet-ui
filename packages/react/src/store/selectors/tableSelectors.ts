@@ -156,7 +156,7 @@ export const selectDashboardTableData = createSelector(
         if (!hasNewData(solutionDetails) && !isReloading(solutionDetails)) {
           if (isFailed(solutionDetails)) {
             return {
-              name: window.electron.getFilename(solutionPath),
+              name: path.basename(solutionPath),
               path: solutionPath,
               portedProjects: 0,
               totalProjects: 0,
@@ -170,7 +170,7 @@ export const selectDashboardTableData = createSelector(
             } as DashboardTableData;
           }
           return {
-            name: window.electron.getFilename(solutionPath),
+            name: path.basename(solutionPath),
             path: solutionPath
           } as DashboardTableData;
         }

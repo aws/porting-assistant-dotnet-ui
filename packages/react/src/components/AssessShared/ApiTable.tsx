@@ -1,6 +1,6 @@
 import { useCollection } from "@awsui/collection-hooks";
 import { Box, Pagination, Table, TableProps, TextFilter } from "@awsui/components-react";
-import StatusIndicator from "@awsui/components-react/status-indicator";
+import StatusIndicator from "@awsui/components-react/status-indicator/internal";
 import React, { useMemo, useState } from "react";
 import { useLocation } from "react-router";
 

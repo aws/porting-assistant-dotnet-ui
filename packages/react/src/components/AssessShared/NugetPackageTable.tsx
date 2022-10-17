@@ -1,6 +1,6 @@
 import { useCollection } from "@awsui/collection-hooks";
 import { Box, Button, Pagination, Table, TableProps, TextFilter } from "@awsui/components-react";
-import StatusIndicator from "@awsui/components-react/status-indicator";
+import StatusIndicator from "@awsui/components-react/status-indicator/internal";
 import { MemoryHistory } from "history";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";

@@ -11,7 +11,7 @@ import {
   TextFilter
 } from "@awsui/components-react";
 import StatusIndicator from "@awsui/components-react/status-indicator";
-import { stat } from "fs";
+import { stat } from "fs"
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";

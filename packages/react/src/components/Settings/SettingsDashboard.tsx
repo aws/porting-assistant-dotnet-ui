@@ -7,7 +7,7 @@ import {
   Link as LinkComponent,
   SpaceBetween
 } from "@awsui/components-react";
-import StatusIndicator from "@awsui/components-react/status-indicator";
+import StatusIndicator from "@awsui/components-react/status-indicator/internal";
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
