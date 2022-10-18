@@ -39,8 +39,7 @@
     "@commitlint/config-conventional": "^13.1.0",
     "git-commit-template": "^1.0.5",
     "husky": "^7.0.1",
-    "lerna": "^4.0.0",
-    "sass": "^1.55.0"
+    "lerna": "^4.0.0"
   },
   "dependencies": {
     "winston": "^3.3.3"
