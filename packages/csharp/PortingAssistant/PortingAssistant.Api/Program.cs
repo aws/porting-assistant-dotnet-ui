@@ -59,6 +59,7 @@ namespace PortingAssistant.Api
             }
 
             Log.Logger = logConfiguration.CreateLogger();
+            Log.Logger.Error("Release Debug || Received Args: " + string.Join("\n", args));
 
             var portingAssistantPortingConfiguration = JsonSerializer.Deserialize<PortingAssistantPortingConfiguration>(File.ReadAllText(config));
             var configuration = new PortingAssistantConfiguration();
@@ -109,6 +110,7 @@ namespace PortingAssistant.Api
                 var application = new Application(serviceCollection, contributionConfiguration);
                 application.SetupConnection(isConsole);
                 application.Start();
+                Log.Logger.Error("Release Debug || Application Started");
             }
             finally
             {
