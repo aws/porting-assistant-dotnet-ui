@@ -108,9 +108,13 @@ namespace PortingAssistant.Api
             try
             {
                 var application = new Application(serviceCollection, contributionConfiguration);
+                Log.Logger.Error("Release Debug || Application created");
                 application.SetupConnection(isConsole);
+                Log.Logger.Error("Release Debug || Starting application");
                 application.Start();
                 Log.Logger.Error("Release Debug || Application Started");
+            } catch (Exception ex) {
+                Log.Logger.Error("Error in starting application: ", ex);
             }
             finally
             {
