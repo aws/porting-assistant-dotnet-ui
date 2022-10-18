@@ -67,10 +67,12 @@ namespace PortingAssistant.Api
             configuration.DataStoreSettings.S3Endpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.S3Endpoint;
             configuration.DataStoreSettings.GitHubEndpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.GitHubEndpoint;
 
+            Log.Logger.Error("Release Debug || Configuration Read" + configuration.ToString());
+
             var contributionConfiguration = new CustomerContributionConfiguration();
             contributionConfiguration.CustomerFeedbackEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.CustomerFeedbackEndpoint;
             contributionConfiguration.RuleContributionEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.RuleContributionEndpoint;
-
+            Log.Logger.Error("Release Debug || contributionConfiguration" + contributionConfiguration.ToString());
             string metricsFolder = Path.Combine(args[2], "logs");
             string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
 
@@ -82,8 +84,11 @@ namespace PortingAssistant.Api
                     outputTemplate: outputTemplate);
             TelemetryCollector.Builder(telemetryLogConfiguration.CreateLogger(), metricsFilePath);
 
+            Log.Logger.Error("Release Debug || telemetryLogConfiguration" + telemetryLogConfiguration.ToString());
 
             var crashReportsDir = Path.Combine(metricsFolder, "reports");
+            Log.Logger.Error("Release Debug || crashReportsDir" + crashReportsDir.ToString());
+
             try
             {
             if (Directory.Exists(crashReportsDir)) {
@@ -101,10 +106,10 @@ namespace PortingAssistant.Api
             }
 
 
-
+            Log.Logger.Error("Release Debug || Configuring Services");
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection, configuration);
-
+            Log.Logger.Error("Release Debug || Configured Services");
             try
             {
                 var application = new Application(serviceCollection, contributionConfiguration);
