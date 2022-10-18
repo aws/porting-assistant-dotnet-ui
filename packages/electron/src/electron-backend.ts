@@ -300,16 +300,21 @@ export const initConnection = (logger: any = console) => {
     return connection;
   };
 
-  return {
-    getConnectionInstance: () => instance,
-    closeConnection: () => {
-      if (instance != null) {
-        instance.close();
-      }
-    },
-    registerListeners: (browserWindow: Electron.BrowserWindow) => {
-      instance = createConnection(browserWindow);
-      registerLogListeners(instance);
-    },
-  };
+  try {
+    return {
+      getConnectionInstance: () => instance,
+      closeConnection: () => {
+        if (instance != null) {
+          instance.close();
+        }
+      },
+      registerListeners: (browserWindow: Electron.BrowserWindow) => {
+        instance = createConnection(browserWindow);
+        registerLogListeners(instance);
+      },
+    };
+  } catch (error) {
+    logger.log("Release Debug || Error in creating connection: ", error);
+  }
+
 };

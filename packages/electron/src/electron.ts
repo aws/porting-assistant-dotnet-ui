@@ -225,7 +225,11 @@ function createWindow() {
 app.allowRendererProcessReuse = true;
 
 app.on("ready", () => {
-  createWindow();
+  try {
+    createWindow();
+  } catch (error) {
+    log.error("Release Debug || Error in create window:", error);
+  }
 });
 
 app.on("window-all-closed", () => {
