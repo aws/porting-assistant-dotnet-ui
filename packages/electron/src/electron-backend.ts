@@ -300,7 +300,6 @@ export const initConnection = (logger: any = console) => {
     return connection;
   };
 
-  try {
     return {
       getConnectionInstance: () => instance,
       closeConnection: () => {
@@ -313,8 +312,5 @@ export const initConnection = (logger: any = console) => {
         registerLogListeners(instance);
       },
     };
-  } catch (error) {
-    logger.log("Release Debug || Error in creating connection: ", error);
-  }
 
 };
