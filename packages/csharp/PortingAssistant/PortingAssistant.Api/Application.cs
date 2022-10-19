@@ -24,14 +24,11 @@ namespace PortingAssistant.Api
         private ILogger _logger;
         private CustomerContributionConfiguration _ccconfig;
 
-        public Application(IServiceCollection serviceCollection,
-            CustomerContributionConfiguration contributionConfiguration)
+        public Application(IServiceCollection serviceCollection)
         {
             _services = serviceCollection.BuildServiceProvider();
             _logger = _services.GetRequiredService<ILogger<Application>>();
             _connection = BuildConnection();
-            _ccconfig = contributionConfiguration;
-            
         }
 
         private Connection BuildConnection()

@@ -66,9 +66,6 @@ namespace PortingAssistant.Api
             configuration.DataStoreSettings.S3Endpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.S3Endpoint;
             configuration.DataStoreSettings.GitHubEndpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.GitHubEndpoint;
 
-            var contributionConfiguration = new CustomerContributionConfiguration();
-            contributionConfiguration.CustomerFeedbackEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.CustomerFeedbackEndpoint;
-            contributionConfiguration.RuleContributionEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.RuleContributionEndpoint;
 
             string metricsFolder = Path.Combine(args[2], "logs");
             string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
@@ -106,7 +103,7 @@ namespace PortingAssistant.Api
 
             try
             {
-                var application = new Application(serviceCollection, contributionConfiguration);
+                var application = new Application(serviceCollection);
                 application.SetupConnection(isConsole);
                 application.Start();
             }
