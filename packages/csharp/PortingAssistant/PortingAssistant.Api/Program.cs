@@ -70,13 +70,7 @@ namespace PortingAssistant.Api
             configuration.DataStoreSettings.GitHubEndpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.GitHubEndpoint;
 
             Log.Logger.Error("Release Debug || Configuration Read" + Newtonsoft.Json.JsonConvert.SerializeObject(configuration, Newtonsoft.Json.Formatting.Indented));
-
-            var contributionConfiguration = new CustomerContributionConfiguration();
-            contributionConfiguration.CustomerFeedbackEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.CustomerFeedbackEndpoint;
-            contributionConfiguration.RuleContributionEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.RuleContributionEndpoint;
-            
-            Log.Logger.Error("Release Debug || contributionConfiguration" + contributionConfiguration.ToString());
-            
+                
             string metricsFolder = Path.Combine(args[2], "logs");
             string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
 
