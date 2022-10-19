@@ -116,7 +116,7 @@ namespace PortingAssistant.Api
             Log.Logger.Error("Release Debug || Configured Services");
             try
             {
-                var application = new Application(serviceCollection, contributionConfiguration);
+                var application = new Application(serviceCollection);
                 Log.Logger.Error("Release Debug || Application created");
                 application.SetupConnection(isConsole);
                 Log.Logger.Error("Release Debug || Starting application");
