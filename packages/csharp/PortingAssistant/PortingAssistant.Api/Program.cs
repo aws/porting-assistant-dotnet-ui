@@ -21,6 +21,8 @@ namespace PortingAssistant.Api
     {
         static void Main(string[] args)
         {
+          try {
+            
             if (args.Length < 3)
             {
                 throw new ArgumentException("Must provide a config file, aws profile and path");
@@ -67,12 +69,14 @@ namespace PortingAssistant.Api
             configuration.DataStoreSettings.S3Endpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.S3Endpoint;
             configuration.DataStoreSettings.GitHubEndpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.GitHubEndpoint;
 
-            Log.Logger.Error("Release Debug || Configuration Read" + configuration.ToString());
+            Log.Logger.Error("Release Debug || Configuration Read" + Newtonsoft.Json.JsonConvert.SerializeObject(configuration, Newtonsoft.Json.Formatting.Indented));
 
             var contributionConfiguration = new CustomerContributionConfiguration();
             contributionConfiguration.CustomerFeedbackEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.CustomerFeedbackEndpoint;
             contributionConfiguration.RuleContributionEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.RuleContributionEndpoint;
+            
             Log.Logger.Error("Release Debug || contributionConfiguration" + contributionConfiguration.ToString());
+            
             string metricsFolder = Path.Combine(args[2], "logs");
             string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
 
@@ -125,6 +129,9 @@ namespace PortingAssistant.Api
             {
                 Log.CloseAndFlush();
             }
+          } catch (Exception ex) {
+            Log.Logger.Error("Error", ex);
+          }
         }
 
         static private void ConfigureServices(IServiceCollection serviceCollection, PortingAssistantConfiguration config)
