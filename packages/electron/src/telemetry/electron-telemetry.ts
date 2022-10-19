@@ -20,7 +20,7 @@ const dirName = path.join(app.getPath("userData"), "logs");
 
 if (!fs.existsSync(dirName))
   fs.mkdir(dirName, (err) => {
-    console.log("Telemetry Directory Creation Failed.");
+    console.log("Telemetry Directory Creation Failed.", err);
   });
 
 var winstonTransportsElectron = [

@@ -19,6 +19,7 @@ import { initConnection, initTelemetryConnection } from "./electron-backend";
 import { localStore } from "./preload-localStore";
 import { v4 as uuid } from "uuid";
 import { crashReporter } from "electron";
+import { Connection } from "electron-cgi";
 
 const crashReportsPath = path.dirname(log.transports.file.getFile().path)
 app.setPath('crashDumps', crashReportsPath);
@@ -141,8 +142,16 @@ autoUpdater.allowDowngrade = true;
 autoUpdater.autoInstallOnAppQuit = true;
 localStore.set("sessionid", uuid());
 
-const connection = initConnection(log.functions);
-const telemetryConnection = initTelemetryConnection(log.functions);
+var connection: any;
+var telemetryConnection: any;
+try {
+  connection = initConnection(log.functions);
+  telemetryConnection = initTelemetryConnection(log.functions);  
+} catch (error) {
+  log.error("Release Debug || Error in creating connection: ", error);
+  throw Error("Release Debug || Throw Error in creating connection:"+ JSON.stringify(error));
+}
+
 
 const isDev =
   electronIsDev &&
@@ -225,7 +234,11 @@ function createWindow() {
 app.allowRendererProcessReuse = true;
 
 app.on("ready", () => {
-  createWindow();
+  try {
+    createWindow();
+  } catch (error) {
+    log.error("Release Debug || Error in create window:", error);
+  }
 });
 
 app.on("window-all-closed", () => {

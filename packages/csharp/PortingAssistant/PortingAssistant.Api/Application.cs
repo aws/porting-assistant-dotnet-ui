@@ -22,15 +22,13 @@ namespace PortingAssistant.Api
         private IServiceProvider _services { get; set; }
         private Connection _connection;
         private ILogger _logger;
-        private CustomerContributionConfiguration _ccconfig;
 
-        public Application(IServiceCollection serviceCollection,
-            CustomerContributionConfiguration contributionConfiguration)
+        public Application(IServiceCollection serviceCollection)
         {
             _services = serviceCollection.BuildServiceProvider();
             _logger = _services.GetRequiredService<ILogger<Application>>();
             _connection = BuildConnection();
-            _ccconfig = contributionConfiguration;
+
             
         }
 

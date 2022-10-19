@@ -21,6 +21,8 @@ namespace PortingAssistant.Api
     {
         static void Main(string[] args)
         {
+          try {
+            
             if (args.Length < 3)
             {
                 throw new ArgumentException("Must provide a config file, aws profile and path");
@@ -59,6 +61,7 @@ namespace PortingAssistant.Api
             }
 
             Log.Logger = logConfiguration.CreateLogger();
+            Log.Logger.Error("Release Debug || Received Args: " + string.Join("\n", args));
 
             var portingAssistantPortingConfiguration = JsonSerializer.Deserialize<PortingAssistantPortingConfiguration>(File.ReadAllText(config));
             var configuration = new PortingAssistantConfiguration();
@@ -66,10 +69,8 @@ namespace PortingAssistant.Api
             configuration.DataStoreSettings.S3Endpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.S3Endpoint;
             configuration.DataStoreSettings.GitHubEndpoint = portingAssistantPortingConfiguration.PortingAssistantConfiguration.DataStoreSettings.GitHubEndpoint;
 
-            var contributionConfiguration = new CustomerContributionConfiguration();
-            contributionConfiguration.CustomerFeedbackEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.CustomerFeedbackEndpoint;
-            contributionConfiguration.RuleContributionEndpoint = portingAssistantPortingConfiguration.CustomerContributionConfiguration.RuleContributionEndpoint;
-
+            Log.Logger.Error("Release Debug || Configuration Read" + Newtonsoft.Json.JsonConvert.SerializeObject(configuration, Newtonsoft.Json.Formatting.Indented));
+                
             string metricsFolder = Path.Combine(args[2], "logs");
             string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
 
@@ -81,8 +82,11 @@ namespace PortingAssistant.Api
                     outputTemplate: outputTemplate);
             TelemetryCollector.Builder(telemetryLogConfiguration.CreateLogger(), metricsFilePath);
 
+            Log.Logger.Error("Release Debug || telemetryLogConfiguration" + telemetryLogConfiguration.ToString());
 
             var crashReportsDir = Path.Combine(metricsFolder, "reports");
+            Log.Logger.Error("Release Debug || crashReportsDir" + crashReportsDir.ToString());
+
             try
             {
             if (Directory.Exists(crashReportsDir)) {
@@ -100,20 +104,28 @@ namespace PortingAssistant.Api
             }
 
 
-
+            Log.Logger.Error("Release Debug || Configuring Services");
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection, configuration);
-
+            Log.Logger.Error("Release Debug || Configured Services");
             try
             {
-                var application = new Application(serviceCollection, contributionConfiguration);
+                var application = new Application(serviceCollection);
+                Log.Logger.Error("Release Debug || Application created");
                 application.SetupConnection(isConsole);
+                Log.Logger.Error("Release Debug || Starting application");
                 application.Start();
+                Log.Logger.Error("Release Debug || Application Started");
+            } catch (Exception ex) {
+                Log.Logger.Error("Error in starting application: ", ex);
             }
             finally
             {
                 Log.CloseAndFlush();
             }
+          } catch (Exception ex) {
+            Log.Logger.Error("Error", ex.ToString());
+          }
         }
 
         static private void ConfigureServices(IServiceCollection serviceCollection, PortingAssistantConfiguration config)
