@@ -130,7 +130,7 @@ namespace PortingAssistant.Api
                 Log.CloseAndFlush();
             }
           } catch (Exception ex) {
-            Log.Logger.Error("Error", ex);
+            Log.Logger.Error("Error", ex.ToString());
           }
         }
 
