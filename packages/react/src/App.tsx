@@ -54,27 +54,6 @@ const RouteWithError: React.FC<RouteWithErrorProps> = ({ children, requireProfil
     window.electron.saveState("lastOpenDate", Date.now())
   }
  
-  const watchDefaultCredentialsAreValid = () => {
-    setInterval(async () => {
-      const profile = window.electron.getState("profile");
-      const profileVerfied = (await window.electron.verifyUser(profile));
-      if (!profileVerfied) {
-        dispatch(
-          pushCurrentMessageUpdate({
-              messageId: uuid(),
-              groupId: "verify-defualt-creds",
-              type: "warning",
-              // loading: false,
-              content: `The current credentials have expired. Please review and update AWS credentials.`,
-              dismissible: false,
-              buttonText: "Update Credentials",
-              onButtonClick: () => {history.push('/settings')}
-          })
-      );
-    }
-  }, 900000)
-}
-  watchDefaultCredentialsAreValid();
   checkForCrashReportsLessThan30DaysOld();
 
   return (
@@ -121,7 +100,7 @@ const AppInternal: React.FC<{}> = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const hasProfile = window.electron.getState("profile");
+    const hasProfile = window.electron.getState("lastConfirmVersion") !== "";
     if (hasProfile) {
       dispatch(init(false));
     }

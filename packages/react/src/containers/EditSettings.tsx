@@ -15,25 +15,27 @@ const EditSettingsInternal: React.FC = () => {
   const history = useHistory();
 
   useEffect(() => {
-    dispatch(
-      setInfo({
-        heading: "Set up Porting Assistant for .NET",
-        mainContent: (
-          <Box variant="p">
-            You can change your AWS CLI profile information so that Porting Assistant for .NET can collect metrics to
-            improve your experience. These metrics also help flag issues with the software for AWS to quickly address.
-            If you have not set up your AWS profile, see Learn More below.
-          </Box>
-        ),
-        learnMoreLinks: [
-          {
-            text: "Configuring the AWS CLI",
-            externalUrl:
-              "https://docs.aws.amazon.com/portingassistant/latest/userguide/porting-assistant-prerequisites.html#porting-assistant-iam-profile"
-          }
-        ]
-      })
-    );
+    if (window.electron.getState("profile")) {
+      dispatch(
+        setInfo({
+          heading: "Set up Porting Assistant for .NET",
+          mainContent: (
+            <Box variant="p">
+              You can change your AWS CLI profile information so that Porting Assistant for .NET can collect metrics to
+              improve your experience. These metrics also help flag issues with the software for AWS to quickly address.
+              If you have not set up your AWS profile, see Learn More below.
+            </Box>
+          ),
+          learnMoreLinks: [
+            {
+              text: "Configuring the AWS CLI",
+              externalUrl:
+                "https://docs.aws.amazon.com/portingassistant/latest/userguide/porting-assistant-prerequisites.html#porting-assistant-iam-profile"
+            }
+          ]
+        })
+      );
+    }
   }, [dispatch]);
 
   const setPendingMessage = useCallback(() => {

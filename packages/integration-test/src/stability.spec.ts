@@ -12,7 +12,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
   beforeAll(async () => {
     app = await startApp();
     runner = new TestRunner(app);
-    await runner.selectProfile();
+    await runner.setupTargetFramework();
     return app;
   });
 

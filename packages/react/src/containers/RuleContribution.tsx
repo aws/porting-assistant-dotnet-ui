@@ -44,9 +44,8 @@ const RuleContributionInternal: React.FC = () => {
     heading: "Suggest replacement",
     mainContent: (
       <Box variant="p">
-        You can change your AWS CLI profile information or your permission to send metrics. Porting Assistant for .NET
-        collects metrics to improve your experience. These metrics also help flag issues with the software for AWS to
-        quickly address.
+        The rule contribution form will format your suggestion and open your email client to send to the Porting
+        Assistant for .NET team.
       </Box>
     ),
     learnMoreLinks: []

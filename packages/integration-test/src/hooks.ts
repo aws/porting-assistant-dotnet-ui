@@ -97,3 +97,8 @@ export const setupElectronLogs = (app: Application) => {
     });
   }
 };
+
+export const setupTelemetry = async (app: Application) => {
+  await app.client.execute(`window.electron.saveState("profile", "default")`);
+  await app.client.execute(`window.electron.saveState("share", true)`);
+};

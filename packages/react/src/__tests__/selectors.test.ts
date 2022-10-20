@@ -1,3 +1,4 @@
+import path from "path";
 import { createStore } from "redux";
 
 import { ApiAnalysisResult, Project, ProjectApiAnalysisResult, SourceFileToContents } from "../../src/models/project";
@@ -609,6 +610,7 @@ describe("tableSelectors utils apis", () => {
 describe("selectDashboardTableData", () => {
   window.electron.getState = jest.fn();
   jest.spyOn(window.electron, "getState").mockReturnValue("net6.0");
+  window.electron.getFilename = path.basename;
 
   const fakeStoreData: Partial<RootState> = {
     solution: {
@@ -959,5 +961,17 @@ describe("checkInternetAccess", () => {
     const expectResult = internetAccessFailed();
     expect(currentMessagesUpdates[0]["content"]).toEqual(expectResult["content"]);
     expect(currentMessagesUpdates[0]["header"]).toEqual(expectResult["header"]);
+  });
+});
+
+describe("checkGetProfileSetting", () => {
+  it("should return proper value from get state for profile", async () => {
+    window.electron.getState = jest.fn();
+    jest.spyOn(window.electron, "getState").mockReturnValue("default");
+
+    expect (window.electron.getState("profile")).toEqual("default");
+
+    jest.spyOn(window.electron, "getState").mockReturnValue("");
+    expect (window.electron.getState("profile")).toEqual("");
   });
 });

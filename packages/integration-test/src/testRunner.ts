@@ -26,17 +26,12 @@ export class TestRunner {
     await (await this.app.client.$(`[title="${targetFramework}"`)).click();
   };
 
-  selectProfile = async (targetFramework: string = "") => {
+  setupTargetFramework = async (targetFramework: string = "") => {
     await this.app.client.pause(3000);
     await (await this.app.client.$("#start-btn")).click();
-    await this.addNamedProfileCheck();
     if (targetFramework !== "") {
       await this.selectTargetFramework(targetFramework);
     }
-    await this.selectDefaultCredentials();
-    await this.selectCustomCredentials();
-    await (await this.app.client.$("#profile-selection")).click();
-    await (await this.app.client.$("[title=\"default\"]")).click();
     await (await this.app.client.$("#next-btn")).click();
     await (
       await this.app.client.$("=Assess a new solution")
@@ -45,80 +40,13 @@ export class TestRunner {
     });
   };
 
-  addNamedProfile = async (profileName: string, accessKeyId: string, secretAccessKey: string) => {
-    await this.selectDefaultCredentials();
-    await this.selectCustomCredentials();
-    await (
-      await this.app.client.$("#add-named-profile")
-    ).click({
-      button: "left",
-      x: 0,
-      y: 3,
-    });
-
-    await (await this.app.client.$('[name="profileName"]')).setValue(profileName);
-    await (await this.app.client.$('[name="accessKeyID"]')).setValue(accessKeyId);
-    await (await this.app.client.$('[name="secretAccessKey"]')).setValue(secretAccessKey);
-    await (await this.app.client.$("#add-profile-button")).click();
-    };
-
-  selectDefaultCredentials = async () => {
-        await (
-            await this.app.client.$("[data-value=\"default\"]")
-        ).click();
-    };
-
-  selectCustomCredentials = async () => {
-      await (
-          await this.app.client.$("[data-value=\"custom\"]")
-      ).click();
-  };
-
-  selectNamedProfile = async (profileName: string, targetFramework: string = "") => {
-    if (targetFramework !== "") {
-      await this.selectTargetFramework(targetFramework);
-     }
-    await this.selectDefaultCredentials();
-    await this.selectCustomCredentials();
-    await (await this.app.client.$("#profile-selection")).click();
-    await (await this.app.client.$(`[title="${profileName}"]`)).click();
-    await (await this.app.client.$("#next-btn")).click();
-  };
-
-  addNamedProfileCheck = async () => {
-    // profile selection model element is on top of add named profile link
-    // and will intercept the click so we offset by 3 pixels down
-    await this.selectDefaultCredentials();
-    await this.selectCustomCredentials();
-    await (
-      await this.app.client.$("#add-named-profile")
-    ).click({
-      button: "left",
-      x: 0,
-      y: 3,
-    });
-    await (await this.app.client.$("#add-profile-button")).click();
-    await (
-      await this.app.client.$("span=Profile is required")
-    ).waitForExist({
-      timeout: 1000,
-    });
-    await this.app.client.keys(["Escape"]);
-    await this.selectDefaultCredentials();
-    await this.selectCustomCredentials();
-    await (
-      await this.app.client.$("#profile-selection")
-    ).waitForExist({
-      timeout: 1000,
-    });
-  };
-
-
   sendFeedbackCheck = async () => {
     await (await this.app.client.$("#feedback-btn")).click();
     await (await this.app.client.$("#fb-category-selection")).click();
     await (await this.app.client.$('[data-testid="general"]')).click();
-    await (await this.app.client.$("#fb-text input")).setValue("integration-test-feedback");
+    await (
+      await this.app.client.$("#fb-text input")
+    ).setValue("integration-test-feedback");
     await (await this.app.client.$("#send-feedback-btn")).click();
     console.log("Sent customer feedback success");
   };
@@ -131,7 +59,9 @@ export class TestRunner {
 
   sendRuleContributionCheck = async () => {
     await this.nugetPackageTabCheck();
-    await (await this.app.client.$(".awsui_input_2rhyz_fxf4s_7")).setValue("jQuery.vsdoc");
+    await (
+      await this.app.client.$(".awsui_input_2rhyz_fxf4s_7")
+    ).setValue("jQuery.vsdoc");
     await (await this.app.client.$(".awsui_input_1mabk_1s4v0_34")).click();
     await (await this.app.client.$("#rule-contribution-btn")).click();
     await (await this.app.client.$("span=Suggestion form")).waitForDisplayed();
@@ -150,7 +80,9 @@ export class TestRunner {
     sendRuleContribution: boolean,
     sortingCheckRequest?: SortingCheckRequest
   ) => {
-    const solutionNameTagId = `#solution-link-${this.escapeNonAlphaNumeric(solutionPath)}`;
+    const solutionNameTagId = `#solution-link-${this.escapeNonAlphaNumeric(
+      solutionPath
+    )}`;
     console.log(`assessing solution ${solutionNameTagId}....`);
     await this.assessSolutionCheck(solutionNameTagId, solutionPath);
     console.log(`assess solution ${solutionNameTagId} success`);
@@ -162,7 +94,10 @@ export class TestRunner {
       await this.sendRuleContributionCheck();
     }
     console.log(`reassessing solution ${solutionNameTagId}....`);
-    const assessmentResults = await this.reassessSolutionCheck(solutionNameTagId, solutionPath);
+    const assessmentResults = await this.reassessSolutionCheck(
+      solutionNameTagId,
+      solutionPath
+    );
     console.log(`reassess solution ${solutionNameTagId} success`);
     console.log(`checking tabs in solution ${solutionNameTagId}`);
     const numSourceFiles = await this.solutionTabCheck(sortingCheckRequest);
@@ -190,11 +125,15 @@ export class TestRunner {
       ).waitForExist({
         reverse: true,
         timeout: 1000000,
-        timeoutMsg: "porting and reassessment timeout"
+        timeoutMsg: "porting and reassessment timeout",
       });
       await (await this.app.client.$(solutionNameTagId)).click();
     }
-    await this.checkPortingProjectResults(solutionNameTagId, projects[0], targetFramework);
+    await this.checkPortingProjectResults(
+      solutionNameTagId,
+      projects[0],
+      targetFramework
+    );
     return assessmentResults;
   };
 
