@@ -18,8 +18,8 @@ export class TestRunner {
   };
 
   delay = async (s: number) => {
-      return new Promise(resolve => setTimeout(resolve, s*1000));
-    }
+    return new Promise((resolve) => setTimeout(resolve, s * 1000));
+  };
 
   selectTargetFramework = async (targetFramework: string) => {
     await (await this.app.client.$("#targetFramework-selection")).click();
@@ -32,6 +32,7 @@ export class TestRunner {
     if (targetFramework !== "") {
       await this.selectTargetFramework(targetFramework);
     }
+    await $('div=Current Profile: default');
     await (await this.app.client.$("#next-btn")).click();
     await (
       await this.app.client.$("=Assess a new solution")
@@ -144,14 +145,25 @@ export class TestRunner {
   checkAssessmentResults = async (solutionPath: string) => {
     const escapedSolutionPath = this.escapeNonAlphaNumeric(solutionPath);
     return await Promise.all([
-      await (await this.app.client.$(`#ported-projects-${escapedSolutionPath}`)).getText(),
-      await (await this.app.client.$(`#incompatible-packages-${escapedSolutionPath}`)).getText(),
-      await (await this.app.client.$(`#incompatible-apis-${escapedSolutionPath}`)).getText(),
-      await (await this.app.client.$(`#build-error-${escapedSolutionPath}`)).getText(),
+      await (
+        await this.app.client.$(`#ported-projects-${escapedSolutionPath}`)
+      ).getText(),
+      await (
+        await this.app.client.$(`#incompatible-packages-${escapedSolutionPath}`)
+      ).getText(),
+      await (
+        await this.app.client.$(`#incompatible-apis-${escapedSolutionPath}`)
+      ).getText(),
+      await (
+        await this.app.client.$(`#build-error-${escapedSolutionPath}`)
+      ).getText(),
     ]);
   };
 
-  assessSolutionCheck = async (solutionNameTagId: string, solutionPath: string) => {
+  assessSolutionCheck = async (
+    solutionNameTagId: string,
+    solutionPath: string
+  ) => {
     await (
       await this.app.client.$(".awsui_circle_1612d_189wz_75")
     ).waitForExist({
@@ -161,7 +173,10 @@ export class TestRunner {
     await (await this.app.client.$(solutionNameTagId)).click();
   };
 
-  reassessSolutionCheck = async (solutionNameTagId: string, solutionPath: string) => {
+  reassessSolutionCheck = async (
+    solutionNameTagId: string,
+    solutionPath: string
+  ) => {
     const reassessSolution = await this.app.client.$("#reassess-solution");
     await reassessSolution.waitForEnabled({ timeout: 600000 });
     await reassessSolution.click();
@@ -170,7 +185,7 @@ export class TestRunner {
     ).waitForExist({
       reverse: true,
       timeout: 1000000,
-      timeoutMsg: "reassessment timeout"
+      timeoutMsg: "reassessment timeout",
     });
     const results = await this.checkAssessmentResults(solutionPath);
     await (await this.app.client.$(solutionNameTagId)).click();
@@ -178,12 +193,20 @@ export class TestRunner {
   };
 
   nugetPackageTabCheck = async (sortingCheckRequest?: SortingCheckRequest) => {
-    await (await this.app.client.$(`button[data-testid="nuget-packages"]`)).click();
-    await (await this.app.client.$('input[placeholder="Search NuGet package by name"]')).waitForDisplayed();
+    await (
+      await this.app.client.$(`button[data-testid="nuget-packages"]`)
+    ).click();
+    await (
+      await this.app.client.$(
+        'input[placeholder="Search NuGet package by name"]'
+      )
+    ).waitForDisplayed();
   };
 
   tabsCheck = async (sortingCheckRequest?: SortingCheckRequest) => {
-    const projectReferenceTab = await this.app.client.$(`button[data-testid="project-references"]`);
+    const projectReferenceTab = await this.app.client.$(
+      `button[data-testid="project-references"]`
+    );
     await projectReferenceTab.waitForExist({ timeout: 100000 });
     await projectReferenceTab.click();
     await (
@@ -194,14 +217,18 @@ export class TestRunner {
     await this.nugetPackageTabCheck();
     await this.apisTabCheck(sortingCheckRequest);
     await this.sourceFilesTabCheck(sortingCheckRequest);
-    const numSourceFiles = await (await this.app.client.$(".awsui_counter_2qdw9_bb1i6_175")).getText();
+    const numSourceFiles = await (
+      await this.app.client.$(".awsui_counter_2qdw9_bb1i6_175")
+    ).getText();
     return numSourceFiles;
   };
 
   solutionTabCheck = async (sortingCheckRequest?: SortingCheckRequest) => {
     const numSourceFiles = await this.tabsCheck(sortingCheckRequest);
     await (await this.app.client.$(`button[data-testid="projects"]`)).click();
-    await (await this.app.client.$('input[placeholder="Search by project name"]')).waitForDisplayed();
+    await (
+      await this.app.client.$('input[placeholder="Search by project name"]')
+    ).waitForDisplayed();
     return numSourceFiles;
   };
 
@@ -252,16 +279,21 @@ export class TestRunner {
     }
     // should be 'project-name-[projectfilepath]'
     const projectFilePath = firstProjectId.split("-")[2];
-    const targetFramework = await (await this.app.client.$(`#target-framework-${projectFilePath}`)).getText();
+    const targetFramework = await (
+      await this.app.client.$(`#target-framework-${projectFilePath}`)
+    ).getText();
     expect(targetFramework).toBe(expectedTargetFramework);
   };
 
-  validateHighLevelResults = async (results: string[] | undefined, expectedValues: string[]) => {
+  validateHighLevelResults = async (
+    results: string[] | undefined,
+    expectedValues: string[]
+  ) => {
     // [portedProjects, incompatiblePackages, incompatibleApis, buildErrors, numSourceFiles]
     expect(results).toBeTruthy();
     expect(results ? results[0] : "").toBe(expectedValues[0]);
     expect(results ? results[1] : "").toBe(expectedValues[1]);
-    expect(results ? results[2]: "").not.toBe("0 of 0");
+    expect(results ? results[2] : "").not.toBe("0 of 0");
     expect(results ? results[3] : "").toBe(expectedValues[3]);
     expect(results ? results[4] : "").toBe(expectedValues[4]);
   };
@@ -269,16 +301,22 @@ export class TestRunner {
   validateComponentExists = async (componentSelector: string) => {
     expect(
       await (
-        await this.app.client.$(componentSelector)
+        await this.app.client.A(componentSelector)
       ).waitForExist({
         timeout: 60000,
       })
     ).toBe(true);
   };
 
-  private async sourceFilesTabCheck(sortingCheckRequest: SortingCheckRequest | undefined) {
-    await (await this.app.client.$(`button[data-testid="source-files"]`)).click();
-    await (await this.app.client.$('input[placeholder="Search by source file name"]')).waitForDisplayed();
+  private async sourceFilesTabCheck(
+    sortingCheckRequest: SortingCheckRequest | undefined
+  ) {
+    await (
+      await this.app.client.$(`button[data-testid="source-files"]`)
+    ).click();
+    await (
+      await this.app.client.$('input[placeholder="Search by source file name"]')
+    ).waitForDisplayed();
     if (sortingCheckRequest?.sourceFiles) {
       const nameColumn = await this.app.client.$("div=Source file name");
       await nameColumn.click();
@@ -288,9 +326,13 @@ export class TestRunner {
     }
   }
 
-  private async apisTabCheck(sortingCheckRequest: SortingCheckRequest | undefined) {
+  private async apisTabCheck(
+    sortingCheckRequest: SortingCheckRequest | undefined
+  ) {
     await (await this.app.client.$(`button[data-testid="apis"]`)).click();
-    await (await this.app.client.$('input[placeholder="Search by API name"]')).waitForDisplayed();
+    await (
+      await this.app.client.$('input[placeholder="Search by API name"]')
+    ).waitForDisplayed();
     if (sortingCheckRequest?.apis) {
       const nameColumn = await this.app.client.$("div=Name");
       await nameColumn.click();
