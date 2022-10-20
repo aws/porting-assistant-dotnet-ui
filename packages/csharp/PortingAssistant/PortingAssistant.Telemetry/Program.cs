@@ -37,7 +37,7 @@ namespace PortingAssistant.Telemetry
                 ServiceName = portingAssistantPortingConfiguration.PortingAssistantMetrics["ServiceName"].ToString(),
                 Description = portingAssistantPortingConfiguration.PortingAssistantMetrics["Description"].ToString(),
                 LogsPath = metricsFolder,
-                LogFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.log"),
+                LogFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-errors-{DateTime.Today.ToString("yyyyMMdd")}.log"),
                 MetricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics"),
                 Suffix = new List<string>() { ".log", ".metrics" }
             };
@@ -46,7 +46,7 @@ namespace PortingAssistant.Telemetry
             var logConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
                 .MinimumLevel.Debug()
                 .WriteTo.RollingFile(
-                    Path.Combine(args[2], "logs", "portingAssistant-telemetry-{Date}.log"),
+                    Path.Combine(teleConfig.LogFilePath),
                     outputTemplate: outputTemplate,
                     fileSizeLimitBytes: 1000000);
 

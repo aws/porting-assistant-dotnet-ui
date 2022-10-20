@@ -11,10 +11,11 @@ interface Props {
   unknown: number;
   isLoading: boolean;
   infoLink: ReactNode;
+  isInProgress: boolean;
 }
 
 export const CompatiblePackage: React.FC<Props> = React.memo(
-  ({ title, compatible, incompatible, unknown, isLoading, infoLink }) => {
+  ({ title, compatible, incompatible, unknown, isLoading, infoLink, isInProgress }) => {
     const total = compatible + incompatible + unknown;
     return (
       <div>
@@ -24,6 +25,10 @@ export const CompatiblePackage: React.FC<Props> = React.memo(
         {!isLoading ? (
           <div>
             <div id="compatibility-count" className={styles.packageCount}>{`${incompatible} of ${total}`}</div>
+            {isInProgress? 
+                <div className={styles.loading}>
+                <Spinner size="big" />
+              </div>:""}
             <Box margin={{ top: "m" }}>
               <div className={styles.bar}>
                 {incompatible > 0 && (

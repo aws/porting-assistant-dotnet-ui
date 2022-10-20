@@ -65,13 +65,9 @@ export class TestRunner {
     await (await this.app.client.$(".awsui_input_1mabk_1s4v0_34")).click();
     await (await this.app.client.$("#rule-contribution-btn")).click();
     await (await this.app.client.$("span=Suggestion form")).waitForDisplayed();
-    await (
-      await this.app.client.$("#rc-package-name input")
-    ).setValue("Azure.ImageOptimizer");
-    await (await this.app.client.$("#rc-version-check-box")).click();
-    await (
-      await this.app.client.$("#rc-comment input")
-    ).setValue("integration-test-rule-contribution");
+    await (await this.app.client.$("#rc-package-name input")).setValue("Azure.ImageOptimizer");
+    await (await this.app.client.$(".awsui_input_k2y2q_1mqle_22")).click();
+    await (await this.app.client.$("#rc-comment input")).setValue("integration-test-rule-contribution");
     await (await this.app.client.$("#rc-send-btn")).click();
     console.log("Sent rule contribution success");
   };
@@ -153,9 +149,8 @@ export class TestRunner {
 
   assessSolutionCheck = async (solutionNameTagId: string, solutionPath: string) => {
     await (
-      await this.app.client.$(".awsui_circle_1612d_189wz_75")
+      await this.app.client.$("div*=Successfully assessed")
     ).waitForExist({
-      reverse: true,
       timeout: 800000,
     });
     await (await this.app.client.$(solutionNameTagId)).click();
@@ -166,10 +161,9 @@ export class TestRunner {
     await reassessSolution.waitForEnabled({ timeout: 600000 });
     await reassessSolution.click();
     await (
-      await this.app.client.$(".awsui_circle_1612d_189wz_75")
+      await this.app.client.$("div*=Successfully assessed")
     ).waitForExist({
-      reverse: true,
-      timeout: 1000000,
+      timeout: 800000,
       timeoutMsg: "reassessment timeout"
     });
     const results = await this.checkAssessmentResults(solutionPath);
@@ -215,7 +209,7 @@ export class TestRunner {
     await portProjectButton.click();
     if (selectLocation == "inplace") {
       await (await this.app.client.$("#select-location-button")).click();
-      await (await this.app.client.$(`div[data-value="inplace"]`)).click();
+      await (await this.app.client.$("span=Modify source in place")).click();
       await (await this.app.client.$("#save-button")).click();
     } else if (selectLocation == "copy") {
       await (await this.app.client.$("#select-location-button")).click();
@@ -243,9 +237,8 @@ export class TestRunner {
     const solutionLink = await this.app.client.$(solutionNameTagId);
     if (await solutionLink.isExisting()) {
       await (
-        await this.app.client.$(".awsui_circle_1612d_189wz_75")
+        await this.app.client.$("div*=Successfully assessed")
       ).waitForExist({
-        reverse: true,
         timeout: 800000,
       });
       await solutionLink.click();

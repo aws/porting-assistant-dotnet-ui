@@ -24,14 +24,11 @@ namespace PortingAssistant.Api
         private ILogger _logger;
         private CustomerContributionConfiguration _ccconfig;
 
-        public Application(IServiceCollection serviceCollection,
-            CustomerContributionConfiguration contributionConfiguration)
+        public Application(IServiceCollection serviceCollection)
         {
             _services = serviceCollection.BuildServiceProvider();
             _logger = _services.GetRequiredService<ILogger<Application>>();
             _connection = BuildConnection();
-            _ccconfig = contributionConfiguration;
-            
         }
 
         private Connection BuildConnection()
@@ -68,8 +65,8 @@ namespace PortingAssistant.Api
                 {
                     _connection.Send("onNugetPackageUpdate", response);
                 });
-
-                return assessmentService.AnalyzeSolution(request);
+                request.settings.UseGenerator = true;
+                return assessmentService.AnalyzeSolution(request).Result;
             });
 
 
@@ -140,6 +137,11 @@ namespace PortingAssistant.Api
                     };
                     return HttpServiceUtils.CheckInternetAccess(httpService, files);
                 });
+
+            _connection.On<string>("cancelAssessment", 
+            reuqest => {
+              PortingAssistantUtils.cancel = true;
+            });
         }
 
         public void Start()

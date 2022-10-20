@@ -7,8 +7,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
-		<PackageReference Include="PortingAssistant.Client.Client" Version="2.4.2-alpha-g7b80e67d7c" />
-		<PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.4.2-alpha-g7b80e67d7c" />
+		<PackageReference Include="PortingAssistant.Client.Client" Version="2.4.7" />
+		<PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.4.7" />
 		<PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
 	</ItemGroup>

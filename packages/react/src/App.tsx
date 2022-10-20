@@ -38,6 +38,24 @@ const RouteWithError: React.FC<RouteWithErrorProps> = ({ children, requireProfil
     return <Redirect to="/main" />;
   }
 
+  const checkForCrashReportsLessThan30DaysOld = async () => {
+    const fileCreationTime = await window.electron.crashOnLastUse(window.electron.joinPaths(window.electron.getLogFolder(), "reports"));
+    if (fileCreationTime) {
+      dispatch(
+        pushCurrentMessageUpdate({
+            messageId: uuid(),
+            groupId: "crash-in-last-30-days",
+            type: "warning",
+            content: `Porting Assistant quit unexpectedly the last time. Please contact AWS Porting Assistant Support for more help.`,
+            dismissible: true,
+        })
+    );
+    }
+    window.electron.saveState("lastOpenDate", Date.now())
+  }
+ 
+  checkForCrashReportsLessThan30DaysOld();
+
   return (
     <Route {...props}>
       <ErrorBoundary

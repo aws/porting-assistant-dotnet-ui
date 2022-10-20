@@ -13,15 +13,33 @@ namespace PortingAssistant.Common.Utils
 {
     public static class TelemetryCollectionUtils
     {
-        public static void CollectSolutionMetrics(SolutionAnalysisResult solutionAnalysisResult, AnalyzeSolutionRequest request, DateTime startTime, string tgtFramework)
+        public static void CollectSolutionMetrics(SolutionAnalysisResult solutionAnalysisResult, AnalyzeSolutionRequest request, DateTime startTime, string tgtFramework, double firstProjectAnalysisTime, int numProjects, bool canceled=false)
         {
-            var solutionMetrics = createSolutionMetric(solutionAnalysisResult, request.runId, request.triggerType, tgtFramework, startTime);
+            var solutionMetrics = createSolutionMetric(solutionAnalysisResult, request.runId, request.triggerType, tgtFramework, startTime, firstProjectAnalysisTime, numProjects, canceled);
             TelemetryCollector.Collect<SolutionMetrics>(solutionMetrics);
         }
 
-        public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework, PreTriggerData preTriggerData = null)
+        public static void CollectStartMetrics(AnalyzeSolutionRequest request, DateTime startTime, string tgtFramework, bool canceled=false)
         {
-            var projectMetrics = createProjectMetric(request.runId, request.triggerType, tgtFramework, projectAnalysisResult, preTriggerData);
+            var startMetric = createStartMetric(request.solutionFilePath, request.runId, request.triggerType, tgtFramework, startTime, canceled);
+            TelemetryCollector.Collect<SolutionMetrics>(startMetric);
+        }
+
+        public static void CollectEndMetrics(AnalyzeSolutionRequest request, DateTime startTime, string tgtFramework, bool canceled=false)
+        {
+            var endMetric = createEndMetric(request.solutionFilePath, request.runId, request.triggerType, tgtFramework, startTime, canceled);
+            TelemetryCollector.Collect<SolutionMetrics>(endMetric);
+        }
+
+        public static void CollectCrashMetrics(string fileName, DateTime creationTime)
+        {
+            var crashMetric = createCrashMetric(fileName, creationTime);
+            TelemetryCollector.Collect<CrashMetrics>(crashMetric);
+        }
+
+        public static void CollectProjectMetrics(ProjectAnalysisResult projectAnalysisResult, AnalyzeSolutionRequest request, string tgtFramework, double assessmentTime, double cumulativeAnalysisTime, PreTriggerData preTriggerData = null)
+        {
+            var projectMetrics = createProjectMetric(request.runId, request.triggerType, tgtFramework, projectAnalysisResult, assessmentTime, cumulativeAnalysisTime, preTriggerData);
             TelemetryCollector.Collect<ProjectMetrics>(projectMetrics);
         }
 
@@ -48,7 +66,7 @@ namespace PortingAssistant.Common.Utils
             apiMetrics.ToList().ForEach(metric => TelemetryCollector.Collect(metric));
         }
 
-        public static SolutionMetrics createSolutionMetric(SolutionAnalysisResult solutionAnalysisResult, string runId, string triggerType, string tgtFramework, DateTime startTime)
+        public static SolutionMetrics createSolutionMetric(SolutionAnalysisResult solutionAnalysisResult, string runId, string triggerType, string tgtFramework, DateTime startTime, double firstProjectAnalysisTime, int numProjects, bool canceled)
         {
             return new SolutionMetrics
             {
@@ -64,9 +82,59 @@ namespace PortingAssistant.Common.Utils
                 AnalysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds,
                 PortingAssistantVersion = MetricsBase.Version,
                 UsingDefaultCreds = MetricsBase.UsingDefault,
+                Canceled = canceled,
+                SessionId = MetricsBase.SessionId,
+                FirstProjectAnalysisTime = firstProjectAnalysisTime,
+                NumProjects = numProjects
             };
         }
-        public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult, PreTriggerData preTriggerData = null)
+
+        public static SolutionMetrics createStartMetric(string solutionPath, string runId, string triggerType, string tgtFramework, DateTime startTime, bool canceled)
+        {
+            return new SolutionMetrics
+            {
+                MetricsType = MetricsType.Start,
+                RunId = runId,
+                TriggerType = triggerType,
+                TargetFramework = tgtFramework,
+                TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
+                SolutionPath = CryptoUtil.HashString(solutionPath),
+                PortingAssistantVersion = MetricsBase.Version,
+                UsingDefaultCreds = MetricsBase.UsingDefault,
+                Canceled = canceled,
+                SessionId = MetricsBase.SessionId,
+            };
+        }
+
+        public static SolutionMetrics createEndMetric(string solutionPath, string runId, string triggerType, string tgtFramework, DateTime startTime, bool canceled)
+        {
+            return new SolutionMetrics
+            {
+                MetricsType = MetricsType.End,
+                RunId = runId,
+                TriggerType = triggerType,
+                TargetFramework = tgtFramework,
+                TimeStamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm"),
+                SolutionPath = CryptoUtil.HashString(solutionPath),
+                PortingAssistantVersion = MetricsBase.Version,
+                UsingDefaultCreds = MetricsBase.UsingDefault,
+                Canceled = canceled,
+                SessionId = MetricsBase.SessionId,
+            };
+        }
+
+        public static CrashMetrics createCrashMetric(string fileName, DateTime creationTime)
+        {
+            return new CrashMetrics
+            {
+                MetricsType = MetricsType.Crash,
+                FileName = fileName,
+                CreationTimeUTC = creationTime.ToString(),
+                SessionId = MetricsBase.SessionId,
+                PortingAssistantVersion = MetricsBase.Version
+            };
+        }
+        public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult, double assessmentTime, double cumulativeAnalysisTime, PreTriggerData preTriggerData = null)
         {
             var preCompatibilityResult = (preTriggerData == null || preTriggerData?.sourceFileAnalysisResults == null || preTriggerData.sourceFileAnalysisResults.Length == 0)
                 ? null : AnalysisUtils.GenerateCompatibilityResults(preTriggerData?.sourceFileAnalysisResults?.ToList(),
@@ -94,7 +162,10 @@ namespace PortingAssistant.Common.Utils
                 PreFramework = preTriggerData?.targetFramework,
                 PreBuildErrorCount = preTriggerData?.buildErrors,
                 PostBuildErrorCount = projectAnalysisResult.Errors.Count,
-                ProjectLanguage = GetProjectLanguage(projectAnalysisResult.ProjectFilePath)
+                ProjectLanguage = GetProjectLanguage(projectAnalysisResult.ProjectFilePath),
+                SessionId = MetricsBase.SessionId,
+                AnalysisTime = assessmentTime,
+                CumulativeAnalysisTime = cumulativeAnalysisTime,
             };
         }
 
@@ -131,7 +202,8 @@ namespace PortingAssistant.Common.Utils
                 PackageName = result.Result.PackageVersionPair.PackageId,
                 PackageVersion = result.Result.PackageVersionPair.Version,
                 Compatibility = result.Result.CompatibilityResults[tgtFramework].Compatibility,
-                PortingAssistantVersion = MetricsBase.Version
+                PortingAssistantVersion = MetricsBase.Version,
+                SessionId = MetricsBase.SessionId,
             };
         }
 
@@ -153,7 +225,8 @@ namespace PortingAssistant.Common.Utils
                 ApiType = api.CodeEntityDetails.CodeEntityType.ToString(),
                 HasActions = api.Recommendations.RecommendedActions.Any(action => action.RecommendedActionType != RecommendedActionType.NoRecommendation),
                 ApiCounts = count,
-                PortingAssistantVersion = MetricsBase.Version
+                PortingAssistantVersion = MetricsBase.Version,
+                SessionId = MetricsBase.SessionId,
             };
         }
 

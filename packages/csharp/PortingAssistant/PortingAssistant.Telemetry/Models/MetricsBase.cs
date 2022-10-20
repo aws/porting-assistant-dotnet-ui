@@ -16,6 +16,7 @@ namespace PortingAssistant.Telemetry.Model
         public string TargetFramework { get; set; }
         public string TimeStamp { get; set; }
         public static bool UsingDefault { get; set; }
+        public static string SessionId { get; set;}
 
         // This identifier will be used as default, if there are no active network interface adapters on the machine
         private const string DefaultIdentifier = "591E6A97031144D5BADCE980EE3E51B7";

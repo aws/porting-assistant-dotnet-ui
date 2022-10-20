@@ -9,6 +9,7 @@ namespace PortingAssistant.Common.Utils
 {
     public static class PortingAssistantUtils
     {
+        public static bool cancel = false;
         public static string FindFiles(string targetDirectory, string fileName)
         {
             // Process the list of files found in the directory.

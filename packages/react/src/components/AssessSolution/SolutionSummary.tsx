@@ -9,21 +9,22 @@ import { Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import {
+  selectCancelStatus,
   selectCurrentSolutionApiAnalysis,
   selectCurrentSolutionDetails,
   selectNugetPackages
 } from "../../store/selectors/solutionSelectors";
 import { getActionCounts, getErrorCounts } from "../../store/selectors/tableSelectors";
-import { API_LOADING_AGGREGATE, getCompatibleApi } from "../../utils/getCompatibleApi";
-import { getCompatibleNugetsAgg, LOADING_AGGREGATES } from "../../utils/getCompatibleNugets";
+import { API_COMPATABILITIES, API_LOADING_AGGREGATE, getCompatibleApi } from "../../utils/getCompatibleApi";
+import { getCompatibleNugetsAgg, LOADING_AGGREGATES, NUGET_COMPATABILITIES } from "../../utils/getCompatibleNugets";
 import { getTargetFramework } from "../../utils/getTargetFramework";
-import { isLoaded, Loadable } from "../../utils/Loadable";
+import { hasNewData, isLoaded, isLoading, isLoadingWithData, Loadable } from "../../utils/Loadable";
 import { CompatiblePackage } from "../AssessShared/CompatiblePackage";
 import { SummaryItem } from "../AssessShared/SummaryItem";
 import { InfoLink } from "../InfoLink";
 
 interface Props {
-  solution: SolutionDetails;
+  solution: Loadable<SolutionDetails>;
   projects: Loadable<Project[]>;
 }
 
@@ -34,8 +35,11 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
   const solutionProjects = usePortingAssistantSelector(state => selectCurrentSolutionDetails(state, location.pathname));
   const apiAnalysis = usePortingAssistantSelector(state => selectCurrentSolutionApiAnalysis(state, location.pathname));
   const targetFramework = getTargetFramework();
+  const cancel = useSelector(selectCancelStatus);
+
   const nugetCompatibilities = useMemo(() => {
-    if (!isLoaded(projects)) {
+    if (!hasNewData(projects)) {
+      console.log("Does not have new data");
       return LOADING_AGGREGATES;
     }
     return getCompatibleNugetsAgg(
@@ -45,7 +49,7 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
   }, [nugetPackages, projects]);
 
   const apiCompatibilities = useMemo(() => {
-    if (!isLoaded(projects)) {
+    if (!hasNewData(projects)) {
       return API_LOADING_AGGREGATE;
     }
     if (projects.data.length === 0) {
@@ -59,7 +63,7 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
   }, [apiAnalysis, projects, solutionProjects, targetFramework]);
 
   const buildErrors = useMemo(() => {
-    if (!isLoaded(projects)) {
+    if (!hasNewData(projects)) {
       return 0;
     }
     if (projects.data.length === 0) {
@@ -69,7 +73,7 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
   }, [apiAnalysis, projects]);
 
   const portingActions = useMemo(() => {
-    if (!isLoaded(projects)) {
+    if (!hasNewData(projects)) {
       return 0;
     }
     if (projects.data.length === 0) {
@@ -80,7 +84,7 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
 
   const [shownLoadingMessage, setShownLoadingMessage] = useState(false);
   useEffect(() => {
-    if (!nugetCompatibilities.isAllNugetLoaded || apiCompatibilities.isApisLoading) {
+    if ((!nugetCompatibilities.isAllNugetLoaded || apiCompatibilities.isApisLoading) && !cancel) {
       dispatch(
         pushCurrentMessageUpdate({
           messageId: uuid(),
@@ -93,19 +97,34 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
       );
       setShownLoadingMessage(true);
     } else if (shownLoadingMessage) {
-      dispatch(
-        pushCurrentMessageUpdate({
-          messageId: uuid(),
-          groupId: "assessSuccess",
-          type: "success",
-          content: `Successfully assessed your source code.`,
-          dismissible: true
-        })
-      );
       dispatch(removeCurrentMessageUpdate({ groupId: "assess" }));
       setShownLoadingMessage(false);
+      if (cancel) {
+        window.electron.saveState("cancel", false);
+        dispatch(removeCurrentMessageUpdate({ groupId: "cancel-assessment" }));
+        dispatch(
+          pushCurrentMessageUpdate({
+            messageId: uuid(),
+            groupId: "assessSuccess",
+            type: "success",
+            content: `Successfully cancelled assessment.`,
+            dismissible: true
+          })
+        );
+      } else {
+        console.log("Cancel status: ", cancel);
+        dispatch(
+          pushCurrentMessageUpdate({
+            messageId: uuid(),
+            groupId: "assessSuccess",
+            type: "success",
+            content: `Successfully assessed your source code.`,
+            dismissible: true
+          })
+        );
+      }
     }
-  }, [apiCompatibilities.isApisLoading, dispatch, nugetCompatibilities.isAllNugetLoaded, shownLoadingMessage]);
+  }, [apiCompatibilities.isApisLoading, dispatch, nugetCompatibilities.isAllNugetLoaded, shownLoadingMessage, cancel]);
 
   return (
     <Container
@@ -130,7 +149,8 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
               compatible={nugetCompatibilities.nugetAggregates.compatible}
               incompatible={nugetCompatibilities.nugetAggregates.incompatible}
               unknown={nugetCompatibilities.nugetAggregates.unknown}
-              isLoading={!nugetCompatibilities.isAllNugetLoaded}
+              isLoading={!(hasNewData(solutionProjects))}
+              isInProgress={!isLoaded(solutionProjects)}
               infoLink={
                 <InfoLink
                   heading="Incompatible NuGet packages"
@@ -162,7 +182,8 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
               compatible={apiCompatibilities.values[0]}
               incompatible={apiCompatibilities.values[1] - apiCompatibilities.values[0]}
               unknown={0}
-              isLoading={apiCompatibilities.isApisLoading}
+              isLoading={!hasNewData(solutionProjects)}
+              isInProgress={apiCompatibilities.isApisLoading}
               infoLink={
                 <InfoLink
                   heading="Incompatible APIs"
@@ -192,7 +213,7 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
                       learnMoreLinks={[]}
                     />
                   }
-                  content={apiCompatibilities.isApisLoading ? <Spinner /> : buildErrors}
+                  content={apiCompatibilities.isApisLoading? <div> {buildErrors} <Spinner /> </div>: buildErrors}
                 />
               </div>
               <div>
@@ -205,11 +226,11 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
                       learnMoreLinks={[]}
                     />
                   }
-                  content={apiCompatibilities.isApisLoading ? <Spinner /> : portingActions}
+                  content={apiCompatibilities.isApisLoading? <div> {portingActions} <Spinner /> </div>: portingActions}
                 />
               </div>
             </ColumnLayout>
-            <SummaryItem label="Filepath" content={solution.solutionFilePath} />
+            <SummaryItem label="Filepath" content={ (hasNewData(solution) || isLoaded(solution) )? solution.data.solutionFilePath : "Loading..."} />
           </SpaceBetween>
         </div>
       </ColumnLayout>

@@ -10,7 +10,7 @@ import {
   RecommendedAction
 } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
-import { Failed, isFailed, isLoaded, isLoading, isReloading, Loaded, Loading, Reloading } from "../../utils/Loadable";
+import { Failed, isFailed, isLoaded, isLoading, isLoadingWithData, isReloading, Loaded, Loading, Reloading } from "../../utils/Loadable";
 import { RootState } from "../reducers";
 
 export const selectSolutionToSolutionDetails = (state: RootState) => state.solution.solutionToSolutionDetails;
@@ -18,6 +18,8 @@ export const selectNugetPackages = (state: RootState) => state.nugetPackage.nuge
 export const selectApiAnalysis = (state: RootState) => state.solution.apiAnalysis;
 export const selectSourceFileContents = (state: RootState) => state.file.sourceFileToContents;
 export const selectTargetFramework = () => window.electron.getState("targetFramework")?.id || "net6.0";
+export const selectCancelStatus = (state:RootState) => window.electron.getState("cancel");
+export const selectAssesmentStatus = (state:RootState) => window.electron.getState("isAssesmentRunning");
 
 export const selectCurrentSolutionPath = createCachedSelector(
   (_state: RootState, locationPath: string) => locationPath,
@@ -64,6 +66,9 @@ export const selectProjects = createCachedSelector(
         return Loading<Project[]>();
       }
       return Reloading<Project[]>(prevProject);
+    }
+    if (isLoadingWithData(currentSolutionDetails)) {
+      return Loading(currentSolutionDetails.data.projects);
     }
     if (isLoading(currentSolutionDetails)) {
       return Loading<Project[]>();

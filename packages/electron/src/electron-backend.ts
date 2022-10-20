@@ -124,6 +124,27 @@ export const initConnection = (logger: any = console) => {
     }
   });
 
+  ipcMain.handle("crashOnLastUse", async (_event, sourceFilePath) => {
+    try {
+        const lastOpenDate = localStore.get("lastOpenDate");
+        if (lastOpenDate !== 0)
+        {
+          const fileNames = await fs.promises.readdir(sourceFilePath);
+          for (let fileName of fileNames) {
+            var fileInfo = await fs.promises.stat(path.join(sourceFilePath, fileName));
+            if ((lastOpenDate - fileInfo.birthtimeMs)/(86400000) < 1) {
+              return true;
+            }
+          }
+        } 
+
+        return  false;
+    } catch (ex) {
+      logger.log(`Unable to get file info: ${sourceFilePath}. ${ex}`);
+      return false;
+    }
+  });
+
   ipcMain.handle("getVersion", async (_event) => {
     return app.getVersion();
   });
@@ -179,7 +200,8 @@ export const initConnection = (logger: any = console) => {
         localStore.get("profile"),
         app.getPath("userData"),
         app.getVersion(),
-        localStore.get("useDefaultCreds")
+        localStore.get("useDefaultCreds"),
+        localStore.get("sessionid")
       )
       .build();
 
@@ -195,7 +217,9 @@ export const initConnection = (logger: any = console) => {
         const request = { solutionFilePath, runId, triggerType, settings, preTriggerData };
         const elapseTime = startTimer();
         logger.log(`REQUEST - analyzeSolution: ${JSON.stringify(request)}`);
+        localStore.set("isAssesmentRunning", true);
         const response = await connection.send("analyzeSolution", request);
+        localStore.set("isAssesmentRunning", false);
         logger.log(`RESPONSE - analyzeSolution: ${JSON.stringify(response)}`);
         logSolutionMetrics(response, elapseTime());
         return response;
@@ -255,6 +279,11 @@ export const initConnection = (logger: any = console) => {
       return response;
     });
 
+    ipcMain.handle("cancelAssessment", async (_event) => {
+      const response = await connection.send("cancelAssessment", "");
+      return response;
+    });
+    
     ipcMain.handle("copyDirectory", async (_event, solutionPath, destinationPath) => {
       const request = {
         solutionPath,

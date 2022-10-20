@@ -42,9 +42,11 @@ export interface Electron {
   getLatestVersion: () => Promise<string>;
   getOutdatedVersionFlag: () => Promise<boolean>;
   telemetry: (message: any) => void;
+  crashOnLastUse: (sourceFilePath: string) => Promise<boolean>;
   writeReactErrLog: (source: any, message: any, response: any) => void;
   getAssessmentLog: () => string;
   checkInternetAccess: () => Promise<boolean>;
+  cancelAssessment: () => void
   getLogFolder: () => string;
 }
 
@@ -71,6 +73,7 @@ export interface Backend {
     callback: (projectAnalysis: Response<ProjectApiAnalysisResult, SolutionProject>) => void
   ) => void;
   checkInternetAccess: () => Promise<boolean>;
+  cancelAssessment: () => void;
 }
 
 export interface Porting {

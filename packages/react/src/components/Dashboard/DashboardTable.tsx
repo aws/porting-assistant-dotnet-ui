@@ -21,7 +21,8 @@ import { PreTriggerData } from "../../models/project";
 import { analyzeSolution, exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import { removePortedSolution } from "../../store/actions/porting";
-import { selectSolutionToSolutionDetails} from "../../store/selectors/solutionSelectors";
+import { RootState } from "../../store/reducers";
+import { selectAssesmentStatus, selectCancelStatus, selectCurrentSolutionDetails, selectSolutionToSolutionDetails} from "../../store/selectors/solutionSelectors";
 import { getErrorCounts, selectDashboardTableData, selectSolutionToApiAnalysis
  } from "../../store/selectors/tableSelectors";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
@@ -56,7 +57,9 @@ const DashboardTableInternal: React.FC = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const solutionToSolutionDetails = useSelector(selectSolutionToSolutionDetails);
-  
+  const isAssesmentRunning = useSelector(selectAssesmentStatus);
+  const cancel = useSelector(selectCancelStatus);
+
   const tableData = useSelector(selectDashboardTableData);
   const targetFramework = getTargetFramework();
   useNugetFlashbarMessages();
@@ -70,6 +73,18 @@ const DashboardTableInternal: React.FC = () => {
     },
     [dispatch]
   );
+
+  const cancelAssessment = useMemo(
+    () => () => {
+        window.electron.saveState("cancel", true);
+        window.backend.cancelAssessment();
+        dispatch(
+          removeCurrentMessageUpdate({
+            groupId: "assess"
+          })
+        );
+    },[dispatch]
+  )
 
   const reassessSolution = useMemo(
     () => async (solutionPath: string) => {
@@ -228,6 +243,26 @@ const DashboardTableInternal: React.FC = () => {
             >
               Assess a new solution
             </Button>
+            <Button
+              id="cancel-assessment-button"
+              disabled= {!isAssesmentRunning && !cancel}
+              variant="primary"
+              key="cancel-assessment"
+              onClick={() => {
+                cancelAssessment();
+                dispatch(
+                  pushCurrentMessageUpdate({
+                    type: "info",
+                    messageId: uuid(),
+                    groupId: "cancel-assessment",
+                    content: `Cancelling assessment for ${selectedItems[0].name}.`,
+                    dismissible: true
+                  })
+                );
+              }}
+            >
+              Cancel Assessment
+            </Button>
             <Modal
               visible={showDeleteModal}
               header={`Remove ${selectedItems[0]?.name}?`}
@@ -271,7 +306,7 @@ const DashboardTableInternal: React.FC = () => {
         }
       />
     ),
-    [deleteSolution, dispatch, history, reassessSolution, selectedItems, showDeleteModal, solutionToSolutionDetails]
+    [deleteSolution, dispatch, history, reassessSolution, selectedItems, showDeleteModal, solutionToSolutionDetails, cancel, isAssesmentRunning]
   );
 
   const empty = useMemo(
@@ -336,15 +371,13 @@ const columnDefinitions: TableProps.ColumnDefinition<DashboardTableData>[] = [
     id: "name",
     header: "Name",
     cell: item =>
-      item.portedProjects == null ||
-      item.incompatiblePackages == null ||
-      item.incompatibleApis == null ||
-      item.portingActions == null ||
-      item.buildErrors == null ? (
-        <div id={`solution-link-${escapeNonAlphaNumeric(item.path)}`} className={styles.inProgress}>
-          {item.name}
-        </div>
-      ) : (
+    item.incompatiblePackages == null &&
+    item.incompatibleApis == null ? (
+      <div id={`solution-link-${escapeNonAlphaNumeric(item.path)}`} className={styles.inProgress}>
+        {item.name}
+      </div>
+    ):  
+    (
         <LinkComponent
           id={`solution-link-${escapeNonAlphaNumeric(item.path)}`}
           className="solution-link"

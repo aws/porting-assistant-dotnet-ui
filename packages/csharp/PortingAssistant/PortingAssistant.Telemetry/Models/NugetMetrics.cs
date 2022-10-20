@@ -13,5 +13,7 @@ namespace PortingAssistant.Telemetry.Model
         [JsonProperty("compatibility")]
         [JsonConverter(typeof(StringEnumConverter))]
         public Compatibility Compatibility { get; set; }
+        [JsonProperty("sessionId")]
+        new public string SessionId {get; set;}      
     }
 }
