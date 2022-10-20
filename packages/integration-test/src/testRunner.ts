@@ -131,12 +131,12 @@ export class TestRunner {
 
   sendRuleContributionCheck = async () => {
     await this.nugetPackageTabCheck();
-    await (await this.app.client.$(".awsui_input_2rhyz_fqjbg_97")).setValue("jQuery.vsdoc");
-    await (await this.app.client.$(".awsui_native-input_1wepg_15e8a_103")).click();
+    await (await this.app.client.$(".awsui_input_2rhyz_fxf4s_7")).setValue("jQuery.vsdoc");
+    await (await this.app.client.$(".awsui_input_1mabk_1s4v0_34")).click();
     await (await this.app.client.$("#rule-contribution-btn")).click();
     await (await this.app.client.$("span=Suggestion form")).waitForDisplayed();
     await (await this.app.client.$("#rc-package-name input")).setValue("Azure.ImageOptimizer");
-    await (await this.app.client.$(".awsui_native-input_1wepg_15e8a_103")).click();
+    await (await this.app.client.$(".awsui_input_k2y2q_1mqle_22")).click();
     await (await this.app.client.$("#rc-comment input")).setValue("integration-test-rule-contribution");
     await (await this.app.client.$("#rc-send-btn")).click();
     console.log("Sent rule contribution success");
@@ -249,7 +249,7 @@ export class TestRunner {
     await this.nugetPackageTabCheck();
     await this.apisTabCheck(sortingCheckRequest);
     await this.sourceFilesTabCheck(sortingCheckRequest);
-    const numSourceFiles = await (await this.app.client.$(".awsui_counter_2qdw9_dk6jz_266")).getText();
+    const numSourceFiles = await (await this.app.client.$(".awsui_counter_2qdw9_bb1i6_175")).getText();
     return numSourceFiles;
   };
 
@@ -270,7 +270,7 @@ export class TestRunner {
     await portProjectButton.click();
     if (selectLocation == "inplace") {
       await (await this.app.client.$("#select-location-button")).click();
-      await (await this.app.client.$(`span[data-value="inplace"]`)).click();
+      await (await this.app.client.$("span=Modify source in place")).click();
       await (await this.app.client.$("#save-button")).click();
     } else if (selectLocation == "copy") {
       await (await this.app.client.$("#select-location-button")).click();
