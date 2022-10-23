@@ -32,6 +32,14 @@ namespace PortingAssistant.Common.Utils
 
         public static void CopyDirectory(string solutionPath, string destinationPath)
         {
+            if (solutionPath.Length > 260)
+            {
+                throw new PathTooLongException("The solution path length cannot exceed 260 characters. Please try a location that has a shorter path.");
+            }
+            else if (destinationPath.Length > 260)
+            {
+                throw new PathTooLongException("The destination path length cannot exceed 260 characters. Please try a location that has a shorter path.");
+            }
             string slnDirPath = Directory.GetParent(solutionPath).FullName;
 
             CopyFolderToTemp(Path.GetFileName(solutionPath), slnDirPath, destinationPath);
