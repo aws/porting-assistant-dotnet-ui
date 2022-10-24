@@ -55,7 +55,7 @@
   "dependencies": {
     "@awsui/collection-hooks": "^1.0.0",
     "@awsui/components-react": "^3.0",
-    "@awsui/design-tokens": "^3.0",
+    "@awsui/design-tokens": "3.0.0",
     "@awsui/global-styles": "^1.0.0",
     "ace-builds": "^1.4.9",
     "axios": "^0.21.1",
