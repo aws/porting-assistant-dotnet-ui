@@ -86,7 +86,7 @@ const DashboardInternal: React.FC = () => {
             </Alert>
             <Alert
               type="info"
-              header="Porting Assistant for .NET is now available as an extension for Microsoft Visual Studio"
+              header="Check out the new AWS Toolkit for .NET Refactoring Visual Studio extension for complete .NET modernization"
               dismissible={true}
               visible={visible}
               onDismiss={() => {
@@ -105,7 +105,6 @@ const DashboardInternal: React.FC = () => {
                 window.electron.openExternalUrl(externalUrls.visualstudioExtension);
               }}
             >
-              Assess your solution for .NET Core compatibility and start porting them in Visual Studio.
             </Alert>
             <DashboardTable />
           </SpaceBetween>
