@@ -10,6 +10,7 @@ namespace PortingAssistant.Common.Utils
     public static class PortingAssistantUtils
     {
         public static bool cancel = false;
+        private const int MaxPathLength = 260;
         public static string FindFiles(string targetDirectory, string fileName)
         {
             // Process the list of files found in the directory.
@@ -32,13 +33,13 @@ namespace PortingAssistant.Common.Utils
 
         public static void CopyDirectory(string solutionPath, string destinationPath)
         {
-            if (solutionPath.Length > 260)
+            if (solutionPath.Length > MaxPathLength)
             {
-                throw new PathTooLongException("The solution path length cannot exceed 260 characters. Please try a location that has a shorter path.");
+                throw new PathTooLongException($"The solution path length cannot exceed {MaxPathLength} characters. Please try a location that has a shorter path.");
             }
-            else if (destinationPath.Length > 260)
+            if (Path.GetFileName(solutionPath).Length + destinationPath.Length > MaxPathLength)
             {
-                throw new PathTooLongException("The destination path length cannot exceed 260 characters. Please try a location that has a shorter path.");
+                throw new PathTooLongException($"The destination path length cannot exceed {MaxPathLength} characters. Please try a location that has a shorter path.");
             }
             string slnDirPath = Directory.GetParent(solutionPath).FullName;
 

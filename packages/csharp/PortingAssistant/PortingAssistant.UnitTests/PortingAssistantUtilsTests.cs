@@ -13,12 +13,14 @@ namespace PortingAssistant.UnitTests
     public class PortingAssistantUtilsTests
     {
         private static Random random = new Random();
+        private const int MaxPathLength = 260;
+
 
         [Test]
         public void TestSolutionPathTooLongWillThrowException()
         {
-            var solutionPath = RandomString(280);
-            var destinationPath = "xx";
+            var solutionPath = RandomString(265);
+            var destinationPath = "xx/yy.sln";
             try
             {
                 PortingAssistantUtils.CopyDirectory(solutionPath, destinationPath);
@@ -26,15 +28,16 @@ namespace PortingAssistant.UnitTests
             catch (Exception e)
             {
                 Assert.AreEqual(e.Message,
-                    "The solution path length cannot exceed 260 characters. Please try a location that has a shorter path.");
+                    $"The solution path length cannot exceed {MaxPathLength} characters. Please try a location that has a shorter path.");
             }
         }
 
         [Test]
-        public void TestDestinationPathTooLongWillThrowException()
+        public void TestFileNamePlusDestinationPathTooLongWillThrowException()
         {
-            var solutionPath = "xx";
-            var destinationPath = RandomString(280);
+            var solutionPath = "xx/yy.sln";
+            var destinationPath = RandomString(258);
+
             try
             {
                 PortingAssistantUtils.CopyDirectory(solutionPath, destinationPath);
@@ -42,7 +45,7 @@ namespace PortingAssistant.UnitTests
             catch (Exception e)
             {
                 Assert.AreEqual(e.Message,
-                    "The destination path length cannot exceed 260 characters. Please try a location that has a shorter path.");
+                    $"The destination path length cannot exceed {MaxPathLength} characters. Please try a location that has a shorter path.");
             }
         }
 

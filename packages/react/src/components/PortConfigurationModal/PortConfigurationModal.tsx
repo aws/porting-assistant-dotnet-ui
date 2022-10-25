@@ -29,8 +29,9 @@ const PortConfigurationModalInternal: React.FC<Props> = ({ solution, visible, on
         type: data.portingLocation.value,
         workingDirectory: data.path
       };
-      if (portingLocation.workingDirectory.length > 260){
-        setError("path", "error", "The path length cannot exceed 260 characters. Please try a location that has a shorter path.");
+      const MaxPathLength = 260;
+      if (portingLocation.workingDirectory.length > MaxPathLength){
+        setError("path", "error", `The path length cannot exceed ${MaxPathLength} characters. Please try a location that has a shorter path.`);
         return false;
       }
       if (isLoaded(solution)) {
