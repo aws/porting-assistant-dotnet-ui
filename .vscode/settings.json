@@ -13,9 +13,9 @@
     "dbaeumer.vscode-eslint"
   ],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.detectIndentation": false,
+  "editor.detectIndentation": true,
   "editor.formatOnSave": true,
-  "editor.tabSize": 2,
+  "editor.tabSize": 4,
   "typescript.updateImportsOnFileMove.enabled": "always",
   "javascript.updateImportsOnFileMove.enabled": "always",
   "editor.codeActionsOnSave": {
@@ -33,5 +33,6 @@
   "search.exclude": {
     "**/build": true,
     "**/dist": true
-  }
+  },
+  "editor.emptySelectionClipboard": false
 }
