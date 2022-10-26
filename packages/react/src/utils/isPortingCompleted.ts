@@ -16,7 +16,11 @@ export const isPortingCompleted = (
   }
   if (
     project.targetFrameworks?.some(
-      framework => framework.toLowerCase().includes("netcoreapp") || framework.toLowerCase().includes("netstandard") || framework.toLowerCase().includes("net5.0") || framework.toLowerCase().includes("net6.0")
+      framework => 
+        framework.toLowerCase().includes("netcoreapp") || 
+        framework.toLowerCase().includes("netstandard") || 
+        framework.toLowerCase().includes("net5.0") || 
+        framework.toLowerCase().includes("net6.0")
     )
   ) {
     return true;

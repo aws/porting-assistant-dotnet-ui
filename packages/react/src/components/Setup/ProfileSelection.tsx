@@ -12,13 +12,14 @@ import {
   SelectProps,
   Spinner
 } from "@awsui/components-react";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router";
 
 import { externalUrls } from "../../constants/externalUrls";
 import { init, setProfileSet } from "../../store/actions/backend";
+import { getSupportedVersion } from "../../utils/getSupportedVersions";
 import { InfoLink } from "../InfoLink";
 import styles from "./ProfileSelection.module.scss";
 
@@ -44,16 +45,27 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
   const dispatch = useDispatch();
   const currentProfile = window.electron.getState("profile");
   const cachedUseDefaultCreds = window.electron.getState("useDefaultCreds");
-  const cachedTargetFramework = window.electron.getState("targetFramework");
-  const currentTargetFramework =
-    cachedTargetFramework.id === "netstandard2.1"
-      ? {}
-      : {
-          label: cachedTargetFramework.label,
-          value: cachedTargetFramework.id
-        };
 
-  const [targetFramework, setTargetFramework] = useState(currentTargetFramework);
+  const cachedTargetFramework = window.electron.getState("targetFramework");
+  const [defaultTargetFramework, setDefaultFramework] = useState({label: "", value: ""} as SelectProps.Option);
+  const [targetFramework, setTargetFramework] = useState(defaultTargetFramework);
+  const [targetFrameworkOptions, setFrameworkOptions] = useState(new Array<SelectProps.Option>());
+
+  useEffect(() => {
+    (async () => {
+      var currentOptions = await getSupportedVersion();
+      setFrameworkOptions(currentOptions);
+
+      // Need to convert from existing user selection to latest options if name changes.
+      var lookupOption = currentOptions.find((item) => {
+        return item.value === cachedTargetFramework.id;
+      });
+
+      var currentOption = {label: lookupOption?.label, value: lookupOption?.value} as SelectProps.Option;
+      setTargetFramework(currentOption);
+      setDefaultFramework(currentOption);
+    })();
+  }, []);
 
   const actionButton = useMemo(
     () => (
@@ -87,25 +99,23 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
     <div>
       <form
         onSubmit={handleSubmit(async data => {
-          if (data.targetFrameworkSelection.value == null || data.targetFrameworkSelection.label == null) {
-            setError("targetFrameworkSelection", "required", "Target Framework is required.");
-            return;
-          }
-          window.electron.saveState("lastConfirmVersion", "1.3.0");
-          if (data.removeProfile) {
-            window.electron.saveState("profile", "");
-            window.electron.saveState("share", false);
-          } else {
-            window.electron.saveState("share", data.share ?? false);
-          }
-          window.electron.saveState("targetFramework", {
-            id: data.targetFrameworkSelection.value,
-            label: data.targetFrameworkSelection.label
-          });
-          dispatch(init(true));
-          dispatch(setProfileSet(true));
-          // set pending message and go back to settings dashboard
-          next && next();
+          if (targetFramework.value == null || targetFramework.value.trim() == "" ||
+              targetFramework.label == null || targetFramework.label.trim() == "") {
+              setError("targetFrameworkSelection", "required", "Target Framework is required.");
+              return;
+            }
+            window.electron.saveState("lastConfirmVersion", "1.3.0");
+            window.electron.saveState("share", data.share);
+            window.electron.saveState("targetFramework", {
+              id: targetFramework.value,
+              label: targetFramework.label
+            });
+            // Wait for C# backend to restart
+            await new Promise(resolve => setTimeout(resolve, 10000));
+            dispatch(init(true));
+            dispatch(setProfileSet(true));
+            // set pending message and go back to settings dashboard
+            next && next();
         })}
       >
         <Form
@@ -159,6 +169,15 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                 >
                   Select a target framework to allow Porting Assistant for .NET to assess your solution for .NET Core
                   compatibility.
+                  <Link
+                    external
+                    href="#/"
+                    fontSize="body-s"
+                    onFollow={event => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      window.electron.openExternalUrl(externalUrls.dotnetSupportPolicy);
+                    }}>Learn more</Link>
                 </Box>
                 <div className={styles.select}>
                   <FormField id="targetFramework-selection" errorText={errors.targetFrameworkSelection?.message}>
@@ -172,7 +191,7 @@ const ProfileSelectionInternal: React.FC<Props> = ({ title, next, buttonText }) 
                       rules={{
                         required: "Target Framework is required"
                       }}
-                      defaultValue={currentTargetFramework}
+                      defaultValue={defaultTargetFramework}
                     />
                   </FormField>
                 </div>
@@ -251,11 +270,5 @@ const removeProfileCheckbox = (
     </Box>
   </Checkbox>
 );
-
-export const targetFrameworkOptions: SelectProps.Option[] = [
-  { label: ".NET 6.0.0", value: "net6.0" },
-  { label: ".NET 5.0.0", value: "net5.0" },
-  { label: ".NET Core 3.1.0", value: "netcoreapp3.1" }
-];
 
 export const ProfileSelection = React.memo(ProfileSelectionInternal);

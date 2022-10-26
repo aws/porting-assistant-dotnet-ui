@@ -82,21 +82,23 @@ namespace PortingAssistant.Api
             var crashReportsDir = Path.Combine(metricsFolder, "reports");
             try
             {
-            if (Directory.Exists(crashReportsDir)) {
-              string[] files = Directory.GetFiles(crashReportsDir);
-              for (int i = 0; i < files.Length; i++)
-              {
-                FileInfo file = new FileInfo(files[0]);
-                if ((file.CreationTime - DateTime.Now).TotalDays < 30) {
-                  TelemetryCollectionUtils.CollectCrashMetrics(file.Name, file.CreationTimeUtc);
+                if (Directory.Exists(crashReportsDir))
+                {
+                    string[] files = Directory.GetFiles(crashReportsDir);
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        FileInfo file = new FileInfo(files[0]);
+                        if ((file.CreationTime - DateTime.Now).TotalDays < 30)
+                        {
+                            TelemetryCollectionUtils.CollectCrashMetrics(file.Name, file.CreationTimeUtc);
+                        }
+                    }
                 }
-              }
             }
-            } catch (Exception ex) {
+            catch (Exception ex)
+            {
               Log.Logger.Error("Error in reading crash reports: ", ex);
             }
-
-
 
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection, configuration);
