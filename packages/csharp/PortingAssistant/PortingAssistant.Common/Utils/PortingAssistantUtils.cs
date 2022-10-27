@@ -33,15 +33,18 @@ namespace PortingAssistant.Common.Utils
 
         public static void CopyDirectory(string solutionPath, string destinationPath)
         {
-            if (solutionPath.Length > MaxPathLength)
-            {
-                throw new PathTooLongException($"The solution path length cannot exceed {MaxPathLength} characters. Please try a location that has a shorter path.");
-            }
-            if (Path.GetFileName(solutionPath).Length + destinationPath.Length > MaxPathLength)
-            {
-                throw new PathTooLongException($"The destination path length cannot exceed {MaxPathLength} characters. Please try a location that has a shorter path.");
-            }
+           
             string slnDirPath = Directory.GetParent(solutionPath).FullName;
+
+            DirectoryInfo directoryInfo = new DirectoryInfo(slnDirPath);
+            var allFiles = directoryInfo.EnumerateFiles("*.*", SearchOption.AllDirectories);
+            string longestFileName = allFiles.OrderByDescending(file => file.FullName.Length).FirstOrDefault().FullName;
+            string longestFileNameWithoutParentFolder = longestFileName.Replace(slnDirPath, "").TrimStart('\\');
+            string longestFileNameInDestinationFolder = Path.Combine(destinationPath, longestFileNameWithoutParentFolder);
+            if (longestFileNameInDestinationFolder.Length >= 260)
+            {
+                throw new PathTooLongException($"The destination path length cannot exceed {MaxPathLength - 1} characters. Please try a location that has a shorter path.");
+            }
 
             CopyFolderToTemp(Path.GetFileName(solutionPath), slnDirPath, destinationPath);
 

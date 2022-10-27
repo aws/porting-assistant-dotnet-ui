@@ -13,45 +13,30 @@ namespace PortingAssistant.UnitTests
         private static Random random = new Random();
         private const int MaxPathLength = 260;
 
-
         [Test]
-        public void TestSolutionPathTooLongWillThrowException()
+        public void TestLongestFileNamePlusDestinationPathTooLongWillThrowException()
         {
-            var solutionPath = RandomString(265);
-            var destinationPath = "xx/yy.sln";
-           
-            var ex = Assert.Throws<PathTooLongException>(() =>
-            {
-                PortingAssistantUtils.CopyDirectory(solutionPath, destinationPath);
-            });
-            Assert.AreEqual(ex.Message, $"The solution path length cannot exceed {MaxPathLength} characters. Please try a location that has a shorter path.");
-        }
-
-        [Test]
-        public void TestFileNamePlusDestinationPathTooLongWillThrowException()
-        {
-            var solutionPath = "xx/yy.sln";
-            var destinationPath = RandomString(258);
+            var solutionPath = "cs/yy.sln";
+            var destinationPath = @"D:\" + RandomString(258);
 
             var ex = Assert.Throws<PathTooLongException>(() =>
             {
                 PortingAssistantUtils.CopyDirectory(solutionPath, destinationPath);
             });
-            Assert.AreEqual(ex.Message, $"The destination path length cannot exceed {MaxPathLength} characters. Please try a location that has a shorter path.");
+            Assert.AreEqual(ex.Message, $"The destination path length cannot exceed {MaxPathLength - 1} characters. Please try a location that has a shorter path.");
         }
 
         [Test]
-        public void TestFileNamePlusDestinationPathEqualToMaxWillNotThrowPathTooLongException()
+        public void TestLongestFileNamePlusDestinationPathEqualToMaxWillThrowPathTooLongException()
         {
-            var solutionPath = "xx/yy.sln";
-            var destinationPath = RandomString(254);
-            
-            // since 'xx/yy.sln' is a fake path, in the end this directory will not be found,
-            // but throws this exception means our checks for path too long has been passed
-            var ex = Assert.Throws<DirectoryNotFoundException>(() =>
+            var solutionPath = "cs/yy.sln";
+            var destinationPath = @"D:\" + RandomString(255);
+
+            var ex = Assert.Throws<PathTooLongException>(() =>
             {
                 PortingAssistantUtils.CopyDirectory(solutionPath, destinationPath);
             });
+            Assert.AreEqual(ex.Message, $"The destination path length cannot exceed {MaxPathLength - 1} characters. Please try a location that has a shorter path.");
         }
 
         private static string RandomString(int length)
