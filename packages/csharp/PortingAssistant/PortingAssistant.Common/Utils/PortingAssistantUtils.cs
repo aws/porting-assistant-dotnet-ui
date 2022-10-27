@@ -10,6 +10,7 @@ namespace PortingAssistant.Common.Utils
     public static class PortingAssistantUtils
     {
         public static bool cancel = false;
+        private const int MaxPathLength = 260;
         public static string FindFiles(string targetDirectory, string fileName)
         {
             // Process the list of files found in the directory.
@@ -32,7 +33,27 @@ namespace PortingAssistant.Common.Utils
 
         public static void CopyDirectory(string solutionPath, string destinationPath)
         {
+            if (string.IsNullOrEmpty(solutionPath))
+            {
+                throw new ArgumentNullException(nameof(solutionPath), "The solution path length cannot be null or empty.");
+            }
+
+            if (string.IsNullOrEmpty(destinationPath))
+            {
+                throw new ArgumentNullException(nameof(destinationPath), "The destination path length cannot be null or empty.");
+            }
+
             string slnDirPath = Directory.GetParent(solutionPath).FullName;
+
+            DirectoryInfo directoryInfo = new DirectoryInfo(slnDirPath);
+            var allFiles = directoryInfo.EnumerateFiles("*.*", SearchOption.AllDirectories);
+            string longestFileName = allFiles.OrderByDescending(file => file.FullName.Length).FirstOrDefault().FullName;
+            string longestFileNameWithoutParentFolder = longestFileName.Replace(slnDirPath, "").TrimStart('\\');
+            string longestFileNameInDestinationFolder = Path.Combine(destinationPath, longestFileNameWithoutParentFolder);
+            if (longestFileNameInDestinationFolder.Length >= 260)
+            {
+                throw new PathTooLongException($"The destination path length cannot exceed {MaxPathLength - 1} characters. Please try a location that has a shorter path.");
+            }
 
             CopyFolderToTemp(Path.GetFileName(solutionPath), slnDirPath, destinationPath);
 
