@@ -33,14 +33,14 @@ namespace PortingAssistant.Common.Utils
 
         public static void CopyDirectory(string solutionPath, string destinationPath)
         {
-            if (solutionPath == "")
+            if (string.IsNullOrEmpty(solutionPath))
             {
-                throw new ArgumentNullException(nameof(solutionPath), "The solution path length is empty.");
+                throw new ArgumentNullException(nameof(solutionPath), "The solution path length cannot be null or empty.");
             }
 
-            if (destinationPath == "")
+            if (string.IsNullOrEmpty(destinationPath))
             {
-                throw new ArgumentNullException(nameof(destinationPath), "The destination path length is empty.");
+                throw new ArgumentNullException(nameof(destinationPath), "The destination path length cannot be null or empty.");
             }
 
             string slnDirPath = Directory.GetParent(solutionPath).FullName;

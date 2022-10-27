@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Microsoft.CodeAnalysis;
 using NUnit.Framework;
 using PortingAssistant.Common.Utils;
 
