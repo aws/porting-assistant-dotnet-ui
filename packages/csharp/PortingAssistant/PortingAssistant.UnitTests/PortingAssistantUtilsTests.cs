@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using NUnit.Framework;
 using PortingAssistant.Common.Utils;
 
@@ -30,13 +31,39 @@ namespace PortingAssistant.UnitTests
         public void TestLongestFileNamePlusDestinationPathEqualToMaxWillThrowPathTooLongException()
         {
             var solutionPath = "cs/yy.sln";
-            var destinationPath = @"D:\" + RandomString(255);
+            var destinationPath = @"D:\" + RandomString(195);
 
             var ex = Assert.Throws<PathTooLongException>(() =>
             {
                 PortingAssistantUtils.CopyDirectory(solutionPath, destinationPath);
             });
             Assert.AreEqual(ex.Message, $"The destination path length cannot exceed {MaxPathLength - 1} characters. Please try a location that has a shorter path.");
+        }
+
+        [Test]
+        public void TestEmptySolutionPathWillThrowException()
+        {
+            var solutionPath = "";
+            var destinationPath = @"D:\" + RandomString(255);
+
+            var ex = Assert.Throws<ArgumentNullException>(() =>
+            {
+                PortingAssistantUtils.CopyDirectory(solutionPath, destinationPath);
+            });
+            Assert.AreEqual(ex.ParamName, nameof(solutionPath));
+        }
+
+        [Test]
+        public void TestEmptyDestinationPathWillThrowException()
+        {
+            var solutionPath = "cs/yy.sln";
+            var destinationPath = "";
+
+            var ex = Assert.Throws<ArgumentNullException>(() =>
+            {
+                PortingAssistantUtils.CopyDirectory(solutionPath, destinationPath);
+            });
+            Assert.AreEqual(ex.ParamName, nameof(destinationPath));
         }
 
         private static string RandomString(int length)
