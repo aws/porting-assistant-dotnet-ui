@@ -27,7 +27,8 @@
     "create-dev-exe": "npx ts-node --transpile-only --project tsconfig.build.json build-scripts/publish.ts --config publish-dev.json --local",
     "build-dev-exe": "npx ts-node --transpile-only --project tsconfig.build.json build-scripts/publish.ts --config build-dev.json --local",
     "publish-beta": "npx ts-node --transpile-only --project tsconfig.build.json build-scripts/publish.ts --config publish.json --sign",
-    "publish-preprod": "npx ts-node --transpile-only --project tsconfig.build.json build-scripts/publish.ts --config publish.json --sign"
+    "publish-preprod": "npx ts-node --transpile-only --project tsconfig.build.json build-scripts/publish.ts --config publish.json --sign",
+    "publish-dev": "npx ts-node --transpile-only --project tsconfig.build.json build-scripts/publish.ts --config publish.json"
   },
   "devDependencies": {
     "@types/ncp": "^2.0.3",

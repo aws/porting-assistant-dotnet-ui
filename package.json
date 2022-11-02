@@ -21,6 +21,7 @@
     "build:exe:dev": "npx lerna run build-dev-exe --scope @porting-assistant/electron",
     "publish:beta": "npx lerna run publish-beta --scope @porting-assistant/electron --",
     "publish:preprod": "npx lerna run publish-preprod --scope @porting-assistant/electron --",
+    "publish:dev": "npx lerna run publish-dev --scope @porting-assistant/electron",
     "integration-test": "npx lerna run test --scope @porting-assistant/integration-test --stream",
     "postinstall": "npx lerna bootstrap",
     "version": "npx lerna version --no-push --no-git-tag-version --yes",
