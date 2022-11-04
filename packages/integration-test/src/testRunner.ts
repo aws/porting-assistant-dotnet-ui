@@ -214,7 +214,9 @@ export class TestRunner {
     } else if (selectLocation == "copy") {
       await (await this.app.client.$("#select-location-button")).click();
       await (await this.app.client.$(`div[data-value="copy"]`)).click();
-      await (await this.app.client.$(`icon="folder-open"`)).click();
+      await this.app.client.pause(1000);
+      
+      await (await this.app.client.$("#folder-open-button")).click();
       await (await this.app.client.$("#save-button")).click();
       await this.app.client.pause(3000);
       await (
