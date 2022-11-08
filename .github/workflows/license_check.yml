@@ -1,0 +1,10 @@
+name: license-check
+
+on: [push]
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: License compliance check
+        uses: mikaelvesavuori/license-compliance-action@v1.0.2
