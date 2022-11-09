@@ -29,18 +29,14 @@ const PortConfigurationModalInternal: React.FC<Props> = ({ solution, visible, on
         type: data.portingLocation.value,
         workingDirectory: data.path
       };
-      const MaxPathLength = 260;
-      if (!portingLocation.workingDirectory){
-        setError("path", "error", `The path length cannot be empty`);
-        return false;
-      }
-      if (portingLocation.workingDirectory.length > MaxPathLength){
-        setError("path", "error", `The path length cannot exceed ${MaxPathLength} characters. Please try a location that has a shorter path.`);
-        return false;
-      }
       if (isLoaded(solution)) {
         switch (portingLocation.type) {
           case "copy":
+            const MaxPathLength = 260;
+            if (portingLocation.workingDirectory.length > MaxPathLength){
+              setError("path", "error", `The path length cannot exceed ${MaxPathLength - 1} characters. Please try a location that has a shorter path.`);
+              return false;
+            }
             try {
                 await window.porting.copyDirectory(solution.data.solutionFilePath, portingLocation.workingDirectory);
             } catch (err) {
