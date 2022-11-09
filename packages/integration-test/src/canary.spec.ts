@@ -54,6 +54,7 @@ describe("canary test suite", () => {
       "inplace",
       "net6.0",
       false,
+      false,
       false
     );
     await runner.validateHighLevelResults(results, [
@@ -84,7 +85,8 @@ describe("canary test suite", () => {
       "inplace",
       "net6.0",
       true,
-      true
+      true,
+      false
     );
     await runner.validateHighLevelResults(results, [
       "0 of 1",
@@ -130,6 +132,7 @@ describe("canary test suite", () => {
       solutionPath,
       "inplace",
       "net6.0",
+      false,
       false,
       false
     );
