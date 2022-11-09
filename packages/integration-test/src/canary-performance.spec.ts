@@ -132,8 +132,8 @@ describe("canary performance test suite", () => {
       console.log(`Max memory usage: ${appMemoryUsageMax}`);
     });
 
-    expect(appMemoryUsageBefore).toBeLessThan(220052931);
-    expect(appMemoryUsageMax).toBeLessThan(231693685);
+    expect(appMemoryUsageBefore).toBeLessThan(280000000);
+    expect(appMemoryUsageMax).toBeLessThan(300000000);
   });
 
   test("run through mvcmusicstore", async () => {
@@ -188,7 +188,7 @@ describe("canary performance test suite", () => {
     expect(
       (await getStoreManagerController).indexOf("Microsoft.EntityFrameworkCore")
     ).not.toBe(-1);
-    expect(appMemoryUsageBefore).toBeLessThan(170545971);
-    expect(appMemoryUsageMax).toBeLessThan(190701451);
+    expect(appMemoryUsageBefore).toBeLessThan(280000000);
+    expect(appMemoryUsageMax).toBeLessThan(300000000);
   });
 });
