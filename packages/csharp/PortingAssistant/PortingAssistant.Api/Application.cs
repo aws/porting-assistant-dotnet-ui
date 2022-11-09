@@ -70,16 +70,24 @@ namespace PortingAssistant.Api
             });
 
 
-            _connection.On<CopyDirectoryRequest>("copyDirectory", request =>
+            _connection.On<CopyDirectoryRequest, Response<bool, string>>("copyDirectory", request =>
              {
                  try
                  {
-                     PortingAssistantUtils.CopyDirectory(request.solutionPath, request.destinationPath);
+                    PortingAssistantUtils.CopyDirectory(request.solutionPath, request.destinationPath);
+                    return new Response<bool, string>
+                    {
+                        Status = Response<bool, string>.Success()
+                    };
                  }
                  catch (Exception ex)
                  {
-                     _logger.LogError(ex, "Failed to copy the solution to new location");
-                     throw;
+                    _logger.LogError(ex, "Failed to copy the solution to new location");
+                    return new Response<bool, string>
+                    {
+                        Status = Response<bool, string>.Failed(ex),
+                        ErrorValue = ex.Message
+                    };
                  }
 
              });
