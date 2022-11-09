@@ -115,11 +115,6 @@ const LocationSectionInternal: React.FC<Props> = ({ control, errors, watch, setV
 };
 
 const openDialog = (onChange: (value: string | undefined) => void) => ()=> {
-  // for intgration test, add a path which is >250 length which will trigged path too long error due to fileName + path > 260
-  if (process.env["NODE_ENV"] === "test"){
-    onChange("D:\\Users\\qwertyuiopsdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfssbnmqwertyutyurtyuioprtyuio");
-  }
-  else{
     window.electron.dialog
     .showOpenDialog({
       properties: ["openDirectory"]
@@ -131,7 +126,6 @@ const openDialog = (onChange: (value: string | undefined) => void) => ()=> {
     .catch(err => {
       logError("LocationSection.tsx", "Unable to open directory", err);
     });
-  }
   }
 
 function is_directory_outside_sln_path(path: string, solutionFilePath: string, solutionName: string) {
