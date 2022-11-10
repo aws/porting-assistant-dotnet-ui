@@ -63,7 +63,7 @@
     "classnames": "^2.2.6",
     "compare-versions": "^3.6.0",
     "csv-stringify": "^5.5.0",
-    "electron": "^10.4.7",
+    "electron": "^15.5.5",
     "immer": "^6.0.1",
     "re-reselect": "^3.4.0",
     "react": "^16.14.0",
