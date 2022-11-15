@@ -142,6 +142,7 @@ contextBridge.exposeInMainWorld("backend", {
   listenApiAnalysisUpdate: (callback: (message: string) => void) => listenBackend("onApiAnalysisUpdate", callback),
   checkInternetAccess: () => invokeBackend("checkInternetAccess"),
   cancelAssessment: () => invokeBackend("cancelAssessment"),
+  getSupportedVersion: () => invokeBackend("getSupportedVersion"),
 });
 
 contextBridge.exposeInMainWorld("porting", {

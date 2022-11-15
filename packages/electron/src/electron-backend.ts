@@ -293,6 +293,11 @@ export const initConnection = (logger: any = console) => {
       return response;
     });
 
+    ipcMain.handle("getSupportedVersion", async (_event) => {
+      const response = await connection.send("getSupportedVersion", "");
+      return response;
+    });
+
     connection.on("onNugetPackageUpdate", (response) => {
       browserWindow.webContents.send("onNugetPackageUpdate", response);
     });
