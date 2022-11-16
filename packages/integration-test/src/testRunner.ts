@@ -2,9 +2,10 @@ import { Application } from "spectron";
 import { SortingCheckRequest } from "./models/sortingCheckRequest";
 
 export const TargetFrameworks = {
-  net6: ".NET 6.0.0",
-  net5: ".NET 5.0.0",
-  netcore31: ".NET Core 3.1.0",
+  net7: ".NET 7 (Standard Term Support)",
+  net6: ".NET 6 (Microsoft LTS)",
+  net5: ".NET 5 (Microsoft out of support)",
+  netcore31: ".NET Core 3.1 (Microsoft LTS)",
 };
 
 export class TestRunner {
