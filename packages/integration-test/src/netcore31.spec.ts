@@ -42,7 +42,7 @@ describe("netcore 3.1 test suite", () => {
     test("run through mvcmusicstore on .netcore 3.1", async () => {
       const solutionFolderPath: string = path.join(
         testSolutionPath(),
-        "netcore3.1",
+        "netcore31",
         "mvcmusicstore",
         "sourceCode",
         "mvcmusicstore"
@@ -50,7 +50,7 @@ describe("netcore 3.1 test suite", () => {
       const solutionPath: string = path.join(solutionFolderPath, "MvcMusicStore.sln");
       await addSolution(app, solutionPath);
       await app.client.refresh();
-      const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
+      const results = await runner.runThroughSolution(solutionPath, "inplace", TargetFrameworks.netcore31, false, false);
       await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "50 of 85", "0", "(21)"]);
       const controllerFolderPath: string = path.join(solutionFolderPath, "MvcMusicStore", "Controllers");
       const getAccountController = fs.readFile(path.join(controllerFolderPath, "AccountController.cs"), "utf8");
@@ -64,7 +64,7 @@ describe("netcore 3.1 test suite", () => {
       const solutionPath: string = path.join(solutionFolderPath, "WCFTCPSelfHost.sln");
       await addSolution(app, solutionPath);
       await app.client.refresh();
-      const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
+      const results = await runner.runThroughSolution(solutionPath, "inplace", TargetFrameworks.netcore31, false, false);
       await runner.validateHighLevelResults(results, ["0 of 3", "0 of 0", "14 of 46", "0", "(11)"]);
 
       const selfHostProjectPath: string = path.join(solutionFolderPath, "WCFTCPSelfHost");
@@ -91,7 +91,7 @@ describe("netcore 3.1 test suite", () => {
       const solutionPath: string = path.join(solutionFolderPath, "NopCommerce.sln");
       await addSolution(app, solutionPath);
       await app.client.refresh();
-      const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
+      const results = await runner.runThroughSolution(solutionPath, "inplace", TargetFrameworks.netcore31, false, false);
       await runner.validateHighLevelResults(results, ["0 of 40", "37 of 38", "498 of 1357", "0", "(1565)"]);
 
       const getCatalogController = fs.readFile(
@@ -110,7 +110,7 @@ describe("netcore 3.1 test suite", () => {
         const solutionPath: string = path.join(solutionFolderPath, "eShopOnBlazor.sln");
         await addSolution(app, solutionPath);
         await app.client.refresh();
-        const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
+        const results = await runner.runThroughSolution(solutionPath, "inplace", TargetFrameworks.netcore31, false, false);
         await runner.validateHighLevelResults(results, ['0 of 1', '16 of 44', '56 of 147', '0', '(37)']);
         const layoutFolderPath: string = path.join(solutionFolderPath, "src", "eShopLegacyWebForms", "Layouts");
         const siteRazorFile = fs.readFile(path.join(layoutFolderPath, "site.razor.cs"), "utf8");
@@ -132,7 +132,7 @@ describe("netcore 3.1 test suite", () => {
         const solutionPath: string = path.join(solutionFolderPath, "MVCAppWithIISConfig.sln");
         await addSolution(app, solutionPath);
         await app.client.refresh();
-        const results = await runner.runThroughSolution(solutionPath, "inplace", "netcoreapp3.1", false, false);
+        const results = await runner.runThroughSolution(solutionPath, "inplace", TargetFrameworks.netcore31, false, false);
         await runner.validateHighLevelResults(results, ['0 of 1', '8 of 14', '16 of 24', '0', '(9)']);
         const getStartcsFile = fs.readFile(path.join(solutionFolderPath, "MVCAppWithIISConfig", "Startup.cs"), "utf-8");
         const getProgramcsFile = fs.readFile(path.join(solutionFolderPath, "MVCAppWithIISConfig", "Program.cs"), "utf-8");

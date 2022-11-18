@@ -12,7 +12,7 @@ describe("stability check, assess a solution, reassess the solution, check all s
   beforeAll(async () => {
     app = await startApp();
     runner = new TestRunner(app);
-    await runner.setupTargetFramework(TargetFrameworks.net6);
+    await runner.setupTargetFramework(TargetFrameworks.net7);
     return app;
   });
 
@@ -32,21 +32,21 @@ describe("stability check, assess a solution, reassess the solution, check all s
     await stopApp(app);
   });
 
-  test("run through wcf on net 6.0", async () => {
+  test("run through wcf on net 7.0", async () => {
     const solutionFolderPath: string = path.join(testSolutionPath(), "wcftcpselfhost");
     const solutionPath: string = path.join(solutionFolderPath, "WCFTCPSelfHost.sln");
     await addSolution(app, solutionPath);
     await app.client.refresh();
-    const results = await runner.runThroughSolution(solutionPath, "inplace", TargetFrameworks.net6, false, false);
+    const results = await runner.runThroughSolution(solutionPath, "inplace", TargetFrameworks.net7, false, false);
     await runner.validateHighLevelResults(results, ["0 of 3", "0 of 0", "14 of 46", "0", "(11)"]);
   });
 
-  test("run through mvcmusicstore on net 6.0", async () => {
+  test("run through mvcmusicstore on net 7.0", async () => {
     const solutionFolderPath: string = path.join(testSolutionPath(), "mvcmusicstore", "sourceCode", "mvcmusicstore");
     const solutionPath: string = path.join(solutionFolderPath, "MvcMusicStore.sln");
     await addSolution(app, solutionPath);
     await app.client.refresh();
-    const results = await runner.runThroughSolution(solutionPath, "inplace", TargetFrameworks.net6, false, false, {
+    const results = await runner.runThroughSolution(solutionPath, "inplace", TargetFrameworks.net7, false, false, {
       apis: {
         first: "td=ActionName",
         last: "td=ViewResult",
@@ -56,17 +56,6 @@ describe("stability check, assess a solution, reassess the solution, check all s
         last: "=MvcMusicStore\\ViewModels\\ShoppingCartViewModel.cs",
       },
     } as SortingCheckRequest);
-    await runner.validateHighLevelResults(results, ["0 of 1", "2 of 6", "50 of 85", "0", "(21)"]);
+    await runner.validateHighLevelResults(results, ["0 of 1", "6 of 6", "50 of 85", "0", "(21)"]);
   });
-
-  // disabling this test, project needs debugging
-  // test("run through vbwebapi on net 6.0", async () => {
-  //   const solutionFolderPath: string = path.join(testSolutionPath(), "VBWebApi");
-  //   const solutionPath: string = path.join(solutionFolderPath, "VBWebApi.sln");
-  //   await addSolution(app, solutionPath);
-  //   await app.client.refresh();
-  //   const results = await runner.runThroughSolution(solutionPath, "inplace", "net6.0", false, false);
-  //   await runner.validateHighLevelResults(results, ["0 of 1", "12 of 17", "96 of 257", "0", "(42)"]);
-  // });
-
 });
