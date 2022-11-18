@@ -8,6 +8,20 @@ export const TargetFrameworks = {
   netcore31: ".NET Core 3.1 (Microsoft LTS)",
 };
 
+const getExpectedTargetFramework = (targetFramework: string) => {
+  if (targetFramework == TargetFrameworks.net7) {
+    return "net7.0"
+  } else if (targetFramework == TargetFrameworks.net6) {
+    return "net6.0"
+  } else if (targetFramework == TargetFrameworks.net5) {
+    return "net5.0"
+  } else if (targetFramework == TargetFrameworks.netcore31) {
+    return "netcoreapp3.1"
+  } else {
+    return ""
+  }
+};
+
 export class TestRunner {
   app: Application;
   constructor(app: Application) {
@@ -23,6 +37,9 @@ export class TestRunner {
     }
 
   selectTargetFramework = async (targetFramework: string) => {
+    if (targetFramework == "") {
+      targetFramework = TargetFrameworks.net7
+    }
     await (await this.app.client.$("#targetFramework-selection")).click();
     await (await this.app.client.$(`[title="${targetFramework}"`)).click();
   };
@@ -30,9 +47,7 @@ export class TestRunner {
   setupTargetFramework = async (targetFramework: string = "") => {
     await this.app.client.pause(3000);
     await (await this.app.client.$("#start-btn")).click();
-    if (targetFramework !== "") {
-      await this.selectTargetFramework(targetFramework);
-    }
+    await this.selectTargetFramework(targetFramework);
     await (await this.app.client.$("#next-btn")).click();
     await (
       await this.app.client.$("=Assess a new solution")
@@ -133,7 +148,7 @@ export class TestRunner {
     await this.checkPortingProjectResults(
       solutionNameTagId,
       projects[0],
-      targetFramework
+      getExpectedTargetFramework(targetFramework)
     );
     return assessmentResults;
   };

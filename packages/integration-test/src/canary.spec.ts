@@ -10,7 +10,7 @@ import {
 } from "./hooks";
 import path from "path";
 import fs from "fs/promises";
-import { TestRunner } from "./testRunner";
+import { TargetFrameworks, TestRunner } from "./testRunner";
 
 describe("canary test suite", () => {
   let app: Application;
@@ -20,7 +20,7 @@ describe("canary test suite", () => {
     app = await startApp();
     setupTelemetry(app);
     runner = new TestRunner(app);
-    await runner.setupTargetFramework();
+    await runner.setupTargetFramework(TargetFrameworks.net6);
     return app;
   });
 
@@ -52,7 +52,7 @@ describe("canary test suite", () => {
     const results = await runner.runThroughSolution(
       solutionPath,
       "inplace",
-      "net6.0",
+      TargetFrameworks.net6,
       false,
       false
     );
@@ -82,7 +82,7 @@ describe("canary test suite", () => {
     const results = await runner.runThroughSolution(
       solutionPath,
       "inplace",
-      "net6.0",
+      TargetFrameworks.net6,
       true,
       true
     );
@@ -129,7 +129,7 @@ describe("canary test suite", () => {
     const results = await runner.runThroughSolution(
       solutionPath,
       "inplace",
-      "net6.0",
+      TargetFrameworks.net6,
       false,
       false
     );
