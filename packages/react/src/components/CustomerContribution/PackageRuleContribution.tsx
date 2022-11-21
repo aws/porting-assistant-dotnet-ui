@@ -9,11 +9,13 @@ import {
   Header,
   Input,
   Multiselect,
+  SelectProps,
   SpaceBetween
 } from "@awsui/components-react";
 import { OptionDefinition } from "@awsui/components-react/internal/components/option/interfaces";
 import { MemoryHistory } from "history";
-import React, { useCallback, useState } from "react";
+import path from "path";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router";
 import { useHistory } from "react-router-dom";
@@ -23,8 +25,8 @@ import { externalUrls } from "../../constants/externalUrls";
 import { RuleContribSource } from "../../containers/RuleContribution";
 import { HistoryState } from "../../models/locationState";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
+import { getSupportedVersion } from "../../utils/getSupportedVersions";
 import { validatePackageInput } from "../../utils/validateRuleContrib";
-import { targetFrameworkOptions } from "../Setup/ProfileSelection";
 
 interface Props {
   source: RuleContribSource;
@@ -67,6 +69,24 @@ const PackageRuleContributionInternal: React.FC<Props> = ({ source }) => {
     }
   ]);
   const [comments, setComments] = useState("");
+  const [targetFrameworkOptions, setFrameworkOptions] = useState(new Array<SelectProps.Option>());
+
+  useEffect(() => {
+    (async () => {
+      var result = await getSupportedVersion();
+      if (result[1] == null || result[1].trim() === "") {
+        setFrameworkOptions(result[0]);
+        // Need to convert from existing user selection to latest options if name changes.
+        var lookupOption = result[0].find((item) => {
+            return item.value === cachedTargetFramework.id;
+        });
+        var currentOption = {label: lookupOption?.label, id: lookupOption?.value} as SelectProps.Option;
+        setTargetFramework([currentOption]);
+    } else {
+        setTargetFrameworkError(result[1]);
+    }
+    })();
+  }, []);
 
   const onCancel = () => {
     history.goBack();

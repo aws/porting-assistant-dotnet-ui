@@ -2,9 +2,24 @@ import { Application } from "spectron";
 import { SortingCheckRequest } from "./models/sortingCheckRequest";
 
 export const TargetFrameworks = {
-  net6: ".NET 6.0.0",
-  net5: ".NET 5.0.0",
-  netcore31: ".NET Core 3.1.0",
+  net7: ".NET 7 (Standard Term Support)",
+  net6: ".NET 6 (Microsoft LTS)",
+  net5: ".NET 5 (Microsoft out of support)",
+  netcore31: ".NET Core 3.1 (Microsoft LTS)",
+};
+
+const getExpectedTargetFramework = (targetFramework: string) => {
+  if (targetFramework == TargetFrameworks.net7) {
+    return "net7.0"
+  } else if (targetFramework == TargetFrameworks.net6) {
+    return "net6.0"
+  } else if (targetFramework == TargetFrameworks.net5) {
+    return "net5.0"
+  } else if (targetFramework == TargetFrameworks.netcore31) {
+    return "netcoreapp3.1"
+  } else {
+    return ""
+  }
 };
 
 export class TestRunner {
@@ -22,6 +37,9 @@ export class TestRunner {
     }
 
   selectTargetFramework = async (targetFramework: string) => {
+    if (targetFramework == "") {
+      targetFramework = TargetFrameworks.net7
+    }
     await (await this.app.client.$("#targetFramework-selection")).click();
     await (await this.app.client.$(`[title="${targetFramework}"`)).click();
   };
@@ -29,9 +47,7 @@ export class TestRunner {
   setupTargetFramework = async (targetFramework: string = "") => {
     await this.app.client.pause(3000);
     await (await this.app.client.$("#start-btn")).click();
-    if (targetFramework !== "") {
-      await this.selectTargetFramework(targetFramework);
-    }
+    await this.selectTargetFramework(targetFramework);
     await (await this.app.client.$("#next-btn")).click();
     await (
       await this.app.client.$("=Assess a new solution")
@@ -132,7 +148,7 @@ export class TestRunner {
     await this.checkPortingProjectResults(
       solutionNameTagId,
       projects[0],
-      targetFramework
+      getExpectedTargetFramework(targetFramework)
     );
     return assessmentResults;
   };

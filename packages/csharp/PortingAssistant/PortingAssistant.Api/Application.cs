@@ -14,6 +14,13 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Linq;
+using PortingAssistant.Client.Common.Model;
+using System.IO;
+using System.Net.Http;
+using YamlDotNet.Core.Tokens;
+using Amazon.S3;
+using System.Drawing;
+using Amazon;
 
 namespace PortingAssistant.Api
 {
@@ -22,7 +29,6 @@ namespace PortingAssistant.Api
         private IServiceProvider _services { get; set; }
         private Connection _connection;
         private ILogger _logger;
-        private CustomerContributionConfiguration _ccconfig;
 
         public Application(IServiceCollection serviceCollection)
         {
@@ -138,10 +144,33 @@ namespace PortingAssistant.Api
                     return HttpServiceUtils.CheckInternetAccess(httpService, files);
                 });
 
-            _connection.On<string>("cancelAssessment", 
-            reuqest => {
-              PortingAssistantUtils.cancel = true;
-            });
+            _connection.On<string>("cancelAssessment",
+              reuqest =>
+              {
+                  PortingAssistantUtils.cancel = true;
+              });
+
+            _connection.OnAsync<string, Response<List<SupportedVersion>, string>>("getSupportedVersion",
+                async request =>
+                {
+                    // Note that Console.WriteLine() would somehow messe up with the communication channel.
+                    // The output message will be captured by the channel and fail the parsing,
+                    // resulting to crash the return result of this request.
+                    using var s3Client = new AmazonS3Client(RegionEndpoint.GetBySystemName(SupportedVersionConfiguration.S3Region));
+                    var result = await SupportedVersionUtils.GetSupportedConfigurationAsync(
+                        s3Client,
+                        SupportedVersionConfiguration.S3BucketName,
+                        SupportedVersionConfiguration.S3File,
+                        SupportedVersionConfiguration.ExpectedBucketOwnerId,
+                        _logger);
+
+                    return new Response<List<SupportedVersion>, string>
+                    {
+                        Value = result.Item1,
+                        ErrorValue = result.Item2,
+                        Status = Response<List<SupportedVersion>, string>.Success(),
+                    };
+                });
         }
 
         public void Start()

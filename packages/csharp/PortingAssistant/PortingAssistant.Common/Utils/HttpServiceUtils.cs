@@ -14,6 +14,7 @@ namespace PortingAssistant.Common.Utils
             Task.WhenAll(tasks).Wait();
             return tasks.Any((task) => task.Result);
         }
+
         public static async Task<bool> TryGetFile(IHttpService httpService, string file)
         {
             try
