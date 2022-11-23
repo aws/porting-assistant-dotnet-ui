@@ -15,6 +15,7 @@ namespace PortingAssistant.Common.Model
         public const string NET60 = "net6.0";
         public const string NETCOREAPP31 = "netcoreapp3.1";
         public const string NET50 = "net5.0";
+        public const string NET70 = "net7.0";
 
         public string DisplayName { get; set; }
         public string TargetFrameworkMoniker { get; set; }
@@ -60,24 +61,31 @@ namespace PortingAssistant.Common.Model
                 {
                     new SupportedVersion()
                     {
+                        DisplayName = ".NET 7 (Standard Term Support)",
+                        TargetFrameworkMoniker = SupportedVersion.NET70,
+                        RequiredVisualStudioVersion = "17.4.0",
+                        RecommendOrder = "1",
+                    },
+                    new SupportedVersion()
+                    {
                         DisplayName = ".NET 6 (Microsoft LTS)",
                         TargetFrameworkMoniker = SupportedVersion.NET60,
                         RequiredVisualStudioVersion = "17.0.0",
-                        RecommendOrder = "1",
+                        RecommendOrder = "2",
                     },
                     new SupportedVersion()
                     {
                         DisplayName = ".NET Core 3.1 (Microsoft LTS)",
                         TargetFrameworkMoniker = SupportedVersion.NETCOREAPP31,
                         RequiredVisualStudioVersion = "16.0.0",
-                        RecommendOrder = "2",
+                        RecommendOrder = "3",
                     },
                     new SupportedVersion()
                     {
                         DisplayName = ".NET 5 (Microsoft out of support)",
                         TargetFrameworkMoniker = SupportedVersion.NET50,
                         RequiredVisualStudioVersion = "16.0.0",
-                        RecommendOrder = "3",
+                        RecommendOrder = "4",
                     },
                 }
             };
