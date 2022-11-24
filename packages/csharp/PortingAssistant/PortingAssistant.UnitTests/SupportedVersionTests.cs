@@ -60,7 +60,7 @@ namespace PortingAssistant.UnitTests
             Assert.Multiple(() =>
             {
                 Assert.That(result.Item1, Is.Not.Null);
-                Assert.That(result.Item2.Contains("Porting Assistant failed to configure supported versions."));
+                Assert.That(string.IsNullOrEmpty(result.Item2));
             });
         }
     }

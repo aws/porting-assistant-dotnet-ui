@@ -150,24 +150,17 @@ namespace PortingAssistant.Api
                   PortingAssistantUtils.cancel = true;
               });
 
-            _connection.OnAsync<string, Response<List<SupportedVersion>, string>>("getSupportedVersion",
-                async request =>
+            _connection.On<string, Response<List<SupportedVersion>, string>>("getSupportedVersion",
+                request =>
                 {
                     // Note that Console.WriteLine() would somehow messe up with the communication channel.
                     // The output message will be captured by the channel and fail the parsing,
                     // resulting to crash the return result of this request.
-                    using var s3Client = new AmazonS3Client(RegionEndpoint.GetBySystemName(SupportedVersionConfiguration.S3Region));
-                    var result = await SupportedVersionUtils.GetSupportedConfigurationAsync(
-                        s3Client,
-                        SupportedVersionConfiguration.S3BucketName,
-                        SupportedVersionConfiguration.S3File,
-                        SupportedVersionConfiguration.ExpectedBucketOwnerId,
-                        _logger);
-
+                    var defaultConfiguration = SupportedVersionConfiguration.GetDefaultConfiguration();
                     return new Response<List<SupportedVersion>, string>
                     {
-                        Value = result.Item1,
-                        ErrorValue = result.Item2,
+                        Value = defaultConfiguration.Versions,
+                        ErrorValue = string.Empty,
                         Status = Response<List<SupportedVersion>, string>.Success(),
                     };
                 });
