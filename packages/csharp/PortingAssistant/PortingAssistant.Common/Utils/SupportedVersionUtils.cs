@@ -71,7 +71,7 @@ namespace PortingAssistant.Common.Utils
                     message: errorMessage);
             }
 
-            return (result.Versions, errorMessage);
+            return (result.Versions, string.Empty);
         }
     }
 }
