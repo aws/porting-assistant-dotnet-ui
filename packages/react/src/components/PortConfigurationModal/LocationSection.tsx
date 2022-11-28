@@ -1,4 +1,5 @@
 import { Box, Button, ColumnLayout, FormField, Select, SelectProps } from "@awsui/components-react";
+import process from "process";
 import React, { useMemo } from "react";
 import { Controller, FormContextValues } from "react-hook-form";
 import { useLocation } from "react-router";
@@ -30,7 +31,7 @@ const LocationSectionInternal: React.FC<Props> = ({ control, errors, watch, setV
                 description="Porting Assistant for .NET will copy your solution to the selected location."
                 errorText={errorText}
               >
-                <Button iconName="folder-open" onClick={openDialog(onChange)} formAction="none" disabled={isSubmitting}>
+                <Button id="folder-open-button" iconName="folder-open" onClick={openDialog(onChange)} formAction="none" disabled={isSubmitting}>
                   Choose folder
                 </Button>
               </FormField>

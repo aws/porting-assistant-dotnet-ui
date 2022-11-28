@@ -78,7 +78,7 @@ export interface Backend {
 }
 
 export interface Porting {
-  copyDirectory: (solutionPath: string, destinationPath: string) => void;
+  copyDirectory: (solutionPath: string, destinationPath: string) => Promise<Response<boolean, string>>;
   getConfig: () => SolutionToPortingProjects;
   setConfig: (data: SolutionToPortingProjects) => void;
   applyPortingProjectFileChanges: (
