@@ -61,7 +61,7 @@
     "axios": "^0.21.1",
     "axios-retry": "^3.1.2",
     "classnames": "^2.2.6",
-    "compare-versions": "^3.6.0",
+    "compare-versions": "^5.0.3",
     "csv-stringify": "^5.5.0",
     "electron": "^10.4.7",
     "immer": "^6.0.1",
