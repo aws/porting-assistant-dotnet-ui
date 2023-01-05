@@ -30,7 +30,7 @@ All code is located within the `./packages` folder.
 
 We require the following:
 
-* Node 10+
+* Node 14 (newer versions are not supported)
 * .NET Core 3.1
 
 ### Getting started developing
