@@ -8,8 +8,8 @@
   <ItemGroup>
     <PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.3" />
-    <PackageReference Include="PortingAssistant.Client.Client" Version="2.5.4" />
-    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.5.4" />
+    <ProjectReference Include="..\..\..\..\..\porting-assistant-dotnet-client\src\PortingAssistant.Client.Telemetry\PortingAssistant.Client.Telemetry.csproj" />
+    <ProjectReference Include="..\..\..\..\..\porting-assistant-dotnet-client\src\PortingAssistant.Client\PortingAssistant.Client.CLI.csproj" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
     <PackageReference Include="AWSSDK.Core" Version="3.7.9" />

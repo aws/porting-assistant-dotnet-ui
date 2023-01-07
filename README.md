@@ -1,3 +1,28 @@
+# SPECIAL BRANCH
+
+This is a custom branch to debug Porting Assistant end-to-end:   [React FE](https://github.com/aws/porting-assistant-dotnet-ui/tree/main/packages/react/src) → [C# back-end-for-front-end](https://github.com/aws/porting-assistant-dotnet-ui/blob/main/packages/csharp/PortingAssistant/PortingAssistant.Api/Application.cs) → [porting-assistant-dotnet-client](https://github.com/aws/porting-assistant-dotnet-client) → [Codelyzer](https://github.com/aws/codelyzer)
+
+
+Most projects have been reconfigured to use project referecenes directly rather then relying on nuget references and  _packages/csharp/PortingAssistant/PortingAssistant.sln_ has been configured to load [PortingAssistant.Client](https://github.com/aws/porting-assistant-dotnet-client) and [Codelyzer](https://github.com/aws/codelyzer) projects.
+
+For this solution to work, make sure you have cloned the following repositories and they are all in the same root folder:
+
+- [porting-assistant-dotnet-ui](https://github.com/aws/porting-assistant-dotnet-ui/tree/end-to-end) (**branch:** _end-to-end-debugging_)
+- [porting-assistant-dotnet-client](https://github.com/aws/porting-assistant-dotnet-client/tree/end-to-end) (**branch:** _end-to-end-debugging_)
+- [codelyzer](https://github.com/aws/codelyzer) (**branch:** _main_)
+
+TIP: To easily attach a debugger, [`PortingAssistant.API.Program.Main()`)](https://github.com/aws/porting-assistant-dotnet-ui/blob/main/packages/csharp/PortingAssistant/PortingAssistant.Api/Program.cs#L22) has been modified to start with the following line:
+```
+System.Diagnostics.Debugger.Launch();
+```
+
+When the application is launched, you'll be prompted to select the instance of Visual Studio that's running _packages/csharp/PortingAssistant/PortingAssistant.sln_:
+
+```
+> cd /projects/porting-assistant/porting-assistant-dotnet-ui
+> npm install && npm run build && npm start
+```
+
 # UI for Porting Assistant for .NET Standalone Tool
 
 Porting Assistant for .NET is an analysis tool that scans .NET Framework applications and generates a .NET Core compatibility assessment, helping customers port their applications to Linux faster.

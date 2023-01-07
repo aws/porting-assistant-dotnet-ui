@@ -21,6 +21,8 @@ namespace PortingAssistant.Api
     {
         static void Main(string[] args)
         {
+            System.Diagnostics.Debugger.Launch();
+
             if (args.Length < 3)
             {
                 throw new ArgumentException("Must provide a config file, aws profile and path");
