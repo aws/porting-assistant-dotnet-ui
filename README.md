@@ -32,6 +32,7 @@ We require the following:
 
 * Node 14 (newer versions are not supported)
 * .NET Core 3.1
+* [.NET RUntime 6.0.12 ](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-6.0.12-windows-x64-installer?cid=getdotnetcore)
 
 ### Getting started developing
 
