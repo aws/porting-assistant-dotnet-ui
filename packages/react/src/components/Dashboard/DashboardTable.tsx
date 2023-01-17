@@ -194,7 +194,11 @@ const DashboardTableInternal: React.FC = () => {
                     selectedItems[0].incompatiblePackages == null ||
                     selectedItems[0].incompatibleApis == null ||
                     selectedItems[0].portingActions == null ||
-                    selectedItems[0].buildErrors == null))
+                    selectedItems[0].buildErrors == null)) ||
+                (selectedItems.length === 1 &&
+                  selectedItems[0].totalProjects === 0 &&
+                  selectedItems[0].totalApis === 0 &&
+                  selectedItems[0].totalPackages === 0)
               }
               onClick={() => history.push(`/solutions/${encodeURIComponent(selectedItems[0].path)}`)}
             >
@@ -371,21 +375,24 @@ const columnDefinitions: TableProps.ColumnDefinition<DashboardTableData>[] = [
     id: "name",
     header: "Name",
     cell: item =>
-    item.incompatiblePackages == null &&
-    item.incompatibleApis == null ? (
-      <div id={`solution-link-${escapeNonAlphaNumeric(item.path)}`} className={styles.inProgress}>
-        {item.name}
-      </div>
-    ):  
-    (
-        <LinkComponent
-          id={`solution-link-${escapeNonAlphaNumeric(item.path)}`}
-          className="solution-link"
-          location={{ pathName: `/solutions/${encodeURIComponent(item.path)}` }}
-        >
-          {item.name}
-        </LinkComponent>
-      ),
+      (item.incompatiblePackages == null && item.incompatibleApis == null) ||
+        (item.totalApis === 0 &&
+          item.totalPackages === 0 &&
+          item.totalProjects === 0) ?
+        (
+          <div id={`solution-link-${escapeNonAlphaNumeric(item.path)}`} className={styles.inProgress}>
+            {item.name}
+          </div>
+        ) :
+        (
+          <LinkComponent
+            id={`solution-link-${escapeNonAlphaNumeric(item.path)}`}
+            className="solution-link"
+            location={{ pathName: `/solutions/${encodeURIComponent(item.path)}` }}
+          >
+            {item.name}
+          </LinkComponent>
+        ),
     sortingField: "name"
   },
   {
