@@ -94,13 +94,25 @@ export class TestRunner {
     targetFramework: string,
     sendFeedback: boolean,
     sendRuleContribution: boolean,
+    isCheckMemoryUsage: boolean,
+    appMemoryUsageMax?: number,
     sortingCheckRequest?: SortingCheckRequest
   ) => {
+
+    let appMemoryUsageFirstAssess: number;
+    let appMemberyUsageReassess: number; 
+
     const solutionNameTagId = `#solution-link-${this.escapeNonAlphaNumeric(
       solutionPath
     )}`;
     console.log(`assessing solution ${solutionNameTagId}....`);
     await this.assessSolutionCheck(solutionNameTagId, solutionPath);
+    if (isCheckMemoryUsage && appMemoryUsageMax) {
+      appMemoryUsageFirstAssess = appMemoryUsageMax;
+      console.log(
+        `Memory usage after first assess: ${appMemoryUsageFirstAssess}`
+      );
+    }
     console.log(`assess solution ${solutionNameTagId} success`);
     if (sendFeedback) {
       await this.sendFeedbackCheck();
@@ -114,6 +126,10 @@ export class TestRunner {
       solutionNameTagId,
       solutionPath
     );
+    if (isCheckMemoryUsage && appMemoryUsageMax) {
+      appMemberyUsageReassess = appMemoryUsageMax;
+      console.log(`Memory usage after reassess: ${appMemberyUsageReassess}`);
+    }
     console.log(`reassess solution ${solutionNameTagId} success`);
     console.log(`checking tabs in solution ${solutionNameTagId}`);
     const numSourceFiles = await this.solutionTabCheck(sortingCheckRequest);
@@ -230,7 +246,7 @@ export class TestRunner {
     } else if (selectLocation == "copy") {
       await (await this.app.client.$("#select-location-button")).click();
       await (await this.app.client.$(`div[data-value="copy"]`)).click();
-      await (await this.app.client.$(`icon="folder-open"`)).click();
+      await (await this.app.client.$("#folder-open-button")).click();
       await (await this.app.client.$("#save-button")).click();
       await this.app.client.pause(3000);
       await (
