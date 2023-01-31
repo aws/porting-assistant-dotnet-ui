@@ -244,7 +244,7 @@ export const selectProjectTableData = createCachedSelector(
         referencedProjects: project.projectReferences?.length || 0,
         incompatiblePackages: getIncompatibleNugets(nugetPackages, project.packageReferences || []),
         totalPackages: project.packageReferences?.length || 0,
-        incompatibleApis: apis.values[1] - apis.values[0] || null,
+        incompatibleApis: apis.values[1] - apis.values[0],
         totalApis: apis.values[1],
         buildErrors: getErrorCounts(projectToApiAnalysis, project.projectFilePath, null),
         portingActions: getActionCounts(projectToApiAnalysis, project.projectFilePath, null),
