@@ -94,7 +94,7 @@ export class TestRunner {
     targetFramework: string,
     sendFeedback: boolean,
     sendRuleContribution: boolean,
-    isCheckMemoryUsage: boolean,
+    isCheckMemoryUsage?: boolean,
     appMemoryUsageMax?: number,
     sortingCheckRequest?: SortingCheckRequest
   ) => {
