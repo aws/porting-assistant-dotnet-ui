@@ -36,6 +36,9 @@ export const backendReducer = createReducer({
   .handleAction(partialSolutionUpdate, (state, action) =>
     produce(state, draftState => {
       var existingSolution = state.solutionToSolutionDetails[action.payload.solutionPath];
+      if (existingSolution === undefined) {
+        return;
+      }
       const project = action.payload.projectPath;
       const projectFailed = action.payload.data === null || action.payload.data === undefined;
       var modifiedSolutionDetails = null;
