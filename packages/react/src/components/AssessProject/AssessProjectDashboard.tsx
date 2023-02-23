@@ -108,6 +108,12 @@ const AssessProjectDashboardInternal: React.FC<Props> = ({ solution, project }) 
               variant="primary"
               onClick={() => {
                 if (isLoaded(solution)) {
+                  let content = {
+                    solutionPath: solution.data.solutionFilePath,
+                    projectGuid: project.data.projectGuid,
+                    EventAction: "Port-Project"
+                  }
+                  window.electron.writeReactLog("UI-Click", content);
                   if (portingLocation == null) {
                     setShowPortingModal(true);
                   } else {
@@ -135,6 +141,12 @@ const AssessProjectDashboardInternal: React.FC<Props> = ({ solution, project }) 
         onDismiss={() => setShowPortingModal(false)}
         onSubmit={() => {
           if (isLoaded(solution)) {
+            let content = {
+              solutionPath: solution.data.solutionFilePath,
+              projectGuid: project.data.projectGuid,
+              EventAction: "Port-Solution"
+            }
+            window.electron.writeReactLog("UI-Click", content);
             history.push({
               pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}/${encodeURIComponent(
                 project.data.projectFilePath

@@ -28,6 +28,7 @@ import { getErrorCounts, selectDashboardTableData, selectSolutionToApiAnalysis
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { filteringCountText } from "../../utils/FilteringCountText";
 import { getCompatibleApi } from "../../utils/getCompatibleApi";
+import { getHash } from "../../utils/getHash";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isLoaded } from "../../utils/Loadable";
 import { useNugetFlashbarMessages } from "../AssessShared/useNugetFlashbarMessages";
@@ -65,8 +66,14 @@ const DashboardTableInternal: React.FC = () => {
   useNugetFlashbarMessages();
   useSolutionFlashbarMessage(tableData);
   const apiAnalysis = useSelector(selectSolutionToApiAnalysis); 
+  
   const deleteSolution = useMemo(
     () => (solutionPath: string) => {
+      let content = {
+        solutionPath: getHash(solutionPath),
+        EventAction: "Remove"
+      }
+      window.electron.writeReactLog("UI-Click", content);
       dispatch(removeSolution(solutionPath));
       dispatch(removePortedSolution(solutionPath));
       setSelectedItems([]);
@@ -75,7 +82,7 @@ const DashboardTableInternal: React.FC = () => {
   );
 
   const cancelAssessment = useMemo(
-    () => () => {
+    () => (solutionPath: string) => {
         window.electron.saveState("cancel", true);
         window.backend.cancelAssessment();
         dispatch(
@@ -83,6 +90,11 @@ const DashboardTableInternal: React.FC = () => {
             groupId: "assess"
           })
         );
+        let content = {
+          solutionPath: getHash(solutionPath),
+          EventAction: "Cancel"
+        }
+        window.electron.writeReactLog("UI-Click", content);
     },[dispatch]
   )
 
@@ -93,6 +105,14 @@ const DashboardTableInternal: React.FC = () => {
           groupId: "assessSuccess"
         })
       );
+      const runId = uuid();
+
+      let content = {
+        solutionPath: getHash(solutionPath),
+        runId: runId,
+        EventAction: "Reassess"
+      }
+      window.electron.writeReactLog("UI-Click", content);
 
       let projectTableData: PreTriggerData[] = [];
       const solutionDetails = solutionToSolutionDetails[solutionPath];
@@ -121,8 +141,8 @@ const DashboardTableInternal: React.FC = () => {
               sourceFileAnalysisResults: sourceFileAnalysisResults
             };
           });
+
       }
-      
       const haveInternet = await checkInternetAccess(solutionPath, dispatch);
       if (haveInternet) {
         let preTriggerDataArray: string[] = [];
@@ -131,7 +151,7 @@ const DashboardTableInternal: React.FC = () => {
         dispatch(
           analyzeSolution.request({
             solutionPath: solutionPath,
-            runId: uuid(),
+            runId: runId,
             triggerType: "UserRequest",
             settings: {
               ignoredProjects: [],
@@ -243,7 +263,10 @@ const DashboardTableInternal: React.FC = () => {
               id="assess-new-solution-button"
               variant="primary"
               key="assess-new-solution"
-              onClick={() => history.push("/add-solution")}
+              onClick={() => {
+                history.push("/add-solution");       
+              }
+            }
             >
               Assess a new solution
             </Button>
@@ -253,7 +276,7 @@ const DashboardTableInternal: React.FC = () => {
               variant="primary"
               key="cancel-assessment"
               onClick={() => {
-                cancelAssessment();
+                cancelAssessment(selectedItems[0].name);
                 dispatch(
                   pushCurrentMessageUpdate({
                     type: "info",

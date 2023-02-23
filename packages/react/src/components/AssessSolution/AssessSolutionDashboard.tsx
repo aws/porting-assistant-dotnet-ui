@@ -157,6 +157,11 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               disabled={!isLoaded(solution)}
               onClick={async () => {
                 if (isLoaded(solution)) {
+                  let content = {
+                    solutionPath: solution.data.solutionFilePath,
+                    EventAction: "Reassess"
+                  }
+                  window.electron.writeReactLog("UI-Click", content);
                   const haveInternet = await checkInternetAccess(solution.data.solutionFilePath, dispatch);
                   if (haveInternet) {
                     dispatch(
@@ -201,16 +206,23 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               variant="primary"
               disabled={!isLoaded(projects) || !isLoaded(solution)}
               onClick={() => {
-                if (portingLocation == null) {
-                  setShowPortingModal(true);
-                } else {
-                  if (isLoaded(projects) && isLoaded(solution)) {
-                    history.push({
-                      pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
-                      state: {
-                        projects: projects.data
-                      }
-                    });
+                if (isLoaded(solution)){
+                  let content = {
+                    solutionPath: solution.data.solutionFilePath,
+                    EventAction: "Port-Solution"
+                  };
+                  window.electron.writeReactLog("UI-Click", content);
+                  if (portingLocation == null) {
+                    setShowPortingModal(true);
+                  } else {
+                    if (isLoaded(projects)) {
+                      history.push({
+                        pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
+                        state: {
+                          projects: projects.data
+                        }
+                      });
+                    }
                   }
                 }
               }}
@@ -223,6 +235,11 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               onDismiss={() => setShowPortingModal(false)}
               onSubmit={() => {
                 if (isLoaded(solution)) {
+                  let content = {
+                    solutionPath: solution.data.solutionFilePath,
+                    EventAction: "Port-Solution"
+                  }
+                  window.electron.writeReactLog("UI-Click", content);
                   history.push({
                     pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
                     state: {

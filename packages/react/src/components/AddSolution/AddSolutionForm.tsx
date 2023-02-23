@@ -9,6 +9,7 @@ import { externalUrls } from "../../constants/externalUrls";
 import { analyzeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
+import { getHash } from "../../utils/getHash";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { InfoLink } from "../InfoLink";
 import { UploadSolutionField } from "./UploadSolutionField";
@@ -149,6 +150,11 @@ const addSolution = async (data: Record<string, any>) => {
   const paths = await window.electron.getState("solutions", {});
   paths[data.solutionFilename] = { solutionPath: data.solutionFilename };
   window.electron.saveState("solutions", paths);
+  let content = {
+    solutionPath: getHash(data.solutionFilename),
+    EventAction: "Add-New-Solution"
+  }
+  window.electron.writeReactLog("UI-Click", content); 
 };
 
 export const ImportSolution = React.memo(ImportSolutionInternal);

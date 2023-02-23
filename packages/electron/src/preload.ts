@@ -103,8 +103,8 @@ contextBridge.exposeInMainWorld("electron", {
   getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
   crashOnLastUse: (filePath:string) => invokeBackend("crashOnLastUse", filePath),
-  writeReactErrLog: (source: any, message: any, response: any) =>
-    invokeBackend("writeReactErrLog", source, message, response),
+  writeReactLog: (eventType: any, content: any) =>
+    invokeBackend("writeReactLog", eventType, content),
   getAssessmentLog: () => {
     const dateString = new Date()
       .toLocaleDateString("en-CA")

@@ -11,6 +11,7 @@ import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { selectProjects } from "../../store/selectors/solutionSelectors";
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
 import { filteringCountText } from "../../utils/FilteringCountText";
+import { getHash } from "../../utils/getHash";
 import { hasNewData, isLoaded, isLoading, isReloading, Loadable } from "../../utils/Loadable";
 import { InfoLink } from "../InfoLink";
 import { LinkComponent } from "../LinkComponent";
@@ -159,10 +160,19 @@ const ProjectsTableInternal: React.FC<Props> = ({ solution }) => {
                 key="port-project"
                 disabled={selectedItems.length === 0 || !isLoaded(projects)}
                 onClick={() => {
-                  if (portingLocation == null) {
-                    setShowPortingModal(true);
-                  } else {
                     if (isLoaded(projects)) {
+                      let content = {
+                        solutionPath: getHash(selectedItems[0].solutionPath),
+                        projectGuid: projects.data.filter(p =>
+                          selectedItems.some(s => p.projectFilePath === s.projectPath)
+                        ).map(p => p.projectGuid),
+                        EventAction: "Port-Project"
+                      }
+                      window.electron.writeReactLog("UI-Click", content);
+
+                      if (portingLocation == null) {
+                        setShowPortingModal(true);
+                      } else {
                       history.push({
                         pathname: `/port-solution/${encodeURIComponent(selectedItems[0].solutionPath)}`,
                         state: {
