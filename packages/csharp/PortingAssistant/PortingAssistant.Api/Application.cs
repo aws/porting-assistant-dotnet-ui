@@ -4,12 +4,14 @@ using System.Diagnostics;
 using ElectronCgi.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Client.NuGet.Interfaces;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
 using PortingAssistant.VisualStudio;
+using Serilog.Context;
 
 namespace PortingAssistant.Api
 {
@@ -51,26 +53,37 @@ namespace PortingAssistant.Api
         {
             _connection.On<AnalyzeSolutionRequest, Response<SolutionDetails, string>>("analyzeSolution", request =>
             {
-                var assessmentService = _services.GetRequiredService<IAssessmentService>();
+                var logContext = CreateLogContextJson(request);
+                using var _ =  LogContext.PushProperty("context", logContext);
 
-                assessmentService.AddApiAnalysisListener((response) =>
+                try
                 {
-                    _connection.Send("onApiAnalysisUpdate", response);
-                });
+                    _logger.LogInformation($"Begin On{nameof(AnalyzeSolutionRequest)}: {logContext}");
 
-                assessmentService.AddNugetPackageListener((response) =>
+                    var assessmentService = _services.GetRequiredService<IAssessmentService>();
+
+                    assessmentService.AddApiAnalysisListener((response) => { _connection.Send("onApiAnalysisUpdate", response); });
+
+                    assessmentService.AddNugetPackageListener((response) => { _connection.Send("onNugetPackageUpdate", response); });
+                    request.settings.UseGenerator = true;
+                    return assessmentService.AnalyzeSolution(request).Result;
+                }
+                finally
                 {
-                    _connection.Send("onNugetPackageUpdate", response);
-                });
-                request.settings.UseGenerator = true;
-                return assessmentService.AnalyzeSolution(request).Result;
+                    _logger.LogInformation($"End On{nameof(AnalyzeSolutionRequest)}: {logContext}");
+                }
             });
 
 
             _connection.On<CopyDirectoryRequest, Response<bool, string>>("copyDirectory", request =>
             {
+                var logContext = CreateLogContextJson(request);
+                using var _ = LogContext.PushProperty("context", logContext);
+
                 try
                 {
+                    _logger.LogInformation($"Begin On{nameof(CopyDirectoryRequest)}: {logContext}");
+
                     PortingAssistantUtils.CopyDirectory(request.solutionPath, request.destinationPath);
                     return new Response<bool, string>
                     {
@@ -79,27 +92,48 @@ namespace PortingAssistant.Api
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to copy the solution to new location");
+                    _logger.LogError(ex, "Failed to copy the solution to new location" + logContext);
                     return new Response<bool, string>
                     {
                         Status = Response<bool, string>.Failed(ex),
                         ErrorValue = ex.Message
                     };
                 }
+                finally
+                {
+                    _logger.LogInformation($"End On{nameof(CopyDirectoryRequest)}: {logContext}");
+                }
 
             });
 
             _connection.On<ProjectFilePortingRequest, Response<List<PortingResult>, List<PortingResult>>>("applyPortingProjectFileChanges", request =>
             {
-                var portingService = _services.GetRequiredService<IPortingService>();
+                var logContext = CreateLogContextJson(request);
+                using var _ = LogContext.PushProperty("context", logContext);
 
-                return portingService.ApplyPortingChanges(request);
+                try
+                {
+                    _logger.LogInformation($"Begin On{nameof(ProjectFilePortingRequest)}: {logContext}");
+
+                    var portingService = _services.GetRequiredService<IPortingService>();
+
+                    return portingService.ApplyPortingChanges(request);
+                }
+                finally
+                {
+                    _logger.LogInformation($"End On{nameof(ProjectFilePortingRequest)}: {logContext}");
+                }
             });
 
             _connection.On<string, Response<bool, string>>("openSolutionInIDE", request =>
             {
+                var logContext = CreateLogContextJson(request);
+                using var _ = LogContext.PushProperty("context", logContext);
+                
                 try
                 {
+                    _logger.LogInformation($"Begin OnOpenSolutionInIDE: {logContext}");
+
                     var vsfinder = _services.GetRequiredService<IVisualStudioFinder>();
                     var vsPath = vsfinder.GetLatestVisualStudioPath();
                     var vsexe = PortingAssistantUtils.FindFiles(vsPath, "devenv.exe");
@@ -127,37 +161,77 @@ namespace PortingAssistant.Api
                         ErrorValue = ex.Message
                     };
                 }
+                finally
+                {
+                    _logger.LogInformation($"End OnOpenSolutionInIDE: {logContext}");
+                }
             });
 
             _connection.On<string, bool>("checkInternetAccess", _ =>
             {
-                var httpService = _services.GetRequiredService<IHttpService>();
-                string[] files =
+                var logContext = CreateLogContextJson("<empty payload>");
+                using var __ = LogContext.PushProperty("context", logContext);
+
+                try
                 {
-                    "newtonsoft.json.json.gz",
-                    "github.json.gz",
-                    "giger.json.gz",
-                };
-                return HttpServiceUtils.CheckInternetAccess(httpService, files);
+                    _logger.LogInformation($"Begin OnCheckInternetAccess: {logContext}");
+
+                    var httpService = _services.GetRequiredService<IHttpService>();
+                    string[] files =
+                    {
+                        "newtonsoft.json.json.gz",
+                        "github.json.gz",
+                        "giger.json.gz",
+                    };
+                    return HttpServiceUtils.CheckInternetAccess(httpService, files);
+                }
+                finally
+                {
+                    _logger.LogInformation($"End OnCheckInternetAccess: {logContext}");
+                }
             });
 
             _connection.On<string>("cancelAssessment", _ =>
             {
-                PortingAssistantUtils.cancel = true;
+                var logContext = CreateLogContextJson("<empty payload>");
+                using var __ = LogContext.PushProperty("context", logContext);
+
+                try
+                {
+                    _logger.LogInformation($"Begin OnCancelAssessment: {logContext}");
+
+                    PortingAssistantUtils.cancel = true;
+                }
+                finally
+                {
+                    _logger.LogInformation($"End OnCancelAssessment: {logContext}");
+                }
             });
 
             _connection.On<string, Response<List<SupportedVersion>, string>>("getSupportedVersion", _ =>
             {
-                // Note that Console.WriteLine() would somehow mess up with the communication channel.
-                // The output message will be captured by the channel and fail the parsing,
-                // resulting to crash the return result of this request.
-                var defaultConfiguration = SupportedVersionConfiguration.GetDefaultConfiguration();
-                return new Response<List<SupportedVersion>, string>
+                var logContext = CreateLogContextJson("<empty payload>");
+                using var __ = LogContext.PushProperty("context", logContext);
+
+                try
                 {
-                    Value = defaultConfiguration.Versions,
-                    ErrorValue = string.Empty,
-                    Status = Response<List<SupportedVersion>, string>.Success(),
-                };
+                    _logger.LogInformation($"Begin OnGetSupportedVersion: {logContext}");
+
+                    // Note that Console.WriteLine() would somehow mess up with the communication channel.
+                    // The output message will be captured by the channel and fail the parsing,
+                    // resulting to crash the return result of this request.
+                    var defaultConfiguration = SupportedVersionConfiguration.GetDefaultConfiguration();
+                    return new Response<List<SupportedVersion>, string>
+                    {
+                        Value = defaultConfiguration.Versions,
+                        ErrorValue = string.Empty,
+                        Status = Response<List<SupportedVersion>, string>.Success(),
+                    };
+                }
+                finally
+                {
+                    _logger.LogInformation($"End OnGetSupportedVersion: {logContext}");
+                }
             });
         }
 
@@ -171,6 +245,28 @@ namespace PortingAssistant.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Connection ended");
+            }
+        }
+
+        private string CreateLogContextJson(object request)
+        {
+            try
+            {
+                return
+                    Environment.NewLine +
+                    JsonConvert.SerializeObject(
+                        new
+                        {
+                            RequestPayload = request,
+                            TraceId = Guid.NewGuid(),
+                            TimeStamp = DateTime.UtcNow.ToString("u")
+                        },
+                        Formatting.Indented);
+            }
+            catch (Exception e)
+            {
+                return Environment.NewLine +
+                       $"Exception building log context: {e.Message}";
             }
         }
     }
