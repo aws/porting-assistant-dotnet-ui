@@ -23,10 +23,12 @@ export const backendReducer = createReducer({
   )
   .handleAction(analyzeSolution.success, (state, action) =>
     produce(state, draftState => {
-      draftState.solutionToSolutionDetails[action.payload.solutionDetails.solutionFilePath] = Loaded(
-        action.payload.solutionDetails
-      );
-    })
+      if (state.solutionToSolutionDetails[action.payload.solutionDetails.solutionFilePath] !== undefined) {
+        draftState.solutionToSolutionDetails[action.payload.solutionDetails.solutionFilePath] = Loaded(
+          action.payload.solutionDetails
+        );
+      }
+        })
   )
   .handleAction(analyzeSolution.failure, (state, action) =>
     produce(state, draftState => {
@@ -110,11 +112,13 @@ export const backendReducer = createReducer({
   )
   .handleAction(getApiAnalysis.success, (state, action) =>
     produce(state, draftState => {
-      if (state.apiAnalysis[action.payload.solutionFile] === undefined) {
-        draftState.apiAnalysis[action.payload.solutionFile] = {};
+      if (state.apiAnalysis[action.payload.solutionFile] !== undefined){
+        if (state.apiAnalysis[action.payload.solutionFile] === undefined) {
+          draftState.apiAnalysis[action.payload.solutionFile] = {};
+        }
+        draftState.apiAnalysis[action.payload.solutionFile][action.payload.projectFile] = Loaded(action.payload);
       }
-      draftState.apiAnalysis[action.payload.solutionFile][action.payload.projectFile] = Loaded(action.payload);
-    })
+            })
   )
   .handleAction(getApiAnalysis.failure, (state, action) =>
     produce(state, draftState => {
@@ -127,7 +131,7 @@ export const backendReducer = createReducer({
   .handleAction(removeSolution, (state, action) =>
     produce(state, draftstate => {
       delete draftstate.solutionToSolutionDetails[action.payload];
-      delete draftstate.apiAnalysis[action.payload];
+      delete draftstate.apiAnalysis[action.payload];    
     })
   )
   .handleAction(setProfileSet, (state, action) =>
