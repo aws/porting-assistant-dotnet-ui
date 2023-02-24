@@ -1,4 +1,7 @@
-﻿using ElectronCgi.DotNet;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using ElectronCgi.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PortingAssistant.Client.Model;
@@ -6,29 +9,15 @@ using PortingAssistant.Client.NuGet.Interfaces;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
-using PortingAssistant.Telemetry.Utils;
 using PortingAssistant.VisualStudio;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
-using System.Linq;
-using PortingAssistant.Client.Common.Model;
-using System.IO;
-using System.Net.Http;
-using YamlDotNet.Core.Tokens;
-using Amazon.S3;
-using System.Drawing;
-using Amazon;
 
 namespace PortingAssistant.Api
 {
     public class Application
     {
-        private IServiceProvider _services { get; set; }
-        private Connection _connection;
-        private ILogger _logger;
+        private readonly ServiceProvider _services;
+        private readonly Connection _connection;
+        private readonly ILogger _logger;
 
         public Application(IServiceCollection serviceCollection)
         {
@@ -41,7 +30,9 @@ namespace PortingAssistant.Api
         {
             var serialiser = new PortingAssistantJsonSerializer();
             var channelMessageFactory = new ChannelMessageFactory(serialiser);
+
             Console.OutputEncoding = System.Text.Encoding.UTF8;
+
             return new Connection(
                     new Channel(new TabSeparatedInputStreamParser(), serialiser),
                     new MessageDispatcher(),
@@ -109,7 +100,6 @@ namespace PortingAssistant.Api
             {
                 try
                 {
-                    var portingService = _services.GetRequiredService<IPortingService>();
                     var vsfinder = _services.GetRequiredService<IVisualStudioFinder>();
                     var vsPath = vsfinder.GetLatestVisualStudioPath();
                     var vsexe = PortingAssistantUtils.FindFiles(vsPath, "devenv.exe");
@@ -139,39 +129,36 @@ namespace PortingAssistant.Api
                 }
             });
 
-            _connection.On<string, bool>("checkInternetAccess",
-                request =>
+            _connection.On<string, bool>("checkInternetAccess", _ =>
+            {
+                var httpService = _services.GetRequiredService<IHttpService>();
+                string[] files =
                 {
-                    var httpService = _services.GetRequiredService<IHttpService>();
-                    string[] files =
-                    {
-                        "newtonsoft.json.json.gz",
-                        "github.json.gz",
-                        "giger.json.gz",
-                    };
-                    return HttpServiceUtils.CheckInternetAccess(httpService, files);
-                });
+                    "newtonsoft.json.json.gz",
+                    "github.json.gz",
+                    "giger.json.gz",
+                };
+                return HttpServiceUtils.CheckInternetAccess(httpService, files);
+            });
 
-            _connection.On<string>("cancelAssessment",
-              reuqest =>
-              {
-                  PortingAssistantUtils.cancel = true;
-              });
+            _connection.On<string>("cancelAssessment", _ =>
+            {
+                PortingAssistantUtils.cancel = true;
+            });
 
-            _connection.On<string, Response<List<SupportedVersion>, string>>("getSupportedVersion",
-                request =>
+            _connection.On<string, Response<List<SupportedVersion>, string>>("getSupportedVersion", _ =>
+            {
+                // Note that Console.WriteLine() would somehow mess up with the communication channel.
+                // The output message will be captured by the channel and fail the parsing,
+                // resulting to crash the return result of this request.
+                var defaultConfiguration = SupportedVersionConfiguration.GetDefaultConfiguration();
+                return new Response<List<SupportedVersion>, string>
                 {
-                    // Note that Console.WriteLine() would somehow messe up with the communication channel.
-                    // The output message will be captured by the channel and fail the parsing,
-                    // resulting to crash the return result of this request.
-                    var defaultConfiguration = SupportedVersionConfiguration.GetDefaultConfiguration();
-                    return new Response<List<SupportedVersion>, string>
-                    {
-                        Value = defaultConfiguration.Versions,
-                        ErrorValue = string.Empty,
-                        Status = Response<List<SupportedVersion>, string>.Success(),
-                    };
-                });
+                    Value = defaultConfiguration.Versions,
+                    ErrorValue = string.Empty,
+                    Status = Response<List<SupportedVersion>, string>.Success(),
+                };
+            });
         }
 
         public void Start()
