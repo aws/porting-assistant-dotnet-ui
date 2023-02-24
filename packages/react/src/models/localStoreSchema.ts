@@ -14,6 +14,7 @@ export interface LocalStoreSchema {
   cancel: boolean;
   isAssesmentRunning: boolean;
   lastOpenDate: number;
+  currentAssessmentStatus: {[key: string]: boolean}
 }
 
 export interface SolutionLocalStoreSchema {

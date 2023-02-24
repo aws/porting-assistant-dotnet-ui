@@ -25,12 +25,13 @@ import { RootState } from "../../store/reducers";
 import { selectAssesmentStatus, selectCancelStatus, selectCurrentSolutionDetails, selectSolutionToSolutionDetails} from "../../store/selectors/solutionSelectors";
 import { getErrorCounts, selectDashboardTableData, selectSolutionToApiAnalysis
  } from "../../store/selectors/tableSelectors";
+import { getAssessmentStatus, setAssessmentStatus } from "../../utils/assessmentStatus";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { filteringCountText } from "../../utils/FilteringCountText";
 import { getCompatibleApi } from "../../utils/getCompatibleApi";
 import { getHash } from "../../utils/getHash";
 import { getTargetFramework } from "../../utils/getTargetFramework";
-import { isLoaded } from "../../utils/Loadable";
+import { isLoaded, isLoading, isLoadingWithData } from "../../utils/Loadable";
 import { useNugetFlashbarMessages } from "../AssessShared/useNugetFlashbarMessages";
 import { InfoLink } from "../InfoLink";
 import { LinkComponent } from "../LinkComponent";
@@ -74,6 +75,9 @@ const DashboardTableInternal: React.FC = () => {
         EventAction: "Remove"
       }
       window.electron.writeReactLog("UI-Click", content);
+      if (getAssessmentStatus(solutionPath)){
+        cancelAssessment(solutionPath);
+      }
       dispatch(removeSolution(solutionPath));
       dispatch(removePortedSolution(solutionPath));
       setSelectedItems([]);
@@ -106,7 +110,6 @@ const DashboardTableInternal: React.FC = () => {
         })
       );
       const runId = uuid();
-
       let content = {
         solutionPath: getHash(solutionPath),
         runId: runId,
@@ -251,7 +254,7 @@ const DashboardTableInternal: React.FC = () => {
             <Button
               id="reassess-solution"
               key="reassess-solution"
-              disabled={selectedItems.length === 0}
+              disabled={selectedItems.length === 0 || getAssessmentStatus(selectedItems[0]?.path)}
               onClick={() => {
                 reassessSolution(selectedItems[0].path);
               }}

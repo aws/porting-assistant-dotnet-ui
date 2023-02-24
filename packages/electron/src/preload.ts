@@ -38,11 +38,12 @@ contextBridge.exposeInMainWorld("electron", {
       | "useDefaultCreds"
       | "cancel"
       | "isAssesmentRunning"
-      | "lastOpenDate",
+      | "lastOpenDate"
+      | "currentAssessmentStatus",
     value: any
   ) => localStore.set(key, value),
   getState: (
-    key: "solutions" | "profile" | "targetFramework" | "share" | "email" | "useDefaultCreds" | "cancel" | "isAssesmentRunning"| "lastOpenDate",
+    key: "solutions" | "profile" | "targetFramework" | "share" | "email" | "useDefaultCreds" | "cancel" | "isAssesmentRunning"| "lastOpenDate" | "currentAssessmentStatus",
     defaultValue: any
   ) => localStore.get(key, defaultValue),
   saveCache: (value: any) => reducerCacheStore.set("reducerCache", value),

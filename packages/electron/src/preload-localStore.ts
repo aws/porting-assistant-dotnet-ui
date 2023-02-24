@@ -49,6 +49,7 @@ const createLocalStore = () =>
       isAssesmentRunning: false,
       sessionid: "",
       lastOpenDate: 0,
+      currentAssessmentStatus: {}
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -105,6 +106,9 @@ const createLocalStore = () =>
       },
       lastOpenDate: {
         type: "number"
+      },
+      currentAssessmentStatus: {
+        type: "object"
       }
     },
     watch: true,

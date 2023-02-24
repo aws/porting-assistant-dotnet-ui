@@ -1,8 +1,9 @@
 import { Box, Button, Flashbar, Header, NonCancelableCustomEvent, ProgressBar,SpaceBetween, Tabs, TabsProps } from "@awsui/components-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector} from "react-redux";
 import { Redirect, useHistory, useLocation } from "react-router";
 import { v4 as uuid } from "uuid";
+import { data } from "vis-network";
 
 import { paths } from "../../constants/paths";
 import { usePortingAssistantSelector } from "../../createReduxStore";
@@ -11,12 +12,13 @@ import { Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution, exportSolution, openSolutionInIDE } from "../../store/actions/backend";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
-import { selectCurrentSolutionPath } from "../../store/selectors/solutionSelectors";
+import { selectAssesmentStatus, selectCurrentSolutionPath } from "../../store/selectors/solutionSelectors";
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
+import { setAssessmentStatus } from "../../utils/assessmentStatus";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { getTotalProjects } from "../../utils/getTotalProjects";
-import { hasNewData, isLoaded, isLoadingWithData, Loadable } from "../../utils/Loadable";
+import { hasNewData, isLoaded, isLoading, isLoadingWithData, Loadable } from "../../utils/Loadable";
 import { ApiTable } from "../AssessShared/ApiTable";
 import { FileTable } from "../AssessShared/FileTable";
 import { NugetPackageTable } from "../AssessShared/NugetPackageTable";
@@ -39,6 +41,7 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
   const history = useHistory();
   const location = useLocation<HistoryState>();
   const portingLocation = usePortingAssistantSelector(state => selectPortingLocation(state, location.pathname));
+  const isAssesmentRunning = useSelector(selectAssesmentStatus);
   const [showPortingModal, setShowPortingModal] = useState(false);
   const targetFramework = getTargetFramework();
   const [feedbackModal, setFeedbackModalVisible] = React.useState(false);
@@ -154,7 +157,7 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             <Button
               iconName="refresh"
               id="reassess-solution"
-              disabled={!isLoaded(solution)}
+              disabled={!isLoaded(solution) && !(isLoading(solution) || isLoadingWithData(solution))}
               onClick={async () => {
                 if (isLoaded(solution)) {
                   let content = {

@@ -8,6 +8,7 @@ import { v4 as uuid } from "uuid";
 import { externalUrls } from "../../constants/externalUrls";
 import { analyzeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
+import { setAssessmentStatus } from "../../utils/assessmentStatus";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getHash } from "../../utils/getHash";
 import { getTargetFramework } from "../../utils/getTargetFramework";
@@ -154,7 +155,7 @@ const addSolution = async (data: Record<string, any>) => {
     solutionPath: getHash(data.solutionFilename),
     EventAction: "Add-New-Solution"
   }
-  window.electron.writeReactLog("UI-Click", content); 
+  window.electron.writeReactLog("UI-Click", content);
 };
 
 export const ImportSolution = React.memo(ImportSolutionInternal);
