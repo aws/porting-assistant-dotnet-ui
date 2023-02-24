@@ -42,16 +42,26 @@ namespace PortingAssistant.Api
                 new Serilog.Formatting.Display.MessageTemplateTextFormatter(outputTemplate, CultureInfo.InvariantCulture);
 
             var date = DateTime.Today.ToString("yyyy-MM-dd");
-            var logConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
-                .MinimumLevel.Debug()
-                .WriteTo.RollingFile(
-                    Path.Combine(args[2], "logs", "portingAssistant-assessment-{Date}.log"),
-                    outputTemplate: outputTemplate,
-                    fileSizeLimitBytes: 1000000)
-                .WriteTo.Logger(lc => lc.MinimumLevel.Error().WriteTo.RollingFile(
-                    Path.Combine(args[2], "logs", "portingAssistant-backend-{Date}.log"),
-                    outputTemplate: outputTemplate,
-                    fileSizeLimitBytes: 1000000));
+            var logConfiguration = 
+                new LoggerConfiguration()
+                    .Enrich.FromLogContext()
+                    .MinimumLevel.Debug()
+                    .WriteTo.RollingFile(
+                        Path.Combine(args[2], "logs", "portingAssistant-assessment-{Date}.log"),
+                        outputTemplate: outputTemplate,
+                        fileSizeLimitBytes: 1000000)
+                    .WriteTo.RollingFile(
+                        Path.Combine(args[2], "logs", "portingAssistant-assessmentWithContext-{Date}.log"),
+                        outputTemplate: outputTemplate+ "{NewLine}{Properties}{NewLine}{NewLine}",
+                        fileSizeLimitBytes: 1000000)
+                    .WriteTo.Logger(lc => 
+                        lc
+                            .MinimumLevel.Error()
+                            .WriteTo.RollingFile(
+                                Path.Combine(args[2], "logs", "portingAssistant-backend-{Date}.log"),
+                                outputTemplate: outputTemplate,
+                                fileSizeLimitBytes: 1000000));
+                
 
             if (isConsole)
             {

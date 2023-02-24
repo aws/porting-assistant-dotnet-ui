@@ -17,6 +17,14 @@ namespace PortingAssistant.Telemetry.Utils
 
             string typeOfLog = (fName.Split('-').Length > 1) ? fName.Split('-')[1] : String.Empty;
 
+            if (typeOfLog.Equals("assessment", StringComparison.OrdinalIgnoreCase))
+            {
+                logName = "portingAssistant-assessment";
+            }
+            if (typeOfLog.Equals("assessmentWithContext", StringComparison.OrdinalIgnoreCase))
+            {
+                logName = "portingAssistant-assessmentWithContext";
+            }
             if (typeOfLog.Equals("telemetry", StringComparison.OrdinalIgnoreCase))
             {
                 logName = "portingAssistant-metrics";

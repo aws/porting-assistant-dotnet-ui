@@ -30,6 +30,8 @@ namespace PortingAssistant.Api
 
         private Connection BuildConnection()
         {
+            _logger.LogInformation(nameof(BuildConnection));
+
             var serialiser = new PortingAssistantJsonSerializer();
             var channelMessageFactory = new ChannelMessageFactory(serialiser);
 
@@ -58,7 +60,7 @@ namespace PortingAssistant.Api
 
                 try
                 {
-                    _logger.LogInformation($"Begin On{nameof(AnalyzeSolutionRequest)}: {logContext}");
+                    _logger.LogInformation($"Begin On{nameof(AnalyzeSolutionRequest)}");
 
                     var assessmentService = _services.GetRequiredService<IAssessmentService>();
 
@@ -70,7 +72,7 @@ namespace PortingAssistant.Api
                 }
                 finally
                 {
-                    _logger.LogInformation($"End On{nameof(AnalyzeSolutionRequest)}: {logContext}");
+                    _logger.LogInformation($"End On{nameof(AnalyzeSolutionRequest)}");
                 }
             });
 
@@ -82,7 +84,7 @@ namespace PortingAssistant.Api
 
                 try
                 {
-                    _logger.LogInformation($"Begin On{nameof(CopyDirectoryRequest)}: {logContext}");
+                    _logger.LogInformation($"Begin On{nameof(CopyDirectoryRequest)}");
 
                     PortingAssistantUtils.CopyDirectory(request.solutionPath, request.destinationPath);
                     return new Response<bool, string>
@@ -101,7 +103,7 @@ namespace PortingAssistant.Api
                 }
                 finally
                 {
-                    _logger.LogInformation($"End On{nameof(CopyDirectoryRequest)}: {logContext}");
+                    _logger.LogInformation($"End On{nameof(CopyDirectoryRequest)}");
                 }
 
             });
@@ -113,7 +115,7 @@ namespace PortingAssistant.Api
 
                 try
                 {
-                    _logger.LogInformation($"Begin On{nameof(ProjectFilePortingRequest)}: {logContext}");
+                    _logger.LogInformation($"Begin On{nameof(ProjectFilePortingRequest)}");
 
                     var portingService = _services.GetRequiredService<IPortingService>();
 
@@ -121,7 +123,7 @@ namespace PortingAssistant.Api
                 }
                 finally
                 {
-                    _logger.LogInformation($"End On{nameof(ProjectFilePortingRequest)}: {logContext}");
+                    _logger.LogInformation($"End On{nameof(ProjectFilePortingRequest)}");
                 }
             });
 
@@ -132,7 +134,7 @@ namespace PortingAssistant.Api
                 
                 try
                 {
-                    _logger.LogInformation($"Begin OnOpenSolutionInIDE: {logContext}");
+                    _logger.LogInformation("Begin OnOpenSolutionInIDE");
 
                     var vsfinder = _services.GetRequiredService<IVisualStudioFinder>();
                     var vsPath = vsfinder.GetLatestVisualStudioPath();
@@ -163,7 +165,7 @@ namespace PortingAssistant.Api
                 }
                 finally
                 {
-                    _logger.LogInformation($"End OnOpenSolutionInIDE: {logContext}");
+                    _logger.LogInformation("End OnOpenSolutionInIDE");
                 }
             });
 
@@ -174,7 +176,7 @@ namespace PortingAssistant.Api
 
                 try
                 {
-                    _logger.LogInformation($"Begin OnCheckInternetAccess: {logContext}");
+                    _logger.LogInformation("Begin OnCheckInternetAccess");
 
                     var httpService = _services.GetRequiredService<IHttpService>();
                     string[] files =
@@ -187,7 +189,7 @@ namespace PortingAssistant.Api
                 }
                 finally
                 {
-                    _logger.LogInformation($"End OnCheckInternetAccess: {logContext}");
+                    _logger.LogInformation("End OnCheckInternetAccess");
                 }
             });
 
@@ -198,13 +200,13 @@ namespace PortingAssistant.Api
 
                 try
                 {
-                    _logger.LogInformation($"Begin OnCancelAssessment: {logContext}");
+                    _logger.LogInformation("Begin OnCancelAssessment");
 
                     PortingAssistantUtils.cancel = true;
                 }
                 finally
                 {
-                    _logger.LogInformation($"End OnCancelAssessment: {logContext}");
+                    _logger.LogInformation("End OnCancelAssessment");
                 }
             });
 
@@ -215,7 +217,7 @@ namespace PortingAssistant.Api
 
                 try
                 {
-                    _logger.LogInformation($"Begin OnGetSupportedVersion: {logContext}");
+                    _logger.LogInformation("Begin OnGetSupportedVersion");
 
                     // Note that Console.WriteLine() would somehow mess up with the communication channel.
                     // The output message will be captured by the channel and fail the parsing,
@@ -230,7 +232,7 @@ namespace PortingAssistant.Api
                 }
                 finally
                 {
-                    _logger.LogInformation($"End OnGetSupportedVersion: {logContext}");
+                    _logger.LogInformation("End OnGetSupportedVersion");
                 }
             });
         }
@@ -258,6 +260,7 @@ namespace PortingAssistant.Api
                         new
                         {
                             RequestPayload = request,
+                            RequestType = request.GetType().Name,
                             TraceId = Guid.NewGuid(),
                             TimeStamp = DateTime.UtcNow.ToString("u")
                         },
