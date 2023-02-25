@@ -9,6 +9,7 @@ import { paths } from "../../constants/paths";
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
 import { Project } from "../../models/project";
+import { MetricsType, ReactMetric } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution, exportSolution, openSolutionInIDE } from "../../store/actions/backend";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
@@ -160,11 +161,12 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               disabled={!isLoaded(solution) && !(isLoading(solution) || isLoadingWithData(solution))}
               onClick={async () => {
                 if (isLoaded(solution)) {
-                  let content = {
-                    solutionPath: solution.data.solutionFilePath,
-                    EventAction: "Reassess"
+                  let clickMetric: ReactMetric = {
+                    SolutionPath: solution.data.solutionFilePath,
+                    MetricSource: "Reassess",
+                    MetricType: MetricsType.UIClickEvent
                   }
-                  window.electron.writeReactLog("UI-Click", content);
+                  window.electron.writeReactLog(clickMetric);
                   const haveInternet = await checkInternetAccess(solution.data.solutionFilePath, dispatch);
                   if (haveInternet) {
                     dispatch(
@@ -210,11 +212,12 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               disabled={!isLoaded(projects) || !isLoaded(solution)}
               onClick={() => {
                 if (isLoaded(solution)){
-                  let content = {
-                    solutionPath: solution.data.solutionFilePath,
-                    EventAction: "Port-Solution"
+                  let clickMetric: ReactMetric = {
+                    SolutionPath: solution.data.solutionFilePath,
+                    MetricSource: "Port-Solution",
+                    MetricType: MetricsType.UIClickEvent
                   };
-                  window.electron.writeReactLog("UI-Click", content);
+                  window.electron.writeReactLog(clickMetric);
                   if (portingLocation == null) {
                     setShowPortingModal(true);
                   } else {
@@ -238,11 +241,12 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               onDismiss={() => setShowPortingModal(false)}
               onSubmit={() => {
                 if (isLoaded(solution)) {
-                  let content = {
-                    solutionPath: solution.data.solutionFilePath,
-                    EventAction: "Port-Solution"
+                  let clickMetric: ReactMetric = {
+                    SolutionPath: solution.data.solutionFilePath,
+                    MetricSource: "Port-Solution",
+                    MetricType: MetricsType.UIClickEvent
                   }
-                  window.electron.writeReactLog("UI-Click", content);
+                  window.electron.writeReactLog(clickMetric);
                   history.push({
                     pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
                     state: {

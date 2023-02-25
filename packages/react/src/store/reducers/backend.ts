@@ -1,14 +1,15 @@
 import { produce } from "immer";
 import { createReducer } from "typesafe-actions";
 
-import { SolutionToApiAnalysis, SolutionToSolutionDetails } from "../../models/project";
+import { RemovedSolutions, SolutionToApiAnalysis, SolutionToSolutionDetails } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { Failed, isLoaded, isLoading, isLoadingWithData, isReloading, Loaded, Loading, Reloading } from "../../utils/Loadable";
 import { analyzeSolution, getApiAnalysis, partialSolutionUpdate, removeSolution, setProfileSet } from "../actions/backend";
 export const backendReducer = createReducer({
   apiAnalysis: {} as SolutionToApiAnalysis,
   solutionToSolutionDetails: {} as SolutionToSolutionDetails,
-  profileSet: false
+  profileSet: false,
+  removedSolutions: {} as RemovedSolutions
 })
   .handleAction(analyzeSolution.request, (state, action) =>
     produce(state, draftState => {
@@ -16,6 +17,7 @@ export const backendReducer = createReducer({
       if (isLoaded(existingSolution) && action.payload.force !== true) {
         return;
       }
+      draftState.removedSolutions[action.payload.solutionPath] = false;
       draftState.solutionToSolutionDetails[action.payload.solutionPath] = isLoaded(existingSolution)
         ? Reloading(existingSolution.data)
         : Loading();
@@ -23,7 +25,10 @@ export const backendReducer = createReducer({
   )
   .handleAction(analyzeSolution.success, (state, action) =>
     produce(state, draftState => {
-      if (state.solutionToSolutionDetails[action.payload.solutionDetails.solutionFilePath] !== undefined) {
+      if (state.removedSolutions[action.payload.solutionDetails.solutionFilePath] === true) {
+        draftState.removedSolutions[action.payload.solutionDetails.solutionFilePath] = false;
+      }
+      else{
         draftState.solutionToSolutionDetails[action.payload.solutionDetails.solutionFilePath] = Loaded(
           action.payload.solutionDetails
         );
@@ -32,7 +37,12 @@ export const backendReducer = createReducer({
   )
   .handleAction(analyzeSolution.failure, (state, action) =>
     produce(state, draftState => {
+      if (state.removedSolutions[action.payload.solutionPath] === true) {
+        draftState.removedSolutions[action.payload.solutionPath] = false;
+      }
+      else{
       draftState.solutionToSolutionDetails[action.payload.solutionPath] = Failed(action.payload.error);
+      }
     })
   )
   .handleAction(partialSolutionUpdate, (state, action) =>
@@ -112,13 +122,13 @@ export const backendReducer = createReducer({
   )
   .handleAction(getApiAnalysis.success, (state, action) =>
     produce(state, draftState => {
-      if (state.apiAnalysis[action.payload.solutionFile] !== undefined){
+      if (state.removedSolutions[action.payload.solutionFile] === false){
         if (state.apiAnalysis[action.payload.solutionFile] === undefined) {
           draftState.apiAnalysis[action.payload.solutionFile] = {};
         }
         draftState.apiAnalysis[action.payload.solutionFile][action.payload.projectFile] = Loaded(action.payload);
-      }
-            })
+            }
+      })
   )
   .handleAction(getApiAnalysis.failure, (state, action) =>
     produce(state, draftState => {
@@ -131,7 +141,8 @@ export const backendReducer = createReducer({
   .handleAction(removeSolution, (state, action) =>
     produce(state, draftstate => {
       delete draftstate.solutionToSolutionDetails[action.payload];
-      delete draftstate.apiAnalysis[action.payload];    
+      delete draftstate.apiAnalysis[action.payload];
+      draftstate.removedSolutions[action.payload] = true;
     })
   )
   .handleAction(setProfileSet, (state, action) =>

@@ -6,6 +6,7 @@ import { useHistory, useLocation } from "react-router-dom";
 
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
+import { MetricsType, ReactMetric } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { selectProjects } from "../../store/selectors/solutionSelectors";
@@ -161,14 +162,15 @@ const ProjectsTableInternal: React.FC<Props> = ({ solution }) => {
                 disabled={selectedItems.length === 0 || !isLoaded(projects)}
                 onClick={() => {
                     if (isLoaded(projects)) {
-                      let content = {
-                        solutionPath: getHash(selectedItems[0].solutionPath),
-                        projectGuid: projects.data.filter(p =>
+                      let clickMetric: ReactMetric = {
+                        SolutionPath: getHash(selectedItems[0].solutionPath),
+                        ProjectGuid: projects.data.filter(p =>
                           selectedItems.some(s => p.projectFilePath === s.projectPath)
                         ).map(p => p.projectGuid),
-                        EventAction: "Port-Project"
+                        MetricSource: "Port-Project",
+                        MetricType: MetricsType.UIClickEvent
                       }
-                      window.electron.writeReactLog("UI-Click", content);
+                      window.electron.writeReactLog(clickMetric);
 
                       if (portingLocation == null) {
                         setShowPortingModal(true);
