@@ -10,6 +10,7 @@ import {
   SolutionProject,
   VersionPair
 } from "./models/project";
+import { ReactMetric } from "./models/reactmetric";
 import { Response } from "./models/response";
 import { Credentials, Profiles, SupportedVersion } from "./models/setup";
 import { SolutionDetails } from "./models/solution";
@@ -43,7 +44,7 @@ export interface Electron {
   getOutdatedVersionFlag: () => Promise<boolean>;
   telemetry: (message: any) => void;
   crashOnLastUse: (sourceFilePath: string) => Promise<boolean>;
-  writeReactLog: (eventType: string, content: any) => void;
+  writeReactLog: (eventMessage: ReactMetric) => void;
   getAssessmentLog: () => string;
   checkInternetAccess: () => Promise<boolean>;
   cancelAssessment: () => void

@@ -11,6 +11,7 @@ import { localStore } from "../preload-localStore";
 import path from "path";
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
+import { ReactMetric } from "../models/reactMetric";
 
 
 const electronLogName = "portingAssistant-electron-%DATE%";
@@ -95,21 +96,11 @@ export const logReactMetrics = (response: any) => {
   reactLogger.info(JSON.stringify(errorMetric));
 };
 
-export const logReactEvents = (eventType: string, content: any) => {
-  const cur = new Date();
-  // let curTimeArr = cur.toISOString().split('T');
-  // let curDate = curTimeArr[0];
-  // let curTime = curTimeArr[1].split('.')[0];
-  // let appVersion = app.getVersion();
-  // let errorMessage = `[${curDate} ${curTime} ERR] (${appVersion}) ${source}: ${message}\n${response}`
-  let eventMessage = {
-    Timestamp: cur,
-    ToolVersion: app.getVersion(),
-    ToolType: "Porting Assistant For .NET",
-    SessionId: "test",
-    EventType: eventType,
-  }
-  Object.assign(eventMessage, content);
+export const logReactEvents = (eventMessage: ReactMetric) => {
+  eventMessage.Timestamp = new Date();;
+  eventMessage.PortingAssistantVersion = app.getVersion();
+  eventMessage.SessionId = localStore.get("sessionid");
+  eventMessage.TargetFramework = localStore.get("targetFramework").id || "net6.0";
   reactLogger.info(JSON.stringify(eventMessage));
 };
 

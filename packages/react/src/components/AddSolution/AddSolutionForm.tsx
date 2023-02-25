@@ -6,6 +6,7 @@ import { useHistory } from "react-router";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
+import { MetricsType, ReactMetric } from "../../models/reactmetric";
 import { analyzeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { setAssessmentStatus } from "../../utils/assessmentStatus";
@@ -151,11 +152,12 @@ const addSolution = async (data: Record<string, any>) => {
   const paths = await window.electron.getState("solutions", {});
   paths[data.solutionFilename] = { solutionPath: data.solutionFilename };
   window.electron.saveState("solutions", paths);
-  let content = {
-    solutionPath: getHash(data.solutionFilename),
-    EventAction: "Add-New-Solution"
+  let clickMetric: ReactMetric = {
+    SolutionPath: getHash(data.solutionFilename),
+    MetricType: MetricsType.UIClickEvent,
+    MetricSource: "Add-New-Solution"
   }
-  window.electron.writeReactLog("UI-Click", content);
+  window.electron.writeReactLog(clickMetric);
 };
 
 export const ImportSolution = React.memo(ImportSolutionInternal);

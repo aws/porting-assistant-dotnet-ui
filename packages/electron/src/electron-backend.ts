@@ -155,8 +155,8 @@ export const initConnection = (logger: any = console) => {
   });
   ipcMain.handle(
     "writeReactLog",
-    async (_event, eventType, content) => {
-      logReactEvents(eventType, content);
+    async (_event, eventMessage) => {
+      logReactEvents(eventMessage);
     }
   );
   ipcMain.handle("dialogShowOpenDialog", (_event, options: any) =>

@@ -22,6 +22,7 @@ import {
   getAwsProfiles,
   getProfileCredentials,
 } from "./telemetry/electron-get-profile-credentials";
+import { ReactMetric } from "./models/reactMetric";
 
 contextBridge.exposeInMainWorld("electron", {
   openExternalUrl: (url: string) => shell.openExternal(url),
@@ -104,8 +105,8 @@ contextBridge.exposeInMainWorld("electron", {
   getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
   crashOnLastUse: (filePath:string) => invokeBackend("crashOnLastUse", filePath),
-  writeReactLog: (eventType: any, content: any) =>
-    invokeBackend("writeReactLog", eventType, content),
+  writeReactLog: (eventMessage: ReactMetric) =>
+    invokeBackend("writeReactLog", eventMessage),
   getAssessmentLog: () => {
     const dateString = new Date()
       .toLocaleDateString("en-CA")

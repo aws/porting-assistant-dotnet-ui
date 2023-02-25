@@ -7,6 +7,7 @@ import { Redirect, useHistory, useLocation } from "react-router";
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
 import { Project } from "../../models/project";
+import { MetricsType, ReactMetric } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
 import { RootState } from "../../store/reducers";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
@@ -108,12 +109,13 @@ const AssessProjectDashboardInternal: React.FC<Props> = ({ solution, project }) 
               variant="primary"
               onClick={() => {
                 if (isLoaded(solution)) {
-                  let content = {
-                    solutionPath: solution.data.solutionFilePath,
-                    projectGuid: project.data.projectGuid,
-                    EventAction: "Port-Project"
+                  let clickMetric: ReactMetric = {
+                    SolutionPath: solution.data.solutionFilePath,
+                    MetricType: MetricsType.UIClickEvent,
+                    MetricSource: "Port-Project",
+                    ProjectGuid: [project.data.projectGuid]
                   }
-                  window.electron.writeReactLog("UI-Click", content);
+                  window.electron.writeReactLog(clickMetric);
                   if (portingLocation == null) {
                     setShowPortingModal(true);
                   } else {
@@ -141,12 +143,13 @@ const AssessProjectDashboardInternal: React.FC<Props> = ({ solution, project }) 
         onDismiss={() => setShowPortingModal(false)}
         onSubmit={() => {
           if (isLoaded(solution)) {
-            let content = {
-              solutionPath: solution.data.solutionFilePath,
-              projectGuid: project.data.projectGuid,
-              EventAction: "Port-Solution"
+            let clickMetric: ReactMetric = {
+              SolutionPath: solution.data.solutionFilePath,
+              ProjectGuid: [project.data.projectGuid],
+              MetricSource: "Port-Solution",
+              MetricType: MetricsType.UIClickEvent
             }
-            window.electron.writeReactLog("UI-Click", content);
+            window.electron.writeReactLog(clickMetric);
             history.push({
               pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}/${encodeURIComponent(
                 project.data.projectFilePath

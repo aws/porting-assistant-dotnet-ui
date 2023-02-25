@@ -6,6 +6,7 @@ import { isActionOf } from "typesafe-actions";
 
 import {
   PackageToPackageAnalysisResult,
+  RemovedSolutions,
   SolutionToApiAnalysis,
   SolutionToSolutionDetails,
   SourceFileToContents
@@ -88,7 +89,8 @@ const getStateFromCache = (): Partial<RS> => {
     solution: {
       apiAnalysis: Object.assign({} as SolutionToApiAnalysis, apiAnalysis),
       solutionToSolutionDetails: Object.assign({} as SolutionToSolutionDetails, filteredSolutionToSolutionDetails),
-      profileSet: window.electron.getState("lastConfirmVersion") != ""
+      profileSet: window.electron.getState("lastConfirmVersion") != "",
+      removedSolutions: Object.assign({} as RemovedSolutions, {})
     },
     nugetPackage: Object.assign(
       {

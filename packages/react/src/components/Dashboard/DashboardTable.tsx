@@ -18,6 +18,7 @@ import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
 import { PreTriggerData } from "../../models/project";
+import { MetricsType, ReactMetric } from "../../models/reactmetric";
 import { analyzeSolution, exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import { removePortedSolution } from "../../store/actions/porting";
@@ -70,11 +71,12 @@ const DashboardTableInternal: React.FC = () => {
   
   const deleteSolution = useMemo(
     () => (solutionPath: string) => {
-      let content = {
-        solutionPath: getHash(solutionPath),
-        EventAction: "Remove"
+      let clickMetric: ReactMetric = {
+        SolutionPath: getHash(solutionPath),
+        MetricSource: "Remove",
+        MetricType: MetricsType.UIClickEvent
       }
-      window.electron.writeReactLog("UI-Click", content);
+      window.electron.writeReactLog(clickMetric);
       if (getAssessmentStatus(solutionPath)){
         cancelAssessment(solutionPath);
       }
@@ -94,11 +96,12 @@ const DashboardTableInternal: React.FC = () => {
             groupId: "assess"
           })
         );
-        let content = {
-          solutionPath: getHash(solutionPath),
-          EventAction: "Cancel"
+        let clickMetric: ReactMetric = {
+          SolutionPath: getHash(solutionPath),
+          MetricSource: "Cancel",
+          MetricType: MetricsType.UIClickEvent
         }
-        window.electron.writeReactLog("UI-Click", content);
+        window.electron.writeReactLog(clickMetric);
     },[dispatch]
   )
 
@@ -110,12 +113,13 @@ const DashboardTableInternal: React.FC = () => {
         })
       );
       const runId = uuid();
-      let content = {
-        solutionPath: getHash(solutionPath),
-        runId: runId,
-        EventAction: "Reassess"
+      let clickMetric: ReactMetric = {
+        SolutionPath: getHash(solutionPath),
+        RunId: runId,
+        MetricSource: "Reassess",
+        MetricType: MetricsType.UIClickEvent
       }
-      window.electron.writeReactLog("UI-Click", content);
+      window.electron.writeReactLog(clickMetric);
 
       let projectTableData: PreTriggerData[] = [];
       const solutionDetails = solutionToSolutionDetails[solutionPath];

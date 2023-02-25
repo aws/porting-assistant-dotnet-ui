@@ -151,3 +151,4 @@ export type ProjectToApiAnalysis = { [project: string]: Loadable<ProjectApiAnaly
 export type SolutionToApiAnalysis = { [solutionPath: string]: ProjectToApiAnalysis };
 export type SourceFileToContents = { [sourceFilePath: string]: Loadable<string> };
 export type PackageToPackageAnalysisResult = { [packageVersionPair: string]: Loadable<PackageAnalysisResultWithDate> };
+export type RemovedSolutions = {[key: string]: boolean}
