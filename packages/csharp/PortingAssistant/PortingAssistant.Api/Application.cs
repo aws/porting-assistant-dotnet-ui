@@ -68,7 +68,24 @@ namespace PortingAssistant.Api
 
                     assessmentService.AddNugetPackageListener((response) => { _connection.Send("onNugetPackageUpdate", response); });
                     request.settings.UseGenerator = true;
-                    return assessmentService.AnalyzeSolution(request).Result;
+
+                    var analysisResult = assessmentService.AnalyzeSolution(request).Result;
+
+                    if (analysisResult.Status.Status == Response<SolutionDetails, string>.ResponseStatus.StatusCode.Failure)
+                    {
+                        throw analysisResult.Status.Error;
+                    }
+
+                    return analysisResult;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to analyze solution" + logContext);
+                    return new Response<SolutionDetails, string>
+                    {
+                        Status = Response<SolutionDetails, string>.Failed(ex),
+                        ErrorValue = ex.Message
+                    };
                 }
                 finally
                 {
@@ -94,7 +111,7 @@ namespace PortingAssistant.Api
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to copy the solution to new location" + logContext);
+                    _logger.LogError(ex, "Failed to copy the solution to new location");
                     return new Response<bool, string>
                     {
                         Status = Response<bool, string>.Failed(ex),
@@ -119,7 +136,22 @@ namespace PortingAssistant.Api
 
                     var portingService = _services.GetRequiredService<IPortingService>();
 
+                    var portingResult = portingService.ApplyPortingChanges(request);
+
+                    if (portingResult.Status.Status == Response<List<PortingResult>, List<PortingResult>>.ResponseStatus.StatusCode.Failure)
+                    {
+                        throw portingResult.Status.Error;
+                    }
+
                     return portingService.ApplyPortingChanges(request);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to apply porting project file changes");
+                    return new Response<List<PortingResult>, List<PortingResult>>
+                    {
+                        Status = Response<List<PortingResult>, List<PortingResult>>.Failed(ex)
+                    };
                 }
                 finally
                 {
