@@ -52,8 +52,7 @@ namespace PortingAssistant.Api
                         fileSizeLimitBytes: 1000000)
                     .WriteTo.RollingFile(
                         Path.Combine(args[2], "logs", "portingAssistant-assessmentWithContext-{Date}.log"),
-                        outputTemplate: outputTemplate+ "{NewLine}{Properties}{NewLine}{NewLine}",
-                        fileSizeLimitBytes: 1000000)
+                        outputTemplate: outputTemplate+ "{NewLine}{Properties}{NewLine}{NewLine}")
                     .WriteTo.Logger(lc => 
                         lc
                             .MinimumLevel.Error()
