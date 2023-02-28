@@ -6,7 +6,9 @@ import { useHistory } from "react-router";
 
 import { PortingLocation } from "../../models/porting";
 import { Project } from "../../models/project";
+import { MetricSource } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
+import { getErrorMetric } from "../../utils/getErrorMetric";
 import { InfoLink } from "../InfoLink";
 import { handlePortProjectSubmission } from "../PortShared/handlePortProjectSubmission";
 import { NugetPackageUpgrades } from "../PortShared/NugetPackageUpgrades";
@@ -37,7 +39,8 @@ const PortProjectDashboardInternal: React.FC<Props> = ({ solution, project, port
           setError("targetFramework", { type: "required", message: "Target Framework is required." });
           return;
         }
-        handlePortProjectSubmission(data, solution, [project], targetFramework.id, portingLocation, [], dispatch);
+        const isSolutionPort = false;
+        handlePortProjectSubmission(data, solution, [project], targetFramework.id, portingLocation, [], dispatch, isSolutionPort);
         history.push("/solutions");
       })}
     >

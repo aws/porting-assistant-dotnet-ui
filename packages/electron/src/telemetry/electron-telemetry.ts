@@ -19,6 +19,8 @@ const reactLogName = "portingAssistant-react-%DATE%";
 
 const dirName = path.join(app.getPath("userData"), "logs");
 
+const defaultTargetFramework = "net6.0";
+
 if (!fs.existsSync(dirName))
   fs.mkdir(dirName, (err) => {
     console.log("Telemetry Directory Creation Failed.");
@@ -66,7 +68,7 @@ var reactLogger = winston.createLogger({
 
 export const logReactMetrics = (response: any) => {
   const targetFramework =
-    localStore.get("targetFramework").id || "net6.0";
+    localStore.get("targetFramework").id || defaultTargetFramework;
   // Error with MetaData
   const errorMetric = {
       Metrics: {
@@ -97,16 +99,16 @@ export const logReactMetrics = (response: any) => {
 };
 
 export const logReactEvents = (eventMessage: ReactMetric) => {
-  eventMessage.Timestamp = new Date();;
+  eventMessage.Timestamp = new Date();
   eventMessage.PortingAssistantVersion = app.getVersion();
   eventMessage.SessionId = localStore.get("sessionid");
-  eventMessage.TargetFramework = localStore.get("targetFramework").id || "net6.0";
+  eventMessage.TargetFramework = localStore.get("targetFramework").id || defaultTargetFramework;
   reactLogger.info(JSON.stringify(eventMessage));
 };
 
 export const registerLogListeners = (connection: Connection) => {
   const targetFramework =
-    localStore.get("targetFramework").id || "net6.0";
+    localStore.get("targetFramework").id || defaultTargetFramework;
   // Electron Logs
   const transport = (message: LogMessage) => {
     try {
@@ -140,7 +142,7 @@ export const errorHandler = (response: any, metricsType: string) => {
   const errorValue = response.errorValue;
   const error = response.status.error;
   const targetFramework =
-    localStore.get("targetFramework").id || "net6.0";
+    localStore.get("targetFramework").id || defaultTargetFramework;
   // Error Metric
   putMetricData("portingAssistant-backend-errors", "Error", "Count", 1, [
     {
