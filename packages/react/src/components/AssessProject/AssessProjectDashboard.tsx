@@ -7,11 +7,12 @@ import { Redirect, useHistory, useLocation } from "react-router";
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
 import { Project } from "../../models/project";
-import { MetricsType, ReactMetric } from "../../models/reactmetric";
+import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
 import { RootState } from "../../store/reducers";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { selectProjects } from "../../store/selectors/solutionSelectors";
+import { getErrorMetric } from "../../utils/getErrorMetric";
 import { isFailed, isLoaded, isLoading, Loadable } from "../../utils/Loadable";
 import { ApiTable } from "../AssessShared/ApiTable";
 import { FileTable } from "../AssessShared/FileTable";
@@ -108,23 +109,29 @@ const AssessProjectDashboardInternal: React.FC<Props> = ({ solution, project }) 
               id="port-project-button"
               variant="primary"
               onClick={() => {
-                if (isLoaded(solution)) {
-                  let clickMetric: ReactMetric = {
-                    SolutionPath: solution.data.solutionFilePath,
-                    MetricType: MetricsType.UIClickEvent,
-                    MetricSource: "Port-Project",
-                    ProjectGuid: [project.data.projectGuid]
+                try {
+                  if (isLoaded(solution)) {
+                    let clickMetric: ReactMetric = {
+                      SolutionPath: solution.data.solutionFilePath,
+                      MetricType: MetricType.UIClickEvent,
+                      MetricSource: MetricSource.PortProjectSelect,
+                      ProjectGuid: [project.data.projectGuid]
+                    }
+                    window.electron.writeReactLog(clickMetric);
+                    if (portingLocation == null) {
+                      setShowPortingModal(true);
+                    } else {
+                      history.push({
+                        pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}/${encodeURIComponent(
+                          project.data.projectFilePath
+                        )}`
+                      });
+                    }
                   }
-                  window.electron.writeReactLog(clickMetric);
-                  if (portingLocation == null) {
-                    setShowPortingModal(true);
-                  } else {
-                    history.push({
-                      pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}/${encodeURIComponent(
-                        project.data.projectFilePath
-                      )}`
-                    });
-                  }
+                } catch (err) {
+                  const errorMetric = getErrorMetric(err, MetricSource.PortProjectSelect);
+                  window.electron.writeReactLog(errorMetric);
+                  throw err;
                 }
               }}
             >
@@ -142,20 +149,26 @@ const AssessProjectDashboardInternal: React.FC<Props> = ({ solution, project }) 
         visible={showPortingModal}
         onDismiss={() => setShowPortingModal(false)}
         onSubmit={() => {
-          if (isLoaded(solution)) {
-            let clickMetric: ReactMetric = {
-              SolutionPath: solution.data.solutionFilePath,
-              ProjectGuid: [project.data.projectGuid],
-              MetricSource: "Port-Solution",
-              MetricType: MetricsType.UIClickEvent
+          try {
+            if (isLoaded(solution)) {
+              let clickMetric: ReactMetric = {
+                SolutionPath: solution.data.solutionFilePath,
+                ProjectGuid: [project.data.projectGuid],
+                MetricSource: MetricSource.PortSolutionSelect,
+                MetricType: MetricType.UIClickEvent
+              }
+              window.electron.writeReactLog(clickMetric);
+              history.push({
+                pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}/${encodeURIComponent(
+                  project.data.projectFilePath
+                )}`
+              });
             }
-            window.electron.writeReactLog(clickMetric);
-            history.push({
-              pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}/${encodeURIComponent(
-                project.data.projectFilePath
-              )}`
-            });
-          } 
+          } catch (err) {
+            const errorMetric = getErrorMetric(err, MetricSource.PortSolutionSelect);
+            window.electron.writeReactLog(errorMetric);
+            throw err;
+          }
         }}
       />
     </SpaceBetween>

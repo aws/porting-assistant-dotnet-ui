@@ -3,7 +3,7 @@ export interface ReactMetric {
   Timestamp?: Date,
   PortingAssistantVersion?: string,
   MetricSource?: string, 
-  MetricType?: MetricsType,     //  UIClickEvent/Error
+  MetricType?: MetricType,     //  UIClickEvent/Error
   Content?: string,
   SessionId?: string,
   SolutionPath?: string,
@@ -11,7 +11,7 @@ export interface ReactMetric {
   RunId?: string
 }
 
-export enum MetricsType  {
+export enum MetricType  {
   UIClickEvent= "UIClickEvent",
   UIError ="UIError"
 }

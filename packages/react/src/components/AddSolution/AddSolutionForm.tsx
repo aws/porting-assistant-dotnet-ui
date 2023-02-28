@@ -6,11 +6,12 @@ import { useHistory } from "react-router";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
-import { MetricsType, ReactMetric } from "../../models/reactmetric";
+import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { analyzeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { setAssessmentStatus } from "../../utils/assessmentStatus";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
+import { getErrorMetric } from "../../utils/getErrorMetric";
 import { getHash } from "../../utils/getHash";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { InfoLink } from "../InfoLink";
@@ -27,27 +28,33 @@ const ImportSolutionInternal: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit(async data => {
-          await addSolution(data);
-          const targetFramework = getTargetFramework();
-          const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
-          if (haveInternet) {
-            dispatch(
-              analyzeSolution.request({
-                solutionPath: data.solutionFilename,
-                runId: uuid(),
-                triggerType: "InitialRequest",
-                settings: {
-                  ignoredProjects: [],
-                  targetFramework: targetFramework,
-                  continiousEnabled: false,
-                  actionsOnly: false,
-                  compatibleOnly: false
-                },
-                preTriggerData:[],
-                force: true
-              })
-            );
-            history.push("/solutions");
+          try {
+            await addSolution(data);
+            const targetFramework = getTargetFramework();
+            const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
+            if (haveInternet) {
+              dispatch(
+                analyzeSolution.request({
+                  solutionPath: data.solutionFilename,
+                  runId: uuid(),
+                  triggerType: "InitialRequest",
+                  settings: {
+                    ignoredProjects: [],
+                    targetFramework: targetFramework,
+                    continiousEnabled: false,
+                    actionsOnly: false,
+                    compatibleOnly: false
+                  },
+                  preTriggerData:[],
+                  force: true
+                })
+              );
+              history.push("/solutions");
+            }
+          } catch (err) {
+            const errorMetric = getErrorMetric(err, MetricSource.AddSoution)
+            window.electron.writeReactLog(errorMetric)
+            throw err;
           }
       })}
     >
@@ -153,9 +160,9 @@ const addSolution = async (data: Record<string, any>) => {
   paths[data.solutionFilename] = { solutionPath: data.solutionFilename };
   window.electron.saveState("solutions", paths);
   let clickMetric: ReactMetric = {
+    MetricType: MetricType.UIClickEvent,
+    MetricSource: MetricSource.AddSoution,
     SolutionPath: getHash(data.solutionFilename),
-    MetricType: MetricsType.UIClickEvent,
-    MetricSource: "Add-New-Solution"
   }
   window.electron.writeReactLog(clickMetric);
 };

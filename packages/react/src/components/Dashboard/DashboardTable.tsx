@@ -18,7 +18,7 @@ import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
 import { PreTriggerData } from "../../models/project";
-import { MetricsType, ReactMetric } from "../../models/reactmetric";
+import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { analyzeSolution, exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import { removePortedSolution } from "../../store/actions/porting";
@@ -30,6 +30,7 @@ import { getAssessmentStatus, setAssessmentStatus } from "../../utils/assessment
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { filteringCountText } from "../../utils/FilteringCountText";
 import { getCompatibleApi } from "../../utils/getCompatibleApi";
+import { getErrorMetric } from "../../utils/getErrorMetric";
 import { getHash } from "../../utils/getHash";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { isLoaded, isLoading, isLoadingWithData } from "../../utils/Loadable";
@@ -73,8 +74,8 @@ const DashboardTableInternal: React.FC = () => {
     () => (solutionPath: string) => {
       let clickMetric: ReactMetric = {
         SolutionPath: getHash(solutionPath),
-        MetricSource: "Remove",
-        MetricType: MetricsType.UIClickEvent
+        MetricSource: MetricSource.RemoveSolution,
+        MetricType: MetricType.UIClickEvent
       }
       window.electron.writeReactLog(clickMetric);
       if (getAssessmentStatus(solutionPath)){
@@ -98,8 +99,8 @@ const DashboardTableInternal: React.FC = () => {
         );
         let clickMetric: ReactMetric = {
           SolutionPath: getHash(solutionPath),
-          MetricSource: "Cancel",
-          MetricType: MetricsType.UIClickEvent
+          MetricSource: MetricSource.CancelAssessment,
+          MetricType: MetricType.UIClickEvent
         }
         window.electron.writeReactLog(clickMetric);
     },[dispatch]
@@ -107,70 +108,76 @@ const DashboardTableInternal: React.FC = () => {
 
   const reassessSolution = useMemo(
     () => async (solutionPath: string) => {
-      dispatch(
-        removeCurrentMessageUpdate({
-          groupId: "assessSuccess"
-        })
-      );
-      const runId = uuid();
-      let clickMetric: ReactMetric = {
-        SolutionPath: getHash(solutionPath),
-        RunId: runId,
-        MetricSource: "Reassess",
-        MetricType: MetricsType.UIClickEvent
-      }
-      window.electron.writeReactLog(clickMetric);
-
-      let projectTableData: PreTriggerData[] = [];
-      const solutionDetails = solutionToSolutionDetails[solutionPath];
-      const projectToApiAnalysis = apiAnalysis[solutionPath];
-      if (isLoaded(solutionDetails)) {
-          projectTableData = solutionDetails.data.projects.map<PreTriggerData>(project => {
-            const apis = getCompatibleApi(
-              solutionDetails,
-              projectToApiAnalysis,
-              project.projectFilePath,
-              null,
-              targetFramework
-            );
-            var projectApiAnalysisResult = projectToApiAnalysis[project.projectFilePath];
-            var sourceFileAnalysisResults = (isLoaded(projectApiAnalysisResult))?
-                 projectApiAnalysisResult.data.sourceFileAnalysisResults: null;
-            return {
-              projectName: project.projectName || "-",
-              projectPath: project.projectFilePath || "-",
-              solutionPath: solutionPath || "-",
-              targetFramework: project.targetFrameworks?.join(", ") || "-",
-              incompatibleApis: apis.isApisLoading ? null : apis.values[1] - apis.values[0],
-              totalApis: apis.values[1],
-              buildErrors: getErrorCounts(projectToApiAnalysis, project.projectFilePath, null),
-              ported: false,
-              sourceFileAnalysisResults: sourceFileAnalysisResults
-            };
-          });
-
-      }
-      const haveInternet = await checkInternetAccess(solutionPath, dispatch);
-      if (haveInternet) {
-        let preTriggerDataArray: string[] = [];
-        projectTableData.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
-
+      try {
         dispatch(
-          analyzeSolution.request({
-            solutionPath: solutionPath,
-            runId: runId,
-            triggerType: "UserRequest",
-            settings: {
-              ignoredProjects: [],
-              targetFramework: targetFramework,
-              continiousEnabled: false,
-              actionsOnly: false,
-              compatibleOnly: false
-            },
-            preTriggerData: preTriggerDataArray,
-            force: true
+          removeCurrentMessageUpdate({
+            groupId: "assessSuccess"
           })
         );
+        const runId = uuid();
+        let clickMetric: ReactMetric = {
+          SolutionPath: getHash(solutionPath),
+          RunId: runId,
+          MetricSource: MetricSource.ReassessSolution,
+          MetricType: MetricType.UIClickEvent
+        }
+        window.electron.writeReactLog(clickMetric);
+  
+        let projectTableData: PreTriggerData[] = [];
+        const solutionDetails = solutionToSolutionDetails[solutionPath];
+        const projectToApiAnalysis = apiAnalysis[solutionPath];
+        if (isLoaded(solutionDetails)) {
+            projectTableData = solutionDetails.data.projects.map<PreTriggerData>(project => {
+              const apis = getCompatibleApi(
+                solutionDetails,
+                projectToApiAnalysis,
+                project.projectFilePath,
+                null,
+                targetFramework
+              );
+              var projectApiAnalysisResult = projectToApiAnalysis[project.projectFilePath];
+              var sourceFileAnalysisResults = (isLoaded(projectApiAnalysisResult))?
+                   projectApiAnalysisResult.data.sourceFileAnalysisResults: null;
+              return {
+                projectName: project.projectName || "-",
+                projectPath: project.projectFilePath || "-",
+                solutionPath: solutionPath || "-",
+                targetFramework: project.targetFrameworks?.join(", ") || "-",
+                incompatibleApis: apis.isApisLoading ? null : apis.values[1] - apis.values[0],
+                totalApis: apis.values[1],
+                buildErrors: getErrorCounts(projectToApiAnalysis, project.projectFilePath, null),
+                ported: false,
+                sourceFileAnalysisResults: sourceFileAnalysisResults
+              };
+            });
+  
+        }
+        const haveInternet = await checkInternetAccess(solutionPath, dispatch);
+        if (haveInternet) {
+          let preTriggerDataArray: string[] = [];
+          projectTableData.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
+  
+          dispatch(
+            analyzeSolution.request({
+              solutionPath: solutionPath,
+              runId: runId,
+              triggerType: "UserRequest",
+              settings: {
+                ignoredProjects: [],
+                targetFramework: targetFramework,
+                continiousEnabled: false,
+                actionsOnly: false,
+                compatibleOnly: false
+              },
+              preTriggerData: preTriggerDataArray,
+              force: true
+            })
+          );
+        }
+      } catch (err) {
+        const errorMetric = getErrorMetric(err, MetricSource.ReassessSolution)
+        window.electron.writeReactLog(errorMetric)
+        throw err
       }
     },
     [dispatch, targetFramework]
@@ -283,16 +290,22 @@ const DashboardTableInternal: React.FC = () => {
               variant="primary"
               key="cancel-assessment"
               onClick={() => {
-                cancelAssessment(selectedItems[0].name);
-                dispatch(
-                  pushCurrentMessageUpdate({
-                    type: "info",
-                    messageId: uuid(),
-                    groupId: "cancel-assessment",
-                    content: `Cancelling assessment for ${selectedItems[0].name}.`,
-                    dismissible: true
-                  })
-                );
+                try {
+                  cancelAssessment(selectedItems[0].name);
+                  dispatch(
+                    pushCurrentMessageUpdate({
+                      type: "info",
+                      messageId: uuid(),
+                      groupId: "cancel-assessment",
+                      content: `Cancelling assessment for ${selectedItems[0].name}.`,
+                      dismissible: true
+                    })
+                  );
+                } catch (err) {
+                  const errorMetric = getErrorMetric(err, MetricSource.CancelAssessment)
+                  window.electron.writeReactLog(errorMetric)
+                  throw err
+                }
               }}
             >
               Cancel Assessment
@@ -315,16 +328,22 @@ const DashboardTableInternal: React.FC = () => {
                     variant="primary"
                     formAction="none"
                     onClick={() => {
-                      deleteSolution(selectedItems[0].path);
-                      dispatch(
-                        pushCurrentMessageUpdate({
-                          type: "success",
-                          messageId: uuid(),
-                          content: `Successfully removed ${selectedItems[0].name}.`,
-                          dismissible: true
-                        })
-                      );
-                      setShowDeleteModal(false);
+                      try {
+                        deleteSolution(selectedItems[0].path);
+                        dispatch(
+                          pushCurrentMessageUpdate({
+                            type: "success",
+                            messageId: uuid(),
+                            content: `Successfully removed ${selectedItems[0].name}.`,
+                            dismissible: true
+                          })
+                        );
+                        setShowDeleteModal(false);
+                      } catch (err) {
+                        const errorMetric = getErrorMetric(err, MetricSource.RemoveSolution)
+                        window.electron.writeReactLog(errorMetric)
+                        throw err
+                      }
                     }}
                   >
                     Remove

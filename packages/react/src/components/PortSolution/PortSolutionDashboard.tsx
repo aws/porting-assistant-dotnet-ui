@@ -6,10 +6,12 @@ import { Redirect, useHistory, useLocation } from "react-router";
 
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { PreTriggerData, Project } from "../../models/project";
+import { MetricSource } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { selectApiAnalysis } from "../../store/selectors/solutionSelectors";
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
+import { getErrorMetric } from "../../utils/getErrorMetric";
 import { isLoaded } from "../../utils/Loadable";
 import { InfoLink } from "../InfoLink";
 import { handlePortProjectSubmission } from "../PortShared/handlePortProjectSubmission";
@@ -76,7 +78,8 @@ const PortSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) 
           setError("targetFramework", { type: "required", message: "Target Framework is required." });
           return;
         }
-        handlePortProjectSubmission(data, solution, projects, targetFramework.id, portingLocation, preTriggerData, dispatch);
+        const isSolutionPort = true;
+        handlePortProjectSubmission(data, solution, projects, targetFramework.id, portingLocation, preTriggerData, dispatch, isSolutionPort);
         history.push("/solutions");
       })}
     >

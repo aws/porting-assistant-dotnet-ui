@@ -9,7 +9,7 @@ import { paths } from "../../constants/paths";
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
 import { Project } from "../../models/project";
-import { MetricsType, ReactMetric } from "../../models/reactmetric";
+import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution, exportSolution, openSolutionInIDE } from "../../store/actions/backend";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
@@ -17,6 +17,7 @@ import { selectAssesmentStatus, selectCurrentSolutionPath } from "../../store/se
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
 import { setAssessmentStatus } from "../../utils/assessmentStatus";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
+import { getErrorMetric } from "../../utils/getErrorMetric";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { getTotalProjects } from "../../utils/getTotalProjects";
 import { hasNewData, isLoaded, isLoading, isLoadingWithData, Loadable } from "../../utils/Loadable";
@@ -160,35 +161,40 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               id="reassess-solution"
               disabled={!isLoaded(solution) && !(isLoading(solution) || isLoadingWithData(solution))}
               onClick={async () => {
-                if (isLoaded(solution)) {
-                  let clickMetric: ReactMetric = {
-                    SolutionPath: solution.data.solutionFilePath,
-                    MetricSource: "Reassess",
-                    MetricType: MetricsType.UIClickEvent
+                try {
+                  if (isLoaded(solution)) {
+                    let clickMetric: ReactMetric = {
+                      SolutionPath: solution.data.solutionFilePath,
+                      MetricSource: MetricSource.ReassessSolution,
+                      MetricType: MetricType.UIClickEvent
+                    }
+                    window.electron.writeReactLog(clickMetric);
+                    const haveInternet = await checkInternetAccess(solution.data.solutionFilePath, dispatch);
+                    if (haveInternet) {
+                      dispatch(
+                        analyzeSolution.request({
+                          solutionPath: solution.data.solutionFilePath,
+                          runId: uuid(),
+                          triggerType: "UserRequest",
+                          settings: {
+                            ignoredProjects: [],
+                            targetFramework: targetFramework,
+                            continiousEnabled: false,
+                            actionsOnly: false,
+                            compatibleOnly: false
+                          },
+                          preTriggerData: preTriggerDataArray,
+                          force: true
+                        })
+                      );
+                      history.push(paths.dashboard);
+                    }
                   }
-                  window.electron.writeReactLog(clickMetric);
-                  const haveInternet = await checkInternetAccess(solution.data.solutionFilePath, dispatch);
-                  if (haveInternet) {
-                    dispatch(
-                      analyzeSolution.request({
-                        solutionPath: solution.data.solutionFilePath,
-                        runId: uuid(),
-                        triggerType: "UserRequest",
-                        settings: {
-                          ignoredProjects: [],
-                          targetFramework: targetFramework,
-                          continiousEnabled: false,
-                          actionsOnly: false,
-                          compatibleOnly: false
-                        },
-                        preTriggerData: preTriggerDataArray,
-                        force: true
-                      })
-                    );
-                    history.push(paths.dashboard);
-                  }
+                } catch (err) {
+                  const errorMetric = getErrorMetric(err, MetricSource.ReassessSolution);
+                  window.electron.writeReactLog(errorMetric);
+                  throw err;
                 }
-
               }}
             >
               Reassess solution
@@ -211,25 +217,31 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               variant="primary"
               disabled={!isLoaded(projects) || !isLoaded(solution)}
               onClick={() => {
-                if (isLoaded(solution)){
-                  let clickMetric: ReactMetric = {
-                    SolutionPath: solution.data.solutionFilePath,
-                    MetricSource: "Port-Solution",
-                    MetricType: MetricsType.UIClickEvent
-                  };
-                  window.electron.writeReactLog(clickMetric);
-                  if (portingLocation == null) {
-                    setShowPortingModal(true);
-                  } else {
-                    if (isLoaded(projects)) {
-                      history.push({
-                        pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
-                        state: {
-                          projects: projects.data
-                        }
-                      });
+                try {
+                  if (isLoaded(solution)){
+                    let clickMetric: ReactMetric = {
+                      SolutionPath: solution.data.solutionFilePath,
+                      MetricSource: MetricSource.PortSolutionSelect,
+                      MetricType: MetricType.UIClickEvent
+                    };
+                    window.electron.writeReactLog(clickMetric);
+                    if (portingLocation == null) {
+                      setShowPortingModal(true);
+                    } else {
+                      if (isLoaded(projects)) {
+                        history.push({
+                          pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
+                          state: {
+                            projects: projects.data
+                          }
+                        });
+                      }
                     }
                   }
+                } catch (err) {
+                  const errorMetric = getErrorMetric(err, MetricSource.PortSolutionSelect);
+                  window.electron.writeReactLog(errorMetric);
+                  throw err;
                 }
               }}
             >
@@ -240,21 +252,26 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               visible={showPortingModal && isLoaded(solution)}
               onDismiss={() => setShowPortingModal(false)}
               onSubmit={() => {
-                if (isLoaded(solution)) {
-                  let clickMetric: ReactMetric = {
-                    SolutionPath: solution.data.solutionFilePath,
-                    MetricSource: "Port-Solution",
-                    MetricType: MetricsType.UIClickEvent
-                  }
-                  window.electron.writeReactLog(clickMetric);
-                  history.push({
-                    pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
-                    state: {
-                      projects: hasNewData(projects) ? projects.data : []
+                try {
+                  if (isLoaded(solution)) {
+                    let clickMetric: ReactMetric = {
+                      SolutionPath: solution.data.solutionFilePath,
+                      MetricSource: MetricSource.PortSolutionSelect,
+                      MetricType: MetricType.UIClickEvent
                     }
-                  });
+                    window.electron.writeReactLog(clickMetric);
+                    history.push({
+                      pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
+                      state: {
+                        projects: hasNewData(projects) ? projects.data : []
+                      }
+                    });
+                  }
+                } catch (err) {
+                  const errorMetric = getErrorMetric(err, MetricSource.PortSolutionSelect);
+                  window.electron.writeReactLog(errorMetric);
+                  throw err;
                 }
-
               }}
             />
           </SpaceBetween>
