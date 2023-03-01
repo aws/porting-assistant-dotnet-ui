@@ -142,7 +142,9 @@ const ImportSolutionInternal: React.FC = () => {
                   doesNotExist: async (value: string) => {
                     const existingSolutionPaths = await window.electron.getCache().solutionToSolutionDetails;
                     return (
-                      !Object.keys(existingSolutionPaths).some(path => path === value) || "Solution file already exists"
+                      existingSolutionPaths ?
+                      !Object.keys(existingSolutionPaths).some(path => path === value) || "Solution file already exists":
+                      true
                     );
                   }
                 }
