@@ -24,28 +24,28 @@ const ImportSolutionInternal: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit(async data => {
-          await addSolution(data);
-          const targetFramework = getTargetFramework();
-          const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
-          if (haveInternet) {
-            dispatch(
-              analyzeSolution.request({
-                solutionPath: data.solutionFilename,
-                runId: uuid(),
-                triggerType: "InitialRequest",
-                settings: {
-                  ignoredProjects: [],
-                  targetFramework: targetFramework,
-                  continiousEnabled: false,
-                  actionsOnly: false,
-                  compatibleOnly: false
-                },
-                preTriggerData:[],
-                force: true
-              })
-            );
-            history.push("/solutions");
-          }
+        await addSolution(data);
+        const targetFramework = getTargetFramework();
+        const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
+        if (haveInternet) {
+          dispatch(
+            analyzeSolution.request({
+              solutionPath: data.solutionFilename,
+              runId: uuid(),
+              triggerType: "InitialRequest",
+              settings: {
+                ignoredProjects: [],
+                targetFramework: targetFramework,
+                continiousEnabled: false,
+                actionsOnly: false,
+                compatibleOnly: false
+              },
+              preTriggerData: [],
+              force: true
+            })
+          );
+          history.push("/solutions");
+        }
       })}
     >
       <Form
@@ -130,7 +130,7 @@ const ImportSolutionInternal: React.FC = () => {
                 validate: {
                   endsWithSln: (value: string) => value.endsWith(".sln") || "File needs to end with *.sln",
                   doesNotExist: async (value: string) => {
-                    const existingSolutionPaths = await window.electron.getState("solutions", {});
+                    const existingSolutionPaths = await window.electron.getCache().solutionToSolutionDetails;
                     return (
                       !Object.keys(existingSolutionPaths).some(path => path === value) || "Solution file already exists"
                     );
