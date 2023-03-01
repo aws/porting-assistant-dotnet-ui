@@ -77,7 +77,7 @@ namespace PortingAssistant.Api
 
 
             string metricsFolder = Path.Combine(args[2], "logs");
-            string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
+            string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-.metrics"); // Removing date since Serilog appends the date at the end of the file name (PA Client Version >= 2.8)
 
 
             var telemetryLogConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
