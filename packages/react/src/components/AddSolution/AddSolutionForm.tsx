@@ -140,7 +140,7 @@ const ImportSolutionInternal: React.FC = () => {
                 validate: {
                   endsWithSln: (value: string) => value.endsWith(".sln") || "File needs to end with *.sln",
                   doesNotExist: async (value: string) => {
-                    const existingSolutionPaths = await window.electron.getState("solutions", {});
+                    const existingSolutionPaths = await window.electron.getCache().solutionToSolutionDetails;
                     return (
                       !Object.keys(existingSolutionPaths).some(path => path === value) || "Solution file already exists"
                     );
