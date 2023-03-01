@@ -169,7 +169,7 @@ const ProjectsTableInternal: React.FC<Props> = ({ solution }) => {
                           ProjectGuid: projects.data.filter(p =>
                             selectedItems.some(s => p.projectFilePath === s.projectPath)
                           ).map(p => p.projectGuid),
-                          MetricSource: MetricSource.PortSolutionSelect,
+                          MetricSource: MetricSource.PortProjectSelect,
                           MetricType: MetricType.UIClickEvent
                         }
                         window.electron.writeReactLog(clickMetric);

@@ -6,12 +6,13 @@ import { Redirect, useHistory, useLocation } from "react-router";
 
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { PreTriggerData, Project } from "../../models/project";
-import { MetricSource } from "../../models/reactmetric";
+import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { selectApiAnalysis } from "../../store/selectors/solutionSelectors";
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
 import { getErrorMetric } from "../../utils/getErrorMetric";
+import { getHash } from "../../utils/getHash";
 import { isLoaded } from "../../utils/Loadable";
 import { InfoLink } from "../InfoLink";
 import { handlePortProjectSubmission } from "../PortShared/handlePortProjectSubmission";
@@ -74,6 +75,13 @@ const PortSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) 
   return (
     <form
       onSubmit={handleSubmit(async data => {
+        let clickMetric: ReactMetric = {
+          SolutionPath: getHash(solution.solutionFilePath),
+          ProjectGuid: projects.map(p => p.projectGuid),
+          MetricSource: MetricSource.PortSolution,
+          MetricType: MetricType.UIClickEvent
+        }
+        window.electron.writeReactLog(clickMetric);
         if (targetFramework.id == null) {
           setError("targetFramework", { type: "required", message: "Target Framework is required." });
           return;

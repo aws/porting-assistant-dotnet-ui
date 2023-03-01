@@ -6,9 +6,10 @@ import { useHistory } from "react-router";
 
 import { PortingLocation } from "../../models/porting";
 import { Project } from "../../models/project";
-import { MetricSource } from "../../models/reactmetric";
+import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
 import { getErrorMetric } from "../../utils/getErrorMetric";
+import { getHash } from "../../utils/getHash";
 import { InfoLink } from "../InfoLink";
 import { handlePortProjectSubmission } from "../PortShared/handlePortProjectSubmission";
 import { NugetPackageUpgrades } from "../PortShared/NugetPackageUpgrades";
@@ -35,6 +36,13 @@ const PortProjectDashboardInternal: React.FC<Props> = ({ solution, project, port
   return (
     <form
       onSubmit={handleSubmit(async data => {
+        let clickMetric: ReactMetric = {
+          SolutionPath: getHash(solution.solutionFilePath),
+          ProjectGuid: [project.projectGuid],
+          MetricSource: MetricSource.PortProject,
+          MetricType: MetricType.UIClickEvent
+        }
+        window.electron.writeReactLog(clickMetric);
         if (targetFramework.id == null) {
           setError("targetFramework", { type: "required", message: "Target Framework is required." });
           return;

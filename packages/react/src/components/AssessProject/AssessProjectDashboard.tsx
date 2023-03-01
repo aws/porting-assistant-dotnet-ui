@@ -154,7 +154,7 @@ const AssessProjectDashboardInternal: React.FC<Props> = ({ solution, project }) 
               let clickMetric: ReactMetric = {
                 SolutionPath: solution.data.solutionFilePath,
                 ProjectGuid: [project.data.projectGuid],
-                MetricSource: MetricSource.PortSolutionSelect,
+                MetricSource: MetricSource.PortProjectSelect,
                 MetricType: MetricType.UIClickEvent
               }
               window.electron.writeReactLog(clickMetric);
