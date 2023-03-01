@@ -1,34 +1,25 @@
-﻿using ElectronCgi.DotNet;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using ElectronCgi.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using PortingAssistant.Client.Model;
 using PortingAssistant.Client.NuGet.Interfaces;
 using PortingAssistant.Common.Model;
 using PortingAssistant.Common.Services;
 using PortingAssistant.Common.Utils;
-using PortingAssistant.Telemetry.Utils;
 using PortingAssistant.VisualStudio;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
-using System.Linq;
-using PortingAssistant.Client.Common.Model;
-using System.IO;
-using System.Net.Http;
-using YamlDotNet.Core.Tokens;
-using Amazon.S3;
-using System.Drawing;
-using Amazon;
+using Serilog.Context;
 
 namespace PortingAssistant.Api
 {
     public class Application
     {
-        private IServiceProvider _services { get; set; }
-        private Connection _connection;
-        private ILogger _logger;
+        private readonly ServiceProvider _services;
+        private readonly Connection _connection;
+        private readonly ILogger _logger;
 
         public Application(IServiceCollection serviceCollection)
         {
@@ -39,9 +30,13 @@ namespace PortingAssistant.Api
 
         private Connection BuildConnection()
         {
+            _logger.LogInformation(nameof(BuildConnection));
+
             var serialiser = new PortingAssistantJsonSerializer();
             var channelMessageFactory = new ChannelMessageFactory(serialiser);
+
             Console.OutputEncoding = System.Text.Encoding.UTF8;
+
             return new Connection(
                     new Channel(new TabSeparatedInputStreamParser(), serialiser),
                     new MessageDispatcher(),
@@ -60,26 +55,37 @@ namespace PortingAssistant.Api
         {
             _connection.On<AnalyzeSolutionRequest, Response<SolutionDetails, string>>("analyzeSolution", request =>
             {
-                var assessmentService = _services.GetRequiredService<IAssessmentService>();
+                var logContext = CreateLogContextJson(request);
+                using var _ =  LogContext.PushProperty("context", logContext);
 
-                assessmentService.AddApiAnalysisListener((response) =>
+                try
                 {
-                    _connection.Send("onApiAnalysisUpdate", response);
-                });
+                    _logger.LogInformation($"Begin On{nameof(AnalyzeSolutionRequest)}");
 
-                assessmentService.AddNugetPackageListener((response) =>
+                    var assessmentService = _services.GetRequiredService<IAssessmentService>();
+
+                    assessmentService.AddApiAnalysisListener((response) => { _connection.Send("onApiAnalysisUpdate", response); });
+
+                    assessmentService.AddNugetPackageListener((response) => { _connection.Send("onNugetPackageUpdate", response); });
+                    request.settings.UseGenerator = true;
+                    return assessmentService.AnalyzeSolution(request).Result;
+                }
+                finally
                 {
-                    _connection.Send("onNugetPackageUpdate", response);
-                });
-                request.settings.UseGenerator = true;
-                return assessmentService.AnalyzeSolution(request).Result;
+                    _logger.LogInformation($"End On{nameof(AnalyzeSolutionRequest)}");
+                }
             });
 
 
             _connection.On<CopyDirectoryRequest, Response<bool, string>>("copyDirectory", request =>
             {
+                var logContext = CreateLogContextJson(request);
+                using var _ = LogContext.PushProperty("context", logContext);
+
                 try
                 {
+                    _logger.LogInformation($"Begin On{nameof(CopyDirectoryRequest)}");
+
                     PortingAssistantUtils.CopyDirectory(request.solutionPath, request.destinationPath);
                     return new Response<bool, string>
                     {
@@ -88,28 +94,48 @@ namespace PortingAssistant.Api
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to copy the solution to new location");
+                    _logger.LogError(ex, "Failed to copy the solution to new location" + logContext);
                     return new Response<bool, string>
                     {
                         Status = Response<bool, string>.Failed(ex),
                         ErrorValue = ex.Message
                     };
                 }
+                finally
+                {
+                    _logger.LogInformation($"End On{nameof(CopyDirectoryRequest)}");
+                }
 
             });
 
             _connection.On<ProjectFilePortingRequest, Response<List<PortingResult>, List<PortingResult>>>("applyPortingProjectFileChanges", request =>
             {
-                var portingService = _services.GetRequiredService<IPortingService>();
+                var logContext = CreateLogContextJson(request);
+                using var _ = LogContext.PushProperty("context", logContext);
 
-                return portingService.ApplyPortingChanges(request);
+                try
+                {
+                    _logger.LogInformation($"Begin On{nameof(ProjectFilePortingRequest)}");
+
+                    var portingService = _services.GetRequiredService<IPortingService>();
+
+                    return portingService.ApplyPortingChanges(request);
+                }
+                finally
+                {
+                    _logger.LogInformation($"End On{nameof(ProjectFilePortingRequest)}");
+                }
             });
 
             _connection.On<string, Response<bool, string>>("openSolutionInIDE", request =>
             {
+                var logContext = CreateLogContextJson(request);
+                using var _ = LogContext.PushProperty("context", logContext);
+                
                 try
                 {
-                    var portingService = _services.GetRequiredService<IPortingService>();
+                    _logger.LogInformation("Begin OnOpenSolutionInIDE");
+
                     var vsfinder = _services.GetRequiredService<IVisualStudioFinder>();
                     var vsPath = vsfinder.GetLatestVisualStudioPath();
                     var vsexe = PortingAssistantUtils.FindFiles(vsPath, "devenv.exe");
@@ -137,11 +163,21 @@ namespace PortingAssistant.Api
                         ErrorValue = ex.Message
                     };
                 }
+                finally
+                {
+                    _logger.LogInformation("End OnOpenSolutionInIDE");
+                }
             });
 
-            _connection.On<string, bool>("checkInternetAccess",
-                request =>
+            _connection.On<string, bool>("checkInternetAccess", _ =>
+            {
+                var logContext = CreateLogContextJson("<empty payload>");
+                using var __ = LogContext.PushProperty("context", logContext);
+
+                try
                 {
+                    _logger.LogInformation("Begin OnCheckInternetAccess");
+
                     var httpService = _services.GetRequiredService<IHttpService>();
                     string[] files =
                     {
@@ -150,18 +186,40 @@ namespace PortingAssistant.Api
                         "giger.json.gz",
                     };
                     return HttpServiceUtils.CheckInternetAccess(httpService, files);
-                });
-
-            _connection.On<string>("cancelAssessment",
-              reuqest =>
-              {
-                  PortingAssistantUtils.cancel = true;
-              });
-
-            _connection.On<string, Response<List<SupportedVersion>, string>>("getSupportedVersion",
-                request =>
+                }
+                finally
                 {
-                    // Note that Console.WriteLine() would somehow messe up with the communication channel.
+                    _logger.LogInformation("End OnCheckInternetAccess");
+                }
+            });
+
+            _connection.On<string>("cancelAssessment", _ =>
+            {
+                var logContext = CreateLogContextJson("<empty payload>");
+                using var __ = LogContext.PushProperty("context", logContext);
+
+                try
+                {
+                    _logger.LogInformation("Begin OnCancelAssessment");
+
+                    PortingAssistantUtils.cancel = true;
+                }
+                finally
+                {
+                    _logger.LogInformation("End OnCancelAssessment");
+                }
+            });
+
+            _connection.On<string, Response<List<SupportedVersion>, string>>("getSupportedVersion", _ =>
+            {
+                var logContext = CreateLogContextJson("<empty payload>");
+                using var __ = LogContext.PushProperty("context", logContext);
+
+                try
+                {
+                    _logger.LogInformation("Begin OnGetSupportedVersion");
+
+                    // Note that Console.WriteLine() would somehow mess up with the communication channel.
                     // The output message will be captured by the channel and fail the parsing,
                     // resulting to crash the return result of this request.
                     var defaultConfiguration = SupportedVersionConfiguration.GetDefaultConfiguration();
@@ -171,7 +229,12 @@ namespace PortingAssistant.Api
                         ErrorValue = string.Empty,
                         Status = Response<List<SupportedVersion>, string>.Success(),
                     };
-                });
+                }
+                finally
+                {
+                    _logger.LogInformation("End OnGetSupportedVersion");
+                }
+            });
         }
 
         public void Start()
@@ -184,6 +247,29 @@ namespace PortingAssistant.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Connection ended");
+            }
+        }
+
+        private string CreateLogContextJson(object request)
+        {
+            try
+            {
+                return
+                    Environment.NewLine +
+                    JsonConvert.SerializeObject(
+                        new
+                        {
+                            RequestPayload = request,
+                            RequestType = request.GetType().Name,
+                            TraceId = Guid.NewGuid(),
+                            TimeStamp = DateTime.UtcNow.ToString("u")
+                        },
+                        Formatting.Indented);
+            }
+            catch (Exception e)
+            {
+                return Environment.NewLine +
+                       $"Exception building log context: {e.Message}";
             }
         }
     }

@@ -18,7 +18,6 @@ namespace PortingAssistant.Common.Services
 {
     public class AssessmentService : IAssessmentService
     {
-        private readonly ILogger _logger;
         private readonly IPortingAssistantClient _client;
         private readonly List<OnApiAnalysisUpdate> _apiAnalysisListeners;
         private readonly List<OnNugetPackageUpdate> _nugetPackageListeners;
@@ -26,7 +25,6 @@ namespace PortingAssistant.Common.Services
         public AssessmentService(ILogger<AssessmentService> logger,
             IPortingAssistantClient client)
         {
-            _logger = logger;
             _client = client;
             _apiAnalysisListeners = new List<OnApiAnalysisUpdate>();
             _nugetPackageListeners = new List<OnNugetPackageUpdate>();
