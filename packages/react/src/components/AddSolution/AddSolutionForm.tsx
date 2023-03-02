@@ -1,7 +1,7 @@
 import { Box, Button, ColumnLayout, Container, Form, Header, SpaceBetween, Spinner } from "@awsui/components-react";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { v4 as uuid } from "uuid";
 
@@ -9,6 +9,7 @@ import { externalUrls } from "../../constants/externalUrls";
 import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { analyzeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
+import { selectSolutionToSolutionDetails } from "../../store/selectors/solutionSelectors";
 import { setAssessmentStatus } from "../../utils/assessmentStatus";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getErrorMetric } from "../../utils/getErrorMetric";
@@ -18,6 +19,7 @@ import { InfoLink } from "../InfoLink";
 import { UploadSolutionField } from "./UploadSolutionField";
 
 const ImportSolutionInternal: React.FC = () => {
+  const solutionToSolutionDetails = useSelector(selectSolutionToSolutionDetails);
   const history = useHistory();
   const { control, handleSubmit, errors, formState } = useForm({
     mode: "onChange"
@@ -140,10 +142,9 @@ const ImportSolutionInternal: React.FC = () => {
                 validate: {
                   endsWithSln: (value: string) => value.endsWith(".sln") || "File needs to end with *.sln",
                   doesNotExist: async (value: string) => {
-                    const existingSolutionPaths = await window.electron.getCache().solutionToSolutionDetails;
                     return (
-                      existingSolutionPaths ?
-                      !Object.keys(existingSolutionPaths).some(path => path === value) || "Solution file already exists":
+                      solutionToSolutionDetails ?
+                      !Object.keys(solutionToSolutionDetails).some(path => path === value) || "Solution file already exists":
                       true
                     );
                   }

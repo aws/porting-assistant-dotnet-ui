@@ -17,7 +17,7 @@ import { useHistory } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
-import { PreTriggerData } from "../../models/project";
+import { PreTriggerData, SolutionToSolutionDetails } from "../../models/project";
 import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { analyzeSolution, exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
@@ -69,6 +69,7 @@ const DashboardTableInternal: React.FC = () => {
   useNugetFlashbarMessages();
   useSolutionFlashbarMessage(tableData);
   const apiAnalysis = useSelector(selectSolutionToApiAnalysis); 
+
   
   const deleteSolution = useMemo(
     () => (solutionPath: string) => {
@@ -213,7 +214,7 @@ const DashboardTableInternal: React.FC = () => {
         }
         description="Porting Assistant for .NET has successfully assessed the following solutions for .NET Core compatibility. Improve the compatibility of your solutions by refactoring the code in your IDE."
         totalItems={Object.values(solutionToSolutionDetails).map(solutionDetail =>
-          isLoaded(solutionDetail) ? solutionDetail.data : undefined
+          isLoaded(solutionDetail) || isLoadingWithData(solutionDetail) ? solutionDetail.data : undefined
         )}
         selectedItems={selectedItems}
         actionButtons={
