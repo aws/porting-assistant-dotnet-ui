@@ -96,8 +96,6 @@ namespace PortingAssistant.Api
 
             _connection.On<CopyDirectoryRequest, Response<bool, string>>("copyDirectory", request =>
             {
-                var logContext = CreateLogContextJson(request);
-                using var _ = LogContext.PushProperty("context", logContext);
 
                 try
                 {
@@ -161,8 +159,6 @@ namespace PortingAssistant.Api
 
             _connection.On<string, Response<bool, string>>("openSolutionInIDE", request =>
             {
-                var logContext = CreateLogContextJson(request);
-                using var _ = LogContext.PushProperty("context", logContext);
                 
                 try
                 {
@@ -203,8 +199,6 @@ namespace PortingAssistant.Api
 
             _connection.On<string, bool>("checkInternetAccess", _ =>
             {
-                var logContext = CreateLogContextJson("<empty payload>");
-                using var __ = LogContext.PushProperty("context", logContext);
 
                 try
                 {
@@ -227,8 +221,6 @@ namespace PortingAssistant.Api
 
             _connection.On<string>("cancelAssessment", _ =>
             {
-                var logContext = CreateLogContextJson("<empty payload>");
-                using var __ = LogContext.PushProperty("context", logContext);
 
                 try
                 {
@@ -244,8 +236,6 @@ namespace PortingAssistant.Api
 
             _connection.On<string, Response<List<SupportedVersion>, string>>("getSupportedVersion", _ =>
             {
-                var logContext = CreateLogContextJson("<empty payload>");
-                using var __ = LogContext.PushProperty("context", logContext);
 
                 try
                 {
