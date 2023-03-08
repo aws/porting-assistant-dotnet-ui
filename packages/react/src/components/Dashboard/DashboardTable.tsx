@@ -110,70 +110,72 @@ const DashboardTableInternal: React.FC = () => {
   const reassessSolution = useMemo(
     () => async (solutionPath: string) => {
       try {
+        setAssessmentStatus(solutionPath, true);
         dispatch(
           removeCurrentMessageUpdate({
             groupId: "assessSuccess"
           })
         );
-        const runId = uuid();
-        let clickMetric: ReactMetric = {
-          SolutionPath: getHash(solutionPath),
-          RunId: runId,
-          MetricSource: MetricSource.ReassessSolution,
-          MetricType: MetricType.UIClickEvent
-        }
-        window.electron.writeReactLog(clickMetric);
-  
-        let projectTableData: PreTriggerData[] = [];
-        const solutionDetails = solutionToSolutionDetails[solutionPath];
-        const projectToApiAnalysis = apiAnalysis[solutionPath];
-        if (isLoaded(solutionDetails)) {
-            projectTableData = solutionDetails.data.projects.map<PreTriggerData>(project => {
-              const apis = getCompatibleApi(
-                solutionDetails,
-                projectToApiAnalysis,
-                project.projectFilePath,
-                null,
-                targetFramework
-              );
-              var projectApiAnalysisResult = projectToApiAnalysis[project.projectFilePath];
-              var sourceFileAnalysisResults = (isLoaded(projectApiAnalysisResult))?
-                   projectApiAnalysisResult.data.sourceFileAnalysisResults: null;
-              return {
-                projectName: project.projectName || "-",
-                projectPath: project.projectFilePath || "-",
-                solutionPath: solutionPath || "-",
-                targetFramework: project.targetFrameworks?.join(", ") || "-",
-                incompatibleApis: apis.isApisLoading ? null : apis.values[1] - apis.values[0],
-                totalApis: apis.values[1],
-                buildErrors: getErrorCounts(projectToApiAnalysis, project.projectFilePath, null),
-                ported: false,
-                sourceFileAnalysisResults: sourceFileAnalysisResults
-              };
-            });
-  
-        }
-        const haveInternet = await checkInternetAccess(solutionPath, dispatch);
-        if (haveInternet) {
-          let preTriggerDataArray: string[] = [];
-          projectTableData.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
-  
-          dispatch(
-            analyzeSolution.request({
-              solutionPath: solutionPath,
-              runId: runId,
-              triggerType: "UserRequest",
-              settings: {
-                ignoredProjects: [],
-                targetFramework: targetFramework,
-                continiousEnabled: false,
-                actionsOnly: false,
-                compatibleOnly: false
-              },
-              preTriggerData: preTriggerDataArray,
-              force: true
-            })
-          );
+          const runId = uuid();
+          let clickMetric: ReactMetric = {
+            SolutionPath: getHash(solutionPath),
+            RunId: runId,
+            MetricSource: MetricSource.ReassessSolution,
+            MetricType: MetricType.UIClickEvent
+          }
+          window.electron.writeReactLog(clickMetric);
+    
+          let projectTableData: PreTriggerData[] = [];
+          const solutionDetails = solutionToSolutionDetails[solutionPath];
+          const projectToApiAnalysis = apiAnalysis[solutionPath];
+          if (isLoaded(solutionDetails)) {
+              projectTableData = solutionDetails.data.projects.map<PreTriggerData>(project => {
+                const apis = getCompatibleApi(
+                  solutionDetails,
+                  projectToApiAnalysis,
+                  project.projectFilePath,
+                  null,
+                  targetFramework
+                );
+                var projectApiAnalysisResult = projectToApiAnalysis[project.projectFilePath];
+                var sourceFileAnalysisResults = (isLoaded(projectApiAnalysisResult))?
+                     projectApiAnalysisResult.data.sourceFileAnalysisResults: null;
+                return {
+                  projectName: project.projectName || "-",
+                  projectPath: project.projectFilePath || "-",
+                  solutionPath: solutionPath || "-",
+                  targetFramework: project.targetFrameworks?.join(", ") || "-",
+                  incompatibleApis: apis.isApisLoading ? null : apis.values[1] - apis.values[0],
+                  totalApis: apis.values[1],
+                  buildErrors: getErrorCounts(projectToApiAnalysis, project.projectFilePath, null),
+                  ported: false,
+                  sourceFileAnalysisResults: sourceFileAnalysisResults
+                };
+              });
+    
+          }
+          const haveInternet = await checkInternetAccess(solutionPath, dispatch);
+          if (haveInternet) {
+            setAssessmentStatus(solutionPath, true);
+            let preTriggerDataArray: string[] = [];
+            projectTableData.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
+    
+            dispatch(
+              analyzeSolution.request({
+                solutionPath: solutionPath,
+                runId: runId,
+                triggerType: "UserRequest",
+                settings: {
+                  ignoredProjects: [],
+                  targetFramework: targetFramework,
+                  continiousEnabled: false,
+                  actionsOnly: false,
+                  compatibleOnly: false
+                },
+                preTriggerData: preTriggerDataArray,
+                force: true
+              })
+            );
         }
       } catch (err) {
         const errorMetric = getErrorMetric(err, MetricSource.ReassessSolution)
