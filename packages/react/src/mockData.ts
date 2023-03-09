@@ -14,6 +14,7 @@ import {
   ProjectToApiAnalysis,
   Recommendations,
   RecommendedAction,
+  RemovedSolutions,
   SolutionToApiAnalysis,
   SolutionToSolutionDetails,
   SourceFileAnalysisResult,
@@ -235,6 +236,10 @@ export const projectAnalysisResult: ProjectApiAnalysisResult = {
   projectReferences: [],
   packageReferences: []
 };
+
+export const removedSolutions: RemovedSolutions = {
+  "/test/testproject/test.ts": false
+}
 
 export const projectToApiAnalysis: ProjectToApiAnalysis = {
   "/test/testproject": Loaded(projectAnalysisResult),

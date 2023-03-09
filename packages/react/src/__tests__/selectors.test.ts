@@ -22,6 +22,7 @@ import {
   projectAnalysisResult,
   recommendedaction,
   reloadingproject,
+  removedSolutions,
   solutionDetails,
   solutionToApiAnalysis,
   solutionToPortingLocation,
@@ -90,7 +91,8 @@ const getFakeState = (): Partial<RootState> => {
     solution: {
       solutionToSolutionDetails: solutionToProjects,
       apiAnalysis: solutionToApiAnalysis,
-      profileSet: true
+      profileSet: true,
+      removedSolutions: removedSolutions
     },
     nugetPackage: {
       nugets: { "test-1.1.0": Loaded(packageAnalysisResult) }
@@ -623,7 +625,8 @@ describe("selectDashboardTableData", () => {
         })
       },
       apiAnalysis: { "/test/solution": { "/test/testproject": Loaded(projectAnalysisResult) } },
-      profileSet: true
+      profileSet: true,
+      removedSolutions: {"/test/solution": false}
     },
     nugetPackage: {
       nugets: {
@@ -685,12 +688,13 @@ describe("selectDashboardTableData", () => {
           "/test/solution": Loading<SolutionDetails>()
         },
         apiAnalysis: { "/test/solution": { "/test/testproject": Loaded(projectAnalysisResult) } },
-        profileSet: true
+        profileSet: true,
+        removedSolutions: {"/test/solution": false}
       },
       nugetPackage: {
         nugets: {
           "testpackage-3.0.0": Loaded(packageAnalysisResultWithDate)
-        }
+        },
       },
       file: {
         sourceFileToContents: sourceFiletoContents
@@ -736,7 +740,7 @@ describe("selectDashboardTableData", () => {
         solutionPath: "/test/solution",
         targetFramework: "net48",
         referencedProjects: 2,
-        incompatibleApis: null,
+        incompatibleApis: 0,
         incompatiblePackages: 0,
         totalPackages: 1,
         totalApis: 0,
@@ -799,7 +803,8 @@ describe("selectDashboardTableData", () => {
           })
         },
         apiAnalysis: { "/test/solution": { "/test/testproject": Failed<ProjectApiAnalysisResult>("failed") } },
-        profileSet: true
+        profileSet: true,
+        removedSolutions: {"/test/solution": false}
       },
       nugetPackage: {
         nugets: {
@@ -878,7 +883,8 @@ describe("selectDashboardTableData", () => {
           })
         },
         apiAnalysis: { "/test/solution": { "/test/testproject": Failed<ProjectApiAnalysisResult>("failed") } },
-        profileSet: true
+        profileSet: true,
+        removedSolutions: {"/test/solution": false}
       },
       nugetPackage: {
         nugets: {
