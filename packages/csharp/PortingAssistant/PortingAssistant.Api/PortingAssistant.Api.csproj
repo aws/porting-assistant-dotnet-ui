@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -10,7 +10,7 @@
 		<PackageReference Include="PortingAssistant.Client.Client" Version="2.8.30" />
 		<PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.8.30" />
 		<PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
-		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\PortingAssistant.Common\PortingAssistant.Common.csproj" />
