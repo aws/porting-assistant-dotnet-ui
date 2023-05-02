@@ -1,6 +1,6 @@
 {
   "name": "@porting-assistant/electron",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "productName": "Porting Assistant for .NET",
   "description": "Porting Assistant for .NET",
   "author": {
@@ -53,7 +53,7 @@
     "@aws-sdk/shared-ini-file-loader": "3.51.0",
     "@aws-sdk/signature-v4": "^3.47.1",
     "@aws-sdk/types": "^3.47.1",
-    "@porting-assistant/react": "^1.9.3",
+    "@porting-assistant/react": "^1.9.4",
     "aws-sdk": "^2.570.0",
     "axios": "^0.18.0",
     "electron-cgi": "^1.0.6",
