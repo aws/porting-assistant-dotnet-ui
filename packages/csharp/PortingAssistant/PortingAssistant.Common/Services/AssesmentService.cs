@@ -38,17 +38,7 @@ namespace PortingAssistant.Common.Services
                 string tgtFramework = request.settings.TargetFramework;
                 TelemetryCollectionUtils.CollectStartMetrics( request, startTime, tgtFramework);
 
-                var preProjectTriggerDataDictionary = new Dictionary<string, PreTriggerData>();
-                if (request.preTriggerData != null && request.preTriggerData.Length > 0)
-                {
-                    Array.ForEach(request.preTriggerData, prop => {
-                        var proj = JsonConvert.DeserializeObject<PreTriggerData>(prop);
-                        if (!preProjectTriggerDataDictionary.ContainsKey(proj.projectName))
-                        {
-                            preProjectTriggerDataDictionary.Add(proj.projectName, proj);
-                        }
-                    });
-                }
+                var preProjectTriggerDataDictionary = request.preTriggerData;
 
                   List<ProjectDetails> projectDetails = new List<ProjectDetails>();
                   var failedProjects = new List<string>();

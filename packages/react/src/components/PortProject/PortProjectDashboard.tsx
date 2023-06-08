@@ -48,7 +48,7 @@ const PortProjectDashboardInternal: React.FC<Props> = ({ solution, project, port
           return;
         }
         const isSolutionPort = false;
-        handlePortProjectSubmission(data, solution, [project], targetFramework.id, portingLocation, [], dispatch, isSolutionPort);
+        handlePortProjectSubmission(data, solution, [project], targetFramework.id, portingLocation, {}, dispatch, isSolutionPort);
         history.push("/solutions");
       })}
     >

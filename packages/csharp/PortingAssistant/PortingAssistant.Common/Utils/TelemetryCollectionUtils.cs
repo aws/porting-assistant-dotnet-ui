@@ -136,9 +136,6 @@ namespace PortingAssistant.Common.Utils
         }
         public static ProjectMetrics createProjectMetric(string runId, string triggerType, string tgtFramework, ProjectAnalysisResult projectAnalysisResult, double assessmentTime, double cumulativeAnalysisTime, PreTriggerData preTriggerData = null)
         {
-            var preCompatibilityResult = (preTriggerData == null || preTriggerData?.sourceFileAnalysisResults == null || preTriggerData.sourceFileAnalysisResults.Length == 0)
-                ? null : AnalysisUtils.GenerateCompatibilityResults(preTriggerData?.sourceFileAnalysisResults?.ToList(),
-                    preTriggerData?.projectPath, preTriggerData?.ported ?? false);
             var compatabilityResult = projectAnalysisResult.ProjectCompatibilityResult;
             compatabilityResult.ProjectPath = CryptoUtil.HashString(compatabilityResult.ProjectPath);
             return new ProjectMetrics
@@ -155,7 +152,6 @@ namespace PortingAssistant.Common.Utils
                 NumReferences = projectAnalysisResult.ProjectReferences.Count,
                 IsBuildFailed = projectAnalysisResult.IsBuildFailed,
                 CompatibilityResult = compatabilityResult,
-                PreCompatibilityResult = preCompatibilityResult,
                 PortingAssistantVersion = MetricsBase.Version,
                 PreApiInCompatibilityCount = preTriggerData?.incompatibleApis,
                 PostApiInCompatibilityCount = GetIncompatibleApiCount(projectAnalysisResult),

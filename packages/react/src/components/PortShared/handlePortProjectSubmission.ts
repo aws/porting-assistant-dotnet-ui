@@ -26,7 +26,7 @@ export const handlePortProjectSubmission = async (
     projects: Project[],
     targetFramework: string,
     portingLocation: PortingLocation,
-    preTriggerData: PreTriggerData[],
+    preTriggerData: {[project: string]: PreTriggerData},
     dispatch: ReturnType<typeof useDispatch>,
     isSolutionPort=true
 ) => {
@@ -41,9 +41,6 @@ export const handlePortProjectSubmission = async (
                 dismissible: false
             })
         );
-    
-        let preTriggerDataArray: string[] = [];
-        preTriggerData.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
     
         const portingSolutionPath = getPortingSolutionPath(solution, portingLocation);
         if (portingLocation.type === "copy" && !window.electron.pathExists(portingSolutionPath)) {
@@ -146,7 +143,7 @@ export const handlePortProjectSubmission = async (
                             actionsOnly: false,
                             compatibleOnly: false
                         },
-                        preTriggerData: preTriggerDataArray,
+                        preTriggerData: preTriggerData,
                         force: true
                     })
                 );

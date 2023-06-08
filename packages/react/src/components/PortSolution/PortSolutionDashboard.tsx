@@ -11,6 +11,7 @@ import { SolutionDetails } from "../../models/solution";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { selectApiAnalysis } from "../../store/selectors/solutionSelectors";
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
+import { createPreTriggerDataFromProjectsTable } from "../../utils/createPreTriggerDataFromProjectTable";
 import { getErrorMetric } from "../../utils/getErrorMetric";
 import { getHash } from "../../utils/getHash";
 import { isLoaded } from "../../utils/Loadable";
@@ -38,25 +39,10 @@ const PortSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }) 
   const targetFramework = window.electron.getState("targetFramework");
   const projectsTable= usePortingAssistantSelector(state => selectProjectTableData(state, location.pathname));
   
-  let preTriggerData: PreTriggerData[] = [];
   const apiAnalysis = useSelector(selectApiAnalysis); 
   const projectToApiAnalysis = apiAnalysis[solution.solutionFilePath];
-  preTriggerData = projectsTable.map<PreTriggerData>(project => {
-      var projectApiAnalysisResult = projectToApiAnalysis[project.projectPath];
-      var sourceFileAnalysisResults = (isLoaded(projectApiAnalysisResult))?
-                 projectApiAnalysisResult.data.sourceFileAnalysisResults: null;
-      return {
-        projectName: project.projectName || "-",
-        projectPath: project.projectPath || "-",
-        solutionPath: solution.solutionFilePath || "-",
-        targetFramework: project.targetFramework || "-",
-        incompatibleApis: project.incompatibleApis,
-        totalApis: project.totalApis,
-        buildErrors: project.buildErrors,
-        ported: project.ported,
-        sourceFileAnalysisResults: sourceFileAnalysisResults
-      };
-  });
+  
+  var preTriggerData: { [projectName: string]: PreTriggerData} = createPreTriggerDataFromProjectsTable(projectsTable);
   var hasWebForms = false;
 
   for(var project of projects) {

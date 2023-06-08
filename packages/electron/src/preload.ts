@@ -13,6 +13,7 @@ import {
   reducerCacheStore,
 } from "./preload-localStore";
 import {
+  PreTriggerData,
   Project,
   VersionPair,
 } from "@porting-assistant/react/src/models/project";
@@ -136,7 +137,7 @@ contextBridge.exposeInMainWorld("backend", {
       actionsOnly: boolean;
       compatibleOnly: boolean;
     },
-    preTriggerData: string[]
+    preTriggerData: {[projectName: string]: PreTriggerData}
   ) => invokeBackend("analyzeSolution", solutionFilePath, runId, triggerType, settings, preTriggerData),
   openSolutionInIDE: (solutionFilePath: string) => invokeBackend("openSolutionInIDE", solutionFilePath),
   getFileContents: (sourceFilePath: string) => invokeBackend("getFileContents", sourceFilePath),

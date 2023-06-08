@@ -8,7 +8,7 @@ import { data } from "vis-network";
 import { paths } from "../../constants/paths";
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
-import { Project } from "../../models/project";
+import { PreTriggerData,Project } from "../../models/project";
 import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution, exportSolution, openSolutionInIDE } from "../../store/actions/backend";
@@ -17,6 +17,7 @@ import { selectAssesmentStatus, selectCurrentSolutionPath } from "../../store/se
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
 import { setAssessmentStatus } from "../../utils/assessmentStatus";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
+import { createPreTriggerDataFromProjectsTable } from "../../utils/createPreTriggerDataFromProjectTable";
 import { getErrorMetric } from "../../utils/getErrorMetric";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { getTotalProjects } from "../../utils/getTotalProjects";
@@ -31,7 +32,7 @@ import { CustomerFeedbackModal } from "../CustomerContribution/CustomerFeedbackM
 import { InfoLink } from "../InfoLink";
 import { PortConfigurationModal } from "../PortConfigurationModal/PortConfigurationModal";
 import { getPercent } from "./../../utils/getPercent"
-import { ProjectsTable } from "./ProjectsTable";
+import { ProjectsTable, TableData } from "./ProjectsTable";
 import { SolutionSummary } from "./SolutionSummary";
 interface Props {
   solution: Loadable<SolutionDetails>;
@@ -60,9 +61,9 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
   }, [solutionPath]); 
 
   const projectsTable = usePortingAssistantSelector(state => selectProjectTableData(state, location.pathname));
-  let preTriggerDataArray: string[] = [];
-  projectsTable.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
-  const tabs = useMemo(
+ var preTriggerDataDictionary: { [projectName: string]: PreTriggerData} = createPreTriggerDataFromProjectsTable(projectsTable);
+
+ const tabs = useMemo(
     () => [
       {
         label: "Projects",
@@ -183,7 +184,7 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
                             actionsOnly: false,
                             compatibleOnly: false
                           },
-                          preTriggerData: preTriggerDataArray,
+                          preTriggerData: preTriggerDataDictionary,
                           force: true
                         })
                       );

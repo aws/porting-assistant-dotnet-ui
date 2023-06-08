@@ -5,6 +5,7 @@ import { PortingProjectFileResult } from "./models/porting";
 import {
   NugetPackage,
   PackageAnalysisResult,
+  PreTriggerData,
   Project,
   ProjectApiAnalysisResult,
   SolutionProject,
@@ -64,7 +65,7 @@ export interface Backend {
       actionsOnly: boolean;
       compatibleOnly: boolean;
     },
-    preTriggerData: string[]
+    preTriggerData: {[project: string]: PreTriggerData}
   ) => Promise<Response<SolutionDetails, string>>;
   openSolutionInIDE: (solutionFilePath: string) => Promise<Response<boolean, string>>;
   getFileContents: (sourceFilePath: string) => Promise<string>;

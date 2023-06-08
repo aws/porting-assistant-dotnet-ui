@@ -122,8 +122,6 @@ export interface PreTriggerData {
   totalApis: number | null;
   buildErrors: number | null;
   ported: boolean;
-  sourceFileAnalysisResults: SourceFileAnalysisResult[] | null;
-
 }
 
 export type CompatibleTargets = string;

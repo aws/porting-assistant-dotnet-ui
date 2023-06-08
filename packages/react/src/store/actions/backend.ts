@@ -1,6 +1,6 @@
 import { createAction, createAsyncAction } from "typesafe-actions";
 
-import { ProjectApiAnalysisResult } from "../../models/project";
+import { PreTriggerData, ProjectApiAnalysisResult } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 
 export interface analyzeSolutionRequestPayload {
@@ -14,7 +14,7 @@ export interface analyzeSolutionRequestPayload {
     compatibleOnly: boolean;
     actionsOnly: boolean;
   };
-  preTriggerData:string[];
+  preTriggerData:{[projectName: string]: PreTriggerData};
   force?: boolean;
 }
 export interface analyzeSolutionSuccessPayload {
