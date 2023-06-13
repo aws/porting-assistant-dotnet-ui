@@ -15,8 +15,8 @@
     <Folder Include="Listener\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="PortingAssistant.Client.Client" Version="2.11.1-alpha-g9c284489b2" />
-    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.11.1-alpha-g9c284489b2" />
+    <PackageReference Include="PortingAssistant.Client.Client" Version="2.11.7-alpha-g21f1a5006b" />
+    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.11.7-alpha-g21f1a5006b" />
     <PackageReference Include="Serilog" Version="2.12.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.3" />
   </ItemGroup>
