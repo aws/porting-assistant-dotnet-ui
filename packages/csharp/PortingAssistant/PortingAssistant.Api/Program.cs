@@ -89,7 +89,6 @@ namespace PortingAssistant.Api
                     outputTemplate: outputTemplate);
             TelemetryCollector.Builder(telemetryLogConfiguration.CreateLogger(), metricsFilePath);
 
-
             var crashReportsDir = Path.Combine(metricsFolder, "reports");
             try
             {

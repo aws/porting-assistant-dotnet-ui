@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Runtime;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace PortingAssistant.Common.Services
 {
@@ -21,6 +22,7 @@ namespace PortingAssistant.Common.Services
         private readonly IPortingAssistantClient _client;
         private readonly List<OnApiAnalysisUpdate> _apiAnalysisListeners;
         private readonly List<OnNugetPackageUpdate> _nugetPackageListeners;
+        private ILogger<AssessmentService> _logger;
 
         public AssessmentService(ILogger<AssessmentService> logger,
             IPortingAssistantClient client)
@@ -28,6 +30,7 @@ namespace PortingAssistant.Common.Services
             _client = client;
             _apiAnalysisListeners = new List<OnApiAnalysisUpdate>();
             _nugetPackageListeners = new List<OnNugetPackageUpdate>();
+            _logger = logger;
         }
 
         public async Task<Response<SolutionDetails, string>> AnalyzeSolution(AnalyzeSolutionRequest request)
@@ -43,14 +46,15 @@ namespace PortingAssistant.Common.Services
                   List<ProjectDetails> projectDetails = new List<ProjectDetails>();
                   var failedProjects = new List<string>();
                   List<string> projectGuids = new List<string>();
-                  
-                  var projectAnalysisResultEnumerator = _client.AnalyzeSolutionGeneratorAsync(request.solutionFilePath, request.settings).GetAsyncEnumerator();
+
+                  var cancellationToken = AssessmentManager.solutionToAssessmentState[request.solutionFilePath].cancellationTokenSource.Token;
+                  var projectAnalysisResultEnumerator = _client.AnalyzeSolutionGeneratorAsync(request.solutionFilePath, request.settings).GetAsyncEnumerator(cancellationToken);
                   var projectStartTime = DateTime.Now;
                   var projectCount = 0;
                   var firstProjectTime = 0.0;
                   try
                   {
-                      while (await projectAnalysisResultEnumerator.MoveNextAsync().ConfigureAwait(false) && !PortingAssistantUtils.cancel)
+                      while (await projectAnalysisResultEnumerator.MoveNextAsync().ConfigureAwait(false) && !AssessmentManager.solutionToAssessmentState[request.solutionFilePath].cancellationTokenSource.IsCancellationRequested)
                       {
                           ProjectAnalysisResult result = projectAnalysisResultEnumerator.Current;
                           projectCount += 1;
@@ -91,6 +95,10 @@ namespace PortingAssistant.Common.Services
                           }
                         projectStartTime = DateTime.Now;
                       }
+                  }            
+                  catch (OperationCanceledException ex)
+                  {
+                    _logger.LogError(ex.Message);
                   }
                   finally
                   {

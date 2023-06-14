@@ -284,9 +284,8 @@ export const initConnection = (logger: any = console) => {
       return response;
     });
 
-    ipcMain.handle("cancelAssessment", async (_event) => {
-      const response = await connection.send("cancelAssessment", "");
-      return response;
+    ipcMain.handle("cancelAssessment", async (_event, solutionFilePath) => {
+      await connection.send("cancelAssessment", solutionFilePath);
     });
     
     ipcMain.handle("copyDirectory", async (_event, solutionPath, destinationPath) => {

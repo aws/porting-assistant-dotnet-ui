@@ -48,7 +48,7 @@ export interface Electron {
   writeReactLog: (eventMessage: ReactMetric) => void;
   getAssessmentLog: () => string;
   checkInternetAccess: () => Promise<boolean>;
-  cancelAssessment: () => void
+  cancelAssessment: (sourceFilePath: string) => void
   getLogFolder: () => string;
 }
 
@@ -76,7 +76,7 @@ export interface Backend {
   ) => void;
   checkInternetAccess: () => Promise<boolean>;
   getSupportedVersion: () => Promise<Response<SupportedVersion[], string>>;
-  cancelAssessment: () => void;
+  cancelAssessment: (sourceFilePath: string) => void;
 }
 
 export interface Porting {

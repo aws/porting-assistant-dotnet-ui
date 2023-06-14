@@ -92,7 +92,7 @@ const DashboardTableInternal: React.FC = () => {
   const cancelAssessment = useMemo(
     () => (solutionPath: string) => {
         window.electron.saveState("cancel", true);
-        window.backend.cancelAssessment();
+        window.backend.cancelAssessment(solutionPath);
         dispatch(
           removeCurrentMessageUpdate({
             groupId: "assess"
@@ -289,7 +289,7 @@ const DashboardTableInternal: React.FC = () => {
               key="cancel-assessment"
               onClick={() => {
                 try {
-                  cancelAssessment(selectedItems[0].name);
+                  cancelAssessment(selectedItems[0].path);
                   dispatch(
                     pushCurrentMessageUpdate({
                       type: "info",

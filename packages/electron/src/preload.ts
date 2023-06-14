@@ -144,7 +144,7 @@ contextBridge.exposeInMainWorld("backend", {
   listenNugetPackageUpdate: (callback: (message: string) => void) => listenBackend("onNugetPackageUpdate", callback),
   listenApiAnalysisUpdate: (callback: (message: string) => void) => listenBackend("onApiAnalysisUpdate", callback),
   checkInternetAccess: () => invokeBackend("checkInternetAccess"),
-  cancelAssessment: () => invokeBackend("cancelAssessment"),
+  cancelAssessment: (sourceFilePath: string) => invokeBackend("cancelAssessment", sourceFilePath),
   getSupportedVersion: () => invokeBackend("getSupportedVersion"),
 });
 

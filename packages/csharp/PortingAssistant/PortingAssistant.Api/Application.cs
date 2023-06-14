@@ -69,6 +69,8 @@ namespace PortingAssistant.Api
                     assessmentService.AddNugetPackageListener((response) => { _connection.Send("onNugetPackageUpdate", response); });
                     request.settings.UseGenerator = true;
 
+                    AssessmentManager.addSolution(request.solutionFilePath);
+                    AssessmentManager.setState(request.solutionFilePath, Status.InProgress);
                     var analysisResult = assessmentService.AnalyzeSolution(request).Result;
 
                     if (analysisResult.Status.Status == Response<SolutionDetails, string>.ResponseStatus.StatusCode.Failure)
@@ -219,14 +221,13 @@ namespace PortingAssistant.Api
                 }
             });
 
-            _connection.On<string>("cancelAssessment", _ =>
+            _connection.On<string>("cancelAssessment", solutionPath =>
             {
 
                 try
                 {
                     _logger.LogInformation("Begin OnCancelAssessment");
-
-                    PortingAssistantUtils.cancel = true;
+                    AssessmentManager.solutionToAssessmentState[solutionPath].cancellationTokenSource.Cancel();
                 }
                 finally
                 {
