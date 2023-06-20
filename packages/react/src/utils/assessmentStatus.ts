@@ -1,5 +1,5 @@
 export const getAssessmentStatus = (solutionPath: string) : boolean => {
-  return window.electron.getState("currentAssessmentStatus")[solutionPath] || false;
+  return solutionPath ? window.electron.getState("currentAssessmentStatus")[solutionPath] || false : false;
 }
 
 export const setAssessmentStatus = (solutionPath: string, status: boolean) : void => {

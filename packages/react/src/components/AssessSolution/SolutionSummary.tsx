@@ -12,9 +12,11 @@ import {
   selectCancelStatus,
   selectCurrentSolutionApiAnalysis,
   selectCurrentSolutionDetails,
+  selectCurrentSolutionPath,
   selectNugetPackages
 } from "../../store/selectors/solutionSelectors";
 import { getActionCounts, getErrorCounts } from "../../store/selectors/tableSelectors";
+import { getCancelStatus, setCancelStatus } from "../../utils/cancelStatus";
 import { API_COMPATABILITIES, API_LOADING_AGGREGATE, getCompatibleApi } from "../../utils/getCompatibleApi";
 import { getCompatibleNugetsAgg, LOADING_AGGREGATES, NUGET_COMPATABILITIES } from "../../utils/getCompatibleNugets";
 import { getTargetFramework } from "../../utils/getTargetFramework";
@@ -35,7 +37,8 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
   const solutionProjects = usePortingAssistantSelector(state => selectCurrentSolutionDetails(state, location.pathname));
   const apiAnalysis = usePortingAssistantSelector(state => selectCurrentSolutionApiAnalysis(state, location.pathname));
   const targetFramework = getTargetFramework();
-  const cancel = useSelector(selectCancelStatus);
+  const solutionPath = usePortingAssistantSelector(state => selectCurrentSolutionPath(state, location.pathname))
+  const cancel = getCancelStatus(solutionPath);
 
   const nugetCompatibilities = useMemo(() => {
     if (!hasNewData(projects)) {
@@ -100,7 +103,7 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
       dispatch(removeCurrentMessageUpdate({ groupId: "assess" }));
       setShownLoadingMessage(false);
       if (cancel) {
-        window.electron.saveState("cancel", false);
+        setCancelStatus(solutionPath, false);
         dispatch(removeCurrentMessageUpdate({ groupId: "cancel-assessment" }));
         dispatch(
           pushCurrentMessageUpdate({
@@ -112,7 +115,6 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
           })
         );
       } else {
-        console.log("Cancel status: ", cancel);
         dispatch(
           pushCurrentMessageUpdate({
             messageId: uuid(),
@@ -124,7 +126,7 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
         );
       }
     }
-  }, [apiCompatibilities.isApisLoading, dispatch, nugetCompatibilities.isAllNugetLoaded, shownLoadingMessage, cancel]);
+  }, [apiCompatibilities.isApisLoading, dispatch, nugetCompatibilities.isAllNugetLoaded, shownLoadingMessage, cancel, solutionPath]);
 
   return (
     <Container

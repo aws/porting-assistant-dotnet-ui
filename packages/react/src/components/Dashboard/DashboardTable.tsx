@@ -27,6 +27,7 @@ import { selectAssesmentStatus, selectCancelStatus, selectCurrentSolutionDetails
 import { getErrorCounts, selectDashboardTableData, selectSolutionToApiAnalysis
  } from "../../store/selectors/tableSelectors";
 import { getAssessmentStatus, setAssessmentStatus } from "../../utils/assessmentStatus";
+import { getCancelStatus, setCancelStatus } from "../../utils/cancelStatus";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { filteringCountText } from "../../utils/FilteringCountText";
 import { getCompatibleApi } from "../../utils/getCompatibleApi";
@@ -62,8 +63,7 @@ const DashboardTableInternal: React.FC = () => {
   const history = useHistory();
   const solutionToSolutionDetails = useSelector(selectSolutionToSolutionDetails);
   const isAssesmentRunning = useSelector(selectAssesmentStatus);
-  const cancel = useSelector(selectCancelStatus);
-
+  const cancelStatus = useSelector(selectCancelStatus);
   const tableData = useSelector(selectDashboardTableData);
   const targetFramework = getTargetFramework();
   useNugetFlashbarMessages();
@@ -90,8 +90,9 @@ const DashboardTableInternal: React.FC = () => {
   );
 
   const cancelAssessment = useMemo(
-    () => (solutionPath: string) => {
-        window.electron.saveState("cancel", true);
+    () => async (solutionPath: string) => {
+      try {
+        setCancelStatus(solutionPath, true);
         window.backend.cancelAssessment(solutionPath);
         dispatch(
           removeCurrentMessageUpdate({
@@ -104,6 +105,11 @@ const DashboardTableInternal: React.FC = () => {
           MetricType: MetricType.UIClickEvent
         }
         window.electron.writeReactLog(clickMetric);
+      } catch (err) {
+        const errorMetric = getErrorMetric(err, MetricSource.CancelAssessment)
+        window.electron.writeReactLog(errorMetric)
+        throw err
+      }
     },[dispatch]
   )
 
@@ -284,8 +290,8 @@ const DashboardTableInternal: React.FC = () => {
             </Button>
             <Button
               id="cancel-assessment-button"
-              disabled= {!isAssesmentRunning && !cancel}
               variant="primary"
+              disabled= {selectedItems.length === 0 || !getAssessmentStatus(selectedItems[0]?.path) || getCancelStatus(selectedItems[0]?.path)}
               key="cancel-assessment"
               onClick={() => {
                 try {
@@ -357,7 +363,7 @@ const DashboardTableInternal: React.FC = () => {
         }
       />
     ),
-    [deleteSolution, dispatch, history, reassessSolution, selectedItems, showDeleteModal, solutionToSolutionDetails, cancel, isAssesmentRunning]
+    [deleteSolution, dispatch, history, reassessSolution, selectedItems, showDeleteModal, cancelAssessment, cancelStatus, solutionToSolutionDetails]
   );
 
   const empty = useMemo(

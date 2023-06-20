@@ -18,7 +18,7 @@ export const selectNugetPackages = (state: RootState) => state.nugetPackage.nuge
 export const selectApiAnalysis = (state: RootState) => state.solution.apiAnalysis;
 export const selectSourceFileContents = (state: RootState) => state.file.sourceFileToContents;
 export const selectTargetFramework = () => window.electron.getState("targetFramework")?.id || "net6.0";
-export const selectCancelStatus = (state:RootState) => window.electron.getState("cancel");
+export const selectCancelStatus = (state:RootState) => window.electron.getState("cancelStatus");
 export const selectAssesmentStatus = (state:RootState) => window.electron.getState("isAssesmentRunning");
 
 export const selectCurrentSolutionPath = createCachedSelector(
