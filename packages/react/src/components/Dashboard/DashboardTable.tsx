@@ -295,13 +295,13 @@ const DashboardTableInternal: React.FC = () => {
               key="cancel-assessment"
               onClick={() => {
                 try {
-                  cancelAssessment(selectedItems[0].path);
+                  cancelAssessment(selectedItems[0]?.path);
                   dispatch(
                     pushCurrentMessageUpdate({
                       type: "info",
                       messageId: uuid(),
                       groupId: "cancel-assessment",
-                      content: `Cancelling assessment for ${selectedItems[0].name}.`,
+                      content: `Cancelling assessment for ${selectedItems[0]?.name}.`,
                       dismissible: true
                     })
                   );
