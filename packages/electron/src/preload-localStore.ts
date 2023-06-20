@@ -45,7 +45,7 @@ const createLocalStore = () =>
       notification: true,
       newVersionNotification: true,
       useDefaultCreds: false,
-      cancel: false,
+      cancelStatus: {},
       isAssesmentRunning: false,
       sessionid: "",
       lastOpenDate: 0,
@@ -95,8 +95,8 @@ const createLocalStore = () =>
       useDefaultCreds: {
         type: "boolean",
       },
-      cancel: {
-        type: "boolean",
+      cancelStatus: {
+        type: "object",
       },
       isAssesmentRunning: {
         type: "boolean",

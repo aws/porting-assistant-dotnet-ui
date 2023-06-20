@@ -11,7 +11,7 @@ export interface LocalStoreSchema {
   newVersionNotification: boolean;
   email: string;
   useDefaultCreds: boolean;
-  cancel: boolean;
+  cancelStatus: {[key: string]: boolean};
   isAssesmentRunning: boolean;
   lastOpenDate: number;
   currentAssessmentStatus: {[key: string]: boolean}
