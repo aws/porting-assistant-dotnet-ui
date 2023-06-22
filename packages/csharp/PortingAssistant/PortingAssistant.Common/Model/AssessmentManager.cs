@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,15 +11,23 @@ namespace PortingAssistant.Common.Model
     public class AssessmentManager
     {
         public static Dictionary<string, AssessmentState> solutionToAssessmentState = new();
+        public static ILogger _logger;
+
+        public static void setLogger(ILogger logger)
+        {
+            _logger = logger;
+        }
 
         public static void addSolution(string solutionPath)
         {
             if (solutionExists(solutionPath))
             {
                 solutionToAssessmentState[solutionPath] = new AssessmentState();
+                _logger?.LogDebug($"ReCreating assessment state for {solutionPath}");
             } else
             {
                 solutionToAssessmentState.Add(solutionPath, new AssessmentState());
+                _logger?.LogDebug($"Creating assessment state for {solutionPath}");
             }
 
         }
@@ -26,6 +35,7 @@ namespace PortingAssistant.Common.Model
         public static void setState(string solutionPath, Status state)
         {
             solutionToAssessmentState[solutionPath].state = state;
+            _logger?.LogDebug($"Setting assessment state for {solutionPath} to {state}");
         }
 
         public static Status getState(string solutionPath)

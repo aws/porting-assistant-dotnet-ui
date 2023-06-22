@@ -68,7 +68,7 @@ namespace PortingAssistant.Api
 
                     assessmentService.AddNugetPackageListener((response) => { _connection.Send("onNugetPackageUpdate", response); });
                     request.settings.UseGenerator = true;
-
+                    AssessmentManager._logger = _logger;
                     AssessmentManager.addSolution(request.solutionFilePath);
                     AssessmentManager.setState(request.solutionFilePath, Status.InProgress);
                     var analysisResult = assessmentService.AnalyzeSolution(request).Result;
