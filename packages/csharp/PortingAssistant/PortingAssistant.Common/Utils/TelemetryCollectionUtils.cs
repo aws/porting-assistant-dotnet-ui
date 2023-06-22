@@ -13,6 +13,9 @@ namespace PortingAssistant.Common.Utils
 {
     public static class TelemetryCollectionUtils
     {
+        private static readonly int _numLogicalCores = Environment.ProcessorCount;
+        private static readonly double _systemMemory = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes / 1048576.0;
+        
         public static void CollectSolutionMetrics(SolutionAnalysisResult solutionAnalysisResult, AnalyzeSolutionRequest request, DateTime startTime, string tgtFramework, double firstProjectAnalysisTime, int numProjects, bool canceled=false)
         {
             var solutionMetrics = createSolutionMetric(solutionAnalysisResult, request.runId, request.triggerType, tgtFramework, startTime, firstProjectAnalysisTime, numProjects, canceled);
@@ -85,7 +88,10 @@ namespace PortingAssistant.Common.Utils
                 Canceled = canceled,
                 SessionId = MetricsBase.SessionId,
                 FirstProjectAnalysisTime = firstProjectAnalysisTime,
-                NumProjects = numProjects
+                NumProjects = numProjects,
+                LinesOfCode = solutionAnalysisResult.SolutionDetails.Projects.Sum(p => p.LinesOfCode),
+                NumLogicalCores = _numLogicalCores,
+                SystemMemory = _systemMemory
             };
         }
 
@@ -162,6 +168,7 @@ namespace PortingAssistant.Common.Utils
                 SessionId = MetricsBase.SessionId,
                 AnalysisTime = assessmentTime,
                 CumulativeAnalysisTime = cumulativeAnalysisTime,
+                LinesOfCode = projectAnalysisResult.LinesOfCode
             };
         }
 
