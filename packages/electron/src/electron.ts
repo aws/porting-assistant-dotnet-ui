@@ -220,12 +220,26 @@ function createWindow() {
 
 
   autoUpdater.checkForUpdates();
+  return mainWindow;
 }
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+}
+
+app.on('second-instance', (event, commandLine, workingDirectory) => {
+  // Someone tried to run a second instance, we should focus our window.
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.focus()
+  }
+})
 
 app.allowRendererProcessReuse = true;
 
 app.on("ready", () => {
-  createWindow();
+  mainWindow = createWindow();
 });
 
 app.on("window-all-closed", () => {
@@ -238,7 +252,7 @@ app.on("window-all-closed", () => {
 
 app.on("activate", () => {
   if (mainWindow === null) {
-    createWindow();
+   createWindow();
   }
 });
 
