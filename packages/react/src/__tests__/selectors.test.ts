@@ -28,6 +28,7 @@ import {
   solutionToPortingLocation,
   solutionToPortingProjects,
   solutionToProjects,
+  solutionToStatus,
   sourceFiletoContents,
   tools
 } from "../mockData";
@@ -92,7 +93,8 @@ const getFakeState = (): Partial<RootState> => {
       solutionToSolutionDetails: solutionToProjects,
       apiAnalysis: solutionToApiAnalysis,
       profileSet: true,
-      removedSolutions: removedSolutions
+      removedSolutions: removedSolutions,
+      solutionToStatus: solutionToStatus
     },
     nugetPackage: {
       nugets: { "test-1.1.0": Loaded(packageAnalysisResult) }
@@ -626,7 +628,13 @@ describe("selectDashboardTableData", () => {
       },
       apiAnalysis: { "/test/solution": { "/test/testproject": Loaded(projectAnalysisResult) } },
       profileSet: true,
-      removedSolutions: {"/test/solution": false}
+      removedSolutions: {"/test/solution": false},
+      solutionToStatus: {
+        "/test/solution": {
+          isAssessmentRunning: false,
+          isCancelled: false
+        }
+      }
     },
     nugetPackage: {
       nugets: {
@@ -689,7 +697,13 @@ describe("selectDashboardTableData", () => {
         },
         apiAnalysis: { "/test/solution": { "/test/testproject": Loaded(projectAnalysisResult) } },
         profileSet: true,
-        removedSolutions: {"/test/solution": false}
+        removedSolutions: {"/test/solution": false},
+        solutionToStatus: {
+          "/test/solution": {
+            isAssessmentRunning: false,
+            isCancelled: false
+          }
+        }
       },
       nugetPackage: {
         nugets: {
@@ -804,7 +818,13 @@ describe("selectDashboardTableData", () => {
         },
         apiAnalysis: { "/test/solution": { "/test/testproject": Failed<ProjectApiAnalysisResult>("failed") } },
         profileSet: true,
-        removedSolutions: {"/test/solution": false}
+        removedSolutions: {"/test/solution": false},
+        solutionToStatus: {
+          "/test/solution": {
+            isAssessmentRunning: false,
+            isCancelled: false
+          }
+        }
       },
       nugetPackage: {
         nugets: {
@@ -884,7 +904,13 @@ describe("selectDashboardTableData", () => {
         },
         apiAnalysis: { "/test/solution": { "/test/testproject": Failed<ProjectApiAnalysisResult>("failed") } },
         profileSet: true,
-        removedSolutions: {"/test/solution": false}
+        removedSolutions: {"/test/solution": false},
+        solutionToStatus: {
+          "/test/solution": {
+            isAssessmentRunning: false,
+            isCancelled: false
+          }
+        }
       },
       nugetPackage: {
         nugets: {

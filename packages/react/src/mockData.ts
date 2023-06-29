@@ -17,6 +17,7 @@ import {
   RemovedSolutions,
   SolutionToApiAnalysis,
   SolutionToSolutionDetails,
+  SolutionToStatus,
   SourceFileAnalysisResult,
   SourceFileToContents,
   TextSpan
@@ -239,6 +240,13 @@ export const projectAnalysisResult: ProjectApiAnalysisResult = {
 
 export const removedSolutions: RemovedSolutions = {
   "/test/testproject/test.ts": false
+}
+
+export const solutionToStatus: SolutionToStatus = {
+  "/test/solution" : {
+    isAssessmentRunning: false,
+    isCancelled: true
+  }
 }
 
 export const projectToApiAnalysis: ProjectToApiAnalysis = {
