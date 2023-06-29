@@ -124,6 +124,11 @@ export interface PreTriggerData {
   ported: boolean;
 }
 
+export interface SolutionStatus {
+  isAssessmentRunning: boolean;
+  isCancelled: boolean;
+}
+
 export type CompatibleTargets = string;
 export type Compatibility = "UNKNOWN" | "COMPATIBLE" | "INCOMPATIBLE" | "DEPRACATED";
 export type RecommendedActionType =
@@ -150,3 +155,4 @@ export type SolutionToApiAnalysis = { [solutionPath: string]: ProjectToApiAnalys
 export type SourceFileToContents = { [sourceFilePath: string]: Loadable<string> };
 export type PackageToPackageAnalysisResult = { [packageVersionPair: string]: Loadable<PackageAnalysisResultWithDate> };
 export type RemovedSolutions = {[key: string]: boolean}
+export type SolutionToStatus = {[key: string]: SolutionStatus}

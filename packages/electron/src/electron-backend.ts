@@ -219,11 +219,8 @@ export const initConnection = (logger: any = console) => {
         logger.log(`REQUEST - analyzeSolution: ${JSON.stringify(request)}`);
         electronLogger.info(`${JSON.stringify(request)}`);
         localStore.set("isAssesmentRunning", true);
-        var oldState = localStore.get("currentAssessmentStatus");
-        oldState[solutionFilePath] = true;
         const response = await connection.send("analyzeSolution", request);
         response['runId'] = request.runId;
-        oldState[solutionFilePath] = false
         localStore.set("isAssesmentRunning", false);
         logger.log(`RESPONSE - analyzeSolution: ${JSON.stringify(response)}`);
         electronLogger.info(`${JSON.stringify(response)}`);

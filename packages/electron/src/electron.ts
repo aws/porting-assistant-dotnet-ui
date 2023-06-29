@@ -259,3 +259,17 @@ app.on("activate", () => {
 process.on("uncaughtException", (error) => {
   log.error("Uncaught exception caught: ", error);
 });
+
+process.on("unhandledRejection", (error) => {
+  log.error("unhandledRejection caught: ", error);
+});
+
+process.on("SIGTERM", (error) => {
+  log.error("SIGTERM caught: ", error);
+  process.exit(0);
+});
+
+process.on("SIGINT", (error) => {
+  log.error("SIGINT caught: ", error);
+  process.exit(0);
+});

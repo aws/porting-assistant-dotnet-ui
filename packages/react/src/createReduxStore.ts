@@ -9,10 +9,11 @@ import {
   RemovedSolutions,
   SolutionToApiAnalysis,
   SolutionToSolutionDetails,
+  SolutionToStatus,
   SourceFileToContents
 } from "./models/project";
 import { RootAction as RA } from "./store/actions";
-import { analyzeSolution, getApiAnalysis, removeSolution } from "./store/actions/backend";
+import { analyzeSolution, cancelAssessment, getApiAnalysis, removeSolution } from "./store/actions/backend";
 import { getNugetPackageWithData } from "./store/actions/nugetPackage";
 import { removePortedSolution } from "./store/actions/porting";
 import { createRootReducer, RootState as RS } from "./store/reducers";
@@ -33,7 +34,7 @@ const logger = createLogger({
   level: "info"
 });
 
-const cacheActions = [analyzeSolution.success, getApiAnalysis.success, removeSolution];
+const cacheActions = [analyzeSolution.success, getApiAnalysis.success, removeSolution, cancelAssessment];
 const nugetCacheActions = [getNugetPackageWithData.success];
 const portCacheActions = [removePortedSolution];
 
@@ -58,8 +59,8 @@ const cacheStateMiddleware: Middleware<{}, RS> = store => next => action => {
   const result = next(action);
 
   if (isActionOf(cacheActions)(action)) {
-    const { apiAnalysis, solutionToSolutionDetails } = store.getState().solution;
-    debounceSaveCache({ apiAnalysis, solutionToSolutionDetails });
+    const { apiAnalysis, solutionToSolutionDetails, solutionToStatus } = store.getState().solution;
+    debounceSaveCache({ apiAnalysis, solutionToSolutionDetails, solutionToStatus });
   }
   if (isActionOf(nugetCacheActions)(action)) {
     debounceSaveNuget(store.getState().nugetPackage);
@@ -78,7 +79,7 @@ const getStateFromCache = (): Partial<RS> => {
     }
     return agg;
   }, {} as SolutionToPortingLocation);
-  const { apiAnalysis, solutionToSolutionDetails } = window.electron.getCache();
+  const { apiAnalysis, solutionToSolutionDetails, solutionToStatus } = window.electron.getCache();
   const filteredSolutionToSolutionDetails = Object.values(solutionToSolutionDetails || {}).reduce((agg, sol) => {
     if (isLoaded(sol) && storedSolutions[sol.data.solutionFilePath] != null) {
       agg[sol.data.solutionFilePath] = sol;
@@ -90,7 +91,8 @@ const getStateFromCache = (): Partial<RS> => {
       apiAnalysis: Object.assign({} as SolutionToApiAnalysis, apiAnalysis),
       solutionToSolutionDetails: Object.assign({} as SolutionToSolutionDetails, filteredSolutionToSolutionDetails),
       profileSet: window.electron.getState("lastConfirmVersion") != "",
-      removedSolutions: Object.assign({} as RemovedSolutions, {})
+      removedSolutions: Object.assign({} as RemovedSolutions, {}),
+      solutionToStatus : Object.assign({} as SolutionToStatus, solutionToStatus),
     },
     nugetPackage: Object.assign(
       {

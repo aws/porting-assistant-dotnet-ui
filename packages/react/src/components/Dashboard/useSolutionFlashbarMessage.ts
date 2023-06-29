@@ -1,13 +1,12 @@
 import { useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { v4 as uuid } from "uuid";
 
+import { SolutionStatus } from "../../models/project";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
-import { selectCancelStatus } from "../../store/selectors/solutionSelectors";
-import { getCancelStatus } from "../../utils/cancelStatus";
 import { DashboardTableData } from "./DashboardTable";
 
-export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
+export const useSolutionFlashbarMessage = (tableData: DashboardTableData[], solutionToSolutionStatus: {[key: string]: SolutionStatus}) => {
   const dispatch = useDispatch();
   const prevLoadingSolutions = useRef(Array<DashboardTableData>());
 
@@ -51,7 +50,7 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
       s => !loadingSolutions.some(ls => ls.path === s.path) && !failedSolutions.some(ls => ls.path === s.path)
     );
       if (completed.length === 1) {
-        if (getCancelStatus(completed[0].path)) {
+        if (solutionToSolutionStatus[completed[0].path]?.isCancelled) {
           dispatch(removeCurrentMessageUpdate({ groupId: "cancel-assessment" }));
           dispatch(
             pushCurrentMessageUpdate({
@@ -127,5 +126,5 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
     if (loadingSolutions !== prevLoadingSolutions.current) {
       prevLoadingSolutions.current = loadingSolutions;
     }
-  }, [dispatch, tableData]);
+  }, [dispatch, tableData, solutionToSolutionStatus]);
 };

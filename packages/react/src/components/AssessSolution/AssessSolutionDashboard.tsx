@@ -13,9 +13,8 @@ import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric"
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution, exportSolution, openSolutionInIDE } from "../../store/actions/backend";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
-import { selectAssesmentStatus, selectCurrentSolutionPath } from "../../store/selectors/solutionSelectors";
+import { selectCurrentSolutionPath } from "../../store/selectors/solutionSelectors";
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
-import { setAssessmentStatus } from "../../utils/assessmentStatus";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { createPreTriggerDataFromProjectsTable } from "../../utils/createPreTriggerDataFromProjectTable";
 import { getErrorMetric } from "../../utils/getErrorMetric";
@@ -44,7 +43,6 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
   const history = useHistory();
   const location = useLocation<HistoryState>();
   const portingLocation = usePortingAssistantSelector(state => selectPortingLocation(state, location.pathname));
-  const isAssesmentRunning = useSelector(selectAssesmentStatus);
   const [showPortingModal, setShowPortingModal] = useState(false);
   const targetFramework = getTargetFramework();
   const [feedbackModal, setFeedbackModalVisible] = React.useState(false);

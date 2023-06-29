@@ -10,7 +10,6 @@ import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric"
 import { analyzeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { selectSolutionToSolutionDetails } from "../../store/selectors/solutionSelectors";
-import { setAssessmentStatus } from "../../utils/assessmentStatus";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { getErrorMetric } from "../../utils/getErrorMetric";
 import { getHash } from "../../utils/getHash";

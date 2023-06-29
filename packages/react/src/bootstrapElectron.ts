@@ -24,8 +24,8 @@ export interface Electron {
   callBackend: (channel: string, ...args: any) => Promise<any>;
   saveState: <K extends keyof LocalStoreSchema>(key: K, value: LocalStoreSchema[K]) => void;
   getState: <K extends keyof LocalStoreSchema>(key: K, defaultValue?: LocalStoreSchema[K]) => LocalStoreSchema[K];
-  saveCache: (value: Pick<SolutionReducerState, "apiAnalysis" | "solutionToSolutionDetails">) => void;
-  getCache: () => Pick<SolutionReducerState, "apiAnalysis" | "solutionToSolutionDetails">;
+  saveCache: (value: Pick<SolutionReducerState, "apiAnalysis" | "solutionToSolutionDetails" | "solutionToStatus">) => void;
+  getCache: () => Pick<SolutionReducerState, "apiAnalysis" | "solutionToSolutionDetails" | "solutionToStatus">;
   saveNugetPackages: (value: NugetPackageReducerState) => void;
   getNugetPackages: () => NugetPackageReducerState;
   dialog: Dialog;

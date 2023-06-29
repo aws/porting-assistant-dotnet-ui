@@ -9,14 +9,13 @@ import { Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import {
-  selectCancelStatus,
   selectCurrentSolutionApiAnalysis,
   selectCurrentSolutionDetails,
   selectCurrentSolutionPath,
+  selectCurrentSolutionStatus,
   selectNugetPackages
 } from "../../store/selectors/solutionSelectors";
 import { getActionCounts, getErrorCounts } from "../../store/selectors/tableSelectors";
-import { getCancelStatus, setCancelStatus } from "../../utils/cancelStatus";
 import { API_COMPATABILITIES, API_LOADING_AGGREGATE, getCompatibleApi } from "../../utils/getCompatibleApi";
 import { getCompatibleNugetsAgg, LOADING_AGGREGATES, NUGET_COMPATABILITIES } from "../../utils/getCompatibleNugets";
 import { getTargetFramework } from "../../utils/getTargetFramework";
@@ -38,7 +37,8 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
   const apiAnalysis = usePortingAssistantSelector(state => selectCurrentSolutionApiAnalysis(state, location.pathname));
   const targetFramework = getTargetFramework();
   const solutionPath = usePortingAssistantSelector(state => selectCurrentSolutionPath(state, location.pathname))
-  const cancel = getCancelStatus(solutionPath);
+  const solutionStatus = usePortingAssistantSelector(state => selectCurrentSolutionStatus(state, location.pathname));
+  const cancel = solutionStatus.isCancelled;
 
   const nugetCompatibilities = useMemo(() => {
     if (!hasNewData(projects)) {
@@ -103,7 +103,6 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
       dispatch(removeCurrentMessageUpdate({ groupId: "assess" }));
       setShownLoadingMessage(false);
       if (cancel) {
-        setCancelStatus(solutionPath, false);
         dispatch(removeCurrentMessageUpdate({ groupId: "cancel-assessment" }));
         dispatch(
           pushCurrentMessageUpdate({

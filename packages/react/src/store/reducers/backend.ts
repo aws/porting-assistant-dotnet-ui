@@ -1,17 +1,16 @@
 import { produce } from "immer";
-import { createReducer } from "typesafe-actions";
+import { action, createReducer } from "typesafe-actions";
 
-import { RemovedSolutions, SolutionToApiAnalysis, SolutionToSolutionDetails } from "../../models/project";
+import { RemovedSolutions, SolutionToApiAnalysis, SolutionToSolutionDetails, SolutionToStatus } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
-import { setAssessmentStatus } from "../../utils/assessmentStatus";
-import { setCancelStatus } from "../../utils/cancelStatus";
 import { Failed, isLoaded, isLoading, isLoadingWithData, isReloading, Loaded, Loading, Reloading } from "../../utils/Loadable";
-import { analyzeSolution, getApiAnalysis, partialSolutionUpdate, removeSolution, setProfileSet } from "../actions/backend";
+import { analyzeSolution, cancelAssessment, getApiAnalysis, partialSolutionUpdate, removeSolution, setProfileSet } from "../actions/backend";
 export const backendReducer = createReducer({
   apiAnalysis: {} as SolutionToApiAnalysis,
   solutionToSolutionDetails: {} as SolutionToSolutionDetails,
   profileSet: false,
-  removedSolutions: {} as RemovedSolutions
+  removedSolutions: {} as RemovedSolutions,
+  solutionToStatus: {} as SolutionToStatus
 })
   .handleAction(analyzeSolution.request, (state, action) =>
     produce(state, draftState => {
@@ -19,8 +18,10 @@ export const backendReducer = createReducer({
       if (isLoaded(existingSolution) && action.payload.force !== true) {
         return;
       }
-      setAssessmentStatus(action.payload.solutionPath, true);
-      setCancelStatus(action.payload.solutionPath, false);
+      draftState.solutionToStatus[action.payload.solutionPath] = {
+        isAssessmentRunning: true,
+        isCancelled: false
+      } 
       draftState.removedSolutions[action.payload.solutionPath] = false;
       draftState.solutionToSolutionDetails[action.payload.solutionPath] = isLoaded(existingSolution)
         ? Reloading(existingSolution.data)
@@ -29,7 +30,9 @@ export const backendReducer = createReducer({
   )
   .handleAction(analyzeSolution.success, (state, action) =>
     produce(state, draftState => {
-      setAssessmentStatus(action.payload.solutionDetails.solutionFilePath, false);
+      draftState.solutionToStatus[action.payload.solutionDetails.solutionFilePath].isAssessmentRunning = false;
+      draftState.solutionToStatus[action.payload.solutionDetails.solutionFilePath].isCancelled = false;
+
       if (state.removedSolutions[action.payload.solutionDetails.solutionFilePath] === true) {
         draftState.removedSolutions[action.payload.solutionDetails.solutionFilePath] = false;
       }
@@ -42,7 +45,9 @@ export const backendReducer = createReducer({
   )
   .handleAction(analyzeSolution.failure, (state, action) =>
     produce(state, draftState => {
-      setAssessmentStatus(action.payload.solutionPath, false);
+      draftState.solutionToStatus[action.payload.solutionPath].isAssessmentRunning = false;
+      draftState.solutionToStatus[action.payload.solutionPath].isCancelled = false;
+
       if (state.removedSolutions[action.payload.solutionPath] === true) {
         draftState.removedSolutions[action.payload.solutionPath] = false;
       }
@@ -149,7 +154,12 @@ export const backendReducer = createReducer({
       delete draftstate.solutionToSolutionDetails[action.payload];
       delete draftstate.apiAnalysis[action.payload];
       draftstate.removedSolutions[action.payload] = true;
+      delete draftstate.solutionToStatus[action.payload];
     })
+  ).handleAction(cancelAssessment, (state, action) => 
+  produce(state, draftstate => {
+    draftstate.solutionToStatus[action.payload].isCancelled = true;
+  })
   )
   .handleAction(setProfileSet, (state, action) =>
     produce(state, draftState => {

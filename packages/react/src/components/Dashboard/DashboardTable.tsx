@@ -13,21 +13,20 @@ import {
 import StatusIndicator from "@awsui/components-react/status-indicator";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
+import { usePortingAssistantSelector } from "../../createReduxStore";
 import { PreTriggerData, SolutionToSolutionDetails } from "../../models/project";
 import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
-import { analyzeSolution, exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
+import { analyzeSolution, cancelAssessment,exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import { removePortedSolution } from "../../store/actions/porting";
 import { RootState } from "../../store/reducers";
-import { selectAssesmentStatus, selectCancelStatus, selectCurrentSolutionDetails, selectSolutionToSolutionDetails} from "../../store/selectors/solutionSelectors";
+import { selectCurrentSolutionDetails, selectCurrentSolutionStatus, selectSolutionToSolutionDetails, selectSolutioToStatus} from "../../store/selectors/solutionSelectors";
 import { getErrorCounts, selectDashboardTableData, selectSolutionToApiAnalysis
  } from "../../store/selectors/tableSelectors";
-import { getAssessmentStatus, setAssessmentStatus } from "../../utils/assessmentStatus";
-import { getCancelStatus, setCancelStatus } from "../../utils/cancelStatus";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { filteringCountText } from "../../utils/FilteringCountText";
 import { getCompatibleApi } from "../../utils/getCompatibleApi";
@@ -62,12 +61,11 @@ const DashboardTableInternal: React.FC = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const solutionToSolutionDetails = useSelector(selectSolutionToSolutionDetails);
-  const isAssesmentRunning = useSelector(selectAssesmentStatus);
-  const cancelStatus = useSelector(selectCancelStatus);
+  const solutionToSolutionStatus = useSelector(selectSolutioToStatus);
   const tableData = useSelector(selectDashboardTableData);
   const targetFramework = getTargetFramework();
   useNugetFlashbarMessages();
-  useSolutionFlashbarMessage(tableData);
+  useSolutionFlashbarMessage(tableData, solutionToSolutionStatus);
   const apiAnalysis = useSelector(selectSolutionToApiAnalysis); 
 
   
@@ -79,8 +77,8 @@ const DashboardTableInternal: React.FC = () => {
         MetricType: MetricType.UIClickEvent
       }
       window.electron.writeReactLog(clickMetric);
-      if (getAssessmentStatus(solutionPath)){
-        cancelAssessment(solutionPath);
+      if (solutionToSolutionStatus[solutionPath]?.isAssessmentRunning){
+        cancelSolutionAssessment(solutionPath);
       }
       dispatch(removeSolution(solutionPath));
       dispatch(removePortedSolution(solutionPath));
@@ -89,10 +87,10 @@ const DashboardTableInternal: React.FC = () => {
     [dispatch]
   );
 
-  const cancelAssessment = useMemo(
+  const cancelSolutionAssessment = useMemo(
     () => async (solutionPath: string) => {
       try {
-        setCancelStatus(solutionPath, true);
+        dispatch(cancelAssessment(solutionPath));
         window.backend.cancelAssessment(solutionPath);
         dispatch(
           removeCurrentMessageUpdate({
@@ -116,7 +114,6 @@ const DashboardTableInternal: React.FC = () => {
   const reassessSolution = useMemo(
     () => async (solutionPath: string) => {
       try {
-        setAssessmentStatus(solutionPath, true);
         dispatch(
           removeCurrentMessageUpdate({
             groupId: "assessSuccess"
@@ -160,7 +157,6 @@ const DashboardTableInternal: React.FC = () => {
           }
           const haveInternet = await checkInternetAccess(solutionPath, dispatch);
           if (haveInternet) {
-            setAssessmentStatus(solutionPath, true);
             dispatch(
               analyzeSolution.request({
                 solutionPath: solutionPath,
@@ -184,7 +180,7 @@ const DashboardTableInternal: React.FC = () => {
         throw err
       }
     },
-    [dispatch, targetFramework]
+    [apiAnalysis, dispatch, solutionToSolutionDetails, targetFramework]
   );
 
   const header = useMemo(
@@ -269,7 +265,7 @@ const DashboardTableInternal: React.FC = () => {
             <Button
               id="reassess-solution"
               key="reassess-solution"
-              disabled={selectedItems.length === 0 || getAssessmentStatus(selectedItems[0]?.path)}
+              disabled={selectedItems.length === 0 || solutionToSolutionStatus[selectedItems[0]?.path]?.isAssessmentRunning || solutionToSolutionStatus[selectedItems[0]?.path]?.isCancelled}
               onClick={() => {
                 reassessSolution(selectedItems[0].path);
               }}
@@ -291,11 +287,11 @@ const DashboardTableInternal: React.FC = () => {
             <Button
               id="cancel-assessment-button"
               variant="primary"
-              disabled= {selectedItems.length === 0 || !getAssessmentStatus(selectedItems[0]?.path) || getCancelStatus(selectedItems[0]?.path)}
+              disabled= {selectedItems.length === 0 || !solutionToSolutionStatus[selectedItems[0]?.path]?.isAssessmentRunning || solutionToSolutionStatus[selectedItems[0]?.path].isCancelled}
               key="cancel-assessment"
               onClick={() => {
                 try {
-                  cancelAssessment(selectedItems[0]?.path);
+                  cancelSolutionAssessment(selectedItems[0]?.path);
                   dispatch(
                     pushCurrentMessageUpdate({
                       type: "info",
@@ -363,7 +359,7 @@ const DashboardTableInternal: React.FC = () => {
         }
       />
     ),
-    [deleteSolution, dispatch, history, reassessSolution, selectedItems, showDeleteModal, cancelAssessment, cancelStatus, solutionToSolutionDetails]
+    [solutionToSolutionDetails, selectedItems, solutionToSolutionStatus, showDeleteModal, history, dispatch, reassessSolution, cancelSolutionAssessment, deleteSolution]
   );
 
   const empty = useMemo(
