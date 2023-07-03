@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -11,7 +11,7 @@
 			<!-- This package is mostly COM definitions which can be loaded in .NET 5 runtime just fine -->
 			<NoWarn>NU1701</NoWarn>
 		</PackageReference>
-		<PackageReference Include="PortingAssistant.Client.Client" Version="2.10.7" />
+		<PackageReference Include="PortingAssistant.Client.Client" Version="2.11.8" />
 		<PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.10.7" />
 	</ItemGroup>
 
