@@ -15,8 +15,8 @@
     <PackageReference Include="Moq" Version="4.18.4" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageReference Include="PortingAssistant.Client.Client" Version="2.11.7-alpha-g21f1a5006b" />
-    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.11.7-alpha-g21f1a5006b" />
+    <PackageReference Include="PortingAssistant.Client.Client" Version="2.12.13-alpha-gb29282aa8d" />
+    <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.12.13-alpha-gb29282aa8d" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
   </ItemGroup>
 
