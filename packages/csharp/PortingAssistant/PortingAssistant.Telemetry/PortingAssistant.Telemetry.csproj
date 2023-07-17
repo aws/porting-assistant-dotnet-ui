@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.3" />
-    <PackageReference Include="PortingAssistant.Client.Client" Version="2.12.13-alpha-gb29282aa8d" />
+    <PackageReference Include="PortingAssistant.Client.Client" Version="2.12.15" />
     <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.12.13-alpha-gb29282aa8d" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
