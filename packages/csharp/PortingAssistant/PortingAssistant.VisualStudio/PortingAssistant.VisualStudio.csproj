@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -12,7 +12,7 @@
 			<NoWarn>NU1701</NoWarn>
 		</PackageReference>
 		<PackageReference Include="PortingAssistant.Client.Client" Version="2.14.9-alpha-gda76b80968" />
-		<PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.14.9-alpha-gda76b80968" />
+		<PackageReference Include="PortingAssistant.Client.Telemetry" Version="3.0.19" />
 	</ItemGroup>
 
 </Project>
