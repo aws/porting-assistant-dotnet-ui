@@ -5,13 +5,15 @@ import { PortingProjectFileResult } from "./models/porting";
 import {
   NugetPackage,
   PackageAnalysisResult,
+  PreTriggerData,
   Project,
   ProjectApiAnalysisResult,
   SolutionProject,
   VersionPair
 } from "./models/project";
+import { ReactMetric } from "./models/reactmetric";
 import { Response } from "./models/response";
-import { Credentials, Profiles } from "./models/setup";
+import { Credentials, Profiles, SupportedVersion } from "./models/setup";
 import { SolutionDetails } from "./models/solution";
 import { NugetPackageReducerState, SolutionReducerState } from "./store/reducers";
 import { SolutionToPortingProjects } from "./store/reducers/porting";
@@ -22,8 +24,8 @@ export interface Electron {
   callBackend: (channel: string, ...args: any) => Promise<any>;
   saveState: <K extends keyof LocalStoreSchema>(key: K, value: LocalStoreSchema[K]) => void;
   getState: <K extends keyof LocalStoreSchema>(key: K, defaultValue?: LocalStoreSchema[K]) => LocalStoreSchema[K];
-  saveCache: (value: Pick<SolutionReducerState, "apiAnalysis" | "solutionToSolutionDetails">) => void;
-  getCache: () => Pick<SolutionReducerState, "apiAnalysis" | "solutionToSolutionDetails">;
+  saveCache: (value: Pick<SolutionReducerState, "apiAnalysis" | "solutionToSolutionDetails" | "solutionToStatus">) => void;
+  getCache: () => Pick<SolutionReducerState, "apiAnalysis" | "solutionToSolutionDetails" | "solutionToStatus">;
   saveNugetPackages: (value: NugetPackageReducerState) => void;
   getNugetPackages: () => NugetPackageReducerState;
   dialog: Dialog;
@@ -43,10 +45,10 @@ export interface Electron {
   getOutdatedVersionFlag: () => Promise<boolean>;
   telemetry: (message: any) => void;
   crashOnLastUse: (sourceFilePath: string) => Promise<boolean>;
-  writeReactErrLog: (source: any, message: any, response: any) => void;
+  writeReactLog: (eventMessage: ReactMetric) => void;
   getAssessmentLog: () => string;
   checkInternetAccess: () => Promise<boolean>;
-  cancelAssessment: () => void
+  cancelAssessment: (sourceFilePath: string) => void
   getLogFolder: () => string;
 }
 
@@ -63,7 +65,7 @@ export interface Backend {
       actionsOnly: boolean;
       compatibleOnly: boolean;
     },
-    preTriggerData: string[]
+    preTriggerData: {[project: string]: PreTriggerData}
   ) => Promise<Response<SolutionDetails, string>>;
   openSolutionInIDE: (solutionFilePath: string) => Promise<Response<boolean, string>>;
   getFileContents: (sourceFilePath: string) => Promise<string>;
@@ -73,11 +75,12 @@ export interface Backend {
     callback: (projectAnalysis: Response<ProjectApiAnalysisResult, SolutionProject>) => void
   ) => void;
   checkInternetAccess: () => Promise<boolean>;
-  cancelAssessment: () => void;
+  getSupportedVersion: () => Promise<Response<SupportedVersion[], string>>;
+  cancelAssessment: (sourceFilePath: string) => void;
 }
 
 export interface Porting {
-  copyDirectory: (solutionPath: string, destinationPath: string) => void;
+  copyDirectory: (solutionPath: string, destinationPath: string) => Promise<Response<boolean, string>>;
   getConfig: () => SolutionToPortingProjects;
   setConfig: (data: SolutionToPortingProjects) => void;
   applyPortingProjectFileChanges: (

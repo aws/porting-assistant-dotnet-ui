@@ -109,37 +109,8 @@ export function* watchApiAnalysisUpdate() {
 function* handleInit(action: ReturnType<typeof init>) {
   yield put(ping());
   const haveInternet: boolean = yield window.backend.checkInternetAccess();
-  const storedSolutions = window.electron.getState("solutions", {});
-  const targetFramework = getTargetFramework();
   if (!haveInternet) {
     yield put(pushCurrentMessageUpdate(internetAccessFailed()));
-  }
-  for (const solution of Object.keys(storedSolutions)) {
-    if (haveInternet) {
-      yield put(
-        analyzeSolution.request({
-          solutionPath: solution,
-          runId: uuid(),
-          triggerType: "AutoRequest",
-          settings: {
-            ignoredProjects: [],
-            targetFramework: targetFramework,
-            continiousEnabled: false,
-            actionsOnly: false,
-            compatibleOnly: false
-          },
-          preTriggerData: [], // ignore the preTriggerData at initialzation stage
-          force: action.payload
-        })
-      );
-    } else {
-      yield put(
-        analyzeSolution.failure({
-          error: "Cannot analyze solution witout internet connectivity",
-          solutionPath: solution
-        })
-      );
-    }
   }
 }
 

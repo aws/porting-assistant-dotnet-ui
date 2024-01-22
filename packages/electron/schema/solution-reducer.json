@@ -549,6 +549,17 @@
     "profileSet": {
       "type": "boolean",
       "default": false
+    },
+    "solutionToStatus": {
+      "type": "object",
+      "properties": {
+        "isAssessmentRunning": {
+          "type":"boolean"
+        },
+        "isCancelled": {
+          "type":"boolean"
+        }
+      }
     }
   },
   "$schema": "http://json-schema.org/draft-07/schema#"

@@ -122,8 +122,11 @@ export interface PreTriggerData {
   totalApis: number | null;
   buildErrors: number | null;
   ported: boolean;
-  sourceFileAnalysisResults: SourceFileAnalysisResult[] | null;
+}
 
+export interface SolutionStatus {
+  isAssessmentRunning: boolean;
+  isCancelled: boolean;
 }
 
 export type CompatibleTargets = string;
@@ -151,3 +154,5 @@ export type ProjectToApiAnalysis = { [project: string]: Loadable<ProjectApiAnaly
 export type SolutionToApiAnalysis = { [solutionPath: string]: ProjectToApiAnalysis };
 export type SourceFileToContents = { [sourceFilePath: string]: Loadable<string> };
 export type PackageToPackageAnalysisResult = { [packageVersionPair: string]: Loadable<PackageAnalysisResultWithDate> };
+export type RemovedSolutions = {[key: string]: boolean}
+export type SolutionToStatus = {[key: string]: SolutionStatus}

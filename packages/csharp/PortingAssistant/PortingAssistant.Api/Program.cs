@@ -42,16 +42,27 @@ namespace PortingAssistant.Api
                 new Serilog.Formatting.Display.MessageTemplateTextFormatter(outputTemplate, CultureInfo.InvariantCulture);
 
             var date = DateTime.Today.ToString("yyyy-MM-dd");
-            var logConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
-                .MinimumLevel.Debug()
-                .WriteTo.RollingFile(
-                    Path.Combine(args[2], "logs", "portingAssistant-assessment-{Date}.log"),
-                    outputTemplate: outputTemplate,
-                    fileSizeLimitBytes: 1000000)
-                .WriteTo.Logger(lc => lc.MinimumLevel.Error().WriteTo.RollingFile(
-                    Path.Combine(args[2], "logs", "portingAssistant-backend-{Date}.log"),
-                    outputTemplate: outputTemplate,
-                    fileSizeLimitBytes: 1000000));
+            var logConfiguration = 
+                new LoggerConfiguration()
+                    .Enrich.FromLogContext()
+                    .MinimumLevel.Debug()
+                    .WriteTo.RollingFile(
+                        Path.Combine(args[2], "logs", "portingAssistant-assessment-{Date}.log"),
+                        outputTemplate: outputTemplate,
+                        fileSizeLimitBytes: 1000000)
+                    .WriteTo.Logger(lc => lc.MinimumLevel.Error()
+                                        .WriteTo.RollingFile(
+                        Path.Combine(args[2], "logs", "portingAssistant-assessmentWithContext-{Date}.log"),
+                        outputTemplate: outputTemplate+ "{NewLine}{Properties}{NewLine}{NewLine}")
+                    )
+                    .WriteTo.Logger(lc => 
+                        lc
+                            .MinimumLevel.Error()
+                            .WriteTo.RollingFile(
+                                Path.Combine(args[2], "logs", "portingAssistant-backend-{Date}.log"),
+                                outputTemplate: outputTemplate,
+                                fileSizeLimitBytes: 1000000));
+                
 
             if (isConsole)
             {
@@ -68,7 +79,7 @@ namespace PortingAssistant.Api
 
 
             string metricsFolder = Path.Combine(args[2], "logs");
-            string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-{DateTime.Today.ToString("yyyyMMdd")}.metrics");
+            string metricsFilePath = Path.Combine(metricsFolder, $"portingAssistant-telemetry-.metrics"); // Removing date since Serilog appends the date at the end of the file name (PA Client Version >= 2.8)
 
 
             var telemetryLogConfiguration = new LoggerConfiguration().Enrich.FromLogContext()
@@ -78,25 +89,26 @@ namespace PortingAssistant.Api
                     outputTemplate: outputTemplate);
             TelemetryCollector.Builder(telemetryLogConfiguration.CreateLogger(), metricsFilePath);
 
-
             var crashReportsDir = Path.Combine(metricsFolder, "reports");
             try
             {
-            if (Directory.Exists(crashReportsDir)) {
-              string[] files = Directory.GetFiles(crashReportsDir);
-              for (int i = 0; i < files.Length; i++)
-              {
-                FileInfo file = new FileInfo(files[0]);
-                if ((file.CreationTime - DateTime.Now).TotalDays < 30) {
-                  TelemetryCollectionUtils.CollectCrashMetrics(file.Name, file.CreationTimeUtc);
+                if (Directory.Exists(crashReportsDir))
+                {
+                    string[] files = Directory.GetFiles(crashReportsDir);
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        FileInfo file = new FileInfo(files[0]);
+                        if ((file.CreationTime - DateTime.Now).TotalDays < 30)
+                        {
+                            TelemetryCollectionUtils.CollectCrashMetrics(file.Name, file.CreationTimeUtc);
+                        }
+                    }
                 }
-              }
             }
-            } catch (Exception ex) {
+            catch (Exception ex)
+            {
               Log.Logger.Error("Error in reading crash reports: ", ex);
             }
-
-
 
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection, configuration);

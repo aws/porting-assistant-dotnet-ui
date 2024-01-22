@@ -28,6 +28,13 @@ namespace PortingAssistant.UnitTests
                     ApplicationGuid = "test-application-guid",
                     SolutionGuid = "test-solution-guid",
                     RepositoryUrl = "https://github.com/test-project",
+                    Projects = new List<ProjectDetails>
+                    {
+                        new ProjectDetails
+                        {
+                            LinesOfCode = 1
+                        }
+                    }
                 }
             };
             var solutionMetric = TelemetryCollectionUtils.createSolutionMetric(solutionAnalysisResult, runId, triggerType, targetFramework, DateTime.Now, 0, 1, false);

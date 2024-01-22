@@ -13,23 +13,24 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Runtime;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace PortingAssistant.Common.Services
 {
     public class AssessmentService : IAssessmentService
     {
-        private readonly ILogger _logger;
         private readonly IPortingAssistantClient _client;
         private readonly List<OnApiAnalysisUpdate> _apiAnalysisListeners;
         private readonly List<OnNugetPackageUpdate> _nugetPackageListeners;
+        private ILogger<AssessmentService> _logger;
 
         public AssessmentService(ILogger<AssessmentService> logger,
             IPortingAssistantClient client)
         {
-            _logger = logger;
             _client = client;
             _apiAnalysisListeners = new List<OnApiAnalysisUpdate>();
             _nugetPackageListeners = new List<OnNugetPackageUpdate>();
+            _logger = logger;
         }
 
         public async Task<Response<SolutionDetails, string>> AnalyzeSolution(AnalyzeSolutionRequest request)
@@ -40,29 +41,20 @@ namespace PortingAssistant.Common.Services
                 string tgtFramework = request.settings.TargetFramework;
                 TelemetryCollectionUtils.CollectStartMetrics( request, startTime, tgtFramework);
 
-                var preProjectTriggerDataDictionary = new Dictionary<string, PreTriggerData>();
-                if (request.preTriggerData != null && request.preTriggerData.Length > 0)
-                {
-                    Array.ForEach(request.preTriggerData, prop => {
-                        var proj = JsonConvert.DeserializeObject<PreTriggerData>(prop);
-                        if (!preProjectTriggerDataDictionary.ContainsKey(proj.projectName))
-                        {
-                            preProjectTriggerDataDictionary.Add(proj.projectName, proj);
-                        }
-                    });
-                }
+                var preProjectTriggerDataDictionary = request.preTriggerData;
 
                   List<ProjectDetails> projectDetails = new List<ProjectDetails>();
                   var failedProjects = new List<string>();
                   List<string> projectGuids = new List<string>();
-                  
-                  var projectAnalysisResultEnumerator = _client.AnalyzeSolutionGeneratorAsync(request.solutionFilePath, request.settings).GetAsyncEnumerator();
+
+                  var cancellationToken = AssessmentManager.solutionToAssessmentState[request.solutionFilePath].cancellationTokenSource.Token;
+                  var projectAnalysisResultEnumerator = _client.AnalyzeSolutionGeneratorAsync(request.solutionFilePath, request.settings).GetAsyncEnumerator(cancellationToken);
                   var projectStartTime = DateTime.Now;
                   var projectCount = 0;
                   var firstProjectTime = 0.0;
                   try
                   {
-                      while (await projectAnalysisResultEnumerator.MoveNextAsync().ConfigureAwait(false) && !PortingAssistantUtils.cancel)
+                      while (await projectAnalysisResultEnumerator.MoveNextAsync().ConfigureAwait(false) && !AssessmentManager.solutionToAssessmentState[request.solutionFilePath].cancellationTokenSource.IsCancellationRequested)
                       {
                           ProjectAnalysisResult result = projectAnalysisResultEnumerator.Current;
                           projectCount += 1;
@@ -103,6 +95,10 @@ namespace PortingAssistant.Common.Services
                           }
                         projectStartTime = DateTime.Now;
                       }
+                  }            
+                  catch (OperationCanceledException ex)
+                  {
+                    _logger.LogError(ex.Message);
                   }
                   finally
                   {

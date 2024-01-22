@@ -6,11 +6,14 @@ import { useHistory, useLocation } from "react-router-dom";
 
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
+import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { selectProjects } from "../../store/selectors/solutionSelectors";
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
 import { filteringCountText } from "../../utils/FilteringCountText";
+import { getErrorMetric } from "../../utils/getErrorMetric";
+import { getHash } from "../../utils/getHash";
 import { hasNewData, isLoaded, isLoading, isReloading, Loadable } from "../../utils/Loadable";
 import { InfoLink } from "../InfoLink";
 import { LinkComponent } from "../LinkComponent";
@@ -159,20 +162,36 @@ const ProjectsTableInternal: React.FC<Props> = ({ solution }) => {
                 key="port-project"
                 disabled={selectedItems.length === 0 || !isLoaded(projects)}
                 onClick={() => {
-                  if (portingLocation == null) {
-                    setShowPortingModal(true);
-                  } else {
-                    if (isLoaded(projects)) {
-                      history.push({
-                        pathname: `/port-solution/${encodeURIComponent(selectedItems[0].solutionPath)}`,
-                        state: {
-                          projects: projects.data.filter(p =>
+                    try {
+                      if (isLoaded(projects)) {
+                        let clickMetric: ReactMetric = {
+                          SolutionPath: getHash(selectedItems[0].solutionPath),
+                          ProjectGuid: projects.data.filter(p =>
                             selectedItems.some(s => p.projectFilePath === s.projectPath)
-                          )
+                          ).map(p => p.projectGuid),
+                          MetricSource: MetricSource.PortProjectSelect,
+                          MetricType: MetricType.UIClickEvent
                         }
-                      });
+                        window.electron.writeReactLog(clickMetric);
+  
+                        if (portingLocation == null) {
+                          setShowPortingModal(true);
+                        } else {
+                        history.push({
+                          pathname: `/port-solution/${encodeURIComponent(selectedItems[0].solutionPath)}`,
+                          state: {
+                            projects: projects.data.filter(p =>
+                              selectedItems.some(s => p.projectFilePath === s.projectPath)
+                            )
+                          }
+                        });
+                      }
                     }
-                  }
+                    } catch (err) {
+                      const errorMetric = getErrorMetric(err, MetricSource.PortSolutionSelect);
+                      window.electron.writeReactLog(errorMetric);
+                      throw err;
+                    }
                 }}
               >
                 Port project

@@ -42,6 +42,7 @@ namespace PortingAssistant.Telemetry.Model
         public double AnalysisTime { get; set; }
         [JsonProperty("cumulativeAnalysisTime")]
         public double CumulativeAnalysisTime { get; set; }
+        public int LinesOfCode { get; set; }
 
     }
 }

@@ -7,13 +7,14 @@ import { Connection } from "electron-cgi/connection";
 import { testProfile } from "./telemetry/electron-metrics";
 import {
   startTimer,
-  logSolutionMetrics,
-  logReactError,
+  logReactEvents,
   logReactMetrics,
   registerLogListeners,
+  electronLogger,
 } from "./telemetry/electron-telemetry";
 import { localStore } from "./preload-localStore";
 import { latestVersion, outdatedVersionFlag } from "./electron";
+import { electron } from "process";
 
 ipcMain.handle("verifyProfile", (_event, profile: string) => {
   return testProfile(profile);
@@ -153,9 +154,9 @@ export const initConnection = (logger: any = console) => {
     logReactMetrics(message);
   });
   ipcMain.handle(
-    "writeReactErrLog",
-    async (_event, source, message, response) => {
-      logReactError(source, message, response);
+    "writeReactLog",
+    async (_event, eventMessage) => {
+      logReactEvents(eventMessage);
     }
   );
   ipcMain.handle("dialogShowOpenDialog", (_event, options: any) =>
@@ -215,13 +216,14 @@ export const initConnection = (logger: any = console) => {
       "analyzeSolution",
       async (_event, solutionFilePath, runId, triggerType, settings, preTriggerData) => {
         const request = { solutionFilePath, runId, triggerType, settings, preTriggerData };
-        const elapseTime = startTimer();
         logger.log(`REQUEST - analyzeSolution: ${JSON.stringify(request)}`);
+        electronLogger.info(`${JSON.stringify(request)}`);
         localStore.set("isAssesmentRunning", true);
         const response = await connection.send("analyzeSolution", request);
+        response['runId'] = request.runId;
         localStore.set("isAssesmentRunning", false);
         logger.log(`RESPONSE - analyzeSolution: ${JSON.stringify(response)}`);
-        logSolutionMetrics(response, elapseTime());
+        electronLogger.info(`${JSON.stringify(response)}`);
         return response;
       }
     );
@@ -279,9 +281,8 @@ export const initConnection = (logger: any = console) => {
       return response;
     });
 
-    ipcMain.handle("cancelAssessment", async (_event) => {
-      const response = await connection.send("cancelAssessment", "");
-      return response;
+    ipcMain.handle("cancelAssessment", async (_event, solutionFilePath) => {
+      await connection.send("cancelAssessment", solutionFilePath);
     });
     
     ipcMain.handle("copyDirectory", async (_event, solutionPath, destinationPath) => {
@@ -290,6 +291,11 @@ export const initConnection = (logger: any = console) => {
         destinationPath,
       };
       const response = await connection.send("copyDirectory", request);
+      return response;
+    });
+
+    ipcMain.handle("getSupportedVersion", async (_event) => {
+      const response = await connection.send("getSupportedVersion", "");
       return response;
     });
 

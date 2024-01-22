@@ -9,9 +9,10 @@ import { Project } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import {
-  selectCancelStatus,
   selectCurrentSolutionApiAnalysis,
   selectCurrentSolutionDetails,
+  selectCurrentSolutionPath,
+  selectCurrentSolutionStatus,
   selectNugetPackages
 } from "../../store/selectors/solutionSelectors";
 import { getActionCounts, getErrorCounts } from "../../store/selectors/tableSelectors";
@@ -35,7 +36,9 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
   const solutionProjects = usePortingAssistantSelector(state => selectCurrentSolutionDetails(state, location.pathname));
   const apiAnalysis = usePortingAssistantSelector(state => selectCurrentSolutionApiAnalysis(state, location.pathname));
   const targetFramework = getTargetFramework();
-  const cancel = useSelector(selectCancelStatus);
+  const solutionPath = usePortingAssistantSelector(state => selectCurrentSolutionPath(state, location.pathname))
+  const solutionStatus = usePortingAssistantSelector(state => selectCurrentSolutionStatus(state, location.pathname));
+  const cancel = solutionStatus.isCancelled;
 
   const nugetCompatibilities = useMemo(() => {
     if (!hasNewData(projects)) {
@@ -100,7 +103,6 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
       dispatch(removeCurrentMessageUpdate({ groupId: "assess" }));
       setShownLoadingMessage(false);
       if (cancel) {
-        window.electron.saveState("cancel", false);
         dispatch(removeCurrentMessageUpdate({ groupId: "cancel-assessment" }));
         dispatch(
           pushCurrentMessageUpdate({
@@ -112,7 +114,6 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
           })
         );
       } else {
-        console.log("Cancel status: ", cancel);
         dispatch(
           pushCurrentMessageUpdate({
             messageId: uuid(),
@@ -124,7 +125,7 @@ const SolutionSummaryInternal: React.FC<Props> = ({ solution, projects }) => {
         );
       }
     }
-  }, [apiCompatibilities.isApisLoading, dispatch, nugetCompatibilities.isAllNugetLoaded, shownLoadingMessage, cancel]);
+  }, [apiCompatibilities.isApisLoading, dispatch, nugetCompatibilities.isAllNugetLoaded, shownLoadingMessage, cancel, solutionPath]);
 
   return (
     <Container

@@ -7,3 +7,10 @@ export interface Credentials {
   aws_secret_access_key: string;
   aws_session_token: string;
 }
+
+export interface SupportedVersion {
+  displayName: string;
+  targetFrameworkMoniker: string;
+  requiredVisualStudioVersion: string;
+  recommendOrder: string;
+}

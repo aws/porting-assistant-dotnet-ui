@@ -2,9 +2,11 @@ import { Box, Button, Modal, Spinner } from "@awsui/components-react";
 import React, { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
+import { v4 as uuid } from "uuid";
 
 import { PortingLocation } from "../../models/porting";
 import { SolutionDetails } from "../../models/solution";
+import { pushCurrentMessageUpdate } from "../../store/actions/error";
 import { setPortingLocation } from "../../store/actions/porting";
 import { isLoaded, Loadable } from "../../utils/Loadable";
 import { LocationSection } from "./LocationSection";
@@ -29,16 +31,27 @@ const PortConfigurationModalInternal: React.FC<Props> = ({ solution, visible, on
         type: data.portingLocation.value,
         workingDirectory: data.path
       };
+      const MaxPathLength = 260;
       if (isLoaded(solution)) {
-        switch (portingLocation.type) {
-          case "copy":
-            try {
-                await window.porting.copyDirectory(solution.data.solutionFilePath, portingLocation.workingDirectory);
-            } catch (err) {
-              setError("path", "error", `Unable to copy solution to directory. Error: ${err}`);
-              return false;
-            }
-            break;
+        if(portingLocation.type == "copy"){
+            if (portingLocation.workingDirectory.length > MaxPathLength){
+              setError("path", "error", `The path length cannot exceed ${MaxPathLength - 1} characters. Please try a location that has a shorter path.`);
+            return false;
+          }
+          const response = await window.porting.copyDirectory(solution.data.solutionFilePath, portingLocation.workingDirectory);
+          if (response.status.status === "Failure"){
+            setError("path", "error", `Unable to copy solution to directory. Error: ${response.errorValue}`);
+            dispatch(
+              pushCurrentMessageUpdate({
+                  messageId: uuid(),
+                  groupId: "path-too-long",
+                  type: "error",
+                  content: response.errorValue,
+                  dismissible: true,
+              })
+            );
+            return false;
+          }
         }
         dispatch(setPortingLocation({ solutionPath: solution.data.solutionFilePath, portingLocation }));
       }

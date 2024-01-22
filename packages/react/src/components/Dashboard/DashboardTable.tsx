@@ -13,23 +13,27 @@ import {
 import StatusIndicator from "@awsui/components-react/status-indicator";
 import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
-import { PreTriggerData } from "../../models/project";
-import { analyzeSolution, exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
+import { usePortingAssistantSelector } from "../../createReduxStore";
+import { PreTriggerData, SolutionToSolutionDetails } from "../../models/project";
+import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
+import { analyzeSolution, cancelAssessment,exportSolution, openSolutionInIDE, removeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
 import { removePortedSolution } from "../../store/actions/porting";
 import { RootState } from "../../store/reducers";
-import { selectAssesmentStatus, selectCancelStatus, selectCurrentSolutionDetails, selectSolutionToSolutionDetails} from "../../store/selectors/solutionSelectors";
+import { selectCurrentSolutionDetails, selectCurrentSolutionStatus, selectSolutionToSolutionDetails, selectSolutioToStatus} from "../../store/selectors/solutionSelectors";
 import { getErrorCounts, selectDashboardTableData, selectSolutionToApiAnalysis
  } from "../../store/selectors/tableSelectors";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
 import { filteringCountText } from "../../utils/FilteringCountText";
 import { getCompatibleApi } from "../../utils/getCompatibleApi";
+import { getErrorMetric } from "../../utils/getErrorMetric";
+import { getHash } from "../../utils/getHash";
 import { getTargetFramework } from "../../utils/getTargetFramework";
-import { isLoaded } from "../../utils/Loadable";
+import { isLoaded, isLoading, isLoadingWithData } from "../../utils/Loadable";
 import { useNugetFlashbarMessages } from "../AssessShared/useNugetFlashbarMessages";
 import { InfoLink } from "../InfoLink";
 import { LinkComponent } from "../LinkComponent";
@@ -57,16 +61,25 @@ const DashboardTableInternal: React.FC = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const solutionToSolutionDetails = useSelector(selectSolutionToSolutionDetails);
-  const isAssesmentRunning = useSelector(selectAssesmentStatus);
-  const cancel = useSelector(selectCancelStatus);
-
+  const solutionToSolutionStatus = useSelector(selectSolutioToStatus);
   const tableData = useSelector(selectDashboardTableData);
   const targetFramework = getTargetFramework();
   useNugetFlashbarMessages();
-  useSolutionFlashbarMessage(tableData);
+  useSolutionFlashbarMessage(tableData, solutionToSolutionStatus);
   const apiAnalysis = useSelector(selectSolutionToApiAnalysis); 
+
+  
   const deleteSolution = useMemo(
     () => (solutionPath: string) => {
+      let clickMetric: ReactMetric = {
+        SolutionPath: getHash(solutionPath),
+        MetricSource: MetricSource.RemoveSolution,
+        MetricType: MetricType.UIClickEvent
+      }
+      window.electron.writeReactLog(clickMetric);
+      if (solutionToSolutionStatus[solutionPath]?.isAssessmentRunning){
+        cancelSolutionAssessment(solutionPath);
+      }
       dispatch(removeSolution(solutionPath));
       dispatch(removePortedSolution(solutionPath));
       setSelectedItems([]);
@@ -74,79 +87,100 @@ const DashboardTableInternal: React.FC = () => {
     [dispatch]
   );
 
-  const cancelAssessment = useMemo(
-    () => () => {
-        window.electron.saveState("cancel", true);
-        window.backend.cancelAssessment();
+  const cancelSolutionAssessment = useMemo(
+    () => async (solutionPath: string) => {
+      try {
+        dispatch(cancelAssessment(solutionPath));
+        window.backend.cancelAssessment(solutionPath);
         dispatch(
           removeCurrentMessageUpdate({
             groupId: "assess"
           })
         );
+        let clickMetric: ReactMetric = {
+          SolutionPath: getHash(solutionPath),
+          MetricSource: MetricSource.CancelAssessment,
+          MetricType: MetricType.UIClickEvent
+        }
+        window.electron.writeReactLog(clickMetric);
+      } catch (err) {
+        const errorMetric = getErrorMetric(err, MetricSource.CancelAssessment)
+        window.electron.writeReactLog(errorMetric)
+        throw err
+      }
     },[dispatch]
   )
 
   const reassessSolution = useMemo(
     () => async (solutionPath: string) => {
-      dispatch(
-        removeCurrentMessageUpdate({
-          groupId: "assessSuccess"
-        })
-      );
-
-      let projectTableData: PreTriggerData[] = [];
-      const solutionDetails = solutionToSolutionDetails[solutionPath];
-      const projectToApiAnalysis = apiAnalysis[solutionPath];
-      if (isLoaded(solutionDetails)) {
-          projectTableData = solutionDetails.data.projects.map<PreTriggerData>(project => {
-            const apis = getCompatibleApi(
-              solutionDetails,
-              projectToApiAnalysis,
-              project.projectFilePath,
-              null,
-              targetFramework
-            );
-            var projectApiAnalysisResult = projectToApiAnalysis[project.projectFilePath];
-            var sourceFileAnalysisResults = (isLoaded(projectApiAnalysisResult))?
-                 projectApiAnalysisResult.data.sourceFileAnalysisResults: null;
-            return {
-              projectName: project.projectName || "-",
-              projectPath: project.projectFilePath || "-",
-              solutionPath: solutionPath || "-",
-              targetFramework: project.targetFrameworks?.join(", ") || "-",
-              incompatibleApis: apis.isApisLoading ? null : apis.values[1] - apis.values[0],
-              totalApis: apis.values[1],
-              buildErrors: getErrorCounts(projectToApiAnalysis, project.projectFilePath, null),
-              ported: false,
-              sourceFileAnalysisResults: sourceFileAnalysisResults
-            };
-          });
-      }
-      
-      const haveInternet = await checkInternetAccess(solutionPath, dispatch);
-      if (haveInternet) {
-        let preTriggerDataArray: string[] = [];
-        projectTableData.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
-
+      try {
         dispatch(
-          analyzeSolution.request({
-            solutionPath: solutionPath,
-            runId: uuid(),
-            triggerType: "UserRequest",
-            settings: {
-              ignoredProjects: [],
-              targetFramework: targetFramework,
-              continiousEnabled: false,
-              actionsOnly: false,
-              compatibleOnly: false
-            },
-            preTriggerData: preTriggerDataArray,
-            force: true
+          removeCurrentMessageUpdate({
+            groupId: "assessSuccess"
           })
         );
+          const runId = uuid();
+          let clickMetric: ReactMetric = {
+            SolutionPath: getHash(solutionPath),
+            RunId: runId,
+            MetricSource: MetricSource.ReassessSolution,
+            MetricType: MetricType.UIClickEvent
+          }
+          window.electron.writeReactLog(clickMetric);
+    
+          var projectDictionary: {[project: string]: PreTriggerData} = {}
+          const solutionDetails = solutionToSolutionDetails[solutionPath];
+          const projectToApiAnalysis = apiAnalysis[solutionPath];
+          if (isLoaded(solutionDetails)) {
+              solutionDetails.data.projects.forEach((project) => {
+                if (project.projectName != null) {
+                  const apis = getCompatibleApi(
+                    solutionDetails,
+                    projectToApiAnalysis,
+                    project.projectFilePath,
+                    null,
+                    targetFramework
+                  );
+
+                  projectDictionary[project.projectName] = {
+                    projectName: project.projectName,
+                    projectPath: project.projectFilePath || "-",
+                    solutionPath: solutionPath || "-",
+                    targetFramework: project.targetFrameworks?.join(", ") || "-",
+                    incompatibleApis: apis.isApisLoading ? null : apis.values[1] - apis.values[0],
+                    totalApis: apis.values[1],
+                    buildErrors: getErrorCounts(projectToApiAnalysis, project.projectFilePath, null),
+                    ported: false
+                  }
+                }
+              })
+          }
+          const haveInternet = await checkInternetAccess(solutionPath, dispatch);
+          if (haveInternet) {
+            dispatch(
+              analyzeSolution.request({
+                solutionPath: solutionPath,
+                runId: runId,
+                triggerType: "UserRequest",
+                settings: {
+                  ignoredProjects: [],
+                  targetFramework: targetFramework,
+                  continiousEnabled: false,
+                  actionsOnly: false,
+                  compatibleOnly: false
+                },
+                preTriggerData: projectDictionary,
+                force: true
+              })
+            );
+        }
+      } catch (err) {
+        const errorMetric = getErrorMetric(err, MetricSource.ReassessSolution)
+        window.electron.writeReactLog(errorMetric)
+        throw err
       }
     },
-    [dispatch, targetFramework]
+    [apiAnalysis, dispatch, solutionToSolutionDetails, targetFramework]
   );
 
   const header = useMemo(
@@ -179,7 +213,7 @@ const DashboardTableInternal: React.FC = () => {
         }
         description="Porting Assistant for .NET has successfully assessed the following solutions for .NET Core compatibility. Improve the compatibility of your solutions by refactoring the code in your IDE."
         totalItems={Object.values(solutionToSolutionDetails).map(solutionDetail =>
-          isLoaded(solutionDetail) ? solutionDetail.data : undefined
+          isLoaded(solutionDetail) || isLoadingWithData(solutionDetail) ? solutionDetail.data : undefined
         )}
         selectedItems={selectedItems}
         actionButtons={
@@ -194,7 +228,11 @@ const DashboardTableInternal: React.FC = () => {
                     selectedItems[0].incompatiblePackages == null ||
                     selectedItems[0].incompatibleApis == null ||
                     selectedItems[0].portingActions == null ||
-                    selectedItems[0].buildErrors == null))
+                    selectedItems[0].buildErrors == null)) ||
+                (selectedItems.length === 1 &&
+                  selectedItems[0].totalProjects === 0 &&
+                  selectedItems[0].totalApis === 0 &&
+                  selectedItems[0].totalPackages === 0)
               }
               onClick={() => history.push(`/solutions/${encodeURIComponent(selectedItems[0].path)}`)}
             >
@@ -227,7 +265,7 @@ const DashboardTableInternal: React.FC = () => {
             <Button
               id="reassess-solution"
               key="reassess-solution"
-              disabled={selectedItems.length === 0}
+              disabled={selectedItems.length === 0 || solutionToSolutionStatus[selectedItems[0]?.path]?.isAssessmentRunning || solutionToSolutionStatus[selectedItems[0]?.path]?.isCancelled}
               onClick={() => {
                 reassessSolution(selectedItems[0].path);
               }}
@@ -239,26 +277,35 @@ const DashboardTableInternal: React.FC = () => {
               id="assess-new-solution-button"
               variant="primary"
               key="assess-new-solution"
-              onClick={() => history.push("/add-solution")}
+              onClick={() => {
+                history.push("/add-solution");       
+              }
+            }
             >
               Assess a new solution
             </Button>
             <Button
               id="cancel-assessment-button"
-              disabled= {!isAssesmentRunning && !cancel}
               variant="primary"
+              disabled= {selectedItems.length === 0 || !solutionToSolutionStatus[selectedItems[0]?.path]?.isAssessmentRunning || solutionToSolutionStatus[selectedItems[0]?.path].isCancelled}
               key="cancel-assessment"
               onClick={() => {
-                cancelAssessment();
-                dispatch(
-                  pushCurrentMessageUpdate({
-                    type: "info",
-                    messageId: uuid(),
-                    groupId: "cancel-assessment",
-                    content: `Cancelling assessment for ${selectedItems[0].name}.`,
-                    dismissible: true
-                  })
-                );
+                try {
+                  cancelSolutionAssessment(selectedItems[0]?.path);
+                  dispatch(
+                    pushCurrentMessageUpdate({
+                      type: "info",
+                      messageId: uuid(),
+                      groupId: "cancel-assessment",
+                      content: `Cancelling assessment for ${selectedItems[0]?.name}.`,
+                      dismissible: true
+                    })
+                  );
+                } catch (err) {
+                  const errorMetric = getErrorMetric(err, MetricSource.CancelAssessment)
+                  window.electron.writeReactLog(errorMetric)
+                  throw err
+                }
               }}
             >
               Cancel Assessment
@@ -281,16 +328,22 @@ const DashboardTableInternal: React.FC = () => {
                     variant="primary"
                     formAction="none"
                     onClick={() => {
-                      deleteSolution(selectedItems[0].path);
-                      dispatch(
-                        pushCurrentMessageUpdate({
-                          type: "success",
-                          messageId: uuid(),
-                          content: `Successfully removed ${selectedItems[0].name}.`,
-                          dismissible: true
-                        })
-                      );
-                      setShowDeleteModal(false);
+                      try {
+                        deleteSolution(selectedItems[0].path);
+                        dispatch(
+                          pushCurrentMessageUpdate({
+                            type: "success",
+                            messageId: uuid(),
+                            content: `Successfully removed ${selectedItems[0].name}.`,
+                            dismissible: true
+                          })
+                        );
+                        setShowDeleteModal(false);
+                      } catch (err) {
+                        const errorMetric = getErrorMetric(err, MetricSource.RemoveSolution)
+                        window.electron.writeReactLog(errorMetric)
+                        throw err
+                      }
                     }}
                   >
                     Remove
@@ -306,7 +359,7 @@ const DashboardTableInternal: React.FC = () => {
         }
       />
     ),
-    [deleteSolution, dispatch, history, reassessSolution, selectedItems, showDeleteModal, solutionToSolutionDetails, cancel, isAssesmentRunning]
+    [solutionToSolutionDetails, selectedItems, solutionToSolutionStatus, showDeleteModal, history, dispatch, reassessSolution, cancelSolutionAssessment, deleteSolution]
   );
 
   const empty = useMemo(
@@ -371,21 +424,24 @@ const columnDefinitions: TableProps.ColumnDefinition<DashboardTableData>[] = [
     id: "name",
     header: "Name",
     cell: item =>
-    item.incompatiblePackages == null &&
-    item.incompatibleApis == null ? (
-      <div id={`solution-link-${escapeNonAlphaNumeric(item.path)}`} className={styles.inProgress}>
-        {item.name}
-      </div>
-    ):  
-    (
-        <LinkComponent
-          id={`solution-link-${escapeNonAlphaNumeric(item.path)}`}
-          className="solution-link"
-          location={{ pathName: `/solutions/${encodeURIComponent(item.path)}` }}
-        >
-          {item.name}
-        </LinkComponent>
-      ),
+      (item.incompatiblePackages == null && item.incompatibleApis == null) ||
+        (item.totalApis === 0 &&
+          item.totalPackages === 0 &&
+          item.totalProjects === 0) ?
+        (
+          <div id={`solution-link-${escapeNonAlphaNumeric(item.path)}`} className={styles.inProgress}>
+            {item.name}
+          </div>
+        ) :
+        (
+          <LinkComponent
+            id={`solution-link-${escapeNonAlphaNumeric(item.path)}`}
+            className="solution-link"
+            location={{ pathName: `/solutions/${encodeURIComponent(item.path)}` }}
+          >
+            {item.name}
+          </LinkComponent>
+        ),
     sortingField: "name"
   },
   {

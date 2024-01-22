@@ -1,22 +1,26 @@
 import { Box, Button, Flashbar, Header, NonCancelableCustomEvent, ProgressBar,SpaceBetween, Tabs, TabsProps } from "@awsui/components-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector} from "react-redux";
 import { Redirect, useHistory, useLocation } from "react-router";
 import { v4 as uuid } from "uuid";
+import { data } from "vis-network";
 
 import { paths } from "../../constants/paths";
 import { usePortingAssistantSelector } from "../../createReduxStore";
 import { HistoryState } from "../../models/locationState";
-import { Project } from "../../models/project";
+import { PreTriggerData,Project } from "../../models/project";
+import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { SolutionDetails } from "../../models/solution";
 import { analyzeSolution, exportSolution, openSolutionInIDE } from "../../store/actions/backend";
 import { selectPortingLocation } from "../../store/selectors/portingSelectors";
 import { selectCurrentSolutionPath } from "../../store/selectors/solutionSelectors";
 import { selectProjectTableData } from "../../store/selectors/tableSelectors";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
+import { createPreTriggerDataFromProjectsTable } from "../../utils/createPreTriggerDataFromProjectTable";
+import { getErrorMetric } from "../../utils/getErrorMetric";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { getTotalProjects } from "../../utils/getTotalProjects";
-import { hasNewData, isLoaded, isLoadingWithData, Loadable } from "../../utils/Loadable";
+import { hasNewData, isLoaded, isLoading, isLoadingWithData, Loadable } from "../../utils/Loadable";
 import { ApiTable } from "../AssessShared/ApiTable";
 import { FileTable } from "../AssessShared/FileTable";
 import { NugetPackageTable } from "../AssessShared/NugetPackageTable";
@@ -27,7 +31,7 @@ import { CustomerFeedbackModal } from "../CustomerContribution/CustomerFeedbackM
 import { InfoLink } from "../InfoLink";
 import { PortConfigurationModal } from "../PortConfigurationModal/PortConfigurationModal";
 import { getPercent } from "./../../utils/getPercent"
-import { ProjectsTable } from "./ProjectsTable";
+import { ProjectsTable, TableData } from "./ProjectsTable";
 import { SolutionSummary } from "./SolutionSummary";
 interface Props {
   solution: Loadable<SolutionDetails>;
@@ -55,9 +59,9 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
   }, [solutionPath]); 
 
   const projectsTable = usePortingAssistantSelector(state => selectProjectTableData(state, location.pathname));
-  let preTriggerDataArray: string[] = [];
-  projectsTable.forEach(element => {preTriggerDataArray.push(JSON.stringify(element));});
-  const tabs = useMemo(
+ var preTriggerDataDictionary: { [projectName: string]: PreTriggerData} = createPreTriggerDataFromProjectsTable(projectsTable);
+
+ const tabs = useMemo(
     () => [
       {
         label: "Projects",
@@ -154,31 +158,42 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
             <Button
               iconName="refresh"
               id="reassess-solution"
-              disabled={!isLoaded(solution)}
+              disabled={!isLoaded(solution) && !(isLoading(solution) || isLoadingWithData(solution))}
               onClick={async () => {
-                if (isLoaded(solution)) {
-                  const haveInternet = await checkInternetAccess(solution.data.solutionFilePath, dispatch);
-                  if (haveInternet) {
-                    dispatch(
-                      analyzeSolution.request({
-                        solutionPath: solution.data.solutionFilePath,
-                        runId: uuid(),
-                        triggerType: "UserRequest",
-                        settings: {
-                          ignoredProjects: [],
-                          targetFramework: targetFramework,
-                          continiousEnabled: false,
-                          actionsOnly: false,
-                          compatibleOnly: false
-                        },
-                        preTriggerData: preTriggerDataArray,
-                        force: true
-                      })
-                    );
-                    history.push(paths.dashboard);
+                try {
+                  if (isLoaded(solution)) {
+                    let clickMetric: ReactMetric = {
+                      SolutionPath: solution.data.solutionFilePath,
+                      MetricSource: MetricSource.ReassessSolution,
+                      MetricType: MetricType.UIClickEvent
+                    }
+                    window.electron.writeReactLog(clickMetric);
+                    const haveInternet = await checkInternetAccess(solution.data.solutionFilePath, dispatch);
+                    if (haveInternet) {
+                      dispatch(
+                        analyzeSolution.request({
+                          solutionPath: solution.data.solutionFilePath,
+                          runId: uuid(),
+                          triggerType: "UserRequest",
+                          settings: {
+                            ignoredProjects: [],
+                            targetFramework: targetFramework,
+                            continiousEnabled: false,
+                            actionsOnly: false,
+                            compatibleOnly: false
+                          },
+                          preTriggerData: preTriggerDataDictionary,
+                          force: true
+                        })
+                      );
+                      history.push(paths.dashboard);
+                    }
                   }
+                } catch (err) {
+                  const errorMetric = getErrorMetric(err, MetricSource.ReassessSolution);
+                  window.electron.writeReactLog(errorMetric);
+                  throw err;
                 }
-
               }}
             >
               Reassess solution
@@ -201,17 +216,31 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               variant="primary"
               disabled={!isLoaded(projects) || !isLoaded(solution)}
               onClick={() => {
-                if (portingLocation == null) {
-                  setShowPortingModal(true);
-                } else {
-                  if (isLoaded(projects) && isLoaded(solution)) {
-                    history.push({
-                      pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
-                      state: {
-                        projects: projects.data
+                try {
+                  if (isLoaded(solution)){
+                    let clickMetric: ReactMetric = {
+                      SolutionPath: solution.data.solutionFilePath,
+                      MetricSource: MetricSource.PortSolutionSelect,
+                      MetricType: MetricType.UIClickEvent
+                    };
+                    window.electron.writeReactLog(clickMetric);
+                    if (portingLocation == null) {
+                      setShowPortingModal(true);
+                    } else {
+                      if (isLoaded(projects)) {
+                        history.push({
+                          pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
+                          state: {
+                            projects: projects.data
+                          }
+                        });
                       }
-                    });
+                    }
                   }
+                } catch (err) {
+                  const errorMetric = getErrorMetric(err, MetricSource.PortSolutionSelect);
+                  window.electron.writeReactLog(errorMetric);
+                  throw err;
                 }
               }}
             >
@@ -222,15 +251,26 @@ const AssessSolutionDashboardInternal: React.FC<Props> = ({ solution, projects }
               visible={showPortingModal && isLoaded(solution)}
               onDismiss={() => setShowPortingModal(false)}
               onSubmit={() => {
-                if (isLoaded(solution)) {
-                  history.push({
-                    pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
-                    state: {
-                      projects: hasNewData(projects) ? projects.data : []
+                try {
+                  if (isLoaded(solution)) {
+                    let clickMetric: ReactMetric = {
+                      SolutionPath: solution.data.solutionFilePath,
+                      MetricSource: MetricSource.PortSolutionSelect,
+                      MetricType: MetricType.UIClickEvent
                     }
-                  });
+                    window.electron.writeReactLog(clickMetric);
+                    history.push({
+                      pathname: `/port-solution/${encodeURIComponent(solution.data.solutionFilePath)}`,
+                      state: {
+                        projects: hasNewData(projects) ? projects.data : []
+                      }
+                    });
+                  }
+                } catch (err) {
+                  const errorMetric = getErrorMetric(err, MetricSource.PortSolutionSelect);
+                  window.electron.writeReactLog(errorMetric);
+                  throw err;
                 }
-
               }}
             />
           </SpaceBetween>

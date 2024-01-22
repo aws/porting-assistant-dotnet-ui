@@ -13,6 +13,7 @@ import {
   reducerCacheStore,
 } from "./preload-localStore";
 import {
+  PreTriggerData,
   Project,
   VersionPair,
 } from "@porting-assistant/react/src/models/project";
@@ -22,6 +23,7 @@ import {
   getAwsProfiles,
   getProfileCredentials,
 } from "./telemetry/electron-get-profile-credentials";
+import { ReactMetric } from "./models/reactMetric";
 
 contextBridge.exposeInMainWorld("electron", {
   openExternalUrl: (url: string) => shell.openExternal(url),
@@ -38,11 +40,12 @@ contextBridge.exposeInMainWorld("electron", {
       | "useDefaultCreds"
       | "cancel"
       | "isAssesmentRunning"
-      | "lastOpenDate",
+      | "lastOpenDate"
+      | "currentAssessmentStatus",
     value: any
   ) => localStore.set(key, value),
   getState: (
-    key: "solutions" | "profile" | "targetFramework" | "share" | "email" | "useDefaultCreds" | "cancel" | "isAssesmentRunning"| "lastOpenDate",
+    key: "solutions" | "profile" | "targetFramework" | "share" | "email" | "useDefaultCreds" | "cancel" | "isAssesmentRunning"| "lastOpenDate" | "currentAssessmentStatus",
     defaultValue: any
   ) => localStore.get(key, defaultValue),
   saveCache: (value: any) => reducerCacheStore.set("reducerCache", value),
@@ -103,8 +106,8 @@ contextBridge.exposeInMainWorld("electron", {
   getOutdatedVersionFlag: () => invokeBackend("getOutdatedVersionFlag"),
   telemetry: (message: any) => invokeBackend("telemetry", message),
   crashOnLastUse: (filePath:string) => invokeBackend("crashOnLastUse", filePath),
-  writeReactErrLog: (source: any, message: any, response: any) =>
-    invokeBackend("writeReactErrLog", source, message, response),
+  writeReactLog: (eventMessage: ReactMetric) =>
+    invokeBackend("writeReactLog", eventMessage),
   getAssessmentLog: () => {
     const dateString = new Date()
       .toLocaleDateString("en-CA")
@@ -134,14 +137,15 @@ contextBridge.exposeInMainWorld("backend", {
       actionsOnly: boolean;
       compatibleOnly: boolean;
     },
-    preTriggerData: string[]
+    preTriggerData: {[projectName: string]: PreTriggerData}
   ) => invokeBackend("analyzeSolution", solutionFilePath, runId, triggerType, settings, preTriggerData),
   openSolutionInIDE: (solutionFilePath: string) => invokeBackend("openSolutionInIDE", solutionFilePath),
   getFileContents: (sourceFilePath: string) => invokeBackend("getFileContents", sourceFilePath),
   listenNugetPackageUpdate: (callback: (message: string) => void) => listenBackend("onNugetPackageUpdate", callback),
   listenApiAnalysisUpdate: (callback: (message: string) => void) => listenBackend("onApiAnalysisUpdate", callback),
   checkInternetAccess: () => invokeBackend("checkInternetAccess"),
-  cancelAssessment: () => invokeBackend("cancelAssessment"),
+  cancelAssessment: (sourceFilePath: string) => invokeBackend("cancelAssessment", sourceFilePath),
+  getSupportedVersion: () => invokeBackend("getSupportedVersion"),
 });
 
 contextBridge.exposeInMainWorld("porting", {

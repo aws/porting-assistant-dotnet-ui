@@ -7,7 +7,8 @@ import {
   Project,
   ProjectApiAnalysisResult,
   ProjectToApiAnalysis,
-  RecommendedAction
+  RecommendedAction,
+  SolutionStatus
 } from "../../models/project";
 import { SolutionDetails } from "../../models/solution";
 import { Failed, isFailed, isLoaded, isLoading, isLoadingWithData, isReloading, Loaded, Loading, Reloading } from "../../utils/Loadable";
@@ -18,8 +19,7 @@ export const selectNugetPackages = (state: RootState) => state.nugetPackage.nuge
 export const selectApiAnalysis = (state: RootState) => state.solution.apiAnalysis;
 export const selectSourceFileContents = (state: RootState) => state.file.sourceFileToContents;
 export const selectTargetFramework = () => window.electron.getState("targetFramework")?.id || "net6.0";
-export const selectCancelStatus = (state:RootState) => window.electron.getState("cancel");
-export const selectAssesmentStatus = (state:RootState) => window.electron.getState("isAssesmentRunning");
+export const selectSolutioToStatus = (state:RootState) => state.solution.solutionToStatus;
 
 export const selectCurrentSolutionPath = createCachedSelector(
   (_state: RootState, locationPath: string) => locationPath,
@@ -49,6 +49,24 @@ export const selectCurrentSolutionDetails = createCachedSelector(
       return Loading<SolutionDetails>();
     }
     return solutionDetails;
+  }
+)((_state, locationPath) => locationPath);
+
+export const selectCurrentSolutionStatus = createCachedSelector(
+  selectCurrentSolutionPath,
+  selectSolutioToStatus,
+  (currentSolutionPath, solutionToStatus) => {
+    var solutionStatus: SolutionStatus = {
+      isAssessmentRunning: false, isCancelled: false
+    }
+    if (currentSolutionPath == null) {
+      return solutionStatus;
+    }
+    solutionStatus = solutionToStatus[currentSolutionPath];
+    if (solutionStatus == null) {
+      return solutionStatus;
+    }
+    return solutionStatus;
   }
 )((_state, locationPath) => locationPath);
 

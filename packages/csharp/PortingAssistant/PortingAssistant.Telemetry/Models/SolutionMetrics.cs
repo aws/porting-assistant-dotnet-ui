@@ -12,6 +12,9 @@ namespace PortingAssistant.Telemetry.Model
         new public string SessionId {get; set;}
         public double FirstProjectAnalysisTime {get; set;}
         public double NumProjects {get; set;}
+        public int LinesOfCode { get; set;}
+        public int NumLogicalCores { get; set;}
+        public double SystemMemory { get; set;}
 
     }
 }

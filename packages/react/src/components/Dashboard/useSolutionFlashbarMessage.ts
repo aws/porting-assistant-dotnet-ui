@@ -1,15 +1,14 @@
 import { useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { v4 as uuid } from "uuid";
 
+import { SolutionStatus } from "../../models/project";
 import { pushCurrentMessageUpdate, removeCurrentMessageUpdate } from "../../store/actions/error";
-import { selectCancelStatus } from "../../store/selectors/solutionSelectors";
 import { DashboardTableData } from "./DashboardTable";
 
-export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
+export const useSolutionFlashbarMessage = (tableData: DashboardTableData[], solutionToSolutionStatus: {[key: string]: SolutionStatus}) => {
   const dispatch = useDispatch();
   const prevLoadingSolutions = useRef(Array<DashboardTableData>());
-  const cancel = useSelector(selectCancelStatus);
 
   useEffect(() => {
     const logfilePath = window.electron.getAssessmentLog();
@@ -50,31 +49,32 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
     const completed = prevLoadingSolutions.current.filter(
       s => !loadingSolutions.some(ls => ls.path === s.path) && !failedSolutions.some(ls => ls.path === s.path)
     );
-    if (cancel) {
-      window.electron.saveState("cancel", false);
-      dispatch(removeCurrentMessageUpdate({ groupId: "cancel-assessment" }));
-      dispatch(
-        pushCurrentMessageUpdate({
-          messageId: uuid(),
-          groupId: "assessSuccess",
-          type: "success",
-          content: `Successfully cancelled assessment.`,
-          dismissible: true
-        })
-      );
-    } else {
       if (completed.length === 1) {
-        dispatch(
-          pushCurrentMessageUpdate({
-            messageId: uuid(),
-            groupId: "assessSuccess",
-            type: "success",
-            content: `Successfully assessed ${completed[0].name}.`,
-            dismissible: true,
-            buttonText: "View log",
-            onButtonClick: () => window.electron.openPath(logfilePath)
-          })
-        );
+        if (solutionToSolutionStatus[completed[0].path]?.isCancelled) {
+          dispatch(removeCurrentMessageUpdate({ groupId: "cancel-assessment" }));
+          dispatch(
+            pushCurrentMessageUpdate({
+              messageId: uuid(),
+              groupId: "assessSuccess",
+              type: "success",
+              content: `Successfully cancelled assessment.`,
+              dismissible: true
+            })
+          );
+        }
+        else {
+          dispatch(
+            pushCurrentMessageUpdate({
+              messageId: uuid(),
+              groupId: "assessSuccess",
+              type: "success",
+              content: `Successfully assessed ${completed[0].name}.`,
+              dismissible: true,
+              buttonText: "View log",
+              onButtonClick: () => window.electron.openPath(logfilePath)
+            })
+          );
+        }
       }
       if (completed.length > 1) {
         dispatch(
@@ -89,7 +89,6 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
           })
         );
       }
-    }
 
     const failed = prevLoadingSolutions.current.filter(s => failedSolutions.some(ls => ls.path === s.path));
     if (failed.length === 1) {
@@ -127,5 +126,5 @@ export const useSolutionFlashbarMessage = (tableData: DashboardTableData[]) => {
     if (loadingSolutions !== prevLoadingSolutions.current) {
       prevLoadingSolutions.current = loadingSolutions;
     }
-  }, [dispatch, tableData]);
+  }, [dispatch, tableData, solutionToSolutionStatus]);
 };

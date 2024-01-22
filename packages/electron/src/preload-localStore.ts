@@ -39,16 +39,17 @@ const createLocalStore = () =>
     defaults: {
       solutions: {},
       profile: "",
-      targetFramework: { label: ".NET 6.0.0", id: "net6.0" },
+      targetFramework: {},
       share: false,
       lastConfirmVersion: "",
       notification: true,
       newVersionNotification: true,
       useDefaultCreds: false,
-      cancel: false,
+      cancelStatus: {},
       isAssesmentRunning: false,
       sessionid: "",
       lastOpenDate: 0,
+      currentAssessmentStatus: {}
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -94,8 +95,8 @@ const createLocalStore = () =>
       useDefaultCreds: {
         type: "boolean",
       },
-      cancel: {
-        type: "boolean",
+      cancelStatus: {
+        type: "object",
       },
       isAssesmentRunning: {
         type: "boolean",
@@ -105,6 +106,9 @@ const createLocalStore = () =>
       },
       lastOpenDate: {
         type: "number"
+      },
+      currentAssessmentStatus: {
+        type: "object"
       }
     },
     watch: true,
@@ -135,7 +139,7 @@ const createReducerCacheStore = () =>
         "solution-reducer"
       )),
     },
-    name: "reducer-cache-1.8.0",
+    name: "reducer-cache-1.9.9",
     clearInvalidConfig: true,
     cwd:
       process.env["NODE_ENV"] === "test"

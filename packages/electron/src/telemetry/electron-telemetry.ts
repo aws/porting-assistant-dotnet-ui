@@ -11,12 +11,15 @@ import { localStore } from "../preload-localStore";
 import path from "path";
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
+import { ReactMetric } from "../models/reactMetric";
 
 
 const electronLogName = "portingAssistant-electron-%DATE%";
 const reactLogName = "portingAssistant-react-%DATE%";
 
 const dirName = path.join(app.getPath("userData"), "logs");
+
+const defaultTargetFramework = "net6.0";
 
 if (!fs.existsSync(dirName))
   fs.mkdir(dirName, (err) => {
@@ -53,7 +56,7 @@ var winstonTransportsReact = [
   }),
 ];
 
-var electronLogger = winston.createLogger({
+export const electronLogger = winston.createLogger({
   transports: winstonTransportsElectron,
   exitOnError: false,
 });
@@ -65,7 +68,7 @@ var reactLogger = winston.createLogger({
 
 export const logReactMetrics = (response: any) => {
   const targetFramework =
-    localStore.get("targetFramework").id || "net6.0";
+    localStore.get("targetFramework").id || defaultTargetFramework;
   // Error with MetaData
   const errorMetric = {
       Metrics: {
@@ -95,69 +98,17 @@ export const logReactMetrics = (response: any) => {
   reactLogger.info(JSON.stringify(errorMetric));
 };
 
-export const logReactError = (source: any, message: any ,response: any) => {
-  const cur = new Date();
-  let curTimeArr = cur.toISOString().split('T');
-  let curDate = curTimeArr[0];
-  let curTime = curTimeArr[1].split('.')[0];
-  let appVersion = app.getVersion();
-  let errorMessage = `[${curDate} ${curTime} ERR] (${appVersion}) ${source}: ${message}\n${response}`
-  reactLogger.info(errorMessage);
+export const logReactEvents = (eventMessage: ReactMetric) => {
+  eventMessage.Timestamp = new Date();
+  eventMessage.PortingAssistantVersion = app.getVersion();
+  eventMessage.SessionId = localStore.get("sessionid");
+  eventMessage.TargetFramework = localStore.get("targetFramework").id || defaultTargetFramework;
+  reactLogger.info(JSON.stringify(eventMessage));
 };
-
-export const logSolutionMetrics = (response: any, time: number) => {
-  try {
-    if (response.status.status === "Failure") {
-      errorHandler(response, "Solutions");
-    } else if (response.status.status === "Success") {
-      const solutionDetails: SolutionDetails = response.value;
-      const targetFramework =
-        localStore.get("targetFramework").id || "net6.0";
-
-      let allpackages = new Set(
-        solutionDetails.projects
-          .flatMap((project) => {
-            return project.packageReferences;
-          })
-          .filter((p) => p !== undefined || p !== null)
-      );
-    }
-  } catch (err) {}
-};
-
-export const logApiMetrics = (response: any) => {
-  try {
-    if (response.status.status !== "Success") {
-      return;
-    }
-    const projectAnalysis: ProjectApiAnalysisResult = response.value;
-    const targetFramework =
-      localStore.get("targetFramework").id || "net6.0";
-    if (
-      projectAnalysis.sourceFileAnalysisResults != null &&
-      projectAnalysis.projectFile != null
-    ) {
-      //Metrics with ListMetrics and MetaData
-      const apis = projectAnalysis.sourceFileAnalysisResults.flatMap(
-        (sourceFileAnalysisResults) =>
-          sourceFileAnalysisResults.apiAnalysisResults.map((invocation) => {
-            return {
-              name: invocation.codeEntityDetails.name,
-              namespace: invocation.codeEntityDetails.namespace,
-              originalDefinition: invocation.codeEntityDetails?.signature,
-              compatibility:
-                invocation.compatibilityResults[targetFramework]?.compatibility,
-            };
-          })
-      );
-    }
-  } catch (err) {}
-};
-
 
 export const registerLogListeners = (connection: Connection) => {
   const targetFramework =
-    localStore.get("targetFramework").id || "net6.0";
+    localStore.get("targetFramework").id || defaultTargetFramework;
   // Electron Logs
   const transport = (message: LogMessage) => {
     try {
@@ -175,14 +126,6 @@ export const registerLogListeners = (connection: Connection) => {
   };
   transport.level = "warn" as LevelOption;
   log.transports["electron"] = transport;
-
-  //Metrics
-  connection.on("onApiAnalysisUpdate", (response) => {
-    try {
-      logApiMetrics(response);
-    } catch (err) {}
-  });
-
 };
 
 export const startTimer = () => {
@@ -199,7 +142,7 @@ export const errorHandler = (response: any, metricsType: string) => {
   const errorValue = response.errorValue;
   const error = response.status.error;
   const targetFramework =
-    localStore.get("targetFramework").id || "net6.0";
+    localStore.get("targetFramework").id || defaultTargetFramework;
   // Error Metric
   putMetricData("portingAssistant-backend-errors", "Error", "Count", 1, [
     {

@@ -1,6 +1,6 @@
 {
   "name": "@porting-assistant/react",
-  "version": "1.8.0",
+  "version": "1.9.9",
   "productName": "Porting Assistant for .NET",
   "description": "Porting Assistant for .NET",
   "author": {
@@ -58,12 +58,12 @@
     "@awsui/design-tokens": "^3.0",
     "@awsui/global-styles": "^1.0.0",
     "ace-builds": "^1.4.9",
-    "axios": "^0.21.1",
+    "axios": "^1.6.0",
     "axios-retry": "^3.1.2",
     "classnames": "^2.2.6",
     "compare-versions": "^3.6.0",
     "csv-stringify": "^5.5.0",
-    "electron": "^10.4.7",
+    "electron": "^22.3.25",
     "immer": "^6.0.1",
     "re-reselect": "^3.4.0",
     "react": "^16.14.0",

@@ -1,19 +1,24 @@
 import { Box, Button, ColumnLayout, Container, Form, Header, SpaceBetween, Spinner } from "@awsui/components-react";
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { v4 as uuid } from "uuid";
 
 import { externalUrls } from "../../constants/externalUrls";
+import { MetricSource, MetricType, ReactMetric } from "../../models/reactmetric";
 import { analyzeSolution } from "../../store/actions/backend";
 import { pushCurrentMessageUpdate } from "../../store/actions/error";
+import { selectSolutionToSolutionDetails } from "../../store/selectors/solutionSelectors";
 import { checkInternetAccess } from "../../utils/checkInternetAccess";
+import { getErrorMetric } from "../../utils/getErrorMetric";
+import { getHash } from "../../utils/getHash";
 import { getTargetFramework } from "../../utils/getTargetFramework";
 import { InfoLink } from "../InfoLink";
 import { UploadSolutionField } from "./UploadSolutionField";
 
 const ImportSolutionInternal: React.FC = () => {
+  const solutionToSolutionDetails = useSelector(selectSolutionToSolutionDetails);
   const history = useHistory();
   const { control, handleSubmit, errors, formState } = useForm({
     mode: "onChange"
@@ -24,27 +29,33 @@ const ImportSolutionInternal: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit(async data => {
-          await addSolution(data);
-          const targetFramework = getTargetFramework();
-          const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
-          if (haveInternet) {
-            dispatch(
-              analyzeSolution.request({
-                solutionPath: data.solutionFilename,
-                runId: uuid(),
-                triggerType: "InitialRequest",
-                settings: {
-                  ignoredProjects: [],
-                  targetFramework: targetFramework,
-                  continiousEnabled: false,
-                  actionsOnly: false,
-                  compatibleOnly: false
-                },
-                preTriggerData:[],
-                force: true
-              })
-            );
-            history.push("/solutions");
+          try {
+            await addSolution(data);
+            const targetFramework = getTargetFramework();
+            const haveInternet = await checkInternetAccess(data.solutionFilename, dispatch);
+            if (haveInternet) {
+              dispatch(
+                analyzeSolution.request({
+                  solutionPath: data.solutionFilename,
+                  runId: uuid(),
+                  triggerType: "InitialRequest",
+                  settings: {
+                    ignoredProjects: [],
+                    targetFramework: targetFramework,
+                    continiousEnabled: false,
+                    actionsOnly: false,
+                    compatibleOnly: false
+                  },
+                  preTriggerData:{},
+                  force: true
+                })
+              );
+              history.push("/solutions");
+            }
+          } catch (err) {
+            const errorMetric = getErrorMetric(err, MetricSource.AddSoution)
+            window.electron.writeReactLog(errorMetric)
+            throw err;
           }
       })}
     >
@@ -130,9 +141,10 @@ const ImportSolutionInternal: React.FC = () => {
                 validate: {
                   endsWithSln: (value: string) => value.endsWith(".sln") || "File needs to end with *.sln",
                   doesNotExist: async (value: string) => {
-                    const existingSolutionPaths = await window.electron.getState("solutions", {});
                     return (
-                      !Object.keys(existingSolutionPaths).some(path => path === value) || "Solution file already exists"
+                      solutionToSolutionDetails ?
+                      !Object.keys(solutionToSolutionDetails).some(path => path === value) || "Solution file already exists":
+                      true
                     );
                   }
                 }
@@ -149,6 +161,12 @@ const addSolution = async (data: Record<string, any>) => {
   const paths = await window.electron.getState("solutions", {});
   paths[data.solutionFilename] = { solutionPath: data.solutionFilename };
   window.electron.saveState("solutions", paths);
+  let clickMetric: ReactMetric = {
+    MetricType: MetricType.UIClickEvent,
+    MetricSource: MetricSource.AddSoution,
+    SolutionPath: getHash(data.solutionFilename),
+  }
+  window.electron.writeReactLog(clickMetric);
 };
 
 export const ImportSolution = React.memo(ImportSolutionInternal);

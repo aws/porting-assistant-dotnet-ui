@@ -1,4 +1,5 @@
-﻿using PortingAssistant.Client.Model;
+﻿using System.Collections.Generic;
+using PortingAssistant.Client.Model;
 
 namespace PortingAssistant.Common.Model
 {
@@ -12,7 +13,7 @@ namespace PortingAssistant.Common.Model
 
         public AnalyzerSettings settings { get; set; }
 
-        public string[] preTriggerData { get; set; }
+        public Dictionary<string, PreTriggerData> preTriggerData { get; set; }
     }
     public class PreTriggerData
     {
@@ -24,6 +25,5 @@ namespace PortingAssistant.Common.Model
         public int? totalApis { get; set; }
         public int? buildErrors { get; set; }
         public bool ported { get; set; }
-        public SourceFileAnalysisResult[]? sourceFileAnalysisResults { get; set; }
     }
 }
