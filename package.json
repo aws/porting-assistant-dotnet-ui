@@ -35,13 +35,13 @@
     }
   },
   "devDependencies": {
-    "@commitlint/cli": "^13.1.0",
+    "@commitlint/cli": "^18.5.0",
     "@commitlint/config-conventional": "^13.1.0",
     "git-commit-template": "^1.0.5",
     "husky": "^7.0.1",
-    "lerna": "^6.0.1"
+    "lerna": "^8.0.2"
   },
   "dependencies": {
-    "winston": "^3.3.3"
+    "winston": "^3.11.0"
   }
 }
