@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="ElectronCgi.DotNet" Version="1.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.27" />
     <PackageReference Include="PortingAssistant.Client.Client" Version="2.14.9-alpha-gda76b80968" />
     <PackageReference Include="PortingAssistant.Client.Telemetry" Version="2.14.9-alpha-gda76b80968" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
