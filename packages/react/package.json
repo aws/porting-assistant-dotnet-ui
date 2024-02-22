@@ -79,7 +79,7 @@
     "typesafe-actions": "^5.1.0",
     "uuid": "^8.2.0",
     "vis-network": "^7.5.2",
-    "xmldom": "^0.3.0"
+    "xmldom": "^0.6.0"
   },
   "prettier": {
     "printWidth": 120
