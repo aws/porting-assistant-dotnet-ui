@@ -112,6 +112,19 @@ function* handleInit(action: ReturnType<typeof init>) {
   if (!haveInternet) {
     yield put(pushCurrentMessageUpdate(internetAccessFailed()));
   }
+  
+  // Show AWS Transform alert on app startup
+  yield put(
+    pushCurrentMessageUpdate({
+      messageId: uuid(),
+      groupId: "aws-transform-alert",
+      type: "info",
+      content: "New - Modernize faster with AWS Transform - Agentic AI powered scale and speed",
+      buttonText: "Learn more",
+      onButtonClick: () => window.electron.openExternalUrl("https://aws.amazon.com/transform/net/"),
+      dismissible: true
+    })
+  );
 }
 
 function* handlePing() {
