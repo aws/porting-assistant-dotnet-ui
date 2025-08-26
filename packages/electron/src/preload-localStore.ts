@@ -49,7 +49,7 @@ const createLocalStore = () =>
       isAssesmentRunning: false,
       sessionid: "",
       lastOpenDate: 0,
-      currentAssessmentStatus: {}
+      currentAssessmentStatus: {},
     },
     accessPropertiesByDotNotation: false,
     schema: {
@@ -102,14 +102,14 @@ const createLocalStore = () =>
         type: "boolean",
       },
       sessionid: {
-        type: "string"
+        type: "string",
       },
       lastOpenDate: {
-        type: "number"
+        type: "number",
       },
       currentAssessmentStatus: {
-        type: "object"
-      }
+        type: "object",
+      },
     },
     watch: true,
     cwd:
